@@ -1,14 +1,23 @@
 {
-  "name": "bpmn-properties-panel",
+  "name": "bpmnjs",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "axios": "^0.19.2",
+    "bpmn-js": "^6.3.4",
+    "diagram-js": "^6.4.1",
+    "diagram-js-direct-editing": "^1.6.1",
+    "inherits": "^2.0.4",
+    "min-dash": "^3.5.2",
+    "bpmn-js-properties-panel": "^0.32.2",
+    "camunda-bpmn-moddle": "^4.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "tiny-svg": "^2.2.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -30,5 +39,7 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "homepage": "./",
+  "proxy": "http://localhost:8080"
 }
