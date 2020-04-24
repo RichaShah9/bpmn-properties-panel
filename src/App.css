@@ -33,6 +33,25 @@ body,
   overflow: hidden;
 }
 
+#bpmnview {
+  width: 100%;
+  height: 100%;
+  float: left;
+}
+
+#propview {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#bpmncontainer {
+  height: 100%;
+}
+
+.djs-palette{
+  width: 48px !important;
+}
+
 /* property panel css */
 @font-face {
   font-family: "bpmn-js-pp";

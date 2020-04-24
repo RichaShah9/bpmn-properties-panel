@@ -11,26 +11,21 @@ import "./App.css";
 
 let bpmnModeler = null;
 
-function isNumeric(value) {
-  return /^-{0,1}\d+$/.test(value);
-}
-
 const fetchId = () => {
+  const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
   const url = window.location.href;
-  let urlArray = url.split("/");
-  let id = urlArray[urlArray.length - 1];
-  if (!isNumeric(id)) return;
-  return id;
+  let matchBPMNId, id;
+  while ((matchBPMNId = regexBPMN.exec(url))) {
+    id = matchBPMNId[1];
+    return id;
+  }
 };
 
 const fetchDiagram = async (id) => {
   if (id) {
-    let res = await Service.fetchId(
-      "com.axelor.apps.orpea.planning.db.BusinessRule",
-      id
-    );
-    let { diagramXml } = (res && res.data[0]) || {};
-    newBpmnDiagram(diagramXml);
+    let res = await Service.fetchId("com.axelor.workflow.db.Wkf", id);
+    let { bpmnXml } = (res && res.data && res.data[0]) || {};
+    newBpmnDiagram(bpmnXml);
   } else {
     newBpmnDiagram();
   }
@@ -66,13 +61,7 @@ const newBpmnDiagram = (rec) => {
 const openBpmnDiagram = (xml) => {
   bpmnModeler.importXML(xml, (error) => {
     if (error) {
-      let x = document.getElementById("snackbar-alert");
-      x.className = "show";
-      x.innerHTML = "Error! Can't import XML"
-      setTimeout(function () {
-        x.className = x.className.replace("show", "");
-      }, 3000);
-      return console.log("Error! Can't import XMLl");
+      return console.log("Error! Can't import XML");
     }
     let canvas = bpmnModeler.get("canvas");
     canvas.zoom("fit-viewport");
@@ -82,7 +71,14 @@ const openBpmnDiagram = (xml) => {
 function App() {
   const onSave = () => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
-      console.log("XML", xml);
+      console.log(xml);
+      let element = window.top.document.getElementsByName("bpmnXml");
+      let childElements = element && element.length > 0 && element[0].children;
+      console.log("element", element, childElements);
+      if (childElements && childElements.length > 0) {
+        childElements[0].innerText = xml;
+        console.log("element", childElements[0].innerText);
+      }
     });
   };
 
@@ -118,17 +114,8 @@ function App() {
   return (
     <div id="container">
       <div id="bpmncontainer">
-        <div
-          id="propview"
-          style={{
-            width: "100%",
-            overflowX: "auto",
-          }}
-        ></div>
-        <div
-          id="bpmnview"
-          style={{ width: "100%", height: "100vh", float: "left" }}
-        ></div>
+        <div id="propview"></div>
+        <div id="bpmnview"></div>
         <div className="properties-panel-parent" id="js-properties-panel"></div>
       </div>
     </div>
