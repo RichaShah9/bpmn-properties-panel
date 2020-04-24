@@ -50,26 +50,6 @@ export class Service {
     return this.request(url, config, data);
   }
 
-  put(url, data) {
-    const config = {
-      method: "PUT"
-    };
-    return this.request(url, config, data);
-  }
-
-  add(entity, record) {
-    const data = {
-      data: record
-    };
-    const url = `ws/rest/${entity}`;
-    return this.post(url, data);
-  }
-
-  login(data) {
-    return this.post("/login.jsp", data)
-  }
-
-
   fetchId(entity, id, data = {}) {
     const url = `ws/rest/${entity}/${id}/fetch`;
     return this.post(url, data);
