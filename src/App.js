@@ -132,7 +132,7 @@ function App() {
               padding: "20px 20px 0px 20px",
             }}
           >
-            <div class="tooltip">
+            <div className="tooltip">
               <button onClick={onSave} className="property-button">
                 <span className="tooltiptext">Save</span>
                 <img
@@ -145,9 +145,9 @@ function App() {
                 />
               </button>
             </div>
-            <div class="tooltip">
+            <div className="tooltip">
               <button onClick={saveSVG} className="property-button">
-                <span class="tooltiptext">Download SVG</span>
+                <span className="tooltiptext">Download SVG</span>
                 <img
                   src={ImageIcon}
                   alt="save"
