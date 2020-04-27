@@ -114,7 +114,7 @@ function App() {
               display: "flex",
               alignItems: "center",
               justifyContent: "left",
-              padding: 20,
+              padding: "20px 20px 0px 20px",
             }}
           >
             <button onClick={onSave} className="save-button">
