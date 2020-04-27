@@ -50,6 +50,14 @@ export class Service {
     return this.request(url, config, data);
   }
 
+  add(entity, record) {
+    const data = {
+      data: record
+    };
+    const url = `ws/rest/${entity}`;
+    return this.post(url, data);
+  }
+  
   fetchId(entity, id, data = {}) {
     const url = `ws/rest/${entity}/${id}/fetch`;
     return this.post(url, data);
