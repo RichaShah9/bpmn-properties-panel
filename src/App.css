@@ -30,6 +30,7 @@ body,
 #root,
 #container {
   height: 100%;
+  overflow: hidden;
   background: white;
 }
 
@@ -49,7 +50,7 @@ body,
 }
 
 .djs-palette {
-  width: 48px !important;
+  width: 48px;
 }
 
 .property-button {
@@ -895,4 +896,10 @@ a:link {
 
 #js-properties-panel {
   background: #f8f8f8;
+}
+
+@media only screen and (max-height: 795px) {
+  .djs-palette {
+    width: 94px;
+  }
 }
