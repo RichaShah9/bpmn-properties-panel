@@ -4,7 +4,8 @@ import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
 import camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import Service from "./services/Service";
-import SaveIcon from "./save.png";
+import SaveIcon from "./assets/save.png";
+import ImageIcon from "./assets/image.png";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -71,6 +72,20 @@ const openBpmnDiagram = (xml) => {
   });
 };
 
+const saveSVG = () => {
+  bpmnModeler.saveSVG({ format: true }, async function (err, svg) {
+    let encodedData = encodeURIComponent(svg);
+    let dl = document.createElement("a");
+    document.body.appendChild(dl);
+    dl.setAttribute(
+      "href",
+      "data:application/bpmn20-xml;charset=UTF-8," + encodedData
+    );
+    dl.setAttribute("download", "diagram.svg");
+    dl.click();
+  });
+};
+
 function App() {
   const [wkf, setWkf] = React.useState(null);
   const onSave = () => {
@@ -117,16 +132,32 @@ function App() {
               padding: "20px 20px 0px 20px",
             }}
           >
-            <button onClick={onSave} className="save-button">
-              <img
-                src={SaveIcon}
-                alt="save"
-                style={{
-                  height: 20,
-                  width: 20,
-                }}
-              />
-            </button>
+            <div class="tooltip">
+              <button onClick={onSave} className="property-button">
+                <span className="tooltiptext">Save</span>
+                <img
+                  src={SaveIcon}
+                  alt="save"
+                  style={{
+                    height: 20,
+                    width: 20,
+                  }}
+                />
+              </button>
+            </div>
+            <div class="tooltip">
+              <button onClick={saveSVG} className="property-button">
+                <span class="tooltiptext">Download SVG</span>
+                <img
+                  src={ImageIcon}
+                  alt="save"
+                  style={{
+                    height: 20,
+                    width: 20,
+                  }}
+                />
+              </button>
+            </div>
           </div>
         </div>
         <div className="properties-panel-parent" id="js-properties-panel"></div>
