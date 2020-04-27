@@ -24,11 +24,11 @@ const fetchId = () => {
 
 const fetchDiagram = async (id, setWkf) => {
   if (id) {
-    let res = await Service.fetchId("com.axelor.workflow.db.Wkf", id);
+    let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
     const wkf = (res && res.data && res.data[0]) || {};
-    let { bpmnXml } = wkf;
+    let { diagramXml } = wkf;
     setWkf(wkf);
-    newBpmnDiagram(bpmnXml);
+    newBpmnDiagram(diagramXml);
   } else {
     newBpmnDiagram();
   }
@@ -75,9 +75,9 @@ function App() {
   const [wkf, setWkf] = React.useState(null);
   const onSave = () => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
-      Service.add("com.axelor.workflow.db.Wkf", {
+      Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
-        bpmnXml: xml,
+        diagramXml: xml,
       }).then((res) => {
         console.log("res", res);
         let x = document.getElementById("snackbar");
