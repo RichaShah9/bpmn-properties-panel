@@ -4,6 +4,7 @@ import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
 import camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import Service from "./services/Service";
+import SaveIcon from "./save.png";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -21,10 +22,12 @@ const fetchId = () => {
   }
 };
 
-const fetchDiagram = async (id) => {
+const fetchDiagram = async (id, setWkf) => {
   if (id) {
     let res = await Service.fetchId("com.axelor.workflow.db.Wkf", id);
-    let { bpmnXml } = (res && res.data && res.data[0]) || {};
+    const wkf = (res && res.data && res.data[0]) || {};
+    let { bpmnXml } = wkf;
+    setWkf(wkf);
     newBpmnDiagram(bpmnXml);
   } else {
     newBpmnDiagram();
@@ -69,16 +72,20 @@ const openBpmnDiagram = (xml) => {
 };
 
 function App() {
+  const [wkf, setWkf] = React.useState(null);
   const onSave = () => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
-      console.log(xml);
-      let element = window.top.document.getElementsByName("bpmnXml");
-      let childElements = element && element.length > 0 && element[0].children;
-      console.log("element", element, childElements);
-      if (childElements && childElements.length > 0) {
-        childElements[0].innerText = xml;
-        console.log("element", childElements[0].innerText);
-      }
+      Service.add("com.axelor.workflow.db.Wkf", {
+        ...wkf,
+        bpmnXml: xml,
+      }).then((res) => {
+        console.log("res", res);
+        let x = document.getElementById("snackbar");
+        x.className = "show";
+        setTimeout(function () {
+          x.className = x.className.replace("show", "");
+        }, 3000);
+      });
     });
   };
 
@@ -94,30 +101,37 @@ function App() {
       },
     });
     let id = fetchId();
-    fetchDiagram(id);
-
-    bpmnModeler.on(
-      [
-        "shape.added",
-        "connection.added",
-        "shape.removed",
-        "connection.removed",
-        "shape.changed",
-        "connection.changed",
-      ],
-      function () {
-        onSave();
-      }
-    );
-  });
+    fetchDiagram(id, setWkf);
+  }, [setWkf]);
 
   return (
     <div id="container">
       <div id="bpmncontainer">
         <div id="propview"></div>
-        <div id="bpmnview"></div>
+        <div id="bpmnview">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "left",
+              padding: 20,
+            }}
+          >
+            <button onClick={onSave} className="save-button">
+              <img
+                src={SaveIcon}
+                alt="save"
+                style={{
+                  height: 20,
+                  width: 20,
+                }}
+              />
+            </button>
+          </div>
+        </div>
         <div className="properties-panel-parent" id="js-properties-panel"></div>
       </div>
+      <div id="snackbar">Saved Successfully</div>
     </div>
   );
 }
