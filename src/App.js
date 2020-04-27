@@ -88,18 +88,36 @@ const saveSVG = () => {
 
 function App() {
   const [wkf, setWkf] = React.useState(null);
+  const [message, setMessage] = React.useState("");
+
+  const showAlert = (id, message) => {
+    setMessage(message);
+    let x = document.getElementById(id);
+    x.className = "show";
+    setTimeout(function () {
+      x.className = x.className.replace("show", "");
+    }, 3000);
+  };
+
   const onSave = () => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
         diagramXml: xml,
       }).then((res) => {
-        console.log("res", res);
-        let x = document.getElementById("snackbar");
-        x.className = "show";
-        setTimeout(function () {
-          x.className = x.className.replace("show", "");
-        }, 3000);
+        if (res && res.data && res.data[0]) {
+          let x = document.getElementById("snackbar");
+          x.className = "show";
+          setTimeout(function () {
+            x.className = x.className.replace("show", "");
+          }, 3000);
+        } else {
+          showAlert(
+            "snackbar-alert",
+            (res && res.data && (res.data.message || res.data.title)) ||
+              "Error!"
+          );
+        }
       });
     });
   };
@@ -163,6 +181,7 @@ function App() {
         <div className="properties-panel-parent" id="js-properties-panel"></div>
       </div>
       <div id="snackbar">Saved Successfully</div>
+      <div id="snackbar-alert">{message}</div>
     </div>
   );
 }
