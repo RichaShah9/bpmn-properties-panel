@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import BpmnModeler from "bpmn-js/lib/Modeler";
 import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
@@ -87,8 +87,9 @@ const saveSVG = () => {
 };
 
 function App() {
-  const [wkf, setWkf] = React.useState(null);
-  const [message, setMessage] = React.useState("");
+  const [wkf, setWkf] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState(null);
 
   const showAlert = (id, message) => {
     setMessage(message);
@@ -106,14 +107,12 @@ function App() {
         diagramXml: xml,
       }).then((res) => {
         if (res && res.data && res.data[0]) {
-          let x = document.getElementById("snackbar");
-          x.className = "show";
-          setTimeout(function () {
-            x.className = x.className.replace("show", "");
-          }, 3000);
+          setMessageType("success");
+          showAlert("snackbar", "Saved Successfully");
         } else {
+          setMessageType("error");
           showAlert(
-            "snackbar-alert",
+            "snackbar",
             (res && res.data && (res.data.message || res.data.title)) ||
               "Error!"
           );
@@ -180,8 +179,16 @@ function App() {
         </div>
         <div className="properties-panel-parent" id="js-properties-panel"></div>
       </div>
-      <div id="snackbar">Saved Successfully</div>
-      <div id="snackbar-alert">{message}</div>
+      {message && (
+        <div
+          id="snackbar"
+          style={{
+            backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
+          }}
+        >
+          {message}
+        </div>
+      )}
     </div>
   );
 }

@@ -30,7 +30,7 @@ body,
 #root,
 #container {
   height: 100%;
-  overflow: hidden;
+  background: white;
 }
 
 #bpmnview {
@@ -50,12 +50,6 @@ body,
 
 .djs-palette {
   width: 48px !important;
-}
-
-#snackbar.show {
-  visibility: visible;
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
 }
 
 .property-button {
@@ -101,7 +95,6 @@ body,
   visibility: hidden;
   min-width: 250px;
   margin-left: -125px;
-  background-color: #4caf50;
   color: #fff;
   text-align: center;
   border-radius: 2px;
@@ -113,23 +106,7 @@ body,
   font-size: 17px;
 }
 
-#snackbar-alert {
-  visibility: hidden;
-  min-width: 250px;
-  margin-left: -125px;
-  background-color: #f44336;
-  color: #fff;
-  text-align: center;
-  border-radius: 2px;
-  padding: 16px;
-  position: fixed;
-  z-index: 1;
-  left: 50%;
-  bottom: 30px;
-  font-size: 17px;
-}
-
-#snackbar-alert.show {
+#snackbar.show {
   visibility: visible;
   -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
   animation: fadein 0.5s, fadeout 0.5s 2.5s;
@@ -914,4 +891,8 @@ a:link {
 .properties-panel-parent > .djs-properties-panel {
   padding-bottom: 70px;
   min-height: 100%;
+}
+
+#js-properties-panel {
+  background: #f8f8f8;
 }
