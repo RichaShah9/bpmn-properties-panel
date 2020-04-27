@@ -898,6 +898,27 @@ a:link {
   background: #f8f8f8;
 }
 
+#mySidenav > #property {
+  position: absolute;
+  right: -60px;
+  transition: 0.3s;
+  padding: 15px;
+  width: 100px;
+  text-decoration: none;
+  font-size: 20px;
+  color: white;
+  border-radius: 5px 0px 0px 5px;
+}
+
+#mySidenav > #property:hover {
+  right: 0;
+}
+
+#property {
+  top: 20px;
+  background-color: #2f4050;
+}
+
 @media only screen and (max-height: 795px) {
   .djs-palette {
     width: 94px;

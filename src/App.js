@@ -90,7 +90,8 @@ function App() {
   const [wkf, setWkf] = useState(null);
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState(null);
-
+  const [isPropertyPanel, setPropertyPanel] = useState(true);
+  
   const showAlert = (id, message) => {
     setMessage(message);
     let x = document.getElementById(id);
@@ -122,20 +123,26 @@ function App() {
   };
 
   useEffect(() => {
-    bpmnModeler = new BpmnModeler({
+    let modeler = {
       container: "#bpmnview",
-      propertiesPanel: {
+      keyboard: { bindTo: document },
+    };
+    if (isPropertyPanel) {
+      modeler.propertiesPanel = {
         parent: "#js-properties-panel",
-      },
-      additionalModules: [propertiesPanelModule, propertiesProviderModule],
-      moddleExtensions: {
+      };
+      modeler.additionalModules = [
+        propertiesPanelModule,
+        propertiesProviderModule,
+      ];
+      modeler.moddleExtensions = {
         camunda: camundaModdleDescriptor,
-      },
-      keyboard: { bindTo: document }
-    });
+      };
+    }
+    bpmnModeler = new BpmnModeler({ ...modeler });
     let id = fetchId();
     fetchDiagram(id, setWkf);
-  }, [setWkf]);
+  }, [setWkf, isPropertyPanel]);
 
   return (
     <div id="container">
@@ -178,18 +185,33 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="properties-panel-parent" id="js-properties-panel"></div>
       </div>
-      {message && (
+      <div id="mySidenav">
         <div
-          id="snackbar"
+          id="property"
+          onClick={() => setPropertyPanel(!isPropertyPanel)}
           style={{
-            backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
+            marginRight: !isPropertyPanel ? "0px" : "260px",
           }}
         >
-          {message}
+          {isPropertyPanel ? ">" : "<"}
         </div>
-      )}
+        <div
+          className="properties-panel-parent"
+          id="js-properties-panel"
+          style={{ display: isPropertyPanel ? "block" : "none" }}
+        ></div>
+        {message && (
+          <div
+            id="snackbar"
+            style={{
+              backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
+            }}
+          >
+            {message}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
