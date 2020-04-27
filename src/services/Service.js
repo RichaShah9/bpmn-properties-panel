@@ -1,17 +1,33 @@
+let lastCookieString;
+let lastCookies = {};
+
+function readCookie(name) {
+  let cookieString = document.cookie || "";
+  if (cookieString !== lastCookieString) {
+    lastCookieString = cookieString;
+    lastCookies = cookieString.split("; ").reduce((obj, value) => {
+      let parts = value.split("=");
+      obj[parts[0]] = parts[1];
+      return obj;
+    }, {});
+  }
+  return lastCookies[name];
+}
+
 export class Service {
   constructor() {
     const headers = new Headers();
     headers.append("Accept", "application/json");
     headers.append("Content-Type", "application/json");
     headers.append("X-Requested-With", "XMLHttpRequest");
-    this.baseURL =
-      process.env.NODE_ENV === "production" ? ".." : "axelor-erp";
+    headers.append("X-CSRF-Token", readCookie("CSRF-TOKEN"));
+    this.baseURL = process.env.NODE_ENV === "production" ? ".." : "bpm-demo";
     this.headers = headers;
   }
 
   fetch(url, method, options) {
     return fetch(url, options)
-      .then(data => {
+      .then((data) => {
         if (["head", "delete"].indexOf(method.toLowerCase()) !== -1)
           return data;
         let isJSON = data.headers
@@ -19,7 +35,7 @@ export class Service {
           .includes("application/json");
         return isJSON ? data.json() : data;
       })
-      .catch(err => {});
+      .catch((err) => {});
   }
 
   request(url, config = {}, data = {}) {
@@ -29,7 +45,7 @@ export class Service {
         credentials: "include",
         headers: this.headers,
         mode: "cors",
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       },
       config
     );
@@ -45,19 +61,19 @@ export class Service {
 
   post(url, data) {
     const config = {
-      method: "POST"
+      method: "POST",
     };
     return this.request(url, config, data);
   }
 
   add(entity, record) {
     const data = {
-      data: record
+      data: record,
     };
     const url = `ws/rest/${entity}`;
     return this.post(url, data);
   }
-  
+
   fetchId(entity, id, data = {}) {
     const url = `ws/rest/${entity}/${id}/fetch`;
     return this.post(url, data);
