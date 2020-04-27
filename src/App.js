@@ -131,6 +131,7 @@ function App() {
       moddleExtensions: {
         camunda: camundaModdleDescriptor,
       },
+      keyboard: { bindTo: document }
     });
     let id = fetchId();
     fetchDiagram(id, setWkf);
