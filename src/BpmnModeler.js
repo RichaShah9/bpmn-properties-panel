@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import BpmnModeler from "bpmn-js/lib/Modeler";
-
 import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
 import camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
@@ -13,6 +12,28 @@ import "bpmn-font/dist/css/bpmn-embedded.css";
 import "./App.css";
 
 let bpmnModeler = null;
+
+const fetchId = () => {
+  const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
+  const url = window.location.href;
+  let matchBPMNId, id;
+  while ((matchBPMNId = regexBPMN.exec(url))) {
+    id = matchBPMNId[1];
+    return id;
+  }
+};
+
+const fetchDiagram = async (id, setWkf) => {
+  if (id) {
+    let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
+    const wkf = (res && res.data && res.data[0]) || {};
+    let { diagramXml } = wkf;
+    setWkf(wkf);
+    newBpmnDiagram(diagramXml);
+  } else {
+    newBpmnDiagram();
+  }
+};
 
 const newBpmnDiagram = (rec) => {
   const diagram =
@@ -65,12 +86,12 @@ const saveSVG = () => {
   });
 };
 
-function BpmnModelerComponent(props) {
-  const { wkf, setWkf } = props;
+function BpmnModelerComponent() {
+  const [wkf, setWkf] = useState(null);
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState(null);
   const [isPropertyPanel, setPropertyPanel] = useState(true);
-
+  
   const showAlert = (id, message) => {
     setMessage(message);
     let x = document.getElementById(id);
@@ -82,12 +103,13 @@ function BpmnModelerComponent(props) {
 
   const onSave = () => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
-        console.log("LLLLLLLLLL", xml)
+      console.log("xml",xml)
       Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
         diagramXml: xml,
       }).then((res) => {
         if (res && res.data && res.data[0]) {
+          setWkf(res.data[0])
           setMessageType("success");
           showAlert("snackbar", "Saved Successfully");
         } else {
@@ -101,6 +123,7 @@ function BpmnModelerComponent(props) {
       });
     });
   };
+
   useEffect(() => {
     let modeler = {
       container: "#bpmnview",
@@ -119,9 +142,9 @@ function BpmnModelerComponent(props) {
       };
     }
     bpmnModeler = new BpmnModeler({ ...modeler });
-    const { diagramXml } = wkf || {};
-    newBpmnDiagram(diagramXml);
-  }, [isPropertyPanel, wkf]);
+    let id = fetchId();
+    fetchDiagram(id, setWkf);
+  }, [setWkf, isPropertyPanel]);
 
   return (
     <div id="container">

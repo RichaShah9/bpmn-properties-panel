@@ -21,34 +21,37 @@ const saveSVG = () => {
   });
 };
 
+const openDiagramImage = (taskIds, diagramXml) => {
+  if (!diagramXml) return;
+  bpmnViewer.importXML(diagramXml, (err) => {
+    if (err) {
+      return console.error("could not import BPMN 2.0 diagram", err);
+    }
+    var canvas = bpmnViewer.get("canvas");
+    canvas.zoom("fit-viewport");
+    var elementRegistry = bpmnViewer.get("elementRegistry");
+    let nodes = elementRegistry && elementRegistry._elements;
+    if (!nodes) return;
+    let filteredElements = Object.keys(nodes).filter((element) =>
+      taskIds.includes(element)
+    );
+    filteredElements.forEach((element) => {
+      canvas.addMarker(element, "highlight");
+    });
+    saveSVG();
+  });
+};
+
 function BpmnViewerComponent(props) {
   const { wkf, taskIds } = props;
   const { diagramXml } = wkf || {};
+
   useEffect(() => {
     bpmnViewer = new BpmnViewer({
       container: "#canvas-task",
     });
-    if (!diagramXml) {
-      return;
-    }
-    bpmnViewer.importXML(diagramXml, function (err) {
-      if (err) {
-        return console.error("could not import BPMN 2.0 diagram", err);
-      }
-      var canvas = bpmnViewer.get("canvas");
-      canvas.zoom("fit-viewport");
-      var elementRegistry = bpmnViewer.get("elementRegistry");
-      let nodes = elementRegistry && elementRegistry._elements;
-      if (!nodes) return;
-      let filteredElements = Object.keys(nodes).filter((element) =>
-        taskIds.includes(element)
-      );
-      filteredElements.forEach((element) => {
-        canvas.addMarker(element, "highlight");
-      });
-      saveSVG();
-    });
-  });
+    openDiagramImage(taskIds, diagramXml);
+  }, [diagramXml, taskIds]);
 
   return <div id="canvas-task"></div>;
 }

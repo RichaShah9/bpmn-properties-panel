@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-
+import Service from "./services/Service";
 import BpmnModelerComponent from "./BpmnModeler";
 import BpmnViewerComponent from "./BpmnViewer";
-import Service from "./services/Service";
 
 import "./App.css";
 
@@ -11,7 +10,7 @@ const fetchId = () => {
   const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
   const url = window.location.href;
   let matchBPMNId, matchBPMNTasksId, id, taskIds;
-  
+
   while ((matchBPMNTasksId = regexBPMNTask.exec(url))) {
     let ids = matchBPMNTasksId[1];
     taskIds = ids.split(",");
@@ -32,21 +31,22 @@ const fetchDiagram = async (id, setWkf) => {
 };
 
 function App() {
-  const [wkf, setWkf] = useState(null);
   const [taskIds, setTaskIds] = useState(null);
+  const [wkf, setWkf] = useState(null);
 
   useEffect(() => {
     let { id, taskIds } = fetchId();
     setTaskIds(taskIds);
     fetchDiagram(id, setWkf);
-  }, [setWkf]);
+    console.log(taskIds);
+  }, [setTaskIds]);
 
   return (
     <React.Fragment>
       {taskIds && taskIds.length > 0 ? (
         <BpmnViewerComponent taskIds={taskIds} wkf={wkf} />
       ) : (
-        <BpmnModelerComponent wkf={wkf} setWkf={setWkf} />
+        <BpmnModelerComponent />
       )}
     </React.Fragment>
   );
