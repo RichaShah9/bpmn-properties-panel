@@ -1,5 +1,9 @@
 import React, { useEffect } from "react";
 import BpmnViewer from "bpmn-js/lib/NavigatedViewer";
+import xml2js, { parseString } from "xml2js";
+import _ from "lodash";
+
+import { download } from "./utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -7,17 +11,32 @@ import "./App.css";
 
 let bpmnViewer = null;
 
-const saveSVG = () => {
+function updateSVGStroke(obj, taskIds = []) {
+  return _.forEach(obj, (value, key) => {
+    if (obj[key]["g"]) {
+      if (taskIds.includes(obj[key]["g"][0]["$"]["data-element-id"])) {
+        let reactangle = obj[key]["g"][0]["g"][0].rect[0];
+        let newStyle = reactangle["$"].style.replace(
+          "stroke: black",
+          "stroke: #1e88e5"
+        );
+        reactangle["$"].style = newStyle;
+      }
+      updateSVGStroke(obj[key]["g"], taskIds);
+    } else {
+      return;
+    }
+  });
+}
+
+const saveSVG = (taskIds) => {
   bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
-    let encodedData = encodeURIComponent(svg);
-    let dl = document.createElement("a");
-    document.body.appendChild(dl);
-    dl.setAttribute(
-      "href",
-      "data:application/bpmn20-xml;charset=UTF-8," + encodedData
-    );
-    dl.setAttribute("download", "diagram.svg");
-    dl.click();
+    parseString(svg, function (err, result) {
+      let updatedSVG = updateSVGStroke(result, taskIds);
+      var builder = new xml2js.Builder();
+      var xml = builder.buildObject(updatedSVG);
+      download(xml, "diagram.svg");
+    });
   });
 };
 
@@ -38,7 +57,7 @@ const openDiagramImage = (taskIds, diagramXml) => {
     filteredElements.forEach((element) => {
       canvas.addMarker(element, "highlight");
     });
-    saveSVG();
+    saveSVG(taskIds);
   });
 };
 

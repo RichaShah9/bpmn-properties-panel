@@ -919,7 +919,6 @@ a:link {
 }
 
 .highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
-  /* fill: var(--main-bg-color, #BBDEFB) !important; */
   stroke: var(--main-bg-color, #1e88e5) !important;
 }
 
