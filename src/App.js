@@ -35,10 +35,9 @@ function App() {
   const [wkf, setWkf] = useState(null);
 
   useEffect(() => {
-    let { id, taskIds } = fetchId();
+    let { id, taskIds } = fetchId() || {};
     setTaskIds(taskIds);
     fetchDiagram(id, setWkf);
-    console.log(taskIds);
   }, [setTaskIds]);
 
   return (
