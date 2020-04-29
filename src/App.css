@@ -920,13 +920,13 @@ a:link {
 
 .highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
   /* fill: var(--main-bg-color, #BBDEFB) !important; */
-  stroke: var(--main-bg-color, #1E88E5) !important
+  stroke: var(--main-bg-color, #1e88e5) !important;
 }
 
 #canvas-task {
   padding: 0;
   margin: 0;
-  height: 100%
+  height: 100%;
 }
 
 h1 {
@@ -936,8 +936,8 @@ h1 {
   padding: 10px 20px;
   margin: 0;
   z-index: 1;
-  background: rgba(255, 255, 255, .8);
-  border: solid 1px #CCC;
+  background: rgba(255, 255, 255, 0.8);
+  border: solid 1px #ccc;
 }
 
 .diagram-note {
@@ -952,6 +952,12 @@ h1 {
   text-align: center;
 }
 
+.toolbar-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  padding: 20px 20px 0px 20px;
+}
 
 @media only screen and (max-height: 795px) {
   .djs-palette {
