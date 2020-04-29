@@ -3,9 +3,10 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
 import camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
+
 import Service from "./services/Service";
-import SaveIcon from "./assets/save.png";
-import ImageIcon from "./assets/image.png";
+import { SaveIcon, ImageIcon, UploadIcon, DownloadIcon } from "./assets";
+import { download } from "./utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -74,15 +75,17 @@ const openBpmnDiagram = (xml) => {
 
 const saveSVG = () => {
   bpmnModeler.saveSVG({ format: true }, async function (err, svg) {
-    let encodedData = encodeURIComponent(svg);
-    let dl = document.createElement("a");
-    document.body.appendChild(dl);
-    dl.setAttribute(
-      "href",
-      "data:application/bpmn20-xml;charset=UTF-8," + encodedData
-    );
-    dl.setAttribute("download", "diagram.svg");
-    dl.click();
+    download(svg, "diagram.svg");
+  });
+};
+
+const uploadXml = () => {
+  document.getElementById("inputFile").click();
+};
+
+const downloadXml = () => {
+  bpmnModeler.saveXML({ format: true }, async function (err, xml) {
+    download(xml, "diagram.xml");
   });
 };
 
@@ -91,25 +94,39 @@ function BpmnModelerComponent() {
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState(null);
   const [isPropertyPanel, setPropertyPanel] = useState(true);
-  
+
   const showAlert = (id, message) => {
     setMessage(message);
     let x = document.getElementById(id);
+    if (!x) return;
     x.className = "show";
     setTimeout(function () {
       x.className = x.className.replace("show", "");
     }, 3000);
   };
 
+  const uploadFile = (e) => {
+    let files = e.target.files;
+    let reader = new FileReader();
+    if (files[0].type !== "text/xml") {
+      setMessageType("error");
+      showAlert("snackbar", "Upload Xml file only");
+      return;
+    }
+    reader.readAsText(files[0]);
+    reader.onload = (e) => {
+      openBpmnDiagram(e.target.result);
+    };
+  };
+
   const onSave = () => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
-      console.log("xml",xml)
       Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
         diagramXml: xml,
       }).then((res) => {
         if (res && res.data && res.data[0]) {
-          setWkf(res.data[0])
+          setWkf({ ...res.data[0] });
           setMessageType("success");
           showAlert("snackbar", "Saved Successfully");
         } else {
@@ -123,6 +140,28 @@ function BpmnModelerComponent() {
       });
     });
   };
+
+  const toolBarButtons = [
+    { name: "Save", icon: SaveIcon, tooltipText: "Save", onClick: onSave },
+    {
+      name: "Image",
+      icon: ImageIcon,
+      tooltipText: "Download SVG",
+      onClick: saveSVG,
+    },
+    {
+      name: "UploadXml",
+      icon: UploadIcon,
+      tooltipText: "Upload XML",
+      onClick: uploadXml,
+    },
+    {
+      name: "DownloadXml",
+      icon: DownloadIcon,
+      tooltipText: "Download XML",
+      onClick: downloadXml,
+    },
+  ];
 
   useEffect(() => {
     let modeler = {
@@ -151,40 +190,31 @@ function BpmnModelerComponent() {
       <div id="bpmncontainer">
         <div id="propview"></div>
         <div id="bpmnview">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "left",
-              padding: "20px 20px 0px 20px",
-            }}
-          >
-            <div className="tooltip">
-              <button onClick={onSave} className="property-button">
-                <span className="tooltiptext">Save</span>
-                <img
-                  src={SaveIcon}
-                  alt="save"
-                  style={{
-                    height: 20,
-                    width: 20,
-                  }}
-                />
-              </button>
-            </div>
-            <div className="tooltip">
-              <button onClick={saveSVG} className="property-button">
-                <span className="tooltiptext">Download SVG</span>
-                <img
-                  src={ImageIcon}
-                  alt="save"
-                  style={{
-                    height: 20,
-                    width: 20,
-                  }}
-                />
-              </button>
-            </div>
+          <div className="toolbar-buttons">
+            {toolBarButtons.map((btn) => (
+              <div className="tooltip" key={btn.name}>
+                {btn.name === "UploadXml" && (
+                  <input
+                    id="inputFile"
+                    type="file"
+                    name="file"
+                    onChange={uploadFile}
+                    style={{ display: "none" }}
+                  />
+                )}
+                <button onClick={btn.onClick} className="property-button">
+                  <span className="tooltiptext">{btn.tooltipText}</span>
+                  <img
+                    src={btn.icon}
+                    alt={btn.name}
+                    style={{
+                      height: 20,
+                      width: 20,
+                    }}
+                  />
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -203,16 +233,15 @@ function BpmnModelerComponent() {
           id="js-properties-panel"
           style={{ display: isPropertyPanel ? "block" : "none" }}
         ></div>
-        {message && (
-          <div
-            id="snackbar"
-            style={{
-              backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
-            }}
-          >
-            {message}
-          </div>
-        )}
+        <div
+          id="snackbar"
+          style={{
+            backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
+          }}
+        >
+          {message}
+        </div>
+        )
       </div>
     </div>
   );
