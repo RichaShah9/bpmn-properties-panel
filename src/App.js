@@ -37,7 +37,9 @@ function App() {
   useEffect(() => {
     let { id, taskIds } = fetchId() || {};
     setTaskIds(taskIds);
-    fetchDiagram(id, setWkf);
+    if(taskIds && taskIds.length > 0 ){
+      fetchDiagram(id, setWkf);
+    }
   }, [setTaskIds]);
 
   return (

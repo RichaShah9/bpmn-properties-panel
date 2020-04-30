@@ -241,7 +241,6 @@ function BpmnModelerComponent() {
         >
           {message}
         </div>
-        )
       </div>
     </div>
   );
