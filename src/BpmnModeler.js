@@ -93,7 +93,6 @@ function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState(null);
-  const [isPropertyPanel, setPropertyPanel] = useState(true);
 
   const showAlert = (id, message) => {
     setMessage(message);
@@ -167,23 +166,18 @@ function BpmnModelerComponent() {
     let modeler = {
       container: "#bpmnview",
       keyboard: { bindTo: document },
-    };
-    if (isPropertyPanel) {
-      modeler.propertiesPanel = {
+      propertiesPanel: {
         parent: "#js-properties-panel",
-      };
-      modeler.additionalModules = [
-        propertiesPanelModule,
-        propertiesProviderModule,
-      ];
-      modeler.moddleExtensions = {
+      },
+      additionalModules: [propertiesPanelModule, propertiesProviderModule],
+      moddleExtensions: {
         camunda: camundaModdleDescriptor,
-      };
-    }
+      },
+    };
     bpmnModeler = new BpmnModeler({ ...modeler });
     let id = fetchId();
     fetchDiagram(id, setWkf);
-  }, [setWkf, isPropertyPanel]);
+  }, [setWkf]);
 
   return (
     <div id="container">
@@ -218,29 +212,14 @@ function BpmnModelerComponent() {
           </div>
         </div>
       </div>
-      <div id="mySidenav">
-        <div
-          id="property"
-          onClick={() => setPropertyPanel(!isPropertyPanel)}
-          style={{
-            marginRight: !isPropertyPanel ? "0px" : "260px",
-          }}
-        >
-          {isPropertyPanel ? ">" : "<"}
-        </div>
-        <div
-          className="properties-panel-parent"
-          id="js-properties-panel"
-          style={{ display: isPropertyPanel ? "block" : "none" }}
-        ></div>
-        <div
-          id="snackbar"
-          style={{
-            backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
-          }}
-        >
-          {message}
-        </div>
+      <div className="properties-panel-parent" id="js-properties-panel"></div>
+      <div
+        id="snackbar"
+        style={{
+          backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
+        }}
+      >
+        {message}
       </div>
     </div>
   );
