@@ -4,7 +4,6 @@ import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
 
 import Service from "./services/Service";
-import { download } from "./utils";
 import { ImageIcon } from "./assets";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -57,13 +56,58 @@ function updateSVGStroke(obj, taskIds = []) {
   });
 }
 
+function svgUrlToPng(svgUrl, callback) {
+  const svgImage = document.createElement("img");
+  document.body.appendChild(svgImage);
+  svgImage.onload = function () {
+    const canvas = document.createElement("canvas");
+    canvas.width = svgImage.clientWidth;
+    canvas.height = svgImage.clientHeight;
+    const canvasCtx = canvas.getContext("2d");
+    canvasCtx.drawImage(svgImage, 0, 0);
+    const imgData = canvas.toDataURL("image/png");
+    callback(imgData);
+  };
+  svgImage.src = svgUrl;
+  svgImage.style.visibility = "hidden"
+
+}
+
+function svgToPng(svg, callback) {
+  const url = getSvgUrl(svg);
+  svgUrlToPng(url, (imgData) => {
+    callback(imgData);
+    URL.revokeObjectURL(url);
+  });
+}
+
+function getSvgUrl(svg) {
+  return URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+}
+
+const clearUrl = (url) => url.replace(/^data:image\/\w+;base64,/, "");
+
+const downloadImage = (name, content, type) => {
+  let link = document.createElement("a");
+  link.style = "position: fixed; left -10000px;";
+  link.href = `data:application/octet-stream;base64,${encodeURIComponent(
+    content
+  )}`;
+  link.download = /\.\w+/.test(name) ? name : `${name}.${type}`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const saveSVG = (taskIds) => {
   bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
     parseString(svg, function (err, result) {
       let updatedSVG = updateSVGStroke(result, taskIds);
-      var builder = new xml2js.Builder();
-      var xml = builder.buildObject(updatedSVG);
-      download(xml, "diagram.svg");
+      let builder = new xml2js.Builder();
+      let xml = builder.buildObject(updatedSVG);
+      svgToPng(xml, (imgData) => {
+        downloadImage("diagram", clearUrl(imgData), "png");
+      });
     });
   });
 };
@@ -74,9 +118,9 @@ const openDiagramImage = (taskIds, diagramXml) => {
     if (err) {
       return console.error("could not import BPMN 2.0 diagram", err);
     }
-    var canvas = bpmnViewer.get("canvas");
+    let canvas = bpmnViewer.get("canvas");
     canvas.zoom("fit-viewport");
-    var elementRegistry = bpmnViewer.get("elementRegistry");
+    let elementRegistry = bpmnViewer.get("elementRegistry");
     let nodes = elementRegistry && elementRegistry._elements;
     if (!nodes) return;
     let filteredElements = Object.keys(nodes).filter((element) =>
@@ -85,6 +129,7 @@ const openDiagramImage = (taskIds, diagramXml) => {
     filteredElements.forEach((element) => {
       canvas.addMarker(element, "highlight");
     });
+    saveSVG(taskIds);
   });
 };
 
@@ -109,7 +154,7 @@ function BpmnViewerComponent() {
             width: "fit-content",
           }}
         >
-          <span className="tooltiptext">Download SVG</span>
+          <span className="tooltiptext">Download Png</span>
           <img
             src={ImageIcon}
             alt={"diagram"}
