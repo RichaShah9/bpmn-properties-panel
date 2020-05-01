@@ -102,7 +102,13 @@ function BpmnViewerComponent() {
   return (
     <React.Fragment>
       <div className="tooltip" style={{ padding: 15 }}>
-        <button onClick={() => saveSVG(taskIds)} className="property-button">
+        <button
+          onClick={() => saveSVG(taskIds)}
+          className="property-button"
+          style={{
+            width: "fit-content",
+          }}
+        >
           <span className="tooltiptext">Download SVG</span>
           <img
             src={ImageIcon}
