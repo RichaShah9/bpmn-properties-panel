@@ -3,13 +3,41 @@ import BpmnViewer from "bpmn-js/lib/NavigatedViewer";
 import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
 
+import Service from "./services/Service";
 import { download } from "./utils";
+import { ImageIcon } from "./assets";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
 import "./App.css";
 
 let bpmnViewer = null;
+
+const fetchId = () => {
+  const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
+  const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
+  const url = window.location.href;
+  let matchBPMNId, matchBPMNTasksId, id, taskIds;
+
+  while ((matchBPMNTasksId = regexBPMNTask.exec(url))) {
+    let ids = matchBPMNTasksId[1];
+    taskIds = ids.split(",");
+  }
+
+  while ((matchBPMNId = regexBPMN.exec(url))) {
+    id = matchBPMNId[1];
+    return { id, taskIds };
+  }
+};
+
+const fetchDiagram = async (id, taskIds) => {
+  if (id) {
+    let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
+    const wkf = (res && res.data && res.data[0]) || {};
+    const { diagramXml } = wkf;
+    openDiagramImage(taskIds, diagramXml);
+  }
+};
 
 function updateSVGStroke(obj, taskIds = []) {
   return _.forEach(obj, (value, key) => {
@@ -57,22 +85,38 @@ const openDiagramImage = (taskIds, diagramXml) => {
     filteredElements.forEach((element) => {
       canvas.addMarker(element, "highlight");
     });
-    saveSVG(taskIds);
   });
 };
 
-function BpmnViewerComponent(props) {
-  const { wkf, taskIds } = props;
-  const { diagramXml } = wkf || {};
-
+function BpmnViewerComponent() {
+  const [taskIds, setTaskIds] = React.useState(null);
   useEffect(() => {
     bpmnViewer = new BpmnViewer({
       container: "#canvas-task",
     });
-    openDiagramImage(taskIds, diagramXml);
-  }, [diagramXml, taskIds]);
+    let { id, taskIds } = fetchId();
+    setTaskIds(taskIds);
+    fetchDiagram(id, taskIds);
+  }, [setTaskIds]);
 
-  return <div id="canvas-task"></div>;
+  return (
+    <React.Fragment>
+      <div className="tooltip" style={{ padding: 15 }}>
+        <button onClick={() => saveSVG(taskIds)} className="property-button">
+          <span className="tooltiptext">Download SVG</span>
+          <img
+            src={ImageIcon}
+            alt={"diagram"}
+            style={{
+              height: 20,
+              width: 20,
+            }}
+          />
+        </button>
+      </div>
+      <div id="canvas-task"></div>
+    </React.Fragment>
+  );
 }
 
 export default BpmnViewerComponent;

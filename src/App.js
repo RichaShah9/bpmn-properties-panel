@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Service from "./services/Service";
 import BpmnModelerComponent from "./BpmnModeler";
 import BpmnViewerComponent from "./BpmnViewer";
 
@@ -22,30 +21,18 @@ const fetchId = () => {
   }
 };
 
-const fetchDiagram = async (id, setWkf) => {
-  if (id) {
-    let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
-    const wkf = (res && res.data && res.data[0]) || {};
-    setWkf(wkf);
-  }
-};
-
 function App() {
   const [taskIds, setTaskIds] = useState(null);
-  const [wkf, setWkf] = useState(null);
 
   useEffect(() => {
-    let { id, taskIds } = fetchId() || {};
+    let { taskIds } = fetchId() || {};
     setTaskIds(taskIds);
-    if(taskIds && taskIds.length > 0 ){
-      fetchDiagram(id, setWkf);
-    }
   }, [setTaskIds]);
 
   return (
     <React.Fragment>
       {taskIds && taskIds.length > 0 ? (
-        <BpmnViewerComponent taskIds={taskIds} wkf={wkf} />
+        <BpmnViewerComponent />
       ) : (
         <BpmnModelerComponent />
       )}
