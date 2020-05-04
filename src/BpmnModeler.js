@@ -107,7 +107,12 @@ function BpmnModelerComponent() {
   const uploadFile = (e) => {
     let files = e.target.files;
     let reader = new FileReader();
-    if (files && (!files[0].name.includes(".bpmn"))) {
+    if (
+      files &&
+      files[0] &&
+      files[0].name &&
+      !files[0].name.includes(".bpmn")
+    ) {
       setMessageType("error");
       showAlert("snackbar", "Upload Bpmn files only");
       return;
