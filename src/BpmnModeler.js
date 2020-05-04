@@ -85,7 +85,7 @@ const uploadXml = () => {
 
 const downloadXml = () => {
   bpmnModeler.saveXML({ format: true }, async function (err, xml) {
-    download(xml, "diagram.xml");
+    download(xml, "diagram.bpmn");
   });
 };
 
@@ -107,9 +107,9 @@ function BpmnModelerComponent() {
   const uploadFile = (e) => {
     let files = e.target.files;
     let reader = new FileReader();
-    if (files[0].type !== "text/xml") {
+    if (files && (!files[0].name.includes(".bpmn"))) {
       setMessageType("error");
-      showAlert("snackbar", "Upload Xml file only");
+      showAlert("snackbar", "Upload Bpmn files only");
       return;
     }
     reader.readAsText(files[0]);
@@ -151,13 +151,13 @@ function BpmnModelerComponent() {
     {
       name: "UploadXml",
       icon: UploadIcon,
-      tooltipText: "Upload XML",
+      tooltipText: "Upload",
       onClick: uploadXml,
     },
     {
       name: "DownloadXml",
       icon: DownloadIcon,
-      tooltipText: "Download XML",
+      tooltipText: "Download",
       onClick: downloadXml,
     },
   ];
