@@ -78,6 +78,27 @@ export class Service {
     const url = `ws/rest/${entity}/${id}/fetch`;
     return this.post(url, data);
   }
+
+  sync(url, method, data) {
+    var request = new XMLHttpRequest();
+    request.open(
+      method,
+      `${this.baseURL}${url.indexOf("/") === 0 ? url : `/${url}`}`,
+      false
+    );
+    for (var [key, value] of this.headers.entries()) {
+      request.setRequestHeader(key, value);
+    }
+    request.send(method.toLowerCase() === "post" ? JSON.stringify(data) : null);
+    if (request.status === 200) {
+      try {
+        return JSON.parse(request.responseText);
+      } catch (error) {
+        return { error };
+      }
+    }
+    return null;
+  }
 }
 
 export default new Service();
