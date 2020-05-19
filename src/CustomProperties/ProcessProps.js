@@ -77,7 +77,7 @@ export function processProps(group, element, translate, options) {
 
     let metaModel = entryFactory.selectBox({
       id: "metaModel",
-      label: "Meta Model",
+      label: "Start Model",
       selectOptions: function() {
         return getMetaModels();
       },
