@@ -6,7 +6,7 @@ import ImplementationTypeHelper from "bpmn-js-properties-panel/lib/helper/Implem
 
 // Require all properties you need from existing providers.
 // In this case all available bpmn relevant properties without camunda extensions.
-import { processProps } from "./ProcessProps"; //bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps
+import processProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps";
 import eventProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps";
 import linkProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps";
 import documentationProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/DocumentationProps";
