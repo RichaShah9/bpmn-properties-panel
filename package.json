@@ -9,6 +9,7 @@
     "bpmn-js": "^6.3.4",
     "bpmn-js-properties-panel": "^0.32.2",
     "camunda-bpmn-moddle": "^4.0.1",
+    "dmn-js": "^8.3.0",
     "diagram-js": "^6.4.1",
     "diagram-js-direct-editing": "^1.6.1",
     "inherits": "^2.0.4",
