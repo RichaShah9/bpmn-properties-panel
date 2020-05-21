@@ -94,7 +94,7 @@ function BpmnViewerComponent() {
     bpmnViewer = new BpmnViewer({
       container: "#canvas-task",
     });
-    let { id, taskIds } = fetchId();
+    let { id, taskIds } = fetchId() || {};
     setTaskIds(taskIds);
     fetchDiagram(id, taskIds);
   }, [setTaskIds]);
