@@ -6,16 +6,12 @@ import DMNModeler from "./DMNModeler";
 import "./App.css";
 
 const fetchId = () => {
-  const regexBPMN = /[?&]type=bpmn([^&#]*)/g; // ?type=bpmn?id=1
-  const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?type=bpmn?id=1&taskIds=1,2
+  const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
+  const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
   const regexDMN = /[?&]type=dmn([^&#]*)/g; // ?type=dmn?id=1
 
   const url = window.location.href;
-  let type = "dmnModeler";
-
-  while (regexDMN.exec(url)) {
-    type = "dmnModeler";
-  }
+  let type = "bpmnModeler";
 
   while (regexBPMN.exec(url)) {
     type = "bpmnModeler";
@@ -23,6 +19,10 @@ const fetchId = () => {
 
   while (regexBPMNTask.exec(url)) {
     type = "bpmnViewer";
+  }
+
+  while (regexDMN.exec(url)) {
+    type = "dmnModeler";
   }
 
   return type;
