@@ -1,40 +1,49 @@
 import React, { useEffect, useState } from "react";
 import BpmnModelerComponent from "./BpmnModeler";
 import BpmnViewerComponent from "./BpmnViewer";
+import DMNModeler from "./DMNModeler";
 
 import "./App.css";
 
 const fetchId = () => {
-  const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
-  const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
+  const regexBPMN = /[?&]type=bpmn([^&#]*)/g; // ?type=bpmn?id=1
+  const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?type=bpmn?id=1&taskIds=1,2
+  const regexDMN = /[?&]type=dmn([^&#]*)/g; // ?type=dmn?id=1
+
   const url = window.location.href;
-  let matchBPMNId, matchBPMNTasksId, id, taskIds;
+  let type = "dmnModeler";
 
-  while ((matchBPMNTasksId = regexBPMNTask.exec(url))) {
-    let ids = matchBPMNTasksId[1];
-    taskIds = ids.split(",");
+  while (regexDMN.exec(url)) {
+    type = "dmnModeler";
   }
 
-  while ((matchBPMNId = regexBPMN.exec(url))) {
-    id = matchBPMNId[1];
-    return { id, taskIds };
+  while (regexBPMN.exec(url)) {
+    type = "bpmnModeler";
   }
+
+  while (regexBPMNTask.exec(url)) {
+    type = "bpmnViewer";
+  }
+
+  return type;
 };
 
 function App() {
-  const [taskIds, setTaskIds] = useState(null);
+  const [type, setType] = useState("bpmnModeler");
 
   useEffect(() => {
-    let { taskIds } = fetchId() || {};
-    setTaskIds(taskIds);
-  }, [setTaskIds]);
+    let type = fetchId() || {};
+    setType(type);
+  }, [setType]);
 
   return (
     <React.Fragment>
-      {taskIds && taskIds.length > 0 ? (
-        <BpmnViewerComponent />
-      ) : (
+      {type === "dmnModeler" ? (
+        <DMNModeler />
+      ) : type === "bpmnModeler" ? (
         <BpmnModelerComponent />
+      ) : (
+        <BpmnViewerComponent />
       )}
     </React.Fragment>
   );
