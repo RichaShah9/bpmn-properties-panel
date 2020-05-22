@@ -16,26 +16,37 @@ let bpmnViewer = null;
 const fetchId = () => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
   const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
+  const regexBPMNActivityCounts = /[?&]activityCount=([^&#]*)/g; // ?id=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
+
   const url = window.location.href;
-  let matchBPMNId, matchBPMNTasksId, id, taskIds;
+  let matchBPMNId,
+    matchBPMNTasksId,
+    matchActivityCounts,
+    activityCounts,
+    id,
+    taskIds;
 
   while ((matchBPMNTasksId = regexBPMNTask.exec(url))) {
     let ids = matchBPMNTasksId[1];
     taskIds = ids.split(",");
   }
 
+  while ((matchActivityCounts = regexBPMNActivityCounts.exec(url))) {
+    activityCounts = matchActivityCounts[1];
+  }
+
   while ((matchBPMNId = regexBPMN.exec(url))) {
     id = matchBPMNId[1];
-    return { id, taskIds };
+    return { id, taskIds, activityCounts };
   }
 };
 
-const fetchDiagram = async (id, taskIds) => {
+const fetchDiagram = async (id, taskIds, activityCounts) => {
   if (id) {
     let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
     const wkf = (res && res.data && res.data[0]) || {};
     const { diagramXml } = wkf;
-    openDiagramImage(taskIds, diagramXml);
+    openDiagramImage(taskIds, diagramXml, activityCounts);
   }
 };
 
@@ -57,7 +68,7 @@ function updateSVGStroke(obj, taskIds = []) {
   });
 }
 
-const openDiagramImage = (taskIds, diagramXml) => {
+const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
   if (!diagramXml) return;
   bpmnViewer.importXML(diagramXml, (err) => {
     if (err) {
@@ -73,6 +84,31 @@ const openDiagramImage = (taskIds, diagramXml) => {
     );
     filteredElements.forEach((element) => {
       canvas.addMarker(element, "highlight");
+    });
+
+    if (!activityCounts) return;
+    const activities = activityCounts.split(",") || [];
+    const overlayActivies = [];
+
+    if (activities.length <= 0) return;
+    activities.forEach((activity) => {
+      let taskActivity = activity.split(":");
+      overlayActivies.push({
+        id: taskActivity[0],
+        count: taskActivity[1],
+      });
+    });
+
+    let overlays = bpmnViewer.get("overlays");
+    if (overlayActivies.length <= 0) return;
+    overlayActivies.forEach((overlayActivity) => {
+      overlays.add(overlayActivity.id, "note", {
+        position: {
+          bottom: 0,
+          right: 0,
+        },
+        html: `<div class="diagram-note">${overlayActivity.count}</div>`,
+      });
     });
   });
 };
@@ -138,9 +174,9 @@ function BpmnViewerComponent() {
     bpmnViewer = new BpmnViewer({
       container: "#canvas-task",
     });
-    let { id, taskIds } = fetchId() || {};
+    let { id, taskIds, activityCounts } = fetchId() || {};
     setTaskIds(taskIds);
-    fetchDiagram(id, taskIds);
+    fetchDiagram(id, taskIds, activityCounts);
   }, [setTaskIds]);
 
   return (
