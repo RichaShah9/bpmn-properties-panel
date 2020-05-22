@@ -4,7 +4,7 @@ import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
 
 import Service from "./services/Service";
-import { ImageIcon } from "./assets";
+import { ImageIcon, ZoomInIcon, ZoomOutIcon, ResetIcon } from "./assets";
 import { download } from "./utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -57,17 +57,6 @@ function updateSVGStroke(obj, taskIds = []) {
   });
 }
 
-const saveSVG = (taskIds) => {
-  bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
-    parseString(svg, function (err, result) {
-      let updatedSVG = updateSVGStroke(result, taskIds);
-      let builder = new xml2js.Builder();
-      let xml = builder.buildObject(updatedSVG);
-      download(xml, "diagram.svg");
-    });
-  });
-};
-
 const openDiagramImage = (taskIds, diagramXml) => {
   if (!diagramXml) return;
   bpmnViewer.importXML(diagramXml, (err) => {
@@ -88,8 +77,63 @@ const openDiagramImage = (taskIds, diagramXml) => {
   });
 };
 
+const zoomIn = () => {
+  bpmnViewer.get("zoomScroll").stepZoom(1);
+};
+
+const zoomOut = () => {
+  bpmnViewer.get("zoomScroll").stepZoom(-1);
+};
+
+const resetZoom = () => {
+  bpmnViewer.get("canvas").zoom(1.0);
+};
+
 function BpmnViewerComponent() {
   const [taskIds, setTaskIds] = React.useState(null);
+
+  const saveSVG = () => {
+    bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
+      parseString(svg, function (err, result) {
+        let updatedSVG = updateSVGStroke(result, taskIds);
+        let builder = new xml2js.Builder();
+        let xml = builder.buildObject(updatedSVG);
+        download(xml, "diagram.svg");
+      });
+    });
+  };
+
+  const toolBarButtons = [
+    {
+      name: "DownloadSVG",
+      icon: ImageIcon,
+      tooltipText: "Download SVG",
+      onClick: saveSVG,
+      classname: "property-button",
+    },
+    {
+      name: "ZoomInIcon",
+      icon: ZoomInIcon,
+      tooltipText: "Zoom In",
+      onClick: zoomIn,
+      classname: "zoom-buttons",
+    },
+    {
+      name: "zoomOut",
+      icon: ZoomOutIcon,
+      tooltipText: "Zoom Out",
+      onClick: zoomOut,
+      classname: "zoom-buttons",
+    },
+    {
+      name: "resetZoom",
+      icon: ResetIcon,
+      tooltipText: "Reset Zoom",
+      onClick: resetZoom,
+      classname: "zoom-buttons",
+    },
+  ];
+
   useEffect(() => {
     bpmnViewer = new BpmnViewer({
       container: "#canvas-task",
@@ -101,24 +145,28 @@ function BpmnViewerComponent() {
 
   return (
     <React.Fragment>
-      <div className="tooltip" style={{ padding: 15 }}>
-        <button
-          onClick={() => saveSVG(taskIds)}
-          className="property-button"
-          style={{
-            width: "fit-content",
-          }}
-        >
-          <span className="tooltiptext">Download SVG</span>
-          <img
-            src={ImageIcon}
-            alt={"diagram"}
-            style={{
-              height: 20,
-              width: 20,
-            }}
-          />
-        </button>
+      <div style={{ display: "flex", padding: 10 }}>
+        {toolBarButtons.map((btn) => (
+          <div className="tooltip" key={btn.name} style={{ display: "flex" }}>
+            <button
+              onClick={btn.onClick}
+              className={btn.classname}
+              style={{
+                width: "fit-content",
+              }}
+            >
+              <span className="tooltiptext">{btn.tooltipText}</span>
+              <img
+                src={btn.icon}
+                alt={btn.name}
+                style={{
+                  height: 20,
+                  width: 20,
+                }}
+              />
+            </button>
+          </div>
+        ))}
       </div>
       <div id="canvas-task"></div>
     </React.Fragment>
