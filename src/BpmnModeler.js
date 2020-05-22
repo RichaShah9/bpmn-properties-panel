@@ -145,6 +145,30 @@ function BpmnModelerComponent() {
     });
   };
 
+  const deployDiagram = async () => {
+    let res = await Service.action({
+      model: "com.axelor.apps.bpm.db.WkfModel",
+      action: "save,action-wkf-model-method-deploy",
+      data: {
+        context: {
+          _model: "com.axelor.apps.bpm.db.WkfModel",
+          ...wkf,
+        },
+      },
+    });
+    if (res && res.data && res.data[0]) {
+      setMessageType("success");
+      showAlert("snackbar", "Deployed Successfully");
+      fetchDiagram(wkf.id, setWkf);
+    } else {
+      setMessageType("error");
+      showAlert(
+        "snackbar",
+        (res && res.data && (res.data.message || res.data.title)) || "Error!"
+      );
+    }
+  };
+
   const toolBarButtons = [
     { name: "Save", icon: SaveIcon, tooltipText: "Save", onClick: onSave },
     {
@@ -203,17 +227,32 @@ function BpmnModelerComponent() {
                 )}
                 <button onClick={btn.onClick} className="property-button">
                   <span className="tooltiptext">{btn.tooltipText}</span>
-                  <img
-                    src={btn.icon}
-                    alt={btn.name}
-                    style={{
-                      height: 20,
-                      width: 20,
-                    }}
-                  />
+                  {btn.icon && (
+                    <img
+                      src={btn.icon}
+                      alt={btn.name}
+                      style={{
+                        height: 20,
+                        width: 20,
+                      }}
+                    />
+                  )}
                 </button>
               </div>
             ))}
+            <div className="tooltip" key="Deploy">
+              <button
+                onClick={deployDiagram}
+                className="property-button"
+                style={{
+                  padding: 9,
+                  width: "fit-content",
+                }}
+              >
+                <span className="tooltiptext">Deploy</span>
+                Deploy
+              </button>
+            </div>
           </div>
         </div>
       </div>
