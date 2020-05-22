@@ -78,6 +78,11 @@ export class Service {
     const url = `ws/rest/${entity}/${id}/fetch`;
     return this.post(url, data);
   }
+
+  action(data) {
+    const url = `ws/action`;
+    return this.post(url, data);
+  }
 }
 
 export default new Service();
