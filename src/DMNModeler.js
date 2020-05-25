@@ -134,6 +134,53 @@ function DMNModeler() {
     });
   };
 
+  const deployDiagram = async () => {
+    dmnModeler.saveXML({ format: true }, async function (err, xml) {
+      let res = await Service.add("com.axelor.apps.bpm.db.WkfDmnModel", {
+        ...wkfModel,
+        diagramXml: xml,
+      });
+      if (res && res.data && res.data[0]) {
+        setWkfModel({ ...res.data[0] });
+        let actionRes = await Service.action({
+          model: "com.axelor.apps.bpm.db.WkfDmnModel",
+          action: "action-wkf-dmn-model-method-deploy",
+          data: {
+            context: {
+              _model: "com.axelor.apps.bpm.db.WkfDmnModel",
+              ...res.data[0],
+            },
+          },
+        });
+        if (
+          actionRes &&
+          actionRes.data &&
+          actionRes.data[0] &&
+          actionRes.data[0].reload
+        ) {
+          setMessageType("success");
+          showAlert("snackbar", "Deployed Successfully");
+          fetchDiagram(wkfModel.id, setWkfModel);
+        } else {
+          setMessageType("error");
+          showAlert(
+            "snackbar",
+            (actionRes &&
+              actionRes.data &&
+              (actionRes.data.message || actionRes.data.title)) ||
+              "Error!"
+          );
+        }
+      } else {
+        setMessageType("error");
+        showAlert(
+          "snackbar",
+          (res && res.data && (res.data.message || res.data.title)) || "Error!"
+        );
+      }
+    });
+  };
+
   const toolBarButtons = [
     {
       name: "Save",
@@ -152,6 +199,12 @@ function DMNModeler() {
       icon: <i className="fa fa-download" style={{ fontSize: 18 }}></i>,
       tooltipText: "Download",
       onClick: exportDiagram,
+    },
+    {
+      name: "Deploy",
+      icon: <i className="fa fa-rocket" style={{ fontSize: 18 }}></i>,
+      tooltipText: "Deploy",
+      onClick: deployDiagram,
     },
   ];
 
