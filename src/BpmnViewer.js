@@ -104,8 +104,8 @@ const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
     overlayActivies.forEach((overlayActivity) => {
       overlays.add(overlayActivity.id, "note", {
         position: {
-          bottom: 0,
-          right: 0,
+          bottom: 18,
+          right: 18,
         },
         html: `<div class="diagram-note">${overlayActivity.count}</div>`,
       });
