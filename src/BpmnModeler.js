@@ -124,48 +124,69 @@ function BpmnModelerComponent() {
 
   const onSave = () => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
-      Service.add("com.axelor.apps.bpm.db.WkfModel", {
+      let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
         diagramXml: xml,
-      }).then((res) => {
-        if (res && res.data && res.data[0]) {
-          setWkf({ ...res.data[0] });
-          setMessageType("success");
-          showAlert("snackbar", "Saved Successfully");
-        } else {
-          setMessageType("error");
-          showAlert(
-            "snackbar",
-            (res && res.data && (res.data.message || res.data.title)) ||
-              "Error!"
-          );
-        }
       });
+      if (res && res.data && res.data[0]) {
+        setWkf({ ...res.data[0] });
+        setMessageType("success");
+        showAlert("snackbar", "Saved Successfully");
+      } else {
+        setMessageType("error");
+        showAlert(
+          "snackbar",
+          (res && res.data && (res.data.message || res.data.title)) || "Error!"
+        );
+      }
     });
   };
 
   const deployDiagram = async () => {
-    let res = await Service.action({
-      model: "com.axelor.apps.bpm.db.WkfModel",
-      action: "action-wkf-model-method-deploy",
-      data: {
-        context: {
-          _model: "com.axelor.apps.bpm.db.WkfModel",
-          ...wkf,
-        },
-      },
+    bpmnModeler.saveXML({ format: true }, async function (err, xml) {
+      let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
+        ...wkf,
+        diagramXml: xml,
+      });
+      if (res && res.data && res.data[0]) {
+        setWkf({ ...res.data[0] });        
+        let actionRes = await Service.action({
+          model: "com.axelor.apps.bpm.db.WkfModel",
+          action: "action-wkf-model-method-deploy",
+          data: {
+            context: {
+              _model: "com.axelor.apps.bpm.db.WkfModel",
+              ...res.data[0],
+            },
+          },
+        });
+        if (
+          actionRes &&
+          actionRes.data &&
+          actionRes.data[0] &&
+          actionRes.data[0].reload
+        ) {
+          setMessageType("success");
+          showAlert("snackbar", "Deployed Successfully");
+          fetchDiagram(wkf.id, setWkf);
+        } else {
+          setMessageType("error");
+          showAlert(
+            "snackbar",
+            (actionRes &&
+              actionRes.data &&
+              (actionRes.data.message || actionRes.data.title)) ||
+              "Error!"
+          );
+        }
+      } else {
+        setMessageType("error");
+        showAlert(
+          "snackbar",
+          (res && res.data && (res.data.message || res.data.title)) || "Error!"
+        );
+      }
     });
-    if (res && res.data && res.data[0] && res.data[0].reload) {
-      setMessageType("success");
-      showAlert("snackbar", "Deployed Successfully");
-      fetchDiagram(wkf.id, setWkf);
-    } else {
-      setMessageType("error");
-      showAlert(
-        "snackbar",
-        (res && res.data && (res.data.message || res.data.title)) || "Error!"
-      );
-    }
   };
 
   const toolBarButtons = [
