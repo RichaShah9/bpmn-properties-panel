@@ -4,7 +4,6 @@ import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
 
 import Service from "./services/Service";
-import { ImageIcon, ZoomInIcon, ZoomOutIcon, ResetIcon } from "./assets";
 import { download } from "./utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -122,7 +121,7 @@ const zoomOut = () => {
 };
 
 const resetZoom = () => {
-  bpmnViewer.get("canvas").zoom(1.0);
+  bpmnViewer.get("canvas").zoom("fit-viewport");
 };
 
 function BpmnViewerComponent() {
@@ -142,28 +141,28 @@ function BpmnViewerComponent() {
   const toolBarButtons = [
     {
       name: "DownloadSVG",
-      icon: ImageIcon,
+      icon: <i className="fa fa-picture-o" style={{ fontSize: 18 }}></i>,
       tooltipText: "Download SVG",
       onClick: saveSVG,
       classname: "property-button",
     },
     {
       name: "ZoomInIcon",
-      icon: ZoomInIcon,
+      icon: <i className="fa fa-plus" aria-hidden="true"></i>,
       tooltipText: "Zoom In",
       onClick: zoomIn,
       classname: "zoom-buttons",
     },
     {
       name: "zoomOut",
-      icon: ZoomOutIcon,
+      icon: <i className="fa fa-minus" aria-hidden="true"></i>,
       tooltipText: "Zoom Out",
       onClick: zoomOut,
       classname: "zoom-buttons",
     },
     {
       name: "resetZoom",
-      icon: ResetIcon,
+      icon: <i className="fa fa-refresh" aria-hidden="true"></i>,
       tooltipText: "Reset Zoom",
       onClick: resetZoom,
       classname: "zoom-buttons",
@@ -184,22 +183,9 @@ function BpmnViewerComponent() {
       <div style={{ display: "flex", padding: 10 }}>
         {toolBarButtons.map((btn) => (
           <div className="tooltip" key={btn.name} style={{ display: "flex" }}>
-            <button
-              onClick={btn.onClick}
-              className={btn.classname}
-              style={{
-                width: "fit-content",
-              }}
-            >
+            <button onClick={btn.onClick} className={btn.classname}>
               <span className="tooltiptext">{btn.tooltipText}</span>
-              <img
-                src={btn.icon}
-                alt={btn.name}
-                style={{
-                  height: 20,
-                  width: 20,
-                }}
-              />
+              {btn.icon}
             </button>
           </div>
         ))}

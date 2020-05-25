@@ -5,7 +5,6 @@ import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camu
 import camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 
 import Service from "./services/Service";
-import { SaveIcon, ImageIcon, UploadIcon, DownloadIcon } from "./assets";
 import { download } from "./utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -148,7 +147,7 @@ function BpmnModelerComponent() {
   const deployDiagram = async () => {
     let res = await Service.action({
       model: "com.axelor.apps.bpm.db.WkfModel",
-      action: "save,action-wkf-model-method-deploy",
+      action: "action-wkf-model-method-deploy",
       data: {
         context: {
           _model: "com.axelor.apps.bpm.db.WkfModel",
@@ -156,7 +155,7 @@ function BpmnModelerComponent() {
         },
       },
     });
-    if (res && res.data && res.data[0]) {
+    if (res && res.data && res.data[0] && res.data[0].reload) {
       setMessageType("success");
       showAlert("snackbar", "Deployed Successfully");
       fetchDiagram(wkf.id, setWkf);
@@ -170,24 +169,35 @@ function BpmnModelerComponent() {
   };
 
   const toolBarButtons = [
-    { name: "Save", icon: SaveIcon, tooltipText: "Save", onClick: onSave },
+    {
+      name: "Save",
+      icon: <i className="fa fa-floppy-o" style={{ fontSize: 18 }}></i>,
+      tooltipText: "Save",
+      onClick: onSave,
+    },
     {
       name: "Image",
-      icon: ImageIcon,
+      icon: <i className="fa fa-picture-o" style={{ fontSize: 18 }}></i>,
       tooltipText: "Download SVG",
       onClick: saveSVG,
     },
     {
       name: "UploadXml",
-      icon: UploadIcon,
+      icon: <i className="fa fa-upload" style={{ fontSize: 18 }}></i>,
       tooltipText: "Upload",
       onClick: uploadXml,
     },
     {
       name: "DownloadXml",
-      icon: DownloadIcon,
+      icon: <i className="fa fa-download" style={{ fontSize: 18 }}></i>,
       tooltipText: "Download",
       onClick: downloadXml,
+    },
+    {
+      name: "Deploy",
+      icon: <i className="fa fa-rocket" style={{ fontSize: 18 }}></i>,
+      tooltipText: "Deploy",
+      onClick: deployDiagram,
     },
   ];
 
@@ -227,32 +237,10 @@ function BpmnModelerComponent() {
                 )}
                 <button onClick={btn.onClick} className="property-button">
                   <span className="tooltiptext">{btn.tooltipText}</span>
-                  {btn.icon && (
-                    <img
-                      src={btn.icon}
-                      alt={btn.name}
-                      style={{
-                        height: 20,
-                        width: 20,
-                      }}
-                    />
-                  )}
+                  {btn.icon}
                 </button>
               </div>
             ))}
-            <div className="tooltip" key="Deploy">
-              <button
-                onClick={deployDiagram}
-                className="property-button"
-                style={{
-                  padding: 9,
-                  width: "fit-content",
-                }}
-              >
-                <span className="tooltiptext">Deploy</span>
-                Deploy
-              </button>
-            </div>
           </div>
         </div>
       </div>

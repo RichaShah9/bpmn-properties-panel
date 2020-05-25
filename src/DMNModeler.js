@@ -8,7 +8,6 @@ import camundaModdleDescriptor from "camunda-dmn-moddle/resources/camunda";
 
 import Service from "./services/Service";
 import { download } from "./utils";
-import { SaveIcon, UploadIcon, DownloadIcon } from "./assets";
 
 import "dmn-js-properties-panel/dist/assets/dmn-js-properties-panel.css";
 import "./dmnModeler.css";
@@ -136,16 +135,21 @@ function DMNModeler() {
   };
 
   const toolBarButtons = [
-    { name: "Save", icon: SaveIcon, tooltipText: "Save", onClick: onSave },
+    {
+      name: "Save",
+      icon: <i className="fa fa-floppy-o" style={{ fontSize: 18 }}></i>,
+      tooltipText: "Save",
+      onClick: onSave,
+    },
     {
       name: "UploadXml",
-      icon: UploadIcon,
+      icon: <i className="fa fa-upload" style={{ fontSize: 18 }}></i>,
       tooltipText: "Upload",
       onClick: uploadXml,
     },
     {
       name: "DownloadXml",
-      icon: DownloadIcon,
+      icon: <i className="fa fa-download" style={{ fontSize: 18 }}></i>,
       tooltipText: "Download",
       onClick: exportDiagram,
     },
@@ -191,14 +195,7 @@ function DMNModeler() {
                 )}
                 <button onClick={btn.onClick} className="property-button">
                   <span className="tooltiptext">{btn.tooltipText}</span>
-                  <img
-                    src={btn.icon}
-                    alt={btn.name}
-                    style={{
-                      height: 20,
-                      width: 20,
-                    }}
-                  />
+                  {btn.icon}
                 </button>
               </div>
             ))}
