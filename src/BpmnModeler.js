@@ -300,6 +300,42 @@ function BpmnModelerComponent() {
     fetchDiagram(id, setWkf);
   }, [setWkf]);
 
+  const setCSSWidth = (width) => {
+    document.documentElement.style.setProperty("--container-width", width);
+  };
+
+  useEffect(() => {
+    const BORDER_SIZE = 4;
+    const panel = document.getElementById("resize-handler");
+    if (!panel) return;
+    let m_pos;
+    function resize(e) {
+      const dx = m_pos - e.x;
+      m_pos = e.x;
+      panel.style.width =
+        parseInt(getComputedStyle(panel, "").width) + dx + "px";
+      setCSSWidth(panel.style.width);
+    }
+
+    panel.addEventListener(
+      "mousedown",
+      function (e) {
+        if (e.offsetX < BORDER_SIZE) {
+          m_pos = e.x;
+          document.addEventListener("mousemove", resize, false);
+        }
+      },
+      false
+    );
+
+    document.addEventListener(
+      "mouseup",
+      function () {
+        document.removeEventListener("mousemove", resize, false);
+      },
+      false
+    );
+  });
   return (
     <div id="container">
       <div id="bpmncontainer">
@@ -326,15 +362,36 @@ function BpmnModelerComponent() {
           </div>
         </div>
       </div>
-      <div className="properties-panel-parent" id="js-properties-panel"></div>
-      <div
-        id="snackbar"
-        style={{
-          backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
-        }}
-      >
-        {message}
+      <div>
+        <div
+          className="property-toggle"
+          draggable="true"
+          onClick={() => {
+            let element = document.getElementById("resize-handler");
+            element.style.width =
+              parseInt(element.style.width, 10) > 4 ? 0 : "260px";
+            setCSSWidth(element.style.width);
+          }}
+        >
+          Properties Panel
+        </div>
+        <div id="resize-handler" style={{ width: 260 }}>
+          <div
+            className="properties-panel-parent"
+            id="js-properties-panel"
+          ></div>
+        </div>
       </div>
+      {message && (
+        <div
+          id="snackbar"
+          style={{
+            backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
+          }}
+        >
+          {message}
+        </div>
+      )}
     </div>
   );
 }
