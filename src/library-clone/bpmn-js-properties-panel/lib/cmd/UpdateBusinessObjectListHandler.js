@@ -75,7 +75,9 @@ UpdateBusinessObjectListHandler.prototype.execute = function (context) {
     } else if (referencePropertyName) {
       // remove the list when it is empty
       var parentObject = currentObject.$parent;
-      parentObject.set(referencePropertyName, undefined);
+      if(parentObject){
+        parentObject.set(referencePropertyName, undefined);
+      }
     }
   }
 
