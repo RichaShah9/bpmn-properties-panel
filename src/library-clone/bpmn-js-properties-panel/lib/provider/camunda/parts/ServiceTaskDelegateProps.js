@@ -1,4 +1,4 @@
-'use strict';
+
 
 var ImplementationTypeHelper = require('../../../helper/ImplementationTypeHelper'),
     InputOutputHelper = require('../../../helper/InputOutputHelper');

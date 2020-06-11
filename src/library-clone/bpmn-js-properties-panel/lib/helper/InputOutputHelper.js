@@ -1,4 +1,4 @@
-'use strict';
+
 
 var ModelUtil = require('bpmn-js/lib/util/ModelUtil'),
     is = ModelUtil.is,

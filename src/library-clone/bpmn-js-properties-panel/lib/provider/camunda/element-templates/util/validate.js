@@ -1,4 +1,4 @@
-'use strict';
+
 
 var Validator = require('../Validator');
 

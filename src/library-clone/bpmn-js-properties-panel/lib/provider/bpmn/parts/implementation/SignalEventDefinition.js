@@ -1,4 +1,4 @@
-'use strict';
+
 
 var eventDefinitionReference = require('./EventDefinitionReference'),
     elementReferenceProperty = require('./ElementReferenceProperty');

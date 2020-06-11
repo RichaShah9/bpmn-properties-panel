@@ -1,5 +1,3 @@
-'use strict';
-
 var is = require('bpmn-js/lib/util/ModelUtil').is,
     getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
 
@@ -11,7 +9,7 @@ var extensionElementsEntry = require('./ExtensionElements'),
 
 
 function getListeners(bo, type) {
-  return bo && extensionElementsHelper.getExtensionElements(bo, type) || [];
+  return (bo && extensionElementsHelper.getExtensionElements(bo, type)) || [];
 }
 
 var CAMUNDA_EXECUTION_LISTENER_ELEMENT = 'camunda:ExecutionListener';

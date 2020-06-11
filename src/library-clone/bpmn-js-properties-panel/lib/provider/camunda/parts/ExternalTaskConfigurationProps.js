@@ -1,5 +1,3 @@
-'use strict';
-
 var is = require('bpmn-js/lib/util/ModelUtil').is,
     getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
 
@@ -27,7 +25,7 @@ module.exports = function(group, element, bpmnFactory, translate) {
     return;
   }
 
-  if (is(bo, 'camunda:TaskPriorized') || (is(bo, 'bpmn:Participant')) && bo.get('processRef')) {
+  if ((is(bo, 'camunda:TaskPriorized') || (is(bo, 'bpmn:Participant'))) && bo.get('processRef')) {
     group.entries = group.entries.concat(externalTaskPriority(element, bpmnFactory, {
       getBusinessObject: function(element) {
         if (!is(bo, 'bpmn:Participant')) {

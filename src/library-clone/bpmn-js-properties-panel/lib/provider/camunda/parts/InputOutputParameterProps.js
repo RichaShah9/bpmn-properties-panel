@@ -1,4 +1,4 @@
-'use strict';
+
 
 var inputOutputParameter = require('./implementation/InputOutputParameter');
 

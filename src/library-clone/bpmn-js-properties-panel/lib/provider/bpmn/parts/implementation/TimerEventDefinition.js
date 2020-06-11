@@ -1,4 +1,4 @@
-'use strict';
+
 
 var elementHelper = require('../../../../helper/ElementHelper'),
     cmdHelper = require('../../../../helper/CmdHelper');

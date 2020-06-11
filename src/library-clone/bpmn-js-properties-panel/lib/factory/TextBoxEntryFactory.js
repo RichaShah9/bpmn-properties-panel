@@ -1,5 +1,3 @@
-'use strict';
-
 var escapeHTML = require('../Utils').escapeHTML;
 
 var entryFieldDescription = require('./EntryFieldDescription');

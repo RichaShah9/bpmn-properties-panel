@@ -1,4 +1,4 @@
-'use strict';
+
 
 var entryFactory = require('../../../factory/EntryFactory'),
     getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,

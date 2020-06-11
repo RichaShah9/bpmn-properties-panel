@@ -1,4 +1,4 @@
-'use strict';
+
 
 var assign = require('lodash/assign');
 
@@ -145,11 +145,8 @@ module.exports = function(element, elementTemplates, bpmnFactory, translate) {
       };
 
       scope.properties.forEach(function(p, idx) {
-
         var propertyId = 'custom-' + template.id + '-' + idScopeName + '-' + idx;
-
         var scopedProperty = propertyWithScope(p, scopeName);
-
         entry = renderCustomField(propertyId, scopedProperty, idx);
         if (entry) {
           customScopeFieldsGroup.entries.push(entry);
@@ -348,7 +345,7 @@ function getPropertyValue(element, property) {
 
   var ioElement;
 
-  if (IN_OUT_BINDING_TYPES.indexOf(bindingType) != -1) {
+  if (IN_OUT_BINDING_TYPES.indexOf(bindingType) !== -1) {
     ioElement = findCamundaInOut(bo, binding);
 
     if (ioElement) {

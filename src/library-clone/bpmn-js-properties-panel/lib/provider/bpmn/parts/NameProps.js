@@ -1,4 +1,4 @@
-'use strict';
+
 
 var nameEntryFactory = require('./implementation/Name'),
     createCategoryValue = require('../../../helper/CategoryHelper').createCategoryValue,

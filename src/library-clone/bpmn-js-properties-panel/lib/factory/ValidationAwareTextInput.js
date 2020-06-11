@@ -1,5 +1,3 @@
-'use strict';
-
 var textField = require('./TextInputEntryFactory');
 
 /**

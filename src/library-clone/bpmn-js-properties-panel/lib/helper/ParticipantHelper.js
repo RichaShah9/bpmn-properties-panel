@@ -1,4 +1,4 @@
-'use strict';
+
 
 var is = require('bpmn-js/lib/util/ModelUtil').is,
     getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,

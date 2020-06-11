@@ -1,5 +1,3 @@
-"use strict";
-
 var forEach = require("lodash/forEach");
 
 /**
@@ -61,7 +59,7 @@ UpdateBusinessObjectListHandler.prototype.execute = function (context) {
     var listCopy = [];
     // remove all objects which should be removed
     forEach(objectList, function (object) {
-      if (objectsToRemove.indexOf(object) == -1) {
+      if (objectsToRemove.indexOf(object) === -1) {
         listCopy.push(object);
       }
     });

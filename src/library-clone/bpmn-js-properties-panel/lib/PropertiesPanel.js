@@ -1,4 +1,4 @@
-'use strict';
+
 
 var escapeHTML = require('./Utils').escapeHTML;
 

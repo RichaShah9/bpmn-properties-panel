@@ -1,5 +1,3 @@
-'use strict';
-
 var extensionElementsHelper = require('../../../../helper/ExtensionElementsHelper'),
     elementHelper = require('../../../../helper/ElementHelper'),
     cmdHelper = require('../../../../helper/CmdHelper');
@@ -63,7 +61,7 @@ module.exports = function(element, bpmnFactory, translate, options) {
 
   function getCamundaListenerFields(element, node) {
     var selectedListener = getSelectedListener(element, node);
-    return selectedListener && selectedListener.fields || [];
+    return (selectedListener && selectedListener.fields) || [];
   }
 
   function getFieldType(bo) {

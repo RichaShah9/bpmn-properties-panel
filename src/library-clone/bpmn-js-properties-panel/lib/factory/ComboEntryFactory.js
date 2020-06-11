@@ -1,5 +1,3 @@
-'use strict';
-
 var assign = require('lodash/assign'),
     find = require('lodash/find');
 

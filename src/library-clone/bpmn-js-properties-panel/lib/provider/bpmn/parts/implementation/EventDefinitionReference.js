@@ -1,5 +1,3 @@
-'use strict';
-
 var cmdHelper = require('../../../../helper/CmdHelper');
 
 var domQuery = require('min-dom').query,
@@ -125,7 +123,7 @@ module.exports = function(element, definition, bpmnFactory, options) {
       // of the element and not as id
       var id = utils.nextId(newElementIdPrefix);
 
-      var optionTemplate = domify('<option value="' + escapeHTML(id) + '"> (id='+escapeHTML(id)+')' + '</option>');
+      var optionTemplate = domify('<option value="' + escapeHTML(id) + '"> (id='+escapeHTML(id)+') </option>');
 
       // add new option
       var selectBox = getSelectBox(inputNode);

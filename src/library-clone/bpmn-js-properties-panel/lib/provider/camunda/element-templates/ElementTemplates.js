@@ -1,4 +1,4 @@
-'use strict';
+
 
 var values = require('lodash/values');
 

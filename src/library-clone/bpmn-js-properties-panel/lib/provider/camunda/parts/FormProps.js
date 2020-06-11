@@ -1,4 +1,4 @@
-'use strict';
+
 
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
     getExtensionElements = require('../../../helper/ExtensionElementsHelper').getExtensionElements,

@@ -1,5 +1,3 @@
-'use strict';
-
 var escapeHTML = require('../Utils').escapeHTML;
 
 /**
@@ -31,7 +29,7 @@ module.exports = function entryFieldDescription(description) {
       escaped.push(escapeText(description.substring(index, match.index)));
     }
 
-    link = match[2] && encodeURI(match[2]) || match[3];
+    link = (match[2] && encodeURI(match[2])) || match[3];
     text = match[1] || match[4];
 
     // insert safe link

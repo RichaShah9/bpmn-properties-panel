@@ -1,4 +1,4 @@
-'use strict';
+
 
 var properties = require('./implementation/Properties'),
     elementHelper = require('../../../helper/ElementHelper'),

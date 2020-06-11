@@ -1,4 +1,4 @@
-'use strict';
+
 
 var reduce = require('lodash/transform'),
     is = require('bpmn-js/lib/util/ModelUtil').is,

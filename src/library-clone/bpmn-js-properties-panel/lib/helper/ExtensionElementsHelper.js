@@ -1,4 +1,4 @@
-'use strict';
+
 
 var cmdHelper = require('./CmdHelper'),
     elementHelper = require('./ElementHelper');

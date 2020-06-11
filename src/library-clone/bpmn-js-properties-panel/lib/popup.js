@@ -1,5 +1,3 @@
-'use strict';
-
 var domQuery = require('min-dom').query,
     domClasses = require('min-dom').classes,
     domify = require('min-dom').domify,

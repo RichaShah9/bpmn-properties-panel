@@ -1,4 +1,4 @@
-'use strict';
+
 
 var entryFactory = require('../../../factory/EntryFactory'),
     cmdHelper = require('../../../helper/CmdHelper'),
@@ -13,7 +13,7 @@ module.exports = function(group, element, translate) {
     return;
   }
 
-  if (is(element, 'bpmn:Process') || is(element, 'bpmn:Participant') && bo.get('processRef')) {
+  if ((is(element, 'bpmn:Process') || is(element, 'bpmn:Participant')) && bo.get('processRef')) {
     var versionTagEntry = entryFactory.textField({
       id: 'versionTag',
       label: translate('Version Tag'),

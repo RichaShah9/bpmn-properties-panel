@@ -1,5 +1,3 @@
-'use strict';
-
 var DEFAULT_PRIORITY = 1000;
 
 

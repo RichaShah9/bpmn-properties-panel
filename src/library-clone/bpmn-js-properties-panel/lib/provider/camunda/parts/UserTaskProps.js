@@ -1,5 +1,3 @@
-'use strict';
-
 var is = require('bpmn-js/lib/util/ModelUtil').is,
     entryFactory = require('../../../factory/EntryFactory');
 

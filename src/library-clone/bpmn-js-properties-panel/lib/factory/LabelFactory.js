@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * The label factory provides a label entry. For the label text
  * it expects either a string provided by the options.labelText

@@ -1,4 +1,4 @@
-'use strict';
+
 
 var findExtension = require('../Helper').findExtension,
     findExtensions = require('../Helper').findExtensions;

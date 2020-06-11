@@ -1,4 +1,4 @@
-'use strict';
+
 
 var inherits = require('inherits');
 
@@ -79,7 +79,7 @@ var isExternalTaskPriorityEnabled = function(element) {
   var businessObject = getBusinessObject(element);
 
   // show only if element is a process, a participant ...
-  if (is(element, 'bpmn:Process') || is(element, 'bpmn:Participant') && businessObject.get('processRef')) {
+  if ((is(element, 'bpmn:Process') || is(element, 'bpmn:Participant')) && businessObject.get('processRef')) {
     return true;
   }
 
@@ -93,7 +93,7 @@ var isExternalTaskPriorityEnabled = function(element) {
 var isJobConfigEnabled = function(element) {
   var businessObject = getBusinessObject(element);
 
-  if (is(element, 'bpmn:Process') || is(element, 'bpmn:Participant') && businessObject.get('processRef')) {
+  if ((is(element, 'bpmn:Process') || is(element, 'bpmn:Participant')) && businessObject.get('processRef')) {
     return true;
   }
 

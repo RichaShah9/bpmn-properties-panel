@@ -1,4 +1,4 @@
-'use strict';
+
 
 var domQuery = require('min-dom').query,
     escapeHTML = require('../../../../Utils').escapeHTML,

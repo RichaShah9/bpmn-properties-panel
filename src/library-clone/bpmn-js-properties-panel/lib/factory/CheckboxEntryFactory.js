@@ -1,5 +1,3 @@
-'use strict';
-
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
     cmdHelper = require('../helper/CmdHelper'),
     escapeHTML = require('../Utils').escapeHTML;

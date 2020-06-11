@@ -1,4 +1,4 @@
-'use strict';
+
 
 var isArray = require('lodash/isArray');
 var isObject = require('lodash/isObject');

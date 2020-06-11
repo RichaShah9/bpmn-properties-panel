@@ -1,5 +1,3 @@
-'use strict';
-
 var entryFactory = require('../../../../factory/EntryFactory');
 
 var cmdHelper = require('../../../../helper/CmdHelper');

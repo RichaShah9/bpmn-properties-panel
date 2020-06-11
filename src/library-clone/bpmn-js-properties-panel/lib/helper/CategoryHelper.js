@@ -1,4 +1,4 @@
-'use strict';
+
 
 var collectionAdd = require('diagram-js/lib/util/Collections').add,
     getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
