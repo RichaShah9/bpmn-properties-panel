@@ -13,6 +13,9 @@
           "value": "${ userInput }"
         }
       }
-    ]
+    ],
+    "entriesVisible": {
+      "_all": true
+    }
   }
 ]
