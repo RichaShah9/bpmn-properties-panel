@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import BpmnModelerComponent from "./BpmnModeler";
-import BpmnViewerComponent from "./BpmnViewer";
-import DMNModeler from "./DMNModeler";
+import BpmnModelerComponent from "./BPMN/BpmnModeler";
+import BpmnViewerComponent from "./BPMN/BpmnViewer";
+import DMNModeler from "./DMN/DMNModeler";
 
 import "./App.css";
 

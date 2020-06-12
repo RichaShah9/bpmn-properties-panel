@@ -5,12 +5,12 @@ import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import propertiesPanelModule from "./library-clone/bpmn-js-properties-panel";
 import propertiesProviderModule from "./library-clone/bpmn-js-properties-panel/lib/provider/camunda";
-import Service from "./services/Service";
-import { download } from "./utils";
+import Service from "../services/Service";
+import { download } from "../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
-import "./App.css";
+import "../App.css";
 
 let bpmnModeler = null;
 
@@ -365,7 +365,6 @@ function BpmnModelerComponent() {
       <div>
         <div
           className="property-toggle"
-          draggable="true"
           onClick={() => {
             let element = document.getElementById("resize-handler");
             element.style.width =

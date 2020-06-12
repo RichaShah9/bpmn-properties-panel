@@ -958,11 +958,10 @@ h1 {
 #resize-handler {
   position: absolute;
   width: 260px;
-  padding-left: 4px;
   height: 100%;
   right: 0;
-  background-color: #F8F8F8;
-  max-width: calc(100% - 30px);
+  background-color: #f8f8f8;
+  max-width: calc(100% - 29.5px);
 }
 
 #resize-handler:after {
@@ -970,15 +969,15 @@ h1 {
   background-color: #ccc;
   position: absolute;
   left: 0;
-  width: 4px;
+  width: 1px;
   height: 100%;
   cursor: w-resize;
 }
 
 .property-toggle {
   position: absolute;
-  left: calc(100% - 30px - var(--container-width));
-  top: 50%;
+  left: calc(100% - 29.5px - var(--container-width));
+  top: calc(50% + 60px);
   background: #f8f8f8;
   padding: 7px 10px;
   transform: rotate(-90deg);
