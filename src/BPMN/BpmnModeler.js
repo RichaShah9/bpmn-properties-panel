@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import BpmnModeler from "bpmn-js/lib/Modeler";
 import camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
-import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+import propertiesPanelModule from "bpmn-js-properties-panel";
+import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
 
-import propertiesPanelModule from "./library-clone/bpmn-js-properties-panel";
-import propertiesProviderModule from "./library-clone/bpmn-js-properties-panel/lib/provider/camunda";
+import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
 import { download } from "../utils";
 
@@ -63,53 +63,6 @@ const newBpmnDiagram = (rec) => {
   openBpmnDiagram(diagram);
 };
 
-const addExtensionProperty = (element) => {
-  const businessObject = getBusinessObject(element);
-  const bpmnFactory = bpmnModeler.get("bpmnFactory");
-  if (!businessObject.extensionElements) {
-    businessObject.extensionElements = bpmnFactory.create(
-      "bpmn:ExtensionElements"
-    );
-    let camundaProps = bpmnFactory.create("camunda:Properties");
-    let property = bpmnFactory.create("camunda:Property");
-    property.name = "completedIf";
-    property.value = "";
-    camundaProps.get("values").push(property);
-    businessObject.extensionElements.get("values").push(camundaProps);
-  } else {
-    let values = businessObject.extensionElements.get("values");
-    if (values.length > 0) {
-      let modelElementValues = values[0].values || [];
-      if (modelElementValues) {
-        let isPropertyAvailable =
-          modelElementValues.length > 0 &&
-          modelElementValues.find(
-            (value) =>
-              (value && value.name && value.name.toLowerCase()) ===
-              "completedif"
-          );
-        if (!isPropertyAvailable) {
-          let property = bpmnFactory.create("camunda:Property");
-          property.name = "completedIf";
-          property.value = "";
-          modelElementValues.push(property);
-          values[0].values = modelElementValues;
-        }
-      }
-    }
-  }
-};
-
-const onTaskTypeChange = () => {
-  bpmnModeler.get("eventBus").on("shape.changed", function (event) {
-    const { element } = event;
-    if (element && element.type !== "bpmn:UserTask") {
-      return;
-    }
-    addExtensionProperty(element);
-  });
-};
-
 const openBpmnDiagram = (xml) => {
   bpmnModeler.importXML(xml, (error) => {
     if (error) {
@@ -117,19 +70,6 @@ const openBpmnDiagram = (xml) => {
     }
     let canvas = bpmnModeler.get("canvas");
     canvas.zoom("fit-viewport");
-    const { rootElements = [] } = bpmnModeler._definitions;
-    if (rootElements.length > 0) {
-      rootElements.forEach((ele) => {
-        const { flowElements } = ele;
-        flowElements &&
-          flowElements.forEach((element) => {
-            if (element && element.$type === "bpmn:UserTask") {
-              addExtensionProperty(element);
-            }
-          });
-      });
-    }
-    onTaskTypeChange();
   });
 };
 
@@ -291,6 +231,7 @@ function BpmnModelerComponent() {
         parent: "#js-properties-panel",
       },
       additionalModules: [propertiesPanelModule, propertiesProviderModule],
+      elementTemplates: templates,
       moddleExtensions: {
         camunda: camundaModdleDescriptor,
       },
