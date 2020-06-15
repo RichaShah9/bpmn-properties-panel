@@ -11,7 +11,7 @@ import { download } from "../utils";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
 import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css";
-import "./bpmn.css";
+import "./css/bpmn.css";
 
 let bpmnModeler = null;
 

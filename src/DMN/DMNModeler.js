@@ -10,7 +10,7 @@ import Service from "../services/Service";
 import { download } from "../utils";
 
 import "dmn-js-properties-panel/dist/assets/dmn-js-properties-panel.css";
-import "./dmnModeler.css";
+import "./css/dmnModeler.css";
 
 let dmnModeler = null;
 
