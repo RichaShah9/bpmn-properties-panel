@@ -8,7 +8,7 @@ import { download } from "../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
-import "../App.css";
+import "./bpmn.css";
 
 let bpmnViewer = null;
 

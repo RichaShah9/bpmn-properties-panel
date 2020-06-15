@@ -1,0 +1,254 @@
+:root {
+  --container-width: 260px;
+}
+
+html,
+body,
+#container,
+.App {
+  height: 100%;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  height: 100%;
+  max-height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.bjs-powered-by {
+  display: none;
+}
+
+#js-create-diagram {
+  width: 150px;
+  margin-left: 10px;
+  padding: 10px;
+}
+
+#message {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+#root,
+#container {
+  height: 100%;
+  overflow: hidden;
+  background: white;
+}
+
+#container {
+  display: flex;
+}
+
+#bpmnview {
+  width: 100%;
+  height: 100%;
+  float: left;
+}
+
+#propview {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#bpmncontainer {
+  height: 100%;
+  flex: 1;
+}
+
+.property-button {
+  width: 50px;
+  padding: 5px;
+  background: #fafafa;
+  border: solid 1px #ccc;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 100px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: -80%;
+  left: 150%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+#snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  font-size: 17px;
+}
+
+#snackbar.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+#js-properties-panel {
+  background: #f8f8f8;
+  width: calc(100% - 1px);
+  position: absolute;
+  border-left: 1px solid #ccc;
+  overflow: auto;
+  height: inherit;
+}
+
+#js-properties-panel > .bpp-properties-panel {
+  padding-right: 15;
+}
+
+.highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
+  stroke: var(--main-bg-color, #1e88e5) !important;
+}
+
+#canvas-task {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+h1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px 20px;
+  margin: 0;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.8);
+  border: solid 1px #ccc;
+}
+
+.diagram-note {
+  color: white;
+  height: 25px;
+  width: fit-content;
+  min-width: 25px;
+  background-color: #4186e0;
+  border-radius: 50%;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  padding: 20px 20px 0px 20px;
+}
+
+.zoom-buttons {
+  width: 50px;
+  padding: 5px;
+  background: #fafafa;
+  border: solid 1px #ccc;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#resize-handler {
+  position: absolute;
+  width: 260px;
+  height: 100%;
+  right: 0;
+  background-color: #f8f8f8;
+  max-width: calc(100% - 29.5px);
+  overflow: hidden;
+}
+
+#resize-handler:after {
+  content: " ";
+  background-color: #ccc;
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  cursor: w-resize;
+}
+
+.property-toggle {
+  position: absolute;
+  left: calc(100% - 29.5px - var(--container-width));
+  top: calc(50% + 60px);
+  background: #f8f8f8;
+  padding: 7px 10px;
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  font-size: 13px;
+  border: solid 1px #ccc;
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+  transform-origin: top left;
+  z-index: 10;
+  cursor: default;
+  user-select: none;
+}
+
+
+@-webkit-keyframes fadein {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@keyframes fadein {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@media only screen and (max-height: 710px) {
+  #bpmnview > .bjs-container > .djs-container > .djs-palette {
+    width: 94px;
+  }
+}

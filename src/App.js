@@ -3,8 +3,6 @@ import BpmnModelerComponent from "./BPMN/BpmnModeler";
 import BpmnViewerComponent from "./BPMN/BpmnViewer";
 import DMNModeler from "./DMN/DMNModeler";
 
-import "./App.css";
-
 const fetchId = () => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
   const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
