@@ -224,6 +224,42 @@ function BpmnModelerComponent() {
     },
   ];
 
+  const removeLabels = (isUserTask = false) => {
+    let element = document.querySelectorAll("[data-group=customField]");
+    let elementTemplate = document.querySelectorAll(
+      "[data-entry=elementTemplate-chooser]"
+    );
+
+    let extensionTab = document.querySelectorAll(
+      "[data-tab=extensionElements]"
+    );
+    if (element && element[0] && element[0].childNodes) {
+      if (isUserTask) {
+        element[0].childNodes[1].style.display = "none";
+      } else {
+        element[0].style.display = "none";
+      }
+    }
+    if (elementTemplate && elementTemplate[0]) {
+      elementTemplate[0].style.display = "none";
+    }
+    if (extensionTab && extensionTab[0] && isUserTask) {
+      let childNodes = extensionTab[0].querySelector(
+        "[data-list-entry-container]"
+      ).childNodes;
+      childNodes &&
+        childNodes.forEach((node) => {
+          let childrens = node.childNodes || [];
+          childrens &&
+            childrens.forEach((child) => {
+              if (child && child.value === "completedIf") {
+                node.style.display = "none";
+              }
+            });
+        });
+    }
+  };
+
   useEffect(() => {
     let modeler = {
       container: "#bpmnview",
@@ -278,6 +314,21 @@ function BpmnModelerComponent() {
       false
     );
   });
+
+  useEffect(() => {
+    bpmnModeler.get("eventBus").on("propertiesPanel.changed", function (event) {
+      if (
+        event &&
+        event.current &&
+        event.current.element &&
+        event.current.element.type
+      ) {
+        let isUserTask = event.current.element.type === "bpmn:UserTask";
+        removeLabels(isUserTask);
+      }
+    });
+  });
+
   return (
     <div id="container">
       <div id="bpmncontainer">
