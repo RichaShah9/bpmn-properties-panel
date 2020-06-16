@@ -13,6 +13,15 @@
           "name": "completedIf",
           "value": "${ userInput }"
         }
+      },
+      {
+        "label": "Buttons",
+        "type": "String",
+        "binding": {
+          "type": "camunda:property",
+          "name": "buttons",
+          "value": "${ userInput }"
+        }
       }
     ],
     "entriesVisible": {

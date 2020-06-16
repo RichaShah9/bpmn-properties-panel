@@ -252,7 +252,12 @@ function BpmnModelerComponent() {
           let childrens = node.childNodes || [];
           childrens &&
             childrens.forEach((child) => {
-              if (child && child.value === "completedIf") {
+              if (
+                child &&
+                child.value &&
+                (child.value.toLowerCase() === "completedif" ||
+                  child.value.toLowerCase() === "buttons")
+              ) {
                 node.style.display = "none";
               }
             });
