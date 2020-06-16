@@ -128,10 +128,6 @@ body,
   height: inherit;
 }
 
-#js-properties-panel > .bpp-properties-panel {
-  padding-right: 15;
-}
-
 .highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
   stroke: var(--main-bg-color, #1e88e5) !important;
 }
@@ -224,6 +220,9 @@ h1 {
   user-select: none;
 }
 
+.bpp-properties-panel [type="text"] {
+  width: calc(100% - 35px)
+}
 
 @-webkit-keyframes fadein {
   from {
