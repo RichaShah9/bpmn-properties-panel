@@ -3,6 +3,7 @@
     "name": "Custom Property",
     "id": "com.camunda.example.CustomProperty",
     "appliesTo": ["bpmn:UserTask"],
+    "isDefault": true,
     "properties": [
       {
         "label": "Completed If",
