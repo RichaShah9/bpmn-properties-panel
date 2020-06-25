@@ -1,11 +1,28 @@
 import React, { useEffect, useState } from "react";
+import find from "lodash/find";
 import BpmnModeler from "bpmn-js/lib/Modeler";
 import camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
+import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
+import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
+import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Checkbox,
+  TextField,
+  FormControlLabel,
+} from "@material-ui/core";
 
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
+import Select from "./components/Select";
+import { getModels, getViews, getItems } from "../services/api";
 import { download } from "../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -25,19 +42,19 @@ const fetchId = () => {
   }
 };
 
-const fetchDiagram = async (id, setWkf) => {
+const fetchDiagram = async (id, setWkf, handleClickOpen, setElement) => {
   if (id) {
     let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
     const wkf = (res && res.data && res.data[0]) || {};
     let { diagramXml } = wkf;
     setWkf(wkf);
-    newBpmnDiagram(diagramXml);
+    newBpmnDiagram(diagramXml, handleClickOpen, setElement);
   } else {
-    newBpmnDiagram();
+    newBpmnDiagram(undefined, handleClickOpen, setElement);
   }
 };
 
-const newBpmnDiagram = (rec) => {
+const newBpmnDiagram = (rec, handleClickOpen, setElement) => {
   const diagram =
     rec ||
     `<?xml version="1.0" encoding="UTF-8" ?>
@@ -61,16 +78,24 @@ const newBpmnDiagram = (rec) => {
         </bpmndi:BPMNPlane>
       </bpmndi:BPMNDiagram>
     </bpmn2:definitions>`;
-  openBpmnDiagram(diagram);
+  openBpmnDiagram(diagram, handleClickOpen, setElement);
 };
 
-const openBpmnDiagram = (xml) => {
+const openBpmnDiagram = (xml, handleClickOpen, setElement) => {
   bpmnModeler.importXML(xml, (error) => {
     if (error) {
       return console.log("Error! Can't import XML");
     }
     let canvas = bpmnModeler.get("canvas");
     canvas.zoom("fit-viewport");
+    bpmnModeler.on("element.contextmenu", 1500, (event) => {
+      if (event.element.type === "bpmn:UserTask") {
+        event.originalEvent.preventDefault();
+        event.originalEvent.stopPropagation();
+        setElement(event.element);
+        handleClickOpen();
+      }
+    });
   });
 };
 
@@ -90,10 +115,37 @@ const downloadXml = () => {
   });
 };
 
+const intialState = {
+  model: null,
+  view: null,
+  item: null,
+};
+
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [id, setId] = useState(null);
+  const [properties, setProperties] = useState(intialState);
+  const [element, setElement] = useState(null);
+  const [attribute, setAttribute] = useState(null);
+  const [attributeValue, setAttributeValue] = useState(null);
+
+  const handleProperties = (name, value) => {
+    setProperties({
+      ...properties,
+      [name]: value,
+    });
+  };
+  const handleClickOpen = async () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setProperties(intialState);
+    setOpen(false);
+  };
 
   const showAlert = (id, message) => {
     setMessage(message);
@@ -120,7 +172,7 @@ function BpmnModelerComponent() {
     }
     reader.readAsText(files[0]);
     reader.onload = (e) => {
-      openBpmnDiagram(e.target.result);
+      openBpmnDiagram(e.target.result, handleClickOpen);
     };
   };
 
@@ -170,7 +222,7 @@ function BpmnModelerComponent() {
         ) {
           setMessageType("success");
           showAlert("snackbar", "Deployed Successfully");
-          fetchDiagram(wkf.id, setWkf);
+          fetchDiagram(wkf.id, setWkf, handleClickOpen, setElement);
         } else {
           setMessageType("error");
           showAlert(
@@ -224,6 +276,86 @@ function BpmnModelerComponent() {
     },
   ];
 
+  function isExtensionElements(element) {
+    return is(element, "bpmn:ExtensionElements");
+  }
+
+  function createParent(element, bo) {
+    const bpmnFactory = bpmnModeler.get("bpmnFactory");
+
+    let parent = elementHelper.createElement(
+      "bpmn:ExtensionElements",
+      { values: [] },
+      bo,
+      bpmnFactory
+    );
+    let cmd = cmdHelper.updateBusinessObject(element, bo, {
+      extensionElements: parent,
+    });
+    return {
+      cmd: cmd,
+      parent: parent,
+    };
+  }
+
+  function getPropertiesElementInsideExtensionElements(extensionElements) {
+    return find(extensionElements.$parent.extensionElements.values, function (
+      elem
+    ) {
+      return is(elem, "camunda:Properties");
+    });
+  }
+
+  function getPropertiesElement(element) {
+    if (!isExtensionElements(element)) {
+      return element.properties;
+    } else {
+      return getPropertiesElementInsideExtensionElements(element);
+    }
+  }
+
+  const addProperty = (name, value) => {
+    const bo = getBusinessObject(element);
+    const bpmnFactory = bpmnModeler.get("bpmnFactory");
+    const businessObject = getBusinessObject(element);
+
+    let parent;
+    let result = createParent(element, bo);
+    parent = result.parent;
+    let properties = getPropertiesElement(parent);
+    if (!properties) {
+      properties = elementHelper.createElement(
+        "camunda:Properties",
+        {},
+        parent,
+        bpmnFactory
+      );
+    }
+
+    let propertyProps = {
+      name: name,
+      value: value,
+    };
+
+    let property = elementHelper.createElement(
+      "camunda:Property",
+      propertyProps,
+      properties,
+      bpmnFactory
+    );
+
+    let camundaProps = bpmnFactory.create("camunda:Properties");
+    camundaProps.get("values").push(property);
+    businessObject.extensionElements.get("values")[0].values.push(property);
+  };
+  const handleAdd = () => {
+    Object.entries(properties).forEach((obj) => {
+      addProperty(obj[0], obj[1]);
+    });
+    addProperty(attribute, attributeValue);
+    handleClose();
+  };
+
   const removeLabels = (isUserTask = false) => {
     let element = document.querySelectorAll("[data-group=customField]");
     let elementTemplate = document.querySelectorAll(
@@ -265,6 +397,10 @@ function BpmnModelerComponent() {
     }
   };
 
+  const setCSSWidth = (width) => {
+    document.documentElement.style.setProperty("--container-width", width);
+  };
+
   useEffect(() => {
     let modeler = {
       container: "#bpmnview",
@@ -280,12 +416,9 @@ function BpmnModelerComponent() {
     };
     bpmnModeler = new BpmnModeler({ ...modeler });
     let id = fetchId();
-    fetchDiagram(id, setWkf);
+    setId(id);
+    fetchDiagram(id, setWkf, handleClickOpen, setElement);
   }, [setWkf]);
-
-  const setCSSWidth = (width) => {
-    document.documentElement.style.setProperty("--container-width", width);
-  };
 
   useEffect(() => {
     const BORDER_SIZE = 4;
@@ -389,6 +522,94 @@ function BpmnModelerComponent() {
           {message}
         </div>
       )}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="form-dialog-title"
+      >
+        <DialogTitle id="form-dialog-title">View attributes</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Add attributes</DialogContentText>
+          <Select
+            fetchMethod={(data) => getModels(id, data)}
+            update={(value) => handleProperties("model", value.name)}
+            name="model"
+            value={properties.model}
+          />
+          {properties.model && (
+            <Select
+              fetchMethod={(data) => getViews(properties.model, data)}
+              update={(value) => handleProperties("view", value.name)}
+              name="view"
+              value={properties.view}
+            />
+          )}
+          {properties.view && (
+            <Select
+              fetchMethod={(data) =>
+                getItems(properties.view, properties.model, data)
+              }
+              update={(value) => handleProperties("item", value.name)}
+              name="item"
+              value={properties.item}
+            />
+          )}
+          {properties.item && (
+            <Select
+              options={[
+                "readonly",
+                "readonlyIf",
+                "hidden",
+                "required",
+                "requiredIf",
+                "title",
+                "domain",
+              ]}
+              update={(value) => {
+                setAttributeValue(null);
+                setAttribute(value);
+              }}
+              name="attribute"
+              value={attribute}
+            />
+          )}
+          {attribute &&
+            ["readonly", "hidden", "required"].includes(attribute) && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={attributeValue || false}
+                    onChange={(e) => setAttributeValue(e.target.checked)}
+                    name="attributeValue"
+                  />
+                }
+                label={attribute}
+              />
+            )}
+          {attribute &&
+            ["readonlyIf", "hideIf", "requiredIf", "title", "domain"].includes(
+              attribute
+            ) && (
+              <TextField
+                value={attributeValue || ""}
+                onChange={(e) => setAttributeValue(e.target.value)}
+                name="attributeValue"
+                fullWidth
+                variant="outlined"
+                size="small"
+                placeholder={`${attribute} value`}
+              />
+            )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAdd} color="primary">
+            Add
+          </Button>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
