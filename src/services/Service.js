@@ -21,7 +21,7 @@ export class Service {
     headers.append("Content-Type", "application/json");
     headers.append("X-Requested-With", "XMLHttpRequest");
     headers.append("X-CSRF-Token", readCookie("CSRF-TOKEN"));
-    this.baseURL = process.env.NODE_ENV === "production" ? ".." : "bpm-demo";
+    this.baseURL = process.env.NODE_ENV === "production" ? ".." : "aos-wip";
     this.headers = headers;
   }
 
@@ -76,6 +76,15 @@ export class Service {
 
   fetchId(entity, id, data = {}) {
     const url = `ws/rest/${entity}/${id}/fetch`;
+    return this.post(url, data);
+  }
+
+  search(entity, options) {
+    const data = {
+      offset: 0,
+      ...options,
+    };
+    const url = `ws/rest/${entity}/search`;
     return this.post(url, data);
   }
 
