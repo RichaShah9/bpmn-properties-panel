@@ -14,16 +14,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Checkbox,
-  TextField,
-  FormControlLabel,
 } from "@material-ui/core";
 
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
-import Select from "./components/Select";
-import { getModels, getViews, getItems, getRoles } from "../services/api";
 import { download } from "../utils";
+import Table from "./Table";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -115,39 +111,19 @@ const downloadXml = () => {
   });
 };
 
-const intialState = {
-  model: null,
-  view: null,
-  item: null,
-};
-
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState(null);
   const [open, setOpen] = useState(false);
   const [id, setId] = useState(null);
-  const [properties, setProperties] = useState(intialState);
   const [element, setElement] = useState(null);
-  const [attribute, setAttribute] = useState(null);
-  const [attributeValue, setAttributeValue] = useState(null);
-  const [roles, setRoles] = useState([]);
-
-  const handleProperties = (name, value, optionLabel) => {
-    setProperties({
-      ...properties,
-      [name]: value ? value[optionLabel] : null,
-    });
-  };
+ 
   const handleClickOpen = async () => {
     setOpen(true);
   };
 
   const handleClose = () => {
-    setProperties(intialState);
-    setRoles([]);
-    setAttribute(null);
-    setAttributeValue(null);
     setOpen(false);
   };
 
@@ -352,17 +328,18 @@ function BpmnModelerComponent() {
     camundaProps.get("values").push(property);
     businessObject.extensionElements.get("values")[0].values.push(property);
   };
+
   const handleAdd = () => {
-    Object.entries(properties).forEach((obj) => {
-      if(obj[0] && obj[1]){
-        addProperty(obj[0], obj[1]);
-      }
-    });
-    addProperty(attribute, attributeValue);
-    if (roles.length > 0) {
-      const roleNames = roles.map((role) => role.name);
-      addProperty("roles", roleNames.toString());
-    }
+    // Object.entries(properties).forEach((obj) => {
+    //   if (obj[0] && obj[1]) {
+    //     addProperty(obj[0], obj[1]);
+    //   }
+    // });
+    // addProperty(attribute, attributeValue);
+    // if (roles.length > 0) {
+    //   const roleNames = roles.map((role) => role.name);
+    //   addProperty("roles", roleNames.toString());
+    // }
     handleClose();
   };
 
@@ -540,89 +517,7 @@ function BpmnModelerComponent() {
         <DialogTitle id="form-dialog-title">View attributes</DialogTitle>
         <DialogContent>
           <DialogContentText>Add attributes</DialogContentText>
-          <Select
-            fetchMethod={(data) => getRoles(data)}
-            update={(value) => setRoles(value)}
-            value={roles}
-            multiple={true}
-            label="Roles"
-          />
-          <Select
-            fetchMethod={(data) => getModels(id, data)}
-            update={(value) => handleProperties("model", value, "model")}
-            name="model"
-            value={properties.model}
-            optionLabel="model"
-            label="Model"
-          />
-          {properties.model && (
-            <Select
-              fetchMethod={(data) => getViews(properties.model, data)}
-              update={(value) => handleProperties("view", value, "name")}
-              name="view"
-              value={properties.view}
-              label="View"
-            />
-          )}
-          {properties.view && properties.model && (
-            <Select
-              fetchMethod={(data) =>
-                getItems(properties.view, properties.model, data)
-              }
-              update={(value) => handleProperties("item", value, "title")}
-              name="item"
-              value={properties.item}
-              optionLabel="title"
-              label="Item"
-            />
-          )}
-          {properties.view && properties.model && properties.item && (
-            <Select
-              options={[
-                "readonly",
-                "readonlyIf",
-                "hidden",
-                "required",
-                "requiredIf",
-                "title",
-                "domain",
-              ]}
-              update={(value) => {
-                setAttributeValue(null);
-                setAttribute(value);
-              }}
-              name="attribute"
-              value={attribute}
-              label="Attribute"
-            />
-          )}
-          {attribute &&
-            ["readonly", "hidden", "required"].includes(attribute) && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={attributeValue || false}
-                    onChange={(e) => setAttributeValue(e.target.checked)}
-                    name="attributeValue"
-                  />
-                }
-                label={attribute}
-              />
-            )}
-          {attribute &&
-            ["readonlyIf", "hideIf", "requiredIf", "title", "domain"].includes(
-              attribute
-            ) && (
-              <TextField
-                value={attributeValue || ""}
-                onChange={(e) => setAttributeValue(e.target.value)}
-                name="attributeValue"
-                fullWidth
-                variant="outlined"
-                size="small"
-                placeholder={`${attribute} value`}
-              />
-            )}
+          <Table id={id} />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleAdd} color="primary">
