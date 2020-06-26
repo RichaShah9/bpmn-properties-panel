@@ -22,7 +22,7 @@ import {
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
 import Select from "./components/Select";
-import { getModels, getViews, getItems } from "../services/api";
+import { getModels, getViews, getItems, getRoles } from "../services/api";
 import { download } from "../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -131,11 +131,12 @@ function BpmnModelerComponent() {
   const [element, setElement] = useState(null);
   const [attribute, setAttribute] = useState(null);
   const [attributeValue, setAttributeValue] = useState(null);
+  const [roles, setRoles] = useState([]);
 
-  const handleProperties = (name, value) => {
+  const handleProperties = (name, value, optionLabel) => {
     setProperties({
       ...properties,
-      [name]: value,
+      [name]: value ? value[optionLabel] : null,
     });
   };
   const handleClickOpen = async () => {
@@ -144,6 +145,9 @@ function BpmnModelerComponent() {
 
   const handleClose = () => {
     setProperties(intialState);
+    setRoles([]);
+    setAttribute(null);
+    setAttributeValue(null);
     setOpen(false);
   };
 
@@ -350,9 +354,15 @@ function BpmnModelerComponent() {
   };
   const handleAdd = () => {
     Object.entries(properties).forEach((obj) => {
-      addProperty(obj[0], obj[1]);
+      if(obj[0] && obj[1]){
+        addProperty(obj[0], obj[1]);
+      }
     });
     addProperty(attribute, attributeValue);
+    if (roles.length > 0) {
+      const roleNames = roles.map((role) => role.name);
+      addProperty("roles", roleNames.toString());
+    }
     handleClose();
   };
 
@@ -531,30 +541,42 @@ function BpmnModelerComponent() {
         <DialogContent>
           <DialogContentText>Add attributes</DialogContentText>
           <Select
+            fetchMethod={(data) => getRoles(data)}
+            update={(value) => setRoles(value)}
+            value={roles}
+            multiple={true}
+            label="Roles"
+          />
+          <Select
             fetchMethod={(data) => getModels(id, data)}
-            update={(value) => handleProperties("model", value.name)}
+            update={(value) => handleProperties("model", value, "model")}
             name="model"
             value={properties.model}
+            optionLabel="model"
+            label="Model"
           />
           {properties.model && (
             <Select
               fetchMethod={(data) => getViews(properties.model, data)}
-              update={(value) => handleProperties("view", value.name)}
+              update={(value) => handleProperties("view", value, "name")}
               name="view"
               value={properties.view}
+              label="View"
             />
           )}
-          {properties.view && (
+          {properties.view && properties.model && (
             <Select
               fetchMethod={(data) =>
                 getItems(properties.view, properties.model, data)
               }
-              update={(value) => handleProperties("item", value.name)}
+              update={(value) => handleProperties("item", value, "title")}
               name="item"
               value={properties.item}
+              optionLabel="title"
+              label="Item"
             />
           )}
-          {properties.item && (
+          {properties.view && properties.model && properties.item && (
             <Select
               options={[
                 "readonly",
@@ -571,6 +593,7 @@ function BpmnModelerComponent() {
               }}
               name="attribute"
               value={attribute}
+              label="Attribute"
             />
           )}
           {attribute &&
