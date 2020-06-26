@@ -28,12 +28,8 @@ export async function getModels(id, criteria) {
       }
     );
     const { data } = resList || [];
-    if (Array.isArray(data)) {
-      return [
-        { name: "", value: "" },
-        ...(data.map(({ id, model }) => ({ name: model, value: model })) || []),
-      ];
-    }
+    let models = data.filter((val) => val.model !== null);
+    return models;
   }
   return [];
 }
@@ -60,14 +56,8 @@ export async function getViews(model, criteria) {
     },
   });
   const { data = [] } = res || {};
-  if (Array.isArray(data)) {
-    return [
-      { name: "", value: "" },
-      ...(data.map(({ name, id }) => ({ name: name, value: name, id: id })) ||
-        []),
-    ];
-  }
-  return [];
+  let views = data.filter((val) => val.name !== null);
+  return views;
 }
 
 export async function getItems(formName, model, criteria) {
@@ -86,12 +76,18 @@ export async function getItems(formName, model, criteria) {
   });
   const { data = [] } = res || {};
   const { fields = [] } = data;
-  if (Array.isArray(fields)) {
-    return [
-      { name: "", value: "" },
-      ...(fields.map(({ name, title }) => ({ name: title, value: name })) ||
-        []),
-    ];
-  }
-  return [];
+  let items = fields.filter((val) => val.title !== null);
+  return items;
+}
+
+export async function getRoles(criteria) {
+  const res = await Service.search(`com.axelor.auth.db.Role`, {
+    fields: ["name"],
+    data: {
+      criteria: [...criteria],
+      operator: "and",
+    },
+  });
+  const { data = [] } = res || {};
+  return data;
 }
