@@ -64,7 +64,13 @@ const useStyles = makeStyles({
     justifyContent: "space-between",
   },
   card: {
-    margin: " 20px 0px",
+    margin: "5px 0px 10px 0px",
+  },
+  cardContent: {
+    padding: "10px !important",
+  },
+  tableHead: {
+    padding: 8,
   },
 });
 
@@ -262,20 +268,21 @@ export default function DialogView({
         }
       });
 
-      items && items.forEach((item) => {
-        let itemName = item[0].value;
-        let attributes = [];
-        for (let i = 1; i < item.length; i++) {
-          attributes.push({
-            attributeName: item[i].name,
-            attributeValue: item[i].value,
+      items &&
+        items.forEach((item) => {
+          let itemName = item[0].value;
+          let attributes = [];
+          for (let i = 1; i < item.length; i++) {
+            attributes.push({
+              attributeName: item[i].name,
+              attributeValue: item[i].value,
+            });
+          }
+          value.items.push({
+            itemName,
+            attributes,
           });
-        }
-        value.items.push({
-          itemName,
-          attributes,
         });
-      });
       values.push(value);
     });
     setRows([createData(values)]);
@@ -314,7 +321,11 @@ export default function DialogView({
                         : "white",
                   }}
                 >
-                  <TableCell component="th" scope="row">
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    className={classes.tableHead}
+                  >
                     {row.id}
                   </TableCell>
                 </TableRow>
@@ -339,7 +350,7 @@ export default function DialogView({
                 (val, index) =>
                   val && (
                     <Card key={`card_${index}`} className={classes.card}>
-                      <CardContent>
+                      <CardContent className={classes.cardContent}>
                         <Grid>
                           <Select
                             fetchMethod={(data) => getModels(id, data)}
