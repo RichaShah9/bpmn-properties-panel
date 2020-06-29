@@ -29,6 +29,9 @@ const useStyles = makeStyles({
   label: {
     fontSize: 14,
   },
+  textField: {
+    width: "95%",
+  },
 });
 
 export default function SelectComponent({
@@ -54,7 +57,6 @@ export default function SelectComponent({
     (searchText = "") => {
       const criteria = [];
       if (searchText) {
-        console.log(searchText);
         criteria.push({
           fieldName: optionLabel,
           operator: "like",
@@ -122,7 +124,7 @@ export default function SelectComponent({
       multiple={multiple}
       value={value || {}}
       getOptionSelected={(option, val) => {
-        return option.id === val.id;
+        return option === val[optionLabel];
       }}
       onChange={(e, value) => {
         let values = value;
@@ -130,7 +132,7 @@ export default function SelectComponent({
           values =
             value &&
             value.filter(
-              (val, i, self) => i === self.findIndex((t) => t.id === val.id)
+              (val, i, self) => i === self.findIndex((t) => t[optionLabel] === val[optionLabel])
             );
         }
         update(values);
@@ -139,8 +141,8 @@ export default function SelectComponent({
       onInputChange={(e, val) => setsearchText(value)}
       renderInput={(params) => (
         <TextField
+          className={classes.textField}
           variant="outlined"
-          fullWidth
           {...params}
           InputProps={{
             ...(params.InputProps || {}),
