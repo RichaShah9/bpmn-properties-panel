@@ -75,9 +75,10 @@ export async function getItems(formName, model, criteria) {
     model: model,
   });
   const { data = [] } = res || {};
-  const { fields = [] } = data;
+  const { fields = [], view } = data;
+  const panels = view.items.filter((item) => item.title !== null);
   let items = fields.filter((val) => val.title !== null);
-  return items;
+  return [...items, ...panels];
 }
 
 export async function getRoles(criteria) {

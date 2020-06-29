@@ -406,6 +406,7 @@ function BpmnModelerComponent() {
                   "readonly",
                   "readonlyIf",
                   "hidden",
+                  "hideIf",
                   "required",
                   "requiredIf",
                   "title",

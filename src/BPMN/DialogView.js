@@ -157,6 +157,7 @@ export default function DialogView({
     items[itemIndex] = {
       ...(items[itemIndex] || []),
       [name]: value && value[label],
+      type: value.type,
     };
 
     values[index] = {
@@ -211,6 +212,7 @@ export default function DialogView({
             "readonly",
             "readonlyIf",
             "hidden",
+            "hideIf",
             "required",
             "requiredIf",
             "title",
@@ -412,14 +414,14 @@ export default function DialogView({
                                       handleItems(
                                         value,
                                         "itemName",
-                                        "title",
+                                        "name",
                                         index,
                                         key
                                       )
                                     }
                                     name="itemName"
                                     value={item.itemName}
-                                    optionLabel="title"
+                                    optionLabel="name"
                                     label="Item"
                                   />
                                   <Button
@@ -439,15 +441,26 @@ export default function DialogView({
                                         key={`attribute_${val.id}_${key}_${attributeKey}`}
                                       >
                                         <Select
-                                          options={[
-                                            "readonly",
-                                            "readonlyIf",
-                                            "hidden",
-                                            "required",
-                                            "requiredIf",
-                                            "title",
-                                            "domain",
-                                          ]}
+                                          options={
+                                            item.type &&
+                                            item.type.includes("panel")
+                                              ? [
+                                                  "readonly",
+                                                  "readonlyIf",
+                                                  "hidden",
+                                                  "hideIf",
+                                                ]
+                                              : [
+                                                  "readonly",
+                                                  "readonlyIf",
+                                                  "hidden",
+                                                  "hideIf",
+                                                  "required",
+                                                  "requiredIf",
+                                                  "title",
+                                                  "domain",
+                                                ]
+                                          }
                                           update={(value) => {
                                             handleAttribute(
                                               value,
