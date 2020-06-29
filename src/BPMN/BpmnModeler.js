@@ -7,19 +7,11 @@ import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camu
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@material-ui/core";
 
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
+import Dialog from "./DialogView";
 import { download } from "../utils";
-import Table from "./Table";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -36,63 +28,6 @@ const fetchId = () => {
     id = matchBPMNId[1];
     return id;
   }
-};
-
-const fetchDiagram = async (id, setWkf, handleClickOpen, setElement) => {
-  if (id) {
-    let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
-    const wkf = (res && res.data && res.data[0]) || {};
-    let { diagramXml } = wkf;
-    setWkf(wkf);
-    newBpmnDiagram(diagramXml, handleClickOpen, setElement);
-  } else {
-    newBpmnDiagram(undefined, handleClickOpen, setElement);
-  }
-};
-
-const newBpmnDiagram = (rec, handleClickOpen, setElement) => {
-  const diagram =
-    rec ||
-    `<?xml version="1.0" encoding="UTF-8" ?>
-    <bpmn2:definitions 
-      xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" 
-      xs:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" 
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-      xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" 
-      xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
-      xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
-      xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
-      id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn">
-      <bpmn2:process id="Process_1" isExecutable="false">
-        <bpmn2:startEvent id="StartEvent_1" />
-      </bpmn2:process>
-      <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-          <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-            <dc:Bounds height="36.0" width="36.0" x="412.0" y="240.0" />
-          </bpmndi:BPMNShape>
-        </bpmndi:BPMNPlane>
-      </bpmndi:BPMNDiagram>
-    </bpmn2:definitions>`;
-  openBpmnDiagram(diagram, handleClickOpen, setElement);
-};
-
-const openBpmnDiagram = (xml, handleClickOpen, setElement) => {
-  bpmnModeler.importXML(xml, (error) => {
-    if (error) {
-      return console.log("Error! Can't import XML");
-    }
-    let canvas = bpmnModeler.get("canvas");
-    canvas.zoom("fit-viewport");
-    bpmnModeler.on("element.contextmenu", 1500, (event) => {
-      if (event.element.type === "bpmn:UserTask") {
-        event.originalEvent.preventDefault();
-        event.originalEvent.stopPropagation();
-        setElement(event.element);
-        handleClickOpen();
-      }
-    });
-  });
 };
 
 const saveSVG = () => {
@@ -118,7 +53,7 @@ function BpmnModelerComponent() {
   const [open, setOpen] = useState(false);
   const [id, setId] = useState(null);
   const [element, setElement] = useState(null);
- 
+
   const handleClickOpen = async () => {
     setOpen(true);
   };
@@ -136,6 +71,70 @@ function BpmnModelerComponent() {
       x.className = x.className.replace("show", "");
     }, 3000);
   };
+
+  const openBpmnDiagram = React.useCallback(function openBpmnDiagram(xml) {
+    bpmnModeler.importXML(xml, (error) => {
+      if (error) {
+        return console.log("Error! Can't import XML");
+      }
+      let canvas = bpmnModeler.get("canvas");
+      canvas.zoom("fit-viewport");
+
+      bpmnModeler.on("element.contextmenu", 1500, (event) => {
+        if (event.element.type === "bpmn:UserTask") {
+          event.originalEvent.preventDefault();
+          event.originalEvent.stopPropagation();
+          setElement(event.element);
+          handleClickOpen();
+        }
+      });
+    });
+  }, []);
+
+  const newBpmnDiagram = React.useCallback(
+    function newBpmnDiagram(rec) {
+      const diagram =
+        rec ||
+        `<?xml version="1.0" encoding="UTF-8" ?>
+      <bpmn2:definitions 
+        xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" 
+        xs:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+        xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
+        xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
+        xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
+        id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn">
+        <bpmn2:process id="Process_1" isExecutable="false">
+          <bpmn2:startEvent id="StartEvent_1" />
+        </bpmn2:process>
+        <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+          <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+              <dc:Bounds height="36.0" width="36.0" x="412.0" y="240.0" />
+            </bpmndi:BPMNShape>
+          </bpmndi:BPMNPlane>
+        </bpmndi:BPMNDiagram>
+      </bpmn2:definitions>`;
+      openBpmnDiagram(diagram);
+    },
+    [openBpmnDiagram]
+  );
+
+  const fetchDiagram = React.useCallback(
+    async function fetchDiagram(id) {
+      if (id) {
+        let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
+        const wkf = (res && res.data && res.data[0]) || {};
+        let { diagramXml } = wkf;
+        setWkf(wkf);
+        newBpmnDiagram(diagramXml);
+      } else {
+        newBpmnDiagram(undefined);
+      }
+    },
+    [newBpmnDiagram]
+  );
 
   const uploadFile = (e) => {
     let files = e.target.files;
@@ -202,7 +201,7 @@ function BpmnModelerComponent() {
         ) {
           setMessageType("success");
           showAlert("snackbar", "Deployed Successfully");
-          fetchDiagram(wkf.id, setWkf, handleClickOpen, setElement);
+          fetchDiagram(wkf.id);
         } else {
           setMessageType("error");
           showAlert(
@@ -329,17 +328,42 @@ function BpmnModelerComponent() {
     businessObject.extensionElements.get("values")[0].values.push(property);
   };
 
-  const handleAdd = () => {
-    // Object.entries(properties).forEach((obj) => {
-    //   if (obj[0] && obj[1]) {
-    //     addProperty(obj[0], obj[1]);
-    //   }
-    // });
-    // addProperty(attribute, attributeValue);
-    // if (roles.length > 0) {
-    //   const roleNames = roles.map((role) => role.name);
-    //   addProperty("roles", roleNames.toString());
-    // }
+  const handleAdd = (rows) => {
+    if (rows.length < 1) return;
+    rows.forEach((row) => {
+      const { values = [] } = row;
+      if (values.length > 0) {
+        values.forEach((value) => {
+          const { model, view, roles = [], items = [] } = value;
+          if (!model) return;
+          if (model) {
+            addProperty("model", model);
+          }
+          if (view) {
+            addProperty("view", view);
+          }
+          if (roles.length > 0) {
+            const roleNames = roles.map((role) => role.name);
+            addProperty("roles", roleNames.toString());
+          }
+          if (items.length > 0) {
+            items.forEach((item) => {
+              const { itemName, attributes = [] } = item;
+              addProperty("item", itemName);
+              if (attributes.length > 0) {
+                attributes.forEach((attribute) => {
+                  const { attributeName, attributeValue } = attribute;
+                  if (attributeName) {
+                    addProperty(attributeName, attributeValue);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+    onSave();
     handleClose();
   };
 
@@ -374,8 +398,21 @@ function BpmnModelerComponent() {
               if (
                 child &&
                 child.value &&
-                (child.value.toLowerCase() === "completedif" ||
-                  child.value.toLowerCase() === "buttons")
+                [
+                  "model",
+                  "view",
+                  "item",
+                  "roles",
+                  "readonly",
+                  "readonlyIf",
+                  "hidden",
+                  "required",
+                  "requiredIf",
+                  "title",
+                  "domain",
+                  "completedif",
+                  "buttons",
+                ].includes(child.value.toLowerCase())
               ) {
                 node.style.display = "none";
               }
@@ -404,8 +441,8 @@ function BpmnModelerComponent() {
     bpmnModeler = new BpmnModeler({ ...modeler });
     let id = fetchId();
     setId(id);
-    fetchDiagram(id, setWkf, handleClickOpen, setElement);
-  }, [setWkf]);
+    fetchDiagram(id);
+  }, [fetchDiagram]);
 
   useEffect(() => {
     const BORDER_SIZE = 4;
@@ -509,25 +546,15 @@ function BpmnModelerComponent() {
           {message}
         </div>
       )}
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="form-dialog-title"
-      >
-        <DialogTitle id="form-dialog-title">View attributes</DialogTitle>
-        <DialogContent>
-          <DialogContentText>Add attributes</DialogContentText>
-          <Table id={id} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleAdd} color="primary">
-            Add
-          </Button>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {element && (
+        <Dialog
+          id={id}
+          handleClose={handleClose}
+          handleAdd={handleAdd}
+          open={open}
+          element={element}
+        />
+      )}
     </div>
   );
 }
