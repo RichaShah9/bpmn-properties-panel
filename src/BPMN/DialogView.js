@@ -157,7 +157,7 @@ export default function DialogView({
     items[itemIndex] = {
       ...(items[itemIndex] || []),
       [name]: value && value[label],
-      type: value.type,
+      type: value && value.type,
     };
 
     values[index] = {
@@ -434,6 +434,7 @@ export default function DialogView({
                                   </Button>
                                 </div>
                                 {item &&
+                                  item.itemName &&
                                   item.attributes &&
                                   item.attributes.map(
                                     (attribute, attributeKey) => (
@@ -443,7 +444,8 @@ export default function DialogView({
                                         <Select
                                           options={
                                             item.type &&
-                                            item.type.includes("panel")
+                                            (item.type.includes("panel") ||
+                                              item.type === "button")
                                               ? [
                                                   "readonly",
                                                   "readonlyIf",

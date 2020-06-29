@@ -349,6 +349,7 @@ function BpmnModelerComponent() {
           if (items.length > 0) {
             items.forEach((item) => {
               const { itemName, attributes = [] } = item;
+              if(!itemName) return
               addProperty("item", itemName);
               if (attributes.length > 0) {
                 attributes.forEach((attribute) => {
