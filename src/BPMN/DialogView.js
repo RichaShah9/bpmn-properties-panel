@@ -70,6 +70,7 @@ const useStyles = makeStyles({
     padding: "10px !important",
   },
   tableHead: {
+    cursor: "pointer",
     padding: 8,
   },
 });
