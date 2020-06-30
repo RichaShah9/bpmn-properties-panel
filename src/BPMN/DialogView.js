@@ -6,6 +6,7 @@ import {
   TableCell,
   TableContainer,
   TableRow,
+  TableHead,
   Paper,
   Button,
   Grid,
@@ -19,7 +20,10 @@ import {
   DialogTitle,
   Card,
   CardContent,
+  Typography,
+  IconButton,
 } from "@material-ui/core";
+import { Add } from "@material-ui/icons";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "./components/Select";
@@ -36,7 +40,8 @@ const valueObj = {
 
 const itemsObj = {
   itemName: null,
-  attributes: [],
+  attributeName: null,
+  attributeValue: null,
 };
 
 function nextId() {
@@ -83,81 +88,45 @@ export default function DialogView({
   element,
 }) {
   const classes = useStyles();
-  const [rows, setRows] = useState([]);
-  const [selectedRow, setSelectedRow] = useState(null);
-
-  const addColumn = () => {
-    setRows([...rows, createData()]);
-  };
-
-  const updateRows = (row) => {
-    const cloneRows = [...rows];
-    const rowIndex = cloneRows.findIndex((r) => r.id === row.id);
-    cloneRows[rowIndex] = {
-      ...row,
-    };
-    setRows([...cloneRows]);
-  };
+  const [row, setRow] = useState(null);
 
   const addModelView = () => {
-    setSelectedRow({
-      ...selectedRow,
-      values: [{ ...valueObj }, ...selectedRow.values],
+    setRow({
+      ...row,
+      values: [...row.values, { ...valueObj }],
     });
   };
 
   const updateValue = (value, name, label, index) => {
-    const row = { ...selectedRow };
-    let values = row.values;
+    const cloneRow = { ...row };
+    let values = cloneRow.values;
     values[index] = {
       ...(values[index] || {}),
       [name]: (value && value[label]) || value,
     };
-    setSelectedRow({ ...row });
-    updateRows(row);
+    setRow({ ...cloneRow });
   };
 
   const addItems = (index) => {
-    const row = { ...selectedRow };
-    let values = row.values;
+    const cloneRow = { ...row };
+    let values = cloneRow.values;
     values[index] = {
       ...(values[index] || {}),
       items: [
-        { ...itemsObj, id: `item_${selectedRow.id}_${index}` },
+        { id: `item_${cloneRow.id}_${index}`, ...itemsObj },
         ...(values[index].items || []),
       ],
     };
-    setSelectedRow({ ...row });
-    updateRows(row);
-  };
-
-  const addAttributes = (itemIndex, valueIndex) => {
-    const row = { ...selectedRow };
-    let values = row.values;
-    let items = row.values[valueIndex].items;
-    items[itemIndex] = {
-      ...(items[itemIndex] || []),
-      attributes: [
-        { id: `attribute_${selectedRow.id}_${valueIndex}` },
-        ...(items[itemIndex].attributes || []),
-      ],
-    };
-
-    values[valueIndex] = {
-      ...(values[valueIndex] || {}),
-      items,
-    };
-    setSelectedRow({ ...row });
-    updateRows(row);
+    setRow({ ...cloneRow });
   };
 
   const handleItems = (value, name, label, index, itemIndex) => {
-    const row = { ...selectedRow };
-    let values = row.values;
-    let items = row.values[index].items;
+    const cloneRow = { ...row };
+    let values = cloneRow.values;
+    let items = cloneRow.values[index].items;
     items[itemIndex] = {
       ...(items[itemIndex] || []),
-      [name]: value && value[label],
+      [name]: value && (value[label] || value),
       type: value && value.type,
     };
 
@@ -165,32 +134,7 @@ export default function DialogView({
       ...(values[index] || {}),
       items,
     };
-    setSelectedRow({ ...row });
-    updateRows(row);
-  };
-
-  const handleAttribute = (value, name, index, itemIndex, attributeIndex) => {
-    const row = { ...selectedRow };
-    let values = row.values;
-    let items = values[index].items;
-    let attributes = items[itemIndex].attributes;
-
-    attributes[attributeIndex] = {
-      ...(attributes[attributeIndex] || []),
-      [name]: value,
-    };
-
-    items[itemIndex] = {
-      ...(items[index] || {}),
-      attributes,
-    };
-
-    values[index] = {
-      ...(values[index] || {}),
-      items,
-    };
-    setSelectedRow({ ...row });
-    updateRows(row);
+    setRow({ ...cloneRow });
   };
 
   const handlePropertyAdd = () => {
@@ -222,7 +166,8 @@ export default function DialogView({
       );
       businessObject.extensionElements.get("values")[0].values = [...elements];
     }
-    handleAdd(rows);
+    console.log("ROWS", row);
+    handleAdd(row);
   };
 
   function getKeyData(data, key) {
@@ -239,6 +184,8 @@ export default function DialogView({
     if (!element) return;
     const businessObject = getBusinessObject(element);
     const extensionElements = businessObject.extensionElements;
+
+    if (!extensionElements) return;
     if (
       extensionElements &&
       extensionElements.values[0] &&
@@ -247,7 +194,7 @@ export default function DialogView({
     ) {
     }
     const elements = extensionElements.values[0].values;
-    if (elements.length < 1) return;
+    if (elements && elements.length < 1) return;
     let models = getKeyData(elements, "model");
     let values = [];
     models.forEach((modelArr) => {
@@ -255,7 +202,7 @@ export default function DialogView({
       let items = getKeyData(modelArr, "item");
       modelArr.forEach((ele) => {
         if (ele.name === "model") {
-          value.model = ele.value;
+          value.model = { model: ele.value };
         }
         if (ele.name === "view") {
           value.view = ele.value;
@@ -273,22 +220,15 @@ export default function DialogView({
 
       items &&
         items.forEach((item) => {
-          let itemName = item[0].value;
-          let attributes = [];
-          for (let i = 1; i < item.length; i++) {
-            attributes.push({
-              attributeName: item[i].name,
-              attributeValue: item[i].value,
-            });
-          }
           value.items.push({
-            itemName,
-            attributes,
+            itemName: item[0].value,
+            attributeName: item[1].name,
+            attributeValue: item[1].value,
           });
         });
       values.push(value);
     });
-    setRows([createData(values)]);
+    setRow(createData(values));
   }, [element]);
 
   return (
@@ -300,94 +240,54 @@ export default function DialogView({
       <DialogTitle id="form-dialog-title">View attributes</DialogTitle>
       <DialogContent>
         <DialogContentText>Add attributes</DialogContentText>
-        <Button
-          className={classes.button}
-          variant="outlined"
-          onClick={addColumn}
-          style={{
-            margin: "10px 0px",
-          }}
-        >
-          Add
-        </Button>
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="custom pagination table">
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  onClick={() => setSelectedRow(row)}
-                  style={{
-                    background:
-                      selectedRow && selectedRow.id === row.id
-                        ? "#F8F8F8"
-                        : "white",
-                  }}
-                >
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    className={classes.tableHead}
-                  >
-                    {row.id}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        {selectedRow && (
+
+        <TextField
+          value={(row && row.id) || ""}
+          size="small"
+          disabled={true}
+          InputProps={{ disableUnderline: false }}
+        />
+
+        {row && (
           <div>
-            <Button
-              className={classes.button}
-              variant="outlined"
-              onClick={addModelView}
-              style={{
-                margin: "10px 0px",
-              }}
-            >
-              Add model/view
-            </Button>
             <div>
-              {selectedRow.values.map(
+              {row.values.map(
                 (val, index) =>
                   val && (
                     <Card key={`card_${index}`} className={classes.card}>
                       <CardContent className={classes.cardContent}>
                         <Grid>
-                          <Select
-                            fetchMethod={(data) => getModels(id, data)}
-                            update={(value) =>
-                              updateValue(value, "model", undefined, index)
-                            }
-                            name="model"
-                            value={val.model}
-                            optionLabel="name"
-                            label="Model"
-                          />
-                          {val.model && (
-                            <div className={classes.container}>
+                          <Grid container>
+                            <Grid item xs={6}>
                               <Select
-                                fetchMethod={(data) =>
-                                  getViews(val.model, data)
-                                }
+                                fetchMethod={(data) => getModels(id, data)}
                                 update={(value) =>
-                                  updateValue(value, "view", "name", index)
+                                  updateValue(value, "model", undefined, index)
                                 }
-                                name="view"
-                                value={val.view}
-                                label="View"
+                                name="model"
+                                value={val.model}
+                                optionLabel="name"
+                                label="Model"
                               />
-                              <Button
-                                className={classes.button}
-                                variant="outlined"
-                                onClick={() => addItems(index)}
-                                disabled={!val.view}
-                              >
-                                Add Items
-                              </Button>
-                            </div>
-                          )}
+                            </Grid>
+                            <Grid item xs={6}>
+                              {val.model && (
+                                <div className={classes.container}>
+                                  <Select
+                                    fetchMethod={(data) =>
+                                      getViews(val.model, data)
+                                    }
+                                    update={(value) =>
+                                      updateValue(value, "view", "name", index)
+                                    }
+                                    name="view"
+                                    value={val.view}
+                                    label="View"
+                                  />
+                                </div>
+                              )}
+                            </Grid>
+                          </Grid>
                           {val.model && val.view && (
                             <Select
                               fetchMethod={(data) => getRoles(data)}
@@ -401,158 +301,185 @@ export default function DialogView({
                               optionLabel="name"
                             />
                           )}
-                          {val.model &&
-                            val.view &&
-                            val.items &&
-                            val.items.map((item, key) => (
-                              <div key={`item_${val.id}_${key}`}>
-                                <div className={classes.container}>
-                                  <Select
-                                    fetchMethod={(data) =>
-                                      getItems(val.view, val.model, data)
-                                    }
-                                    update={(value) =>
-                                      handleItems(
-                                        value,
-                                        "itemName",
-                                        "name",
-                                        index,
-                                        key
-                                      )
-                                    }
-                                    name="itemName"
-                                    value={item.itemName}
-                                    optionLabel="name"
-                                    label="Item"
-                                  />
-                                  <Button
-                                    className={classes.button}
-                                    variant="outlined"
-                                    onClick={() => addAttributes(key, index)}
-                                    disabled={!item || !item.itemName}
-                                  >
-                                    Add Attributes
-                                  </Button>
-                                </div>
-                                {item &&
-                                  item.itemName &&
-                                  item.attributes &&
-                                  item.attributes.map(
-                                    (attribute, attributeKey) => (
-                                      <div
-                                        key={`attribute_${val.id}_${key}_${attributeKey}`}
-                                      >
-                                        <Select
-                                          options={
-                                            item.type &&
-                                            (item.type.includes("panel") ||
-                                              item.type === "button")
-                                              ? [
-                                                  "readonly",
-                                                  "readonlyIf",
-                                                  "hidden",
-                                                  "hideIf",
-                                                ]
-                                              : [
-                                                  "readonly",
-                                                  "readonlyIf",
-                                                  "hidden",
-                                                  "hideIf",
-                                                  "required",
-                                                  "requiredIf",
-                                                  "title",
-                                                  "domain",
-                                                ]
-                                          }
-                                          update={(value) => {
-                                            handleAttribute(
-                                              value,
-                                              "attributeName",
-                                              index,
-                                              key,
-                                              attributeKey
-                                            );
-                                          }}
-                                          name="attributeName"
-                                          value={attribute.attributeName}
-                                          label="Attribute"
-                                        />
-                                        {attribute.attributeName &&
-                                          [
-                                            "readonly",
-                                            "hidden",
-                                            "required",
-                                          ].includes(
-                                            attribute.attributeName
-                                          ) && (
-                                            <FormControlLabel
-                                              style={{ marginLeft: "5%" }}
-                                              control={
-                                                <Checkbox
-                                                  checked={
-                                                    Boolean(
-                                                      attribute.attributeValue
-                                                    ) || false
-                                                  }
-                                                  onChange={(e) => {
-                                                    handleAttribute(
-                                                      e.target.checked,
-                                                      "attributeValue",
-                                                      index,
-                                                      key,
-                                                      attributeKey
-                                                    );
-                                                  }}
-                                                  name="attributeValue"
-                                                />
-                                              }
-                                              label={attribute.attributeName}
-                                            />
-                                          )}
-                                        {attribute.attributeName &&
-                                          [
-                                            "readonlyIf",
-                                            "hideIf",
-                                            "requiredIf",
-                                            "title",
-                                            "domain",
-                                          ].includes(
-                                            attribute.attributeName
-                                          ) && (
-                                            <TextField
-                                              value={
-                                                attribute.attributeValue || ""
-                                              }
-                                              onChange={(e) => {
-                                                handleAttribute(
-                                                  e.target.value,
-                                                  "attributeValue",
-                                                  index,
-                                                  key,
-                                                  attributeKey
-                                                );
-                                              }}
-                                              name="attributeValue"
-                                              style={{
-                                                width: "90%",
-                                                marginLeft: "5%",
-                                              }}
-                                              variant="outlined"
-                                              size="small"
-                                              placeholder={`${attribute.attributeName} value`}
-                                            />
-                                          )}
-                                      </div>
-                                    )
-                                  )}
-                              </div>
-                            ))}
+                          <Grid container>
+                            <Grid item xs={6}>
+                              <Typography>Sub Items</Typography>
+                            </Grid>
+                            <Grid item xs={6} style={{ textAlign: "right" }}>
+                              <Button
+                                className={classes.button}
+                                onClick={() => addItems(index)}
+                                disabled={!val.view}
+                                startIcon={<Add />}
+                              >
+                                New
+                              </Button>
+                            </Grid>
+                          </Grid>
+                          <Grid>
+                            <TableContainer component={Paper}>
+                              <Table
+                                className={classes.table}
+                                size="small"
+                                aria-label="a dense table"
+                              >
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell align="center">Item</TableCell>
+                                    <TableCell align="center">Name</TableCell>
+                                    <TableCell align="center">Value</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {val.model &&
+                                    val.view &&
+                                    val.items &&
+                                    val.items.map((item, key) => (
+                                      <TableRow key={`item_${val.id}_${key}`}>
+                                        <TableCell
+                                          component="th"
+                                          scope="row"
+                                          align="center"
+                                        >
+                                          <Select
+                                            isLabel={false}
+                                            fetchMethod={(data) =>
+                                              getItems(
+                                                val.view,
+                                                val.model.model,
+                                                data
+                                              )
+                                            }
+                                            update={(value) =>
+                                              handleItems(
+                                                value,
+                                                "itemName",
+                                                "name",
+                                                index,
+                                                key
+                                              )
+                                            }
+                                            name="itemName"
+                                            value={item.itemName}
+                                            optionLabel="name"
+                                            label="Item"
+                                          />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                          <Select
+                                            isLabel={false}
+                                            options={
+                                              item.type &&
+                                              (item.type.includes("panel") ||
+                                                item.type === "button")
+                                                ? [
+                                                    "readonly",
+                                                    "readonlyIf",
+                                                    "hidden",
+                                                    "hideIf",
+                                                  ]
+                                                : [
+                                                    "readonly",
+                                                    "readonlyIf",
+                                                    "hidden",
+                                                    "hideIf",
+                                                    "required",
+                                                    "requiredIf",
+                                                    "title",
+                                                    "domain",
+                                                  ]
+                                            }
+                                            update={(value) =>
+                                              handleItems(
+                                                value,
+                                                "attributeName",
+                                                undefined,
+                                                index,
+                                                key
+                                              )
+                                            }
+                                            name="attributeName"
+                                            value={item.attributeName}
+                                            label="Attribute"
+                                          />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                          {item.attributeName &&
+                                            [
+                                              "readonly",
+                                              "hidden",
+                                              "required",
+                                            ].includes(item.attributeName) && (
+                                              <FormControlLabel
+                                                style={{ marginLeft: "5%" }}
+                                                control={
+                                                  <Checkbox
+                                                    checked={
+                                                      Boolean(
+                                                        item.attributeValue
+                                                      ) || false
+                                                    }
+                                                    onChange={(e) => {
+                                                      handleItems(
+                                                        e.target.checked,
+                                                        "attributeValue",
+                                                        undefined,
+                                                        index,
+                                                        key
+                                                      );
+                                                    }}
+                                                    name="attributeValue"
+                                                  />
+                                                }
+                                                label={item.attributeName}
+                                              />
+                                            )}
+                                          {item.attributeName &&
+                                            [
+                                              "readonlyIf",
+                                              "hideIf",
+                                              "requiredIf",
+                                              "title",
+                                              "domain",
+                                            ].includes(item.attributeName) && (
+                                              <TextField
+                                                value={
+                                                  item.attributeValue || ""
+                                                }
+                                                onChange={(e) => {
+                                                  handleItems(
+                                                    e.target.value,
+                                                    "attributeValue",
+                                                    undefined,
+                                                    index,
+                                                    key
+                                                  );
+                                                }}
+                                                name="attributeValue"
+                                                variant="outlined"
+                                                size="small"
+                                                placeholder={`${item.attributeName} value`}
+                                              />
+                                            )}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </Grid>
                         </Grid>
                       </CardContent>
                     </Card>
                   )
               )}
             </div>
+            <IconButton
+              className={classes.button}
+              onClick={addModelView}
+            >
+              <Add />
+            </IconButton>
           </div>
         )}
       </DialogContent>

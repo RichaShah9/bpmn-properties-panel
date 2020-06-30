@@ -328,42 +328,33 @@ function BpmnModelerComponent() {
     businessObject.extensionElements.get("values")[0].values.push(property);
   };
 
-  const handleAdd = (rows) => {
-    if (rows.length < 1) return;
-    rows.forEach((row) => {
-      const { values = [] } = row;
-      if (values.length > 0) {
-        values.forEach((value) => {
-          const { model, view, roles = [], items = [] } = value;
-          if (!model) return;
-          if (model && model.model) {
-            addProperty("model", model.model);
-          }
-          if (view) {
-            addProperty("view", view);
-          }
-          if (roles.length > 0) {
-            const roleNames = roles.map((role) => role.name);
-            addProperty("roles", roleNames.toString());
-          }
-          if (items.length > 0) {
-            items.forEach((item) => {
-              const { itemName, attributes = [] } = item;
-              if(!itemName) return
-              addProperty("item", itemName);
-              if (attributes.length > 0) {
-                attributes.forEach((attribute) => {
-                  const { attributeName, attributeValue } = attribute;
-                  if (attributeName) {
-                    addProperty(attributeName, attributeValue);
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    });
+  const handleAdd = (row) => {
+    if (!row) return;
+    const { values = [] } = row;
+    if (values.length > 0) {
+      values.forEach((value) => {
+        const { model, view, roles = [], items = [] } = value;
+        if (!model) return;
+        if (model && model.model) {
+          addProperty("model", model.model);
+        }
+        if (view) {
+          addProperty("view", view);
+        }
+        if (roles.length > 0) {
+          const roleNames = roles.map((role) => role.name);
+          addProperty("roles", roleNames.toString());
+        }
+        if (items.length > 0) {
+          items.forEach((item) => {
+            const { itemName, attributeName, attributeValue } = item;
+            if (!itemName) return;
+            addProperty("item", itemName);
+            addProperty(attributeName, attributeValue);
+          });
+        }
+      });
+    }
     onSave();
     handleClose();
   };
