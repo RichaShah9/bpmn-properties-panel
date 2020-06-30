@@ -358,11 +358,11 @@ export default function DialogView({
                           <Select
                             fetchMethod={(data) => getModels(id, data)}
                             update={(value) =>
-                              updateValue(value, "model", "model", index)
+                              updateValue(value, "model", undefined, index)
                             }
                             name="model"
                             value={val.model}
-                            optionLabel="model"
+                            optionLabel="name"
                             label="Model"
                           />
                           {val.model && (
@@ -395,7 +395,7 @@ export default function DialogView({
                                 updateValue(value, "roles", undefined, index)
                               }
                               name="roles"
-                              value={val.roles}
+                              value={val.roles || []}
                               multiple={true}
                               label="Roles"
                               optionLabel="name"

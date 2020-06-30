@@ -336,8 +336,8 @@ function BpmnModelerComponent() {
         values.forEach((value) => {
           const { model, view, roles = [], items = [] } = value;
           if (!model) return;
-          if (model) {
-            addProperty("model", model);
+          if (model && model.model) {
+            addProperty("model", model.model);
           }
           if (view) {
             addProperty("view", view);
