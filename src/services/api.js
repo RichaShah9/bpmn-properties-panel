@@ -50,8 +50,26 @@ export async function getViews(model, criteria) {
           operator: "=",
           value: "form",
         },
-        ...criteria,
-      ],
+  ];
+
+  if (model.type === "metaJsonModel") {
+    options.push({
+      fieldName: "name",
+      operator: "=",
+      value: `custom-model-${model.name}-form`,
+    });
+  } else {
+    options.push({
+      fieldName: "model",
+      operator: "=",
+      value: model.model,
+    });
+  }
+
+  const res = await Service.search(`com.axelor.meta.db.MetaView`, {
+    fields: ["name", "title"],
+    data: {
+      criteria: [...options, ...criteria],
       operator: "and",
     },
   });
