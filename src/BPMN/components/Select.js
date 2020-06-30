@@ -19,8 +19,8 @@ const useStyles = makeStyles({
     "& > div > label": {
       fontSize: 14,
     },
-    minWidth: 400,
     margin: "8px 0px",
+    width: "100%",
   },
   input: {
     fontSize: 14,
@@ -28,9 +28,6 @@ const useStyles = makeStyles({
   },
   label: {
     fontSize: 14,
-  },
-  textField: {
-    width: "95%",
   },
 });
 
@@ -47,6 +44,7 @@ export default function SelectComponent({
   options: propOptions,
   label,
   fetchMethod,
+  isLabel = true,
 }) {
   const [open, setOpen] = React.useState(false);
   const [options, setOptions] = useState([]);
@@ -132,7 +130,8 @@ export default function SelectComponent({
           values =
             value &&
             value.filter(
-              (val, i, self) => i === self.findIndex((t) => t[optionLabel] === val[optionLabel])
+              (val, i, self) =>
+                i === self.findIndex((t) => t[optionLabel] === val[optionLabel])
             );
         }
         update(values);
@@ -141,8 +140,7 @@ export default function SelectComponent({
       onInputChange={(e, val) => setsearchText(value)}
       renderInput={(params) => (
         <TextField
-          className={classes.textField}
-          variant="outlined"
+          fullWidth
           {...params}
           InputProps={{
             ...(params.InputProps || {}),
@@ -160,7 +158,7 @@ export default function SelectComponent({
           InputLabelProps={{
             className: classes && classes.label,
           }}
-          label={label}
+          label={isLabel ? label : undefined}
         />
       )}
       getOptionLabel={(option) =>
