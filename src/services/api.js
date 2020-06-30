@@ -20,15 +20,34 @@ export async function getModels(id, criteria) {
     const resList = await Service.search(
       "com.axelor.apps.bpm.db.WkfProcessConfig",
       {
-        fields: ["model"],
         data: {
           criteria: [{ fieldName: "id", operator: "IN", value: ids }],
           ...criteria,
         },
+        fields: ["metaJsonModel.name", "metaJsonModel", "metaModel", "model"],
       }
     );
     const { data } = resList || [];
-    let models = data.filter((val) => val.model !== null);
+    const models = [];
+
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].metaModel) {
+        models.push({
+          ...data[i].metaModel,
+          model: data[i].model,
+          type: "metaModel",
+        });
+      }
+      if (data[i].metaJsonModel) {
+        models.push({
+          ...data[i].metaJsonModel,
+          name: data[i]["metaJsonModel.name"],
+          model: data[i].model,
+          type: "metaJsonModel",
+        });
+      }
+    }
+
     return models;
   }
   return [];
@@ -36,20 +55,12 @@ export async function getModels(id, criteria) {
 
 export async function getViews(model, criteria) {
   if (!model) return [];
-  const res = await Service.search(`com.axelor.meta.db.MetaView`, {
-    fields: ["name", "title"],
-    data: {
-      criteria: [
-        {
-          fieldName: "model",
-          operator: "=",
-          value: model,
-        },
-        {
-          fieldName: "type",
-          operator: "=",
-          value: "form",
-        },
+  let options = [
+    {
+      fieldName: "type",
+      operator: "=",
+      value: "form",
+    },
   ];
 
   if (model.type === "metaJsonModel") {
