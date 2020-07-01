@@ -153,6 +153,18 @@ export default function DialogView({
     setRow({ ...cloneRow });
   };
 
+  const removeItem = (valueIndex, itemIndex) => {
+    const cloneRow = { ...row };
+    let values = cloneRow.values;
+    let items = cloneRow.values[valueIndex].items;
+    items.splice(itemIndex, 1);
+    values[valueIndex] = {
+      ...(values[valueIndex] || {}),
+      items,
+    };
+    setRow({ ...cloneRow });
+  };
+
   const removeCard = (index) => {
     const cloneRow = { ...row };
     let values = cloneRow.values;
@@ -387,6 +399,10 @@ export default function DialogView({
                                         >
                                           Value
                                         </TableCell>
+                                        <TableCell
+                                          className={classes.tableHead}
+                                          align="center"
+                                        ></TableCell>
                                       </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -529,6 +545,19 @@ export default function DialogView({
                                                     placeholder={`${item.attributeName} value`}
                                                   />
                                                 )}
+                                            </TableCell>
+                                            <TableCell
+                                              align="center"
+                                              className={classes.tableCell}
+                                            >
+                                              <IconButton
+                                                className={classes.iconButton}
+                                                onClick={() =>
+                                                  removeItem(index, key)
+                                                }
+                                              >
+                                                <Close />
+                                              </IconButton>
                                             </TableCell>
                                           </TableRow>
                                         ))}
