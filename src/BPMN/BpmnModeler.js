@@ -327,7 +327,15 @@ function BpmnModelerComponent() {
 
     let camundaProps = bpmnFactory.create("camunda:Properties");
     camundaProps.get("values").push(property);
-    businessObject.extensionElements.get("values")[0].values.push(property);
+    if (!businessObject.extensionElements) {
+      businessObject.extensionElements = bpmnFactory.create(
+        "bpmn:ExtensionElements"
+      );
+      businessObject.extensionElements.get("values").push(camundaProps);
+    } else {
+      console.log(businessObject.extensionElements.get("values"));
+      businessObject.extensionElements.get("values")[0].values.push(property);
+    }
   };
 
   const handleAdd = (row) => {
@@ -397,8 +405,8 @@ function BpmnModelerComponent() {
                 child.value &&
                 [
                   "model",
-                  "modelName",
-                  "modelType",
+                  "modelname",
+                  "modeltype",
                   "view",
                   "item",
                   "roles",
