@@ -333,7 +333,6 @@ function BpmnModelerComponent() {
       );
       businessObject.extensionElements.get("values").push(camundaProps);
     } else {
-      console.log(businessObject.extensionElements.get("values"));
       businessObject.extensionElements.get("values")[0].values.push(property);
     }
   };
