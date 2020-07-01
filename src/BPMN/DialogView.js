@@ -330,7 +330,7 @@ export default function DialogView({
                                 )}
                               </Grid>
                             </Grid>
-                            {val.model && val.view && (
+                            {(val.model || val.view) && (
                               <Select
                                 fetchMethod={(data) => getRoles(data)}
                                 update={(value) =>
@@ -353,7 +353,7 @@ export default function DialogView({
                                 <Button
                                   className={classes.button}
                                   onClick={() => addItems(index)}
-                                  disabled={!val.view}
+                                  disabled={!val.model}
                                   startIcon={<Add />}
                                 >
                                   New
@@ -390,8 +390,7 @@ export default function DialogView({
                                       </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                      {val.model &&
-                                        val.view &&
+                                      {(val.model || val.view) &&
                                         val.items &&
                                         val.items.map((item, key) => (
                                           <TableRow
