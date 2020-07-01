@@ -23,7 +23,7 @@ import {
   Typography,
   IconButton,
 } from "@material-ui/core";
-import { Add } from "@material-ui/icons";
+import { Add, Close } from "@material-ui/icons";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "./components/Select";
@@ -63,13 +63,14 @@ const useStyles = makeStyles({
   button: {
     textTransform: "none",
   },
-  container: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
+  grid: {
+    padding: "0px 5px 0px 0px",
   },
   card: {
     margin: "5px 0px 10px 0px",
+    boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.1)",
+    width: "100%",
+    minWidth: 500,
   },
   cardContent: {
     padding: "10px !important",
@@ -77,6 +78,22 @@ const useStyles = makeStyles({
   tableHead: {
     cursor: "pointer",
     padding: 8,
+  },
+  cardContainer: {
+    display: "flex",
+    alignItems: "flex-start",
+  },
+  title: {
+    marginBottom: 12,
+    fontWeight: 600,
+    fontSize: 14,
+  },
+  tableCell: {
+    padding: "6px !important",
+    width: "33%",
+  },
+  iconButton: {
+    padding: 5,
   },
 });
 
@@ -134,6 +151,13 @@ export default function DialogView({
       ...(values[index] || {}),
       items,
     };
+    setRow({ ...cloneRow });
+  };
+
+  const removeCard = (index) => {
+    const cloneRow = { ...row };
+    let values = cloneRow.values;
+    values.splice(index, 1);
     setRow({ ...cloneRow });
   };
 
@@ -254,39 +278,45 @@ export default function DialogView({
       <DialogTitle id="form-dialog-title">View attributes</DialogTitle>
       <DialogContent>
         <DialogContentText>Add attributes</DialogContentText>
-
-        <TextField
-          value={(row && row.id) || ""}
-          size="small"
-          disabled={true}
-          InputProps={{ disableUnderline: false }}
-        />
-
+        <Typography className={classes.title}>{row && row.id}</Typography>
         {row && (
           <div>
             <div>
               {row.values.map(
                 (val, index) =>
                   val && (
-                    <Card key={`card_${index}`} className={classes.card}>
-                      <CardContent className={classes.cardContent}>
-                        <Grid>
-                          <Grid container>
-                            <Grid item xs={6}>
-                              <Select
-                                fetchMethod={(data) => getModels(id, data)}
-                                update={(value) =>
-                                  updateValue(value, "model", undefined, index)
-                                }
-                                name="model"
-                                value={val.model}
-                                optionLabel="name"
-                                label="Model"
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              {val.model && (
-                                <div className={classes.container}>
+                    <div
+                      key={`card_${index}`}
+                      className={classes.cardContainer}
+                    >
+                      <Card className={classes.card}>
+                        <CardContent className={classes.cardContent}>
+                          <Grid>
+                            <Grid container>
+                              <Grid item xs={6} className={classes.grid}>
+                                <Select
+                                  fetchMethod={(data) => getModels(id, data)}
+                                  update={(value) =>
+                                    updateValue(
+                                      value,
+                                      "model",
+                                      undefined,
+                                      index
+                                    )
+                                  }
+                                  name="model"
+                                  value={val.model}
+                                  optionLabel="name"
+                                  label="Model"
+                                />
+                              </Grid>
+                              <Grid
+                                item
+                                xs={6}
+                                style={{ justifyContent: "flex-end" }}
+                                className={classes.grid}
+                              >
+                                {val.model && (
                                   <Select
                                     fetchMethod={(data) =>
                                       getViews(val.model, data)
@@ -298,144 +328,201 @@ export default function DialogView({
                                     value={val.view}
                                     label="View"
                                   />
-                                </div>
-                              )}
+                                )}
+                              </Grid>
                             </Grid>
-                          </Grid>
-                          {val.model && val.view && (
-                            <Select
-                              fetchMethod={(data) => getRoles(data)}
-                              update={(value) =>
-                                updateValue(value, "roles", undefined, index)
-                              }
-                              name="roles"
-                              value={val.roles || []}
-                              multiple={true}
-                              label="Roles"
-                              optionLabel="name"
-                            />
-                          )}
-                          <Grid container>
-                            <Grid item xs={6}>
-                              <Typography>Sub Items</Typography>
+                            {val.model && val.view && (
+                              <Select
+                                fetchMethod={(data) => getRoles(data)}
+                                update={(value) =>
+                                  updateValue(value, "roles", undefined, index)
+                                }
+                                name="roles"
+                                value={val.roles || []}
+                                multiple={true}
+                                label="Roles"
+                                optionLabel="name"
+                              />
+                            )}
+                            <Grid container alignItems="center">
+                              <Grid item xs={6}>
+                                <Typography>Sub Items</Typography>
+                              </Grid>
+                              <Grid item xs={6} style={{ textAlign: "right" }}>
+                                <Button
+                                  className={classes.button}
+                                  onClick={() => addItems(index)}
+                                  disabled={!val.view}
+                                  startIcon={<Add />}
+                                >
+                                  New
+                                </Button>
+                              </Grid>
                             </Grid>
-                            <Grid item xs={6} style={{ textAlign: "right" }}>
-                              <Button
-                                className={classes.button}
-                                onClick={() => addItems(index)}
-                                disabled={!val.view}
-                                startIcon={<Add />}
-                              >
-                                New
-                              </Button>
-                            </Grid>
-                          </Grid>
-                          <Grid>
-                            <TableContainer component={Paper}>
-                              <Table
-                                className={classes.table}
-                                size="small"
-                                aria-label="a dense table"
-                              >
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell align="center">Item</TableCell>
-                                    <TableCell align="center">Name</TableCell>
-                                    <TableCell align="center">Value</TableCell>
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {val.model &&
-                                    val.view &&
-                                    val.items &&
-                                    val.items.map((item, key) => (
-                                      <TableRow key={`item_${val.id}_${key}`}>
+                            <Grid>
+                              {val && val.items && val.items.length > 0 && (
+                                <TableContainer component={Paper}>
+                                  <Table
+                                    className={classes.table}
+                                    size="small"
+                                    aria-label="a dense table"
+                                  >
+                                    <TableHead>
+                                      <TableRow>
                                         <TableCell
-                                          component="th"
-                                          scope="row"
+                                          className={classes.tableCell}
                                           align="center"
                                         >
-                                          <Select
-                                            isLabel={false}
-                                            fetchMethod={(data) =>
-                                              getItems(
-                                                val.view,
-                                                val.model.model,
-                                                data
-                                              )
-                                            }
-                                            update={(value) =>
-                                              handleItems(
-                                                value,
-                                                "itemName",
-                                                "name",
-                                                index,
-                                                key
-                                              )
-                                            }
-                                            name="itemName"
-                                            value={item.itemName}
-                                            optionLabel="name"
-                                            label="Item"
-                                          />
+                                          Item
                                         </TableCell>
-                                        <TableCell align="center">
-                                          <Select
-                                            isLabel={false}
-                                            options={
-                                              item.type &&
-                                              (item.type.includes("panel") ||
-                                                item.type === "button")
-                                                ? [
-                                                    "readonly",
-                                                    "readonlyIf",
-                                                    "hidden",
-                                                    "hideIf",
-                                                  ]
-                                                : [
-                                                    "readonly",
-                                                    "readonlyIf",
-                                                    "hidden",
-                                                    "hideIf",
-                                                    "required",
-                                                    "requiredIf",
-                                                    "title",
-                                                    "domain",
-                                                  ]
-                                            }
-                                            update={(value) =>
-                                              handleItems(
-                                                value,
-                                                "attributeName",
-                                                undefined,
-                                                index,
-                                                key
-                                              )
-                                            }
-                                            name="attributeName"
-                                            value={item.attributeName}
-                                            label="Attribute"
-                                          />
+                                        <TableCell
+                                          className={classes.tableCell}
+                                          align="center"
+                                        >
+                                          Name
                                         </TableCell>
-                                        <TableCell align="center">
-                                          {item.attributeName &&
-                                            [
-                                              "readonly",
-                                              "hidden",
-                                              "required",
-                                            ].includes(item.attributeName) && (
-                                              <FormControlLabel
-                                                style={{ marginLeft: "5%" }}
-                                                control={
-                                                  <Checkbox
-                                                    checked={
-                                                      Boolean(
-                                                        item.attributeValue
-                                                      ) || false
+                                        <TableCell
+                                          className={classes.tableCell}
+                                          align="center"
+                                        >
+                                          Value
+                                        </TableCell>
+                                      </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                      {val.model &&
+                                        val.view &&
+                                        val.items &&
+                                        val.items.map((item, key) => (
+                                          <TableRow
+                                            key={`item_${val.id}_${key}`}
+                                          >
+                                            <TableCell
+                                              component="th"
+                                              scope="row"
+                                              align="center"
+                                              className={classes.tableCell}
+                                            >
+                                              <Select
+                                                isLabel={false}
+                                                fetchMethod={(data) =>
+                                                  getItems(
+                                                    val.view,
+                                                    val.model.model,
+                                                    data
+                                                  )
+                                                }
+                                                update={(value) =>
+                                                  handleItems(
+                                                    value,
+                                                    "itemName",
+                                                    "name",
+                                                    index,
+                                                    key
+                                                  )
+                                                }
+                                                name="itemName"
+                                                value={item.itemName}
+                                                optionLabel="name"
+                                                label="Item"
+                                              />
+                                            </TableCell>
+                                            <TableCell
+                                              align="center"
+                                              className={classes.tableCell}
+                                            >
+                                              <Select
+                                                isLabel={false}
+                                                options={
+                                                  item.type &&
+                                                  (item.type.includes(
+                                                    "panel"
+                                                  ) ||
+                                                    item.type === "button")
+                                                    ? [
+                                                        "readonly",
+                                                        "readonlyIf",
+                                                        "hidden",
+                                                        "hideIf",
+                                                      ]
+                                                    : [
+                                                        "readonly",
+                                                        "readonlyIf",
+                                                        "hidden",
+                                                        "hideIf",
+                                                        "required",
+                                                        "requiredIf",
+                                                        "title",
+                                                        "domain",
+                                                      ]
+                                                }
+                                                update={(value) =>
+                                                  handleItems(
+                                                    value,
+                                                    "attributeName",
+                                                    undefined,
+                                                    index,
+                                                    key
+                                                  )
+                                                }
+                                                name="attributeName"
+                                                value={item.attributeName}
+                                                label="Attribute"
+                                              />
+                                            </TableCell>
+                                            <TableCell
+                                              align="center"
+                                              className={classes.tableCell}
+                                            >
+                                              {item.attributeName &&
+                                                [
+                                                  "readonly",
+                                                  "hidden",
+                                                  "required",
+                                                ].includes(
+                                                  item.attributeName
+                                                ) && (
+                                                  <FormControlLabel
+                                                    style={{ marginLeft: "5%" }}
+                                                    control={
+                                                      <Checkbox
+                                                        checked={
+                                                          Boolean(
+                                                            item.attributeValue
+                                                          ) || false
+                                                        }
+                                                        onChange={(e) => {
+                                                          handleItems(
+                                                            e.target.checked,
+                                                            "attributeValue",
+                                                            undefined,
+                                                            index,
+                                                            key
+                                                          );
+                                                        }}
+                                                        name="attributeValue"
+                                                      />
+                                                    }
+                                                    label={item.attributeName}
+                                                  />
+                                                )}
+                                              {item.attributeName &&
+                                                [
+                                                  "readonlyIf",
+                                                  "hideIf",
+                                                  "requiredIf",
+                                                  "title",
+                                                  "domain",
+                                                ].includes(
+                                                  item.attributeName
+                                                ) && (
+                                                  <TextField
+                                                    value={
+                                                      item.attributeValue || ""
                                                     }
                                                     onChange={(e) => {
                                                       handleItems(
-                                                        e.target.checked,
+                                                        e.target.value,
                                                         "attributeValue",
                                                         undefined,
                                                         index,
@@ -443,52 +530,32 @@ export default function DialogView({
                                                       );
                                                     }}
                                                     name="attributeValue"
+                                                    size="small"
+                                                    placeholder={`${item.attributeName} value`}
                                                   />
-                                                }
-                                                label={item.attributeName}
-                                              />
-                                            )}
-                                          {item.attributeName &&
-                                            [
-                                              "readonlyIf",
-                                              "hideIf",
-                                              "requiredIf",
-                                              "title",
-                                              "domain",
-                                            ].includes(item.attributeName) && (
-                                              <TextField
-                                                value={
-                                                  item.attributeValue || ""
-                                                }
-                                                onChange={(e) => {
-                                                  handleItems(
-                                                    e.target.value,
-                                                    "attributeValue",
-                                                    undefined,
-                                                    index,
-                                                    key
-                                                  );
-                                                }}
-                                                name="attributeValue"
-                                                variant="outlined"
-                                                size="small"
-                                                placeholder={`${item.attributeName} value`}
-                                              />
-                                            )}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                </TableBody>
-                              </Table>
-                            </TableContainer>
+                                                )}
+                                            </TableCell>
+                                          </TableRow>
+                                        ))}
+                                    </TableBody>
+                                  </Table>
+                                </TableContainer>
+                              )}
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                      <IconButton
+                        className={classes.iconButton}
+                        onClick={() => removeCard(index)}
+                      >
+                        <Close />
+                      </IconButton>
+                    </div>
                   )
               )}
             </div>
-            <IconButton className={classes.button} onClick={addModelView}>
+            <IconButton className={classes.iconButton} onClick={addModelView}>
               <Add />
             </IconButton>
           </div>
