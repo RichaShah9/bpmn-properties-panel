@@ -105,7 +105,8 @@ export async function getItems(formName, model, criteria) {
   });
   const { data = [] } = res || {};
   const { fields = [], view } = data;
-  const panels = view.items && view.items.filter((item) => item.title !== null);
+  const panels =
+    view && view.items && view.items.filter((item) => item.title !== null);
   let items = fields && fields.filter((val) => val.title !== null);
   return [...items, ...panels];
 }
