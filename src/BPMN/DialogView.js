@@ -12,7 +12,6 @@ import {
   Grid,
   Checkbox,
   TextField,
-  FormControlLabel,
   Dialog,
   DialogActions,
   DialogContent,
@@ -57,9 +56,6 @@ function createData(values = []) {
 }
 
 const useStyles = makeStyles({
-  table: {
-    minWidth: 500,
-  },
   button: {
     textTransform: "none",
   },
@@ -89,6 +85,7 @@ const useStyles = makeStyles({
     width: "33%",
   },
   tableHead: {
+    padding: "6px !important",
     fontWeight: 600,
   },
   iconButton: {
@@ -364,7 +361,6 @@ export default function DialogView({
                               {val && val.items && val.items.length > 0 && (
                                 <TableContainer component={Paper}>
                                   <Table
-                                    className={classes.table}
                                     size="small"
                                     aria-label="a dense table"
                                   >
