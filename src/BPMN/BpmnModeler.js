@@ -278,11 +278,13 @@ function BpmnModelerComponent() {
   }
 
   function getPropertiesElementInsideExtensionElements(extensionElements) {
-    return find(extensionElements.$parent.extensionElements.values, function (
-      elem
-    ) {
-      return is(elem, "camunda:Properties");
-    });
+    return find(
+      extensionElements.$parent.extensionElements &&
+        extensionElements.$parent.extensionElements.values,
+      function (elem) {
+        return is(elem, "camunda:Properties");
+      }
+    );
   }
 
   function getPropertiesElement(element) {
@@ -332,28 +334,31 @@ function BpmnModelerComponent() {
     if (!row) return;
     const { values = [] } = row;
     if (values.length > 0) {
-      values.forEach((value) => {
-        const { model, view, roles = [], items = [] } = value;
-        if (!model) return;
-        if (model && model.model) {
-          addProperty("model", model.model);
-        }
-        if (view) {
-          addProperty("view", view);
-        }
-        if (roles.length > 0) {
-          const roleNames = roles.map((role) => role.name);
-          addProperty("roles", roleNames.toString());
-        }
-        if (items.length > 0) {
-          items.forEach((item) => {
-            const { itemName, attributeName, attributeValue } = item;
-            if (!itemName) return;
-            addProperty("item", itemName);
-            addProperty(attributeName, attributeValue);
-          });
-        }
-      });
+      values &&
+        values.forEach((value) => {
+          const { model, view, roles = [], items = [] } = value;
+          if (!model) return;
+          if (model) {
+            addProperty("model", model.model);
+            addProperty("modelName", model.name);
+            addProperty("modelType", model.type);
+          }
+          if (view) {
+            addProperty("view", view);
+          }
+          if (roles.length > 0) {
+            const roleNames = roles.map((role) => role.name);
+            addProperty("roles", roleNames.toString());
+          }
+          if (items.length > 0) {
+            items.forEach((item) => {
+              const { itemName, attributeName, attributeValue } = item;
+              if (!itemName) return;
+              addProperty("item", itemName);
+              addProperty(attributeName, attributeValue || false);
+            });
+          }
+        });
     }
     onSave();
     handleClose();
@@ -392,6 +397,8 @@ function BpmnModelerComponent() {
                 child.value &&
                 [
                   "model",
+                  "modelName",
+                  "modelType",
                   "view",
                   "item",
                   "roles",

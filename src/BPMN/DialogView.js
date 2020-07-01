@@ -151,6 +151,8 @@ export default function DialogView({
         (val) =>
           ![
             "model",
+            "modelName",
+            "modelType",
             "view",
             "item",
             "roles",
@@ -166,18 +168,20 @@ export default function DialogView({
       );
       businessObject.extensionElements.get("values")[0].values = [...elements];
     }
-    console.log("ROWS", row);
     handleAdd(row);
   };
 
   function getKeyData(data, key) {
-    return data.reduce((arrs, item) => {
-      if (item.name === key) {
-        arrs.push([]);
-      }
-      arrs[arrs.length - 1] && arrs[arrs.length - 1].push(item);
-      return arrs;
-    }, []);
+    return (
+      data &&
+      data.reduce((arrs, item) => {
+        if (item.name === key) {
+          arrs.push([]);
+        }
+        arrs[arrs.length - 1] && arrs[arrs.length - 1].push(item);
+        return arrs;
+      }, [])
+    );
   }
 
   useEffect(() => {
@@ -185,7 +189,10 @@ export default function DialogView({
     const businessObject = getBusinessObject(element);
     const extensionElements = businessObject.extensionElements;
 
-    if (!extensionElements) return;
+    if (!extensionElements) {
+      setRow(createData([]));
+      return;
+    }
     if (
       extensionElements &&
       extensionElements.values[0] &&
@@ -197,37 +204,44 @@ export default function DialogView({
     if (elements && elements.length < 1) return;
     let models = getKeyData(elements, "model");
     let values = [];
-    models.forEach((modelArr) => {
-      let value = { items: [] };
-      let items = getKeyData(modelArr, "item");
-      modelArr.forEach((ele) => {
-        if (ele.name === "model") {
-          value.model = { model: ele.value };
-        }
-        if (ele.name === "view") {
-          value.view = ele.value;
-        }
-        if (ele.name === "roles") {
-          if (!ele.value) return;
-          const roles = ele.value.split(",");
-          let valueRoles = [];
-          roles.forEach((role) => {
-            valueRoles.push({ name: role });
-          });
-          value.roles = valueRoles;
-        }
-      });
-
-      items &&
-        items.forEach((item) => {
-          value.items.push({
-            itemName: item[0].value,
-            attributeName: item[1].name,
-            attributeValue: item[1].value,
-          });
+    models &&
+      models.forEach((modelArr) => {
+        let value = { items: [] };
+        let items = getKeyData(modelArr, "item");
+        modelArr.forEach((ele) => {
+          if (ele.name === "model") {
+            value.model = { model: ele.value };
+          }
+          if (ele.name === "modelName") {
+            value.model = { ...value.model, name: ele.value };
+          }
+          if (ele.name === "modelType") {
+            value.model = { ...value.model, type: ele.value };
+          }
+          if (ele.name === "view") {
+            value.view = ele.value;
+          }
+          if (ele.name === "roles") {
+            if (!ele.value) return;
+            const roles = ele.value.split(",");
+            let valueRoles = [];
+            roles.forEach((role) => {
+              valueRoles.push({ name: role });
+            });
+            value.roles = valueRoles;
+          }
         });
-      values.push(value);
-    });
+
+        items &&
+          items.forEach((item) => {
+            value.items.push({
+              itemName: item[0].value,
+              attributeName: item[1] && item[1].name,
+              attributeValue: item[1] && item[1].value,
+            });
+          });
+        values.push(value);
+      });
     setRow(createData(values));
   }, [element]);
 
@@ -474,10 +488,7 @@ export default function DialogView({
                   )
               )}
             </div>
-            <IconButton
-              className={classes.button}
-              onClick={addModelView}
-            >
+            <IconButton className={classes.button} onClick={addModelView}>
               <Add />
             </IconButton>
           </div>
