@@ -163,6 +163,8 @@ export default function SelectComponent({
       getOptionLabel={(option) =>
         option[optionLabel]
           ? option[optionLabel]
+          : option["title"]
+          ? option["title"]
           : typeof option === "object"
           ? ""
           : option
