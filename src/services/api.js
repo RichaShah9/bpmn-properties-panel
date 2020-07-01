@@ -1,4 +1,5 @@
 import Service from "./Service";
+import * as _ from "lodash";
 
 export async function getModels(id, criteria) {
   const res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id, {
@@ -104,11 +105,24 @@ export async function getItems(formName, model, criteria) {
     model: model,
   });
   const { data = [] } = res || {};
-  const { fields = [], view } = data;
-  const panels =
-    view && view.items && view.items.filter((item) => item.title !== null);
-  let items = fields && fields.filter((val) => val.title !== null);
-  return [...items, ...panels];
+  const { fields = [], jsonAttrs = [], view } = data;
+  const items = [...fields, ...jsonAttrs];
+  const panels = [];
+  view &&
+    view.items &&
+    view.items.forEach((item) => {
+      panels.push(item);
+      if (item) {
+        const panelItems = item.items || [];
+        panelItems &&
+          panelItems.forEach((element) => {
+            panels.push(element);
+          });
+      }
+    });
+  let allItems = [...items, ...panels];
+  let uniqueItems = _.uniqBy(allItems, "name") || [];
+  return [...uniqueItems];
 }
 
 export async function getRoles(criteria) {
