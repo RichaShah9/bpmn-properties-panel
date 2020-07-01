@@ -274,7 +274,6 @@ export default function DialogView({
       <DialogTitle id="form-dialog-title">View attributes</DialogTitle>
       <DialogContent>
         <DialogContentText>Add attributes</DialogContentText>
-        <Typography className={classes.title}>{row && row.id}</Typography>
         {row && (
           <div>
             <div>
@@ -560,7 +559,7 @@ export default function DialogView({
           onClick={handlePropertyAdd}
           color="primary"
         >
-          Add
+          Ok
         </Button>
         <Button
           className={classes.button}
