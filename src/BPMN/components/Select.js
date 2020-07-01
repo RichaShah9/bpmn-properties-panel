@@ -20,7 +20,6 @@ const useStyles = makeStyles({
       fontSize: 14,
     },
     margin: "8px 0px",
-    width: "100%",
   },
   input: {
     fontSize: 14,
