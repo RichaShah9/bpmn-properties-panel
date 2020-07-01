@@ -15,7 +15,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Card,
   CardContent,
@@ -90,6 +89,9 @@ const useStyles = makeStyles({
   },
   iconButton: {
     padding: 5,
+  },
+  dialogTitle: {
+    padding: "16px 24px 8px 24px",
   },
 });
 
@@ -271,9 +273,10 @@ export default function DialogView({
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
     >
-      <DialogTitle id="form-dialog-title">View attributes</DialogTitle>
+      <DialogTitle id="form-dialog-title" className={classes.dialogTitle}>
+        <strong>View attributes</strong>
+      </DialogTitle>
       <DialogContent>
-        <DialogContentText>Add attributes</DialogContentText>
         {row && (
           <div>
             <div>
