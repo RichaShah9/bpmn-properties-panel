@@ -117,6 +117,12 @@ export async function getItems(formName, model, criteria) {
         panelItems &&
           panelItems.forEach((element) => {
             panels.push(element);
+            const { jsonFields = [] } = element || {};
+            if (jsonFields.length > 0) {
+              jsonFields.forEach((field) => {
+                panels.push(field);
+              });
+            }
           });
       }
     });
