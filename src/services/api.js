@@ -8,7 +8,7 @@ export async function getModels(id, criteria) {
     },
   });
   const { data = [] } = res || {};
-  const { wkfProcessList } = data[0];
+  const { wkfProcessList } = data[0] || {};
   let configIds = [];
   wkfProcessList.forEach((list) => {
     const { wkfProcessConfigList } = list;
@@ -27,7 +27,7 @@ export async function getModels(id, criteria) {
         fields: ["metaJsonModel.name", "metaJsonModel", "metaModel", "model"],
       }
     );
-    const { data } = resList || [];
+    const { data = [] } = resList || [];
     const models = [];
 
     for (let i = 0; i < data.length; i++) {
@@ -105,8 +105,8 @@ export async function getItems(formName, model, criteria) {
   });
   const { data = [] } = res || {};
   const { fields = [], view } = data;
-  const panels = view.items.filter((item) => item.title !== null);
-  let items = fields.filter((val) => val.title !== null);
+  const panels = view.items && view.items.filter((item) => item.title !== null);
+  let items = fields && fields.filter((val) => val.title !== null);
   return [...items, ...panels];
 }
 
