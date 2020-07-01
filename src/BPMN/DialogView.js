@@ -346,7 +346,7 @@ export default function DialogView({
                             <Grid container alignItems="center">
                               <Grid item xs={6}>
                                 <Typography style={{ fontWeight: 600 }}>
-                                  Sub lines
+                                  Attributes
                                 </Typography>
                               </Grid>
                               <Grid item xs={6} style={{ textAlign: "right" }}>
@@ -483,28 +483,23 @@ export default function DialogView({
                                                 ].includes(
                                                   item.attributeName
                                                 ) && (
-                                                  <FormControlLabel
-                                                    style={{ marginLeft: "5%" }}
-                                                    control={
-                                                      <Checkbox
-                                                        checked={
-                                                          Boolean(
-                                                            item.attributeValue
-                                                          ) || false
-                                                        }
-                                                        onChange={(e) => {
-                                                          handleItems(
-                                                            e.target.checked,
-                                                            "attributeValue",
-                                                            undefined,
-                                                            index,
-                                                            key
-                                                          );
-                                                        }}
-                                                        name="attributeValue"
-                                                      />
+                                                  <Checkbox
+                                                    checked={
+                                                      Boolean(
+                                                        item.attributeValue
+                                                      ) || false
                                                     }
-                                                    label={item.attributeName}
+                                                    onChange={(e) => {
+                                                      handleItems(
+                                                        e.target.checked,
+                                                        "attributeValue",
+                                                        undefined,
+                                                        index,
+                                                        key
+                                                      );
+                                                    }}
+                                                    name="attributeValue"
+                                                    color="primary"
                                                   />
                                                 )}
                                               {item.attributeName &&
