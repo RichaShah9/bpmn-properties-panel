@@ -142,9 +142,10 @@ export default function DialogView({
     items[itemIndex] = {
       ...(items[itemIndex] || []),
       [name]: value && (value[label] || value),
-      type: value && value.type,
     };
-
+    if (name === "itemName") {
+      items[itemIndex].type = value && value.type;
+    }
     values[index] = {
       ...(values[index] || {}),
       items,
@@ -443,6 +444,7 @@ export default function DialogView({
                                                         "readonlyIf",
                                                         "hidden",
                                                         "hideIf",
+                                                        "title",
                                                       ]
                                                     : [
                                                         "readonly",
