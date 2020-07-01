@@ -75,10 +75,6 @@ const useStyles = makeStyles({
   cardContent: {
     padding: "10px !important",
   },
-  tableHead: {
-    cursor: "pointer",
-    padding: 8,
-  },
   cardContainer: {
     display: "flex",
     alignItems: "flex-start",
@@ -91,6 +87,9 @@ const useStyles = makeStyles({
   tableCell: {
     padding: "6px !important",
     width: "33%",
+  },
+  tableHead: {
+    fontWeight: 600,
   },
   iconButton: {
     padding: 5,
@@ -346,7 +345,9 @@ export default function DialogView({
                             )}
                             <Grid container alignItems="center">
                               <Grid item xs={6}>
-                                <Typography>Sub Items</Typography>
+                                <Typography style={{ fontWeight: 600 }}>
+                                  Sub lines
+                                </Typography>
                               </Grid>
                               <Grid item xs={6} style={{ textAlign: "right" }}>
                                 <Button
@@ -370,19 +371,19 @@ export default function DialogView({
                                     <TableHead>
                                       <TableRow>
                                         <TableCell
-                                          className={classes.tableCell}
+                                          className={classes.tableHead}
                                           align="center"
                                         >
                                           Item
                                         </TableCell>
                                         <TableCell
-                                          className={classes.tableCell}
+                                          className={classes.tableHead}
                                           align="center"
                                         >
                                           Name
                                         </TableCell>
                                         <TableCell
-                                          className={classes.tableCell}
+                                          className={classes.tableHead}
                                           align="center"
                                         >
                                           Value
