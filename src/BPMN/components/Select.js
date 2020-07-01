@@ -39,7 +39,6 @@ export default function SelectComponent({
   update,
   criteriaIds,
   type,
-  classes: classesProp = {},
   options: propOptions,
   label,
   fetchMethod,
@@ -100,7 +99,6 @@ export default function SelectComponent({
         inputFocused: classes.input,
         clearIndicator: classes.input,
         popupIndicator: classes.input,
-        disabled: classes.disabled,
       }}
       size="small"
       key={index}
