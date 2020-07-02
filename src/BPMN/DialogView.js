@@ -201,6 +201,7 @@ export default function DialogView({
             "requiredIf",
             "title",
             "domain",
+            "itemLabel"
           ].includes(val.name)
       );
       businessObject.extensionElements.get("values")[0].values = [...elements];

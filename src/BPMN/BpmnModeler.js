@@ -429,6 +429,7 @@ function BpmnModelerComponent() {
                   "domain",
                   "completedif",
                   "buttons",
+                  "itemlabel"
                 ].includes(child.value.toLowerCase())
               ) {
                 node.style.display = "none";
