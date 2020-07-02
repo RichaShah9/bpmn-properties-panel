@@ -429,7 +429,7 @@ function BpmnModelerComponent() {
                   "domain",
                   "completedif",
                   "buttons",
-                  "itemlabel"
+                  "itemlabel",
                 ].includes(child.value.toLowerCase())
               ) {
                 node.style.display = "none";
@@ -440,7 +440,7 @@ function BpmnModelerComponent() {
   };
 
   const setCSSWidth = (width) => {
-    document.documentElement.style.setProperty("--container-width", width);
+    document.documentElement.style.setProperty("--bpmn-container-width", width);
   };
 
   useEffect(() => {
@@ -537,17 +537,17 @@ function BpmnModelerComponent() {
       </div>
       <div>
         <div
-          className="property-toggle"
+          className="bpmn-property-toggle"
           onClick={() => {
             let element = document.getElementById("resize-handler");
             element.style.width =
-              parseInt(element.style.width, 10) > 4 ? 0 : "260px";
+              parseInt(element.style.width, 10) > 4 ? 0 : "380px";
             setCSSWidth(element.style.width);
           }}
         >
           Properties Panel
         </div>
-        <div id="resize-handler" style={{ width: 260 }}>
+        <div id="resize-handler" style={{ width: 380 }}>
           <div
             className="properties-panel-parent"
             id="js-properties-panel"

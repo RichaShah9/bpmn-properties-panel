@@ -1,5 +1,5 @@
 :root {
-  --container-width: 260px;
+  --bpmn-container-width: 380px;
 }
 
 html,
@@ -184,7 +184,7 @@ h1 {
 
 #resize-handler {
   position: absolute;
-  width: 260px;
+  width: 380px;
   height: 100%;
   right: 0;
   background-color: #f8f8f8;
@@ -202,9 +202,9 @@ h1 {
   cursor: w-resize;
 }
 
-.property-toggle {
+.bpmn-property-toggle {
   position: absolute;
-  left: calc(100% - 29.5px - var(--container-width));
+  left: calc(100% - 29.5px - var(--bpmn-container-width));
   top: calc(50% + 60px);
   background: #f8f8f8;
   padding: 7px 10px;
@@ -221,7 +221,7 @@ h1 {
 }
 
 .bpp-properties-panel [type="text"] {
-  width: calc(100% - 35px)
+  width: calc(100% - 35px);
 }
 
 @-webkit-keyframes fadein {
