@@ -143,7 +143,7 @@ export async function getItems(formName, model, criteria) {
       });
     let allItems = [...items, ...panels];
     let uniqueItems = _.uniqBy(allItems, "name") || [];
-    return [...uniqueItems];
+    return [...uniqueItems, { name: "self", label: "Self" }];
   } else {
     let metaFields = [];
     if (model.type === "metaModel") {

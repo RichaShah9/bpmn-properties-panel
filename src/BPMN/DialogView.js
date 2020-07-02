@@ -201,7 +201,7 @@ export default function DialogView({
             "requiredIf",
             "title",
             "domain",
-            "itemLabel"
+            "itemLabel",
           ].includes(val.name)
       );
       businessObject.extensionElements.get("values")[0].values = [...elements];
@@ -474,6 +474,11 @@ export default function DialogView({
                                                         "hideIf",
                                                         "title",
                                                       ]
+                                                    : item &&
+                                                      item.itemName &&
+                                                      item.itemName.name ===
+                                                        "self"
+                                                    ? ["readonly", "readonlyIf"]
                                                     : [
                                                         "readonly",
                                                         "readonlyIf",
