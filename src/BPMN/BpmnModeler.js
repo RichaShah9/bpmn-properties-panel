@@ -553,7 +553,7 @@ function BpmnModelerComponent() {
           {message}
         </div>
       )}
-      {element && (
+      {open && element && (
         <Dialog
           id={id}
           handleClose={handleClose}
