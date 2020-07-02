@@ -93,6 +93,11 @@ const useStyles = makeStyles({
   dialogTitle: {
     padding: "16px 24px 8px 24px",
   },
+  dialogPaper: {
+    padding: 5,
+    resize: "both",
+    overflow: "auto",
+  },
 });
 
 export default function DialogView({
@@ -284,6 +289,10 @@ export default function DialogView({
     <Dialog
       open={open}
       onClose={handleClose}
+      maxWidth={false}
+      classes={{
+        paper: classes.dialogPaper,
+      }}
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle id="form-dialog-title" className={classes.dialogTitle}>
