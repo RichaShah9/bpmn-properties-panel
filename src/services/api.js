@@ -90,45 +90,97 @@ export async function getViews(model, criteria) {
   return views;
 }
 
+/**
+ *
+ * @param {String} formName
+ * @param {Object} model
+ * @param {Array} criteria
+ *
+ * If formName fetch form view
+ * else only model is selected
+ *  if model is metaModel
+ *    fetch both real and custom fields
+ * else
+ *    fetch only custom fields
+ */
 export async function getItems(formName, model, criteria) {
-  if (!formName) return [];
-  const res = await Service.post(`/ws/meta/view`, {
-    data: {
-      context: {
-        "json-enhance": "true",
-        _id: null,
+  if (!model || !model.model) return [];
+  let res;
+  if (formName) {
+    res = await Service.post(`/ws/meta/view`, {
+      data: {
+        context: {
+          "json-enhance": "true",
+          _id: null,
+        },
+        name: formName,
+        type: "form",
+        criteria,
       },
-      name: formName,
-      type: "form",
-      criteria,
-    },
-    model: model,
-  });
-  const { data = [] } = res || {};
-  const { fields = [], jsonAttrs = [], view } = data;
-  const items = [...fields, ...jsonAttrs];
-  const panels = [];
-  view &&
-    view.items &&
-    view.items.forEach((item) => {
-      panels.push(item);
-      if (item) {
-        const panelItems = item.items || [];
-        panelItems &&
-          panelItems.forEach((element) => {
-            panels.push(element);
-            const { jsonFields = [] } = element || {};
-            if (jsonFields.length > 0) {
-              jsonFields.forEach((field) => {
-                panels.push(field);
-              });
-            }
-          });
-      }
+      model: model.model,
     });
-  let allItems = [...items, ...panels];
-  let uniqueItems = _.uniqBy(allItems, "name") || [];
-  return [...uniqueItems];
+    const { data = [] } = res || {};
+    const { fields = [], jsonAttrs = [], view } = data;
+    const items = [...fields, ...jsonAttrs];
+    const panels = [];
+    view &&
+      view.items &&
+      view.items.forEach((item) => {
+        panels.push(item);
+        if (item) {
+          const panelItems = item.items || [];
+          panelItems &&
+            panelItems.forEach((element) => {
+              panels.push(element);
+              const { jsonFields = [] } = element || {};
+              if (jsonFields.length > 0) {
+                jsonFields.forEach((field) => {
+                  panels.push(field);
+                });
+              }
+            });
+        }
+      });
+    let allItems = [...items, ...panels];
+    let uniqueItems = _.uniqBy(allItems, "name") || [];
+    return [...uniqueItems];
+  } else {
+    let metaFields = [];
+    if (model.type === "metaModel") {
+      let modelArray = model.model.split(".");
+      let typeName = modelArray[modelArray.length - 1];
+      let packageName = modelArray.slice(0, modelArray.length - 1).join(".");
+      let metaFieldsRes =
+        (await Service.search("com.axelor.meta.db.MetaField", {
+          data: {
+            _domain: `self.packageName = '${packageName}' AND self.typeName = '${typeName}'`,
+            _domainContext: {
+              _model: "com.axelor.meta.db.MetaModel",
+            },
+          },
+        })) || {};
+      metaFields = _.uniqBy(metaFieldsRes.data || [], "label") || [];
+    }
+    let metaJsonFields =
+      (await Service.search("com.axelor.meta.db.MetaJsonField", {
+        data: {
+          _domain: `self.jsonModel is null AND self.model = '${model.model}'`,
+          _domainContext: {
+            _model: "com.axelor.meta.db.MetaJsonField",
+          },
+        },
+        fields: [
+          "sequence",
+          "modelField",
+          "name",
+          "model",
+          "type",
+          "appBuilder",
+        ],
+      })) || {};
+    let response = [...(metaFields || []), ...(metaJsonFields.data || [])];
+    return response;
+  }
 }
 
 export async function getRoles(criteria) {
