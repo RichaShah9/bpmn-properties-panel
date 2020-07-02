@@ -361,8 +361,18 @@ function BpmnModelerComponent() {
             items.forEach((item) => {
               const { itemName, attributeName, attributeValue } = item;
               if (!itemName) return;
-              addProperty("item", itemName);
+              let itemLabel = itemName["label"]
+                ? itemName["label"]
+                : itemName["title"]
+                ? itemName["title"]
+                : itemName["name"]
+                ? itemName["name"]
+                : typeof itemName === "object"
+                ? ""
+                : itemName;
+              addProperty("item", itemName.name);
               addProperty(attributeName, attributeValue || false);
+              addProperty("itemLabel", itemLabel);
             });
           }
         });

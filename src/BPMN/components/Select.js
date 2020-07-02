@@ -158,15 +158,27 @@ export default function SelectComponent({
           label={isLabel ? label : undefined}
         />
       )}
-      getOptionLabel={(option) =>
-        option[optionLabel]
-          ? option[optionLabel]
-          : option["title"]
-          ? option["title"]
-          : typeof option === "object"
-          ? ""
-          : option
-      }
+      getOptionLabel={(option) => {
+        if (name === "itemName") {
+          return option["label"]
+            ? option["label"]
+            : option["title"]
+            ? option["title"]
+            : option["name"]
+            ? option["name"]
+            : typeof option === "object"
+            ? ""
+            : option;
+        } else {
+          return option[optionLabel]
+            ? option[optionLabel]
+            : option["title"]
+            ? option["title"]
+            : typeof option === "object"
+            ? ""
+            : option;
+        }
+      }}
     />
   );
 }

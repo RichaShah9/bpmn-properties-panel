@@ -148,9 +148,6 @@ export default function DialogView({
       ...(items[itemIndex] || []),
       [name]: value && (value[label] || value),
     };
-    if (name === "itemName") {
-      items[itemIndex].type = value && value.type;
-    }
     values[index] = {
       ...(values[index] || {}),
       items,
@@ -275,7 +272,10 @@ export default function DialogView({
         items &&
           items.forEach((item) => {
             value.items.push({
-              itemName: item[0].value,
+              itemName: {
+                name: item[0] && item[0].value,
+                label: item[2] && item[2].value,
+              },
               attributeName: item[1] && item[1].name,
               attributeValue: item[1] && item[1].value,
             });
@@ -432,7 +432,7 @@ export default function DialogView({
                                                 fetchMethod={(data) =>
                                                   getItems(
                                                     val.view,
-                                                    val.model.model,
+                                                    val.model,
                                                     data
                                                   )
                                                 }
@@ -440,7 +440,7 @@ export default function DialogView({
                                                   handleItems(
                                                     value,
                                                     "itemName",
-                                                    "name",
+                                                    undefined,
                                                     index,
                                                     key
                                                   )
@@ -458,11 +458,14 @@ export default function DialogView({
                                               <Select
                                                 isLabel={false}
                                                 options={
-                                                  item.type &&
-                                                  (item.type.includes(
+                                                  item &&
+                                                  item.itemName &&
+                                                  item.itemName.type &&
+                                                  (item.itemName.type.includes(
                                                     "panel"
                                                   ) ||
-                                                    item.type === "button")
+                                                    item.itemName.type ===
+                                                      "button")
                                                     ? [
                                                         "readonly",
                                                         "readonlyIf",
