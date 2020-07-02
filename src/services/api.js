@@ -161,7 +161,7 @@ export async function getItems(formName, model, criteria) {
     let metaJsonFields =
       (await Service.search("com.axelor.meta.db.MetaJsonField", {
         data: {
-          _domain: `self.jsonModel is null AND self.model = '${model.model}'`,
+          _domain: `self.jsonModel.name = '${model.name}'`,
           _domainContext: {
             _model: "com.axelor.meta.db.MetaJsonField",
           },
