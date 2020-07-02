@@ -147,13 +147,10 @@ export async function getItems(formName, model, criteria) {
   } else {
     let metaFields = [];
     if (model.type === "metaModel") {
-      let modelArray = model.model.split(".");
-      let typeName = modelArray[modelArray.length - 1];
-      let packageName = modelArray.slice(0, modelArray.length - 1).join(".");
       let metaFieldsRes =
         (await Service.search("com.axelor.meta.db.MetaField", {
           data: {
-            _domain: `self.packageName = '${packageName}' AND self.typeName = '${typeName}'`,
+            _domain: `self.metaModel.fullName = '${model.model}'`,
             _domainContext: {
               _model: "com.axelor.meta.db.MetaModel",
             },
