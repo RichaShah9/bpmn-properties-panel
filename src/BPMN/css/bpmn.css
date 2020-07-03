@@ -98,27 +98,6 @@ body,
   opacity: 1;
 }
 
-#snackbar {
-  visibility: hidden;
-  min-width: 250px;
-  margin-left: -125px;
-  color: #fff;
-  text-align: center;
-  border-radius: 2px;
-  padding: 16px;
-  position: fixed;
-  z-index: 1;
-  left: 50%;
-  bottom: 30px;
-  font-size: 17px;
-}
-
-#snackbar.show {
-  visibility: visible;
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
-}
-
 #js-properties-panel {
   background: #f8f8f8;
   width: calc(100% - 1px);
@@ -202,6 +181,15 @@ h1 {
   cursor: w-resize;
 }
 
+.snackbarAlert {
+  display: flex;
+  align-items: center;
+}
+
+.snackbarAlert > .MuiAlert-message {
+  font-size: 14px;
+}
+
 .bpmn-property-toggle {
   position: absolute;
   left: calc(100% - 29.5px - var(--bpmn-container-width));
@@ -222,28 +210,6 @@ h1 {
 
 .bpp-properties-panel [type="text"] {
   width: calc(100% - 35px);
-}
-
-@-webkit-keyframes fadein {
-  from {
-    bottom: 0;
-    opacity: 0;
-  }
-  to {
-    bottom: 30px;
-    opacity: 1;
-  }
-}
-
-@keyframes fadein {
-  from {
-    bottom: 0;
-    opacity: 0;
-  }
-  to {
-    bottom: 30px;
-    opacity: 1;
-  }
 }
 
 @media only screen and (max-height: 710px) {

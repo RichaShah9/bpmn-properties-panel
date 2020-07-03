@@ -6,7 +6,9 @@ import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
+import Alert from "@material-ui/lab/Alert";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
+import { Snackbar } from "@material-ui/core";
 
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
@@ -48,11 +50,33 @@ const downloadXml = () => {
 
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
-  const [message, setMessage] = useState(null);
-  const [messageType, setMessageType] = useState(null);
   const [open, setOpen] = useState(false);
   const [id, setId] = useState(null);
   const [element, setElement] = useState(null);
+  const [openSnackbar, setSnackbar] = useState({
+    open: false,
+    messageType: null,
+    message: null,
+  });
+
+  const handleSnackbarClick = (messageType, message) => {
+    setSnackbar({
+      open: true,
+      messageType,
+      message,
+    });
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar({
+      open: false,
+      messageType: null,
+      message: null,
+    });
+  };
 
   const handleClickOpen = async () => {
     setOpen(true);
@@ -62,20 +86,11 @@ function BpmnModelerComponent() {
     setOpen(false);
   };
 
-  const showAlert = (id, message) => {
-    setMessage(message);
-    let x = document.getElementById(id);
-    if (!x) return;
-    x.className = "show";
-    setTimeout(function () {
-      x.className = x.className.replace("show", "");
-    }, 3000);
-  };
-
   const openBpmnDiagram = React.useCallback(function openBpmnDiagram(xml) {
     bpmnModeler.importXML(xml, (error) => {
       if (error) {
-        return console.log("Error! Can't import XML");
+        handleSnackbarClick("error", "Error! Can't import XML");
+        return;
       }
       let canvas = bpmnModeler.get("canvas");
       canvas.zoom("fit-viewport");
@@ -145,8 +160,7 @@ function BpmnModelerComponent() {
       files[0].name &&
       !files[0].name.includes(".bpmn")
     ) {
-      setMessageType("error");
-      showAlert("snackbar", "Upload Bpmn files only");
+      handleSnackbarClick("error", "Upload Bpmn files only");
       return;
     }
     reader.readAsText(files[0]);
@@ -163,12 +177,10 @@ function BpmnModelerComponent() {
       });
       if (res && res.data && res.data[0]) {
         setWkf({ ...res.data[0] });
-        setMessageType("success");
-        showAlert("snackbar", "Saved Successfully");
+        handleSnackbarClick("success", "Saved Successfully");
       } else {
-        setMessageType("error");
-        showAlert(
-          "snackbar",
+        handleSnackbarClick(
+          "error",
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
@@ -199,13 +211,11 @@ function BpmnModelerComponent() {
           actionRes.data[0] &&
           actionRes.data[0].reload
         ) {
-          setMessageType("success");
-          showAlert("snackbar", "Deployed Successfully");
+          handleSnackbarClick("success", "Deployed Successfully");
           fetchDiagram(wkf.id);
         } else {
-          setMessageType("error");
-          showAlert(
-            "snackbar",
+          handleSnackbarClick(
+            "error",
             (actionRes &&
               actionRes.data &&
               (actionRes.data.message || actionRes.data.title)) ||
@@ -213,9 +223,8 @@ function BpmnModelerComponent() {
           );
         }
       } else {
-        setMessageType("error");
-        showAlert(
-          "snackbar",
+        handleSnackbarClick(
+          "error",
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
@@ -554,15 +563,21 @@ function BpmnModelerComponent() {
           ></div>
         </div>
       </div>
-      {message && (
-        <div
-          id="snackbar"
-          style={{
-            backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
-          }}
+      {openSnackbar.open && (
+        <Snackbar
+          open={openSnackbar.open}
+          autoHideDuration={2000}
+          onClose={handleSnackbarClose}
         >
-          {message}
-        </div>
+          <Alert
+            elevation={6}
+            variant="filled"
+            onClose={handleSnackbarClose}
+            className="snackbarAlert"
+          >
+            {openSnackbar.message}
+          </Alert>
+        </Snackbar>
       )}
       {open && element && (
         <Dialog

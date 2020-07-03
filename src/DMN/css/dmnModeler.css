@@ -78,3 +78,12 @@ body,
   cursor: default;
   user-select: none;
 }
+
+.snackbarAlert {
+  display: flex;
+  align-items: center;
+}
+
+.snackbarAlert > .MuiAlert-message {
+  font-size: 14px;
+}

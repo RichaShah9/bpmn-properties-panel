@@ -5,6 +5,8 @@ import propertiesPanelModule from "dmn-js-properties-panel";
 import drdAdapterModule from "dmn-js-properties-panel/lib/adapter/drd";
 import propertiesProviderModule from "dmn-js-properties-panel/lib/provider/camunda";
 import camundaModdleDescriptor from "camunda-dmn-moddle/resources/camunda";
+import Alert from "@material-ui/lab/Alert";
+import { Snackbar } from "@material-ui/core";
 
 import Service from "../services/Service";
 import { download } from "../utils";
@@ -85,25 +87,36 @@ const exportDiagram = () => {
 
 function DMNModeler() {
   const [wkfModel, setWkfModel] = useState(null);
-  const [message, setMessage] = useState(null);
-  const [messageType, setMessageType] = useState(null);
+  const [openSnackbar, setSnackbar] = useState({
+    open: false,
+    messageType: null,
+    message: null,
+  });
 
-  const showAlert = (id, message) => {
-    setMessage(message);
-    let x = document.getElementById(id);
-    if (!x) return;
-    x.className = "show";
-    setTimeout(function () {
-      x.className = x.className.replace("show", "");
-    }, 3000);
+  const handleSnackbarClick = (messageType, message) => {
+    setSnackbar({
+      open: true,
+      messageType,
+      message,
+    });
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar({
+      open: false,
+      messageType: null,
+      message: null,
+    });
   };
 
   const uploadFile = (e) => {
     let files = e.target.files;
     let reader = new FileReader();
     if (files && files[0] && files[0].name && !files[0].name.includes(".dmn")) {
-      setMessageType("error");
-      showAlert("snackbar", "Upload dmn files only");
+      handleSnackbarClick("error", "Upload dmn files only");
       return;
     }
     reader.readAsText(files[0]);
@@ -120,12 +133,10 @@ function DMNModeler() {
       }).then((res) => {
         if (res && res.data && res.data[0]) {
           setWkfModel({ ...res.data[0] });
-          setMessageType("success");
-          showAlert("snackbar", "Saved Successfully");
+          handleSnackbarClick("success", "Saved Successfully");
         } else {
-          setMessageType("error");
-          showAlert(
-            "snackbar",
+          handleSnackbarClick(
+            "error",
             (res && res.data && (res.data.message || res.data.title)) ||
               "Error!"
           );
@@ -158,13 +169,11 @@ function DMNModeler() {
           actionRes.data[0] &&
           actionRes.data[0].reload
         ) {
-          setMessageType("success");
-          showAlert("snackbar", "Deployed Successfully");
+          handleSnackbarClick("success", "Deployed Successfully");
           fetchDiagram(wkfModel.id, setWkfModel);
         } else {
-          setMessageType("error");
-          showAlert(
-            "snackbar",
+          handleSnackbarClick(
+            "error",
             (actionRes &&
               actionRes.data &&
               (actionRes.data.message || actionRes.data.title)) ||
@@ -172,9 +181,8 @@ function DMNModeler() {
           );
         }
       } else {
-        setMessageType("error");
-        showAlert(
-          "snackbar",
+        handleSnackbarClick(
+          "error",
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
@@ -308,14 +316,22 @@ function DMNModeler() {
           </div>
         </div>
       </div>
-      {message && <div
-        id="snackbar"
-        style={{
-          backgroundColor: messageType === "error" ? "#f44336" : "#4caf50",
-        }}
-      >
-        {message}
-      </div>}
+      {openSnackbar.open && (
+        <Snackbar
+          open={openSnackbar.open}
+          autoHideDuration={2000}
+          onClose={handleSnackbarClose}
+        >
+          <Alert
+            elevation={6}
+            variant="filled"
+            onClose={handleSnackbarClose}
+            className="snackbarAlert"
+          >
+            {openSnackbar.message}
+          </Alert>
+        </Snackbar>
+      )}
     </div>
   );
 }
