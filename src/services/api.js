@@ -87,6 +87,7 @@ export async function getViews(model, criteria) {
   });
   const { data = [] } = res || {};
   let views = data.filter((val) => val.name !== null);
+  views = _.uniqBy(views || [], "name") || [];
   return views;
 }
 
