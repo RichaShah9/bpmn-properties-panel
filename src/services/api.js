@@ -167,14 +167,7 @@ export async function getItems(formName, model, criteria) {
             _model: "com.axelor.meta.db.MetaJsonField",
           },
         },
-        fields: [
-          "sequence",
-          "modelField",
-          "name",
-          "model",
-          "type",
-          "appBuilder",
-        ],
+        fields: ["name", "model", "type", "title"],
       })) || {};
     let response = [...(metaFields || []), ...(metaJsonFields.data || [])];
     return response;
