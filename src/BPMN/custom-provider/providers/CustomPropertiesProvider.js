@@ -12,14 +12,12 @@ import { is } from "bpmn-js/lib/util/ModelUtil";
 import processProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps";
 import eventProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps";
 import linkProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps";
-import documentationProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/DocumentationProps";
 import idProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/IdProps";
 import nameProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps";
 import executableProps from "bpmn-js-properties-panel/lib/provider/bpmn/parts/ExecutableProps";
 
 // camunda properties
 import serviceTaskDelegateProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/ServiceTaskDelegateProps";
-import asynchronousContinuationProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/AsynchronousContinuationProps";
 import callActivityProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/CallActivityProps";
 import multiInstanceProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/MultiInstanceLoopProps";
 import conditionalProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/ConditionalProps";
@@ -215,13 +213,6 @@ function createGeneralTabGroups(
   };
   multiInstanceProps(multiInstanceGroup, element, bpmnFactory, translate);
 
-  let asyncGroup = {
-    id: "async",
-    label: translate("Asynchronous Continuations"),
-    entries: [],
-  };
-  asynchronousContinuationProps(asyncGroup, element, bpmnFactory, translate);
-
   let jobConfigurationGroup = {
     id: "jobConfiguration",
     label: translate("Job Configuration"),
@@ -259,28 +250,21 @@ function createGeneralTabGroups(
   };
   tasklist(tasklistGroup, element, bpmnFactory, translate);
 
-  let documentationGroup = {
-    id: "documentation",
-    label: translate("Documentation"),
-    entries: [],
-  };
-  documentationProps(documentationGroup, element, bpmnFactory, translate);
-
   let groups = [];
   groups.push(generalGroup);
   customFieldsGroups.forEach(function (group) {
     groups.push(group);
   });
   groups.push(detailsGroup);
-  groups.push(externalTaskGroup);
   groups.push(multiInstanceGroup);
-  groups.push(asyncGroup);
-  groups.push(jobConfigurationGroup);
-  groups.push(candidateStarterGroup);
-  groups.push(historyTimeToLiveGroup);
-  groups.push(tasklistGroup);
-  groups.push(documentationGroup);
-
+  
+  if(element.type !== "bpmn:Process"){
+    groups.push(externalTaskGroup);
+    groups.push(jobConfigurationGroup);
+    groups.push(candidateStarterGroup);
+    groups.push(historyTimeToLiveGroup);
+    groups.push(tasklistGroup);
+  }
   return groups;
 }
 
