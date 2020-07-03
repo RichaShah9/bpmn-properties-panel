@@ -46,7 +46,7 @@ export default function SelectComponent({
   fetchMethod,
   isLabel = true,
 }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
   const [searchText, setsearchText] = useState(null);
   const classes = useStyles();
@@ -61,14 +61,14 @@ export default function SelectComponent({
           value: searchText,
         });
       }
-      if (!fetchMethod) return;
+      if (!fetchMethod || !open) return;
       return fetchMethod(criteria).then((res) => {
         if (res) {
           setOptions(res);
         }
       });
     },
-    [optionLabel, fetchMethod]
+    [optionLabel, fetchMethod, open]
   );
 
   const optionDebounceHandler = React.useCallback(() => {
@@ -113,15 +113,36 @@ export default function SelectComponent({
         e && e.stopPropagation();
         setOpen(false);
       }}
-      onClick={(e) => e && e.stopPropagation()}
+      onClick={(e) => {
+        e && e.stopPropagation();
+        setOpen(true);
+      }}
       clearOnEscape
       autoComplete
       className={classes.autoComplete}
       options={options}
       multiple={multiple}
-      value={value || {}}
+      value={value}
       getOptionSelected={(option, val) => {
-        return option === val[optionLabel];
+        let optionName = "";
+        if (name === "itemName") {
+          optionName = option["label"]
+            ? "label"
+            : option["title"]
+            ? "title"
+            : option["name"]
+            ? "name"
+            : "name";
+        } else {
+          optionName = option[optionLabel]
+            ? optionLabel
+            : option["title"]
+            ? "title"
+            : "name";
+        }
+        return name === "view"
+          ? option[optionName] === val
+          : option[optionName] === val[optionName];
       }}
       onChange={(e, value) => {
         let values = value;
