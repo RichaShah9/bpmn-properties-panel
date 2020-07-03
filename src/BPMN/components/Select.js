@@ -3,6 +3,8 @@ import AutoComplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
+import { translate } from "../../utils";
+
 function useDebounceEffect(handler, interval) {
   const isMounted = React.useRef(false);
   React.useEffect(() => {
@@ -159,8 +161,9 @@ export default function SelectComponent({
         />
       )}
       getOptionLabel={(option) => {
+        let optionName = "";
         if (name === "itemName") {
-          return option["label"]
+          optionName = option["label"]
             ? option["label"]
             : option["title"]
             ? option["title"]
@@ -170,7 +173,7 @@ export default function SelectComponent({
             ? ""
             : option;
         } else {
-          return option[optionLabel]
+          optionName = option[optionLabel]
             ? option[optionLabel]
             : option["title"]
             ? option["title"]
@@ -178,6 +181,7 @@ export default function SelectComponent({
             ? ""
             : option;
         }
+        return translate(optionName);
       }}
     />
   );
