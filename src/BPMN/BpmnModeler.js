@@ -368,7 +368,7 @@ function BpmnModelerComponent() {
           }
           if (items.length > 0) {
             items.forEach((item) => {
-              const { itemName, attributeName, attributeValue } = item;
+              const { itemName, attributeName, attributeValue = false } = item;
               if (!itemName) return;
               let itemLabel = itemName["label"]
                 ? itemName["label"]
@@ -380,7 +380,7 @@ function BpmnModelerComponent() {
                 ? ""
                 : itemName;
               addProperty("item", itemName.name);
-              addProperty(attributeName, attributeValue || false);
+              addProperty(attributeName, attributeValue);
               addProperty("itemLabel", itemLabel);
             });
           }
