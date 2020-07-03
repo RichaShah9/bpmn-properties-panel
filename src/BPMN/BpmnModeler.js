@@ -396,10 +396,6 @@ function BpmnModelerComponent() {
     let elementTemplate = document.querySelectorAll(
       "[data-entry=elementTemplate-chooser]"
     );
-
-    let extensionTab = document.querySelectorAll(
-      "[data-tab=extensionElements]"
-    );
     if (element && element[0] && element[0].childNodes) {
       if (isUserTask) {
         element[0].childNodes[1].style.display = "none";
@@ -409,43 +405,6 @@ function BpmnModelerComponent() {
     }
     if (elementTemplate && elementTemplate[0]) {
       elementTemplate[0].style.display = "none";
-    }
-    if (extensionTab && extensionTab[0] && isUserTask) {
-      let childNodes = extensionTab[0].querySelector(
-        "[data-list-entry-container]"
-      ).childNodes;
-      childNodes &&
-        childNodes.forEach((node) => {
-          let childrens = node.childNodes || [];
-          childrens &&
-            childrens.forEach((child) => {
-              if (
-                child &&
-                child.value &&
-                [
-                  "model",
-                  "modelname",
-                  "modeltype",
-                  "view",
-                  "item",
-                  "roles",
-                  "readonly",
-                  "readonlyif",
-                  "hidden",
-                  "hideif",
-                  "required",
-                  "requiredif",
-                  "title",
-                  "domain",
-                  "completedif",
-                  "buttons",
-                  "itemlabel",
-                ].includes(child.value.toLowerCase())
-              ) {
-                node.style.display = "none";
-              }
-            });
-        });
     }
   };
 
