@@ -37,17 +37,10 @@ import listenerFields from "bpmn-js-properties-panel/lib/provider/camunda/parts/
 import elementTemplateChooserProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/ChooserProps";
 import elementTemplateCustomProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/CustomProps";
 
-// Input/Output
-import inputOutput from "bpmn-js-properties-panel/lib/provider/camunda/parts/InputOutputProps";
-import inputOutputParameter from "bpmn-js-properties-panel/lib/provider/camunda/parts/InputOutputParameterProps";
-
 // Connector
 import connectorDetails from "bpmn-js-properties-panel/lib/provider/camunda/parts/ConnectorDetailProps";
 import connectorInputOutput from "bpmn-js-properties-panel/lib/provider/camunda/parts/ConnectorInputOutputProps";
 import connectorInputOutputParameter from "bpmn-js-properties-panel/lib/provider/camunda/parts/ConnectorInputOutputParameterProps";
-
-// properties
-import properties from "bpmn-js-properties-panel/lib/provider/camunda/parts/PropertiesProps";
 
 // job configuration
 import jobConfiguration from "bpmn-js-properties-panel/lib/provider/camunda/parts/JobConfigurationProps";
@@ -374,46 +367,6 @@ function createListenersTabGroups(
   return [listenersGroup, listenerDetailsGroup, listenerFieldsGroup];
 }
 
-function createInputOutputTabGroups(
-  element,
-  bpmnFactory,
-  elementRegistry,
-  translate
-) {
-  if (is(element, "bpmn:UserTask")) {
-    return;
-  }
-  let inputOutputGroup = {
-    id: "input-output",
-    label: translate("Parameters"),
-    entries: [],
-  };
-
-  let options = inputOutput(inputOutputGroup, element, bpmnFactory, translate);
-
-  let inputOutputParameterGroup = {
-    id: "input-output-parameter",
-    entries: [],
-    enabled: function (element, node) {
-      return options.getSelectedParameter(element, node);
-    },
-    label: function (element, node) {
-      var param = options.getSelectedParameter(element, node);
-      return getInputOutputParameterLabel(param, translate);
-    },
-  };
-
-  inputOutputParameter(
-    inputOutputParameterGroup,
-    element,
-    bpmnFactory,
-    options,
-    translate
-  );
-
-  return [inputOutputGroup, inputOutputParameterGroup];
-}
-
 function createConnectorTabGroups(
   element,
   bpmnFactory,
@@ -483,21 +436,6 @@ function createFieldInjectionsTabGroups(
   fieldInjections(fieldGroup, element, bpmnFactory, translate);
 
   return [fieldGroup];
-}
-
-function createExtensionElementsGroups(
-  element,
-  bpmnFactory,
-  elementRegistry,
-  translate
-) {
-  let propertiesGroup = {
-    id: "extensionElements-properties",
-    label: translate("Properties"),
-    entries: [],
-  };
-  properties(propertiesGroup, element, bpmnFactory, translate);
-  return [propertiesGroup];
 }
 
 // Camunda Properties Provider /////////////////////////////////////
@@ -576,17 +514,6 @@ export default function CustomPropertiesProvider(
       },
     };
 
-    let inputOutputTab = {
-      id: "input-output",
-      label: translate("Input/Output"),
-      groups: createInputOutputTabGroups(
-        element,
-        bpmnFactory,
-        elementRegistry,
-        translate
-      ),
-    };
-
     let connectorTab = {
       id: "connector",
       label: translate("Connector"),
@@ -618,26 +545,13 @@ export default function CustomPropertiesProvider(
       ),
     };
 
-    var extensionsTab = {
-      id: "extensionElements",
-      label: translate("Extensions"),
-      groups: createExtensionElementsGroups(
-        element,
-        bpmnFactory,
-        elementRegistry,
-        translate
-      ),
-    };
-
     return [
       generalTab,
       variablesTab,
       connectorTab,
       formsTab,
       listenersTab,
-      inputOutputTab,
       fieldInjectionsTab,
-      extensionsTab,
     ];
   };
 }
