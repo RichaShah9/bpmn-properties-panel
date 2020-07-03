@@ -10,6 +10,7 @@ import Alert from "@material-ui/lab/Alert";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
 
+import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
 import Dialog from "./DialogView";
@@ -459,7 +460,11 @@ function BpmnModelerComponent() {
       propertiesPanel: {
         parent: "#js-properties-panel",
       },
-      additionalModules: [propertiesPanelModule, propertiesProviderModule],
+      additionalModules: [
+        propertiesPanelModule,
+        propertiesProviderModule,
+        propertiesCustomProviderModule,
+      ],
       elementTemplates: templates,
       moddleExtensions: {
         camunda: camundaModdleDescriptor,
