@@ -148,6 +148,9 @@ export default function DialogView({
       ...(items[itemIndex] || []),
       [name]: value && (value[label] || value),
     };
+    if (name === "attributeName") {
+      items[itemIndex].attributeValue = "";
+    }
     values[index] = {
       ...(values[index] || {}),
       items,
@@ -221,6 +224,11 @@ export default function DialogView({
       }, [])
     );
   }
+
+  const getBool = (val) => {
+    if (!val) return;
+    return !!JSON.parse(String(val).toLowerCase());
+  };
 
   useEffect(() => {
     if (!element) return;
@@ -518,7 +526,7 @@ export default function DialogView({
                                                 ) && (
                                                   <Checkbox
                                                     checked={
-                                                      Boolean(
+                                                      getBool(
                                                         item.attributeValue
                                                       ) || false
                                                     }
