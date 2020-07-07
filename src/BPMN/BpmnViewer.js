@@ -88,14 +88,17 @@ const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
     if (!activityCounts) return;
     const activities = activityCounts.split(",") || [];
     const overlayActivies = [];
-
+    const nodeKeys = Object.keys(nodes) || [];
+    if (nodeKeys.length < 1) return;
     if (activities.length <= 0) return;
     activities.forEach((activity) => {
       let taskActivity = activity.split(":");
-      overlayActivies.push({
-        id: taskActivity[0],
-        count: taskActivity[1],
-      });
+      if (nodeKeys.includes(taskActivity[0])) {
+        overlayActivies.push({
+          id: taskActivity[0],
+          count: taskActivity[1],
+        });
+      }
     });
 
     let overlays = bpmnViewer.get("overlays");
