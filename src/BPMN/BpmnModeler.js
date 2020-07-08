@@ -14,6 +14,7 @@ import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
 import Dialog from "./DialogView";
+import AlertDialog from "./components/AlertDialog";
 import { download } from "../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -54,11 +55,20 @@ function BpmnModelerComponent() {
   const [open, setOpen] = useState(false);
   const [id, setId] = useState(null);
   const [element, setElement] = useState(null);
+  const [openAlert, setAlert] = React.useState(false);
   const [openSnackbar, setSnackbar] = useState({
     open: false,
     messageType: null,
     message: null,
   });
+
+  const alertOpen = () => {
+    setAlert(true);
+  };
+
+  const alertClose = () => {
+    setAlert(false);
+  };
 
   const handleSnackbarClick = (messageType, message) => {
     setSnackbar({
@@ -350,11 +360,19 @@ function BpmnModelerComponent() {
   const handleAdd = (row) => {
     if (!row) return;
     const { values = [] } = row;
+    let isValid = true;
     if (values.length > 0) {
       values &&
         values.forEach((value) => {
           const { model, view, roles = [], items = [] } = value;
-          if (!model) return;
+          const checkItems = items.filter(
+            (item) => item && (!item.itemName || !item.attributeName)
+          );
+          if (items.length < 1 || checkItems.length === items.length) {
+            alertOpen();
+            isValid = false;
+            return;
+          }
           if (model) {
             addProperty("model", model.model);
             addProperty("modelName", model.name);
@@ -370,14 +388,20 @@ function BpmnModelerComponent() {
           if (items.length > 0) {
             items.forEach((item) => {
               let { itemName, attributeName, attributeValue } = item;
-              if (!itemName) return;
+              if (!itemName || !attributeName) {
+                isValid = false;
+                alertOpen();
+                return;
+              }
               if (!attributeValue) {
                 if (
                   ["readonly", "hidden", "required"].includes(attributeName)
                 ) {
                   attributeValue = false;
                 } else {
-                  attributeValue = "";
+                  isValid = false;
+                  alertOpen();
+                  return;
                 }
               }
               let itemLabel = itemName["label"]
@@ -395,9 +419,14 @@ function BpmnModelerComponent() {
             });
           }
         });
+      if (isValid) {
+        onSave();
+        handleClose();
+      }
+    } else {
+      onSave();
+      handleClose();
     }
-    onSave();
-    handleClose();
   };
 
   const removeLabels = (isUserTask = false) => {
@@ -559,6 +588,14 @@ function BpmnModelerComponent() {
           handleAdd={handleAdd}
           open={open}
           element={element}
+        />
+      )}
+      {openAlert && (
+        <AlertDialog
+          openAlert={openAlert}
+          alertClose={alertClose}
+          message="Item is required."
+          title="Error"
         />
       )}
     </div>

@@ -97,6 +97,7 @@ const useStyles = makeStyles({
     padding: 5,
     resize: "both",
     overflow: "auto",
+    minWidth: 300,
   },
 });
 
@@ -117,12 +118,23 @@ export default function DialogView({
     });
   };
 
+  const updateErrorValue = (index, name) => {
+    const cloneRow = { ...row };
+    let values = cloneRow.values;
+    values[index] = {
+      ...(values[index] || {}),
+      [`${name}Error`]: true,
+    };
+    setRow({ ...cloneRow });
+  };
+
   const updateValue = (value, name, label, index) => {
     const cloneRow = { ...row };
     let values = cloneRow.values;
     values[index] = {
       ...(values[index] || {}),
       [name]: (value && value[label]) || value,
+      [`${name}Error`]: false,
     };
     setRow({ ...cloneRow });
   };
@@ -140,6 +152,21 @@ export default function DialogView({
     setRow({ ...cloneRow });
   };
 
+  const updateItemErrorValues = (index, itemIndex, name) => {
+    const cloneRow = { ...row };
+    let values = cloneRow.values;
+    let items = cloneRow.values[index].items;
+    items[itemIndex] = {
+      ...(items[itemIndex] || []),
+      [`${name}Error`]: true,
+    };
+    values[index] = {
+      ...(values[index] || {}),
+      items,
+    };
+    setRow({ ...cloneRow });
+  };
+
   const handleItems = (value, name, label, index, itemIndex) => {
     const cloneRow = { ...row };
     let values = cloneRow.values;
@@ -147,6 +174,7 @@ export default function DialogView({
     items[itemIndex] = {
       ...(items[itemIndex] || []),
       [name]: value && (value[label] || value),
+      [`${name}Error`]: false,
     };
     if (name === "attributeName") {
       items[itemIndex].attributeValue = null;
@@ -209,7 +237,45 @@ export default function DialogView({
       );
       businessObject.extensionElements.get("values")[0].values = [...elements];
     }
-    handleAdd(row);
+    let isValid = true;
+    if (row.values.length > 0) {
+      row.values &&
+        row.values.forEach((value, index) => {
+          const { model, items = [] } = value;
+          if (!model) {
+            isValid = false;
+            updateErrorValue(index, "model");
+            return;
+          }
+          if (items.length > 0) {
+            items.forEach((item, itemIndex) => {
+              let { itemName, attributeName, attributeValue } = item;
+              if (!itemName) {
+                isValid = false;
+                updateItemErrorValues(index, itemIndex, "itemName");
+                return;
+              }
+              if (!attributeName) {
+                isValid = false;
+                updateItemErrorValues(index, itemIndex, "attributeName");
+                return;
+              }
+              if (!attributeValue) {
+                if (
+                  !["readonly", "hidden", "required"].includes(attributeName)
+                ) {
+                  isValid = false;
+                  updateItemErrorValues(index, itemIndex, "attributeValue");
+                  return;
+                }
+              }
+            });
+          }
+        });
+    }
+    if (isValid) {
+      handleAdd(row);
+    }
   };
 
   function getKeyData(data, key) {
@@ -335,6 +401,7 @@ export default function DialogView({
                                   }
                                   name="model"
                                   value={val.model}
+                                  error={val.modelError}
                                   optionLabel="name"
                                   label="Model"
                                 />
@@ -456,6 +523,7 @@ export default function DialogView({
                                                 }
                                                 name="itemName"
                                                 value={item.itemName}
+                                                error={item.itemNameError}
                                                 optionLabel="name"
                                                 label="Item"
                                               />
@@ -508,6 +576,7 @@ export default function DialogView({
                                                   )
                                                 }
                                                 name="attributeName"
+                                                error={item.attributeNameError}
                                                 value={item.attributeName}
                                                 label="Attribute"
                                               />
@@ -566,6 +635,9 @@ export default function DialogView({
                                                         key
                                                       );
                                                     }}
+                                                    error={
+                                                      item.attributeValueError
+                                                    }
                                                     name="attributeValue"
                                                     size="small"
                                                     placeholder={`${item.attributeName} value`}
