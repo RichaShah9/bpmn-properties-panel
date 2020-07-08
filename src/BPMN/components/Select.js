@@ -45,6 +45,7 @@ export default function SelectComponent({
   label,
   fetchMethod,
   isLabel = true,
+  error = false,
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
@@ -122,9 +123,9 @@ export default function SelectComponent({
       className={classes.autoComplete}
       options={options}
       multiple={multiple}
-      value={value}
+      value={value || ""}
       getOptionSelected={(option, val) => {
-        if(!val) return
+        if (!val) return;
         let optionName = "";
         if (name === "itemName") {
           optionName = option["label"]
@@ -161,6 +162,8 @@ export default function SelectComponent({
       onInputChange={(e, val) => setsearchText(value)}
       renderInput={(params) => (
         <TextField
+          error={error}
+          helperText={error ? "Required" : ""}
           fullWidth
           {...params}
           InputProps={{
