@@ -421,7 +421,7 @@ export default function DialogView({
                                       updateValue(value, "view", "name", index)
                                     }
                                     name="view"
-                                    value={val.view}
+                                    value={val.view || ""}
                                     label="View"
                                   />
                                 )}

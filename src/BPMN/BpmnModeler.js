@@ -195,6 +195,9 @@ function BpmnModelerComponent() {
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
+      if (open) {
+        handleClose();
+      }
     });
   };
 
@@ -421,11 +424,9 @@ function BpmnModelerComponent() {
         });
       if (isValid) {
         onSave();
-        handleClose();
       }
     } else {
       onSave();
-      handleClose();
     }
   };
 

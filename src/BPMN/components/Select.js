@@ -123,7 +123,7 @@ export default function SelectComponent({
       className={classes.autoComplete}
       options={options}
       multiple={multiple}
-      value={value || ""}
+      value={value}
       getOptionSelected={(option, val) => {
         if (!val) return;
         let optionName = "";
