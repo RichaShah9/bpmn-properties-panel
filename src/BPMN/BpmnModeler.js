@@ -369,8 +369,17 @@ function BpmnModelerComponent() {
           }
           if (items.length > 0) {
             items.forEach((item) => {
-              const { itemName, attributeName, attributeValue = false } = item;
+              let { itemName, attributeName, attributeValue } = item;
               if (!itemName) return;
+              if (!attributeValue) {
+                if (
+                  ["readonly", "hidden", "required"].includes(attributeName)
+                ) {
+                  attributeValue = false;
+                } else {
+                  attributeValue = "";
+                }
+              }
               let itemLabel = itemName["label"]
                 ? itemName["label"]
                 : itemName["title"]

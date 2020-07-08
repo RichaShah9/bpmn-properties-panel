@@ -149,7 +149,7 @@ export default function DialogView({
       [name]: value && (value[label] || value),
     };
     if (name === "attributeName") {
-      items[itemIndex].attributeValue = "";
+      items[itemIndex].attributeValue = null;
     }
     values[index] = {
       ...(values[index] || {}),

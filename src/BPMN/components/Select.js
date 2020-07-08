@@ -124,6 +124,7 @@ export default function SelectComponent({
       multiple={multiple}
       value={value}
       getOptionSelected={(option, val) => {
+        if(!val) return
         let optionName = "";
         if (name === "itemName") {
           optionName = option["label"]
