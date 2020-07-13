@@ -7,6 +7,7 @@ import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camu
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import Alert from "@material-ui/lab/Alert";
+import _ from "lodash";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
 
@@ -14,6 +15,7 @@ import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
 import Dialog from "./DialogView";
+import DeployDialog from "./DeployDialog";
 import AlertDialog from "./components/AlertDialog";
 import { download } from "../utils";
 
@@ -55,7 +57,12 @@ function BpmnModelerComponent() {
   const [open, setOpen] = useState(false);
   const [id, setId] = useState(null);
   const [element, setElement] = useState(null);
-  const [openAlert, setAlert] = React.useState(false);
+  const [openAlert, setAlert] = useState(false);
+  const [openDelopyDialog, setDelopyDialog] = useState(false);
+  const [ids, setIds] = useState({
+    oldIds: null,
+    currentIds: null,
+  });
   const [openSnackbar, setSnackbar] = useState({
     open: false,
     messageType: null,
@@ -97,11 +104,28 @@ function BpmnModelerComponent() {
     setOpen(false);
   };
 
-  const openBpmnDiagram = React.useCallback(function openBpmnDiagram(xml) {
+  const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
+    xml,
+    isDeploy
+  ) {
     bpmnModeler.importXML(xml, (error) => {
       if (error) {
         handleSnackbarClick("error", "Error! Can't import XML");
         return;
+      }
+      if (isDeploy) {
+        let elementRegistry = bpmnModeler.get("elementRegistry");
+        let elementIds = [];
+        elementRegistry.filter(function (element) {
+          if (element.type !== "label") {
+            elementIds.push({
+              id: element.id,
+              name: element.businessObject.name || element.id,
+            });
+          }
+          return element;
+        });
+        window.localStorage.setItem("elementIds", JSON.stringify(elementIds));
       }
       let canvas = bpmnModeler.get("canvas");
       canvas.zoom("fit-viewport");
@@ -115,10 +139,11 @@ function BpmnModelerComponent() {
         }
       });
     });
-  }, []);
+  },
+  []);
 
   const newBpmnDiagram = React.useCallback(
-    function newBpmnDiagram(rec) {
+    function newBpmnDiagram(rec, isDeploy) {
       const diagram =
         rec ||
         `<?xml version="1.0" encoding="UTF-8" ?>
@@ -142,21 +167,21 @@ function BpmnModelerComponent() {
           </bpmndi:BPMNPlane>
         </bpmndi:BPMNDiagram>
       </bpmn2:definitions>`;
-      openBpmnDiagram(diagram);
+      openBpmnDiagram(diagram, isDeploy);
     },
     [openBpmnDiagram]
   );
 
   const fetchDiagram = React.useCallback(
-    async function fetchDiagram(id) {
+    async function fetchDiagram(id, isDeploy = false) {
       if (id) {
         let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
         const wkf = (res && res.data && res.data[0]) || {};
         let { diagramXml } = wkf;
         setWkf(wkf);
-        newBpmnDiagram(diagramXml);
+        newBpmnDiagram(diagramXml, isDeploy);
       } else {
-        newBpmnDiagram(undefined);
+        newBpmnDiagram(undefined, isDeploy);
       }
     },
     [newBpmnDiagram]
@@ -201,7 +226,7 @@ function BpmnModelerComponent() {
     });
   };
 
-  const deployDiagram = async () => {
+  const deploy = async (wkfMigrationMap = []) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
@@ -216,6 +241,7 @@ function BpmnModelerComponent() {
             context: {
               _model: "com.axelor.apps.bpm.db.WkfModel",
               ...res.data[0],
+              wkfMigrationMap: wkfMigrationMap,
             },
           },
         });
@@ -226,7 +252,7 @@ function BpmnModelerComponent() {
           actionRes.data[0].reload
         ) {
           handleSnackbarClick("success", "Deployed Successfully");
-          fetchDiagram(wkf.id);
+          fetchDiagram(wkf.id, true);
         } else {
           handleSnackbarClick(
             "error",
@@ -243,6 +269,41 @@ function BpmnModelerComponent() {
         );
       }
     });
+  };
+
+  const handleOk = (wkfMigrationMap) => {
+    setDelopyDialog(false);
+    deploy(wkfMigrationMap);
+  };
+
+  const deployDiagram = async () => {
+    let elementRegistry = bpmnModeler.get("elementRegistry");
+    let elements = [];
+    let elementIds = [];
+    elementRegistry.filter((element) => {
+      if (element.type !== "label") {
+        elements.push({
+          id: element.id,
+          name: element.businessObject.name || element.id,
+        });
+        elementIds.push(element.id);
+      }
+      return element;
+    });
+    let oldElements = JSON.parse(window.localStorage.getItem("elementIds"));
+    let oldElementIds = oldElements && oldElements.map((oldEle) => oldEle.id);
+    setIds({
+      currentIds: elements,
+      oldIds: oldElements,
+    });
+    if (
+      _.isEqual(_.sortBy(elementIds), _.sortBy(oldElementIds)) ||
+      !oldElementIds
+    ) {
+      deploy();
+    } else {
+      setDelopyDialog(true);
+    }
   };
 
   const toolBarButtons = [
@@ -597,6 +658,14 @@ function BpmnModelerComponent() {
           alertClose={alertClose}
           message="Item is required."
           title="Error"
+        />
+      )}
+      {openDelopyDialog && (
+        <DeployDialog
+          open={openDelopyDialog}
+          onClose={() => setDelopyDialog(false)}
+          ids={ids}
+          onOk={(wkfMigrationMap) => handleOk(wkfMigrationMap)}
         />
       )}
     </div>
