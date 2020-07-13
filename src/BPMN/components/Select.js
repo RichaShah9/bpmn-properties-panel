@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import classnames from "classnames";
 import AutoComplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -46,6 +47,7 @@ export default function SelectComponent({
   fetchMethod,
   isLabel = true,
   error = false,
+  className,
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
@@ -120,7 +122,7 @@ export default function SelectComponent({
       }}
       clearOnEscape
       autoComplete
-      className={classes.autoComplete}
+      className={classnames(classes.autoComplete, className)}
       options={options}
       multiple={multiple}
       value={value}
