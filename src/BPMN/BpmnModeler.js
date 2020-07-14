@@ -9,12 +9,16 @@ import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import Alert from "@material-ui/lab/Alert";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import Drawer from "@material-ui/core/Drawer";
+import Typography from "@material-ui/core/Typography";
 
 import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
 import AlertDialog from "./components/AlertDialog";
 import Tooltip from "./components/Tooltip";
+import { Tab, Tabs } from "./components/Tabs";
 import { download } from "../utils";
 import {
   DeployDialog,
@@ -28,6 +32,51 @@ import "bpmn-font/dist/css/bpmn-embedded.css";
 import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css";
 import "./css/bpmn.css";
 
+const drawerWidth = 380;
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+  },
+  appBar: {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginRight: drawerWidth,
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    // width: drawerWidth,
+    background: "#F8F8F8",
+    width: "calc(100% - 1px)",
+    position: "absolute",
+    borderLeft: "1px solid #ccc",
+    overflow: "auto",
+    height: "100%",
+  },
+  drawerContainer: {
+    padding: 10,
+    height: "100%",
+  },
+  toolbar: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(3),
+  },
+  label: {
+    fontWeight: "bolder",
+    display: "inline-block",
+    verticalAlign: "middle",
+    color: "#666",
+    marginBottom: 3,
+  },
+  nodeTitle: {
+    fontSize: "120%",
+    fontWeight: "bolder",
+  },
+}));
 let bpmnModeler = null;
 
 const fetchId = () => {
@@ -99,6 +148,7 @@ function BpmnModelerComponent() {
   const [wkfMigrationMap, setWkfMigrationMap] = useState(null);
   const [fields, setFields] = useState(null);
   const [isCustomModel, setCustomModel] = useState(false);
+  const [drawerOpen, setDrawerOpen] = React.useState(true);
   const [ids, setIds] = useState({
     oldIds: null,
     currentIds: null,
@@ -109,7 +159,14 @@ function BpmnModelerComponent() {
     message: null,
   });
   const [metaJsonModel, setMetaJsonModel] = useState(null);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
 
+  const classes = useStyles();
+
+  const handleChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
   const alertOpen = () => {
     setAlert(true);
   };
@@ -155,6 +212,11 @@ function BpmnModelerComponent() {
         handleSnackbarClick("error", "Error! Can't import XML");
         return;
       }
+      setSelectedElement(
+        bpmnModeler._definitions &&
+          bpmnModeler._definitions.rootElements &&
+          bpmnModeler._definitions.rootElements[0]
+      );
       if (isDeploy) {
         const { elements } = getElements();
         window.localStorage.setItem(
@@ -583,6 +645,7 @@ function BpmnModelerComponent() {
 
   const setCSSWidth = (width) => {
     document.documentElement.style.setProperty("--bpmn-container-width", width);
+    setDrawerOpen(width === "0px" ? false : true);
   };
 
   useEffect(() => {
@@ -655,6 +718,15 @@ function BpmnModelerComponent() {
     });
   });
 
+  useEffect(() => {
+    if (!bpmnModeler) return;
+    bpmnModeler.on("element.click", (event) => {
+      console.log("ve", event.element);
+      setSelectedElement(event.element);
+      setDrawerOpen(true);
+    });
+  }, []);
+
   return (
     <div id="container">
       <div id="bpmncontainer">
@@ -698,6 +770,44 @@ function BpmnModelerComponent() {
           Properties Panel
         </div>
         <div id="resize-handler" style={{ width: 380 }}>
+          <Drawer
+            variant="persistent"
+            anchor="right"
+            open={drawerOpen}
+            style={{
+              width: drawerWidth,
+            }}
+            classes={{
+              paper: classes.drawerPaper,
+            }}
+            id="drawer"
+          >
+            <div className={classes.drawerContainer}>
+              <Typography className={classes.nodeTitle}>
+                {selectedElement && selectedElement.id}
+              </Typography>
+              <Tabs value={tabValue} onChange={handleChange}>
+                <Tab label="General Tab" />
+                <Tab label="Tab 2" />
+                <Tab label="Tab 3" />
+              </Tabs>
+              {selectedElement && selectedElement.id && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    marginTop: 20,
+                  }}
+                >
+                  <label className={classes.label}>Id</label>
+                  <input
+                    value={selectedElement && selectedElement.id}
+                    onChange={() => {}}
+                  ></input>
+                </div>
+              )}
+            </div>
+          </Drawer>
           <div
             className="properties-panel-parent"
             id="js-properties-panel"
