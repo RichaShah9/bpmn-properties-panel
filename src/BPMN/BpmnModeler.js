@@ -117,7 +117,11 @@ function BpmnModelerComponent() {
         let elementRegistry = bpmnModeler.get("elementRegistry");
         let elementIds = [];
         elementRegistry.filter(function (element) {
-          if (element.type !== "label") {
+          if (
+            !["label", "bpmn:SequenceFlow", "bpmn:Process"].includes(
+              element.type
+            )
+          ) {
             elementIds.push({
               id: element.id,
               name: element.businessObject.name || element.id,
@@ -281,7 +285,9 @@ function BpmnModelerComponent() {
     let elements = [];
     let elementIds = [];
     elementRegistry.filter((element) => {
-      if (element.type !== "label") {
+      if (
+        !["label", "bpmn:SequenceFlow", "bpmn:Process"].includes(element.type)
+      ) {
         elements.push({
           id: element.id,
           name: element.businessObject.name || element.id,
