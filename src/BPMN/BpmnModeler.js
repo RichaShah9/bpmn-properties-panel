@@ -237,7 +237,7 @@ function BpmnModelerComponent() {
     });
   };
 
-  const deploy = async (wkfMigrationMap = []) => {
+  const deploy = async (wkfMigrationMap = {}) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,

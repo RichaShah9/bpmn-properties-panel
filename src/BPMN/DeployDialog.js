@@ -71,11 +71,13 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
   };
 
   const onConfirm = () => {
-    let cloneWkfMigrationMap =
-      wkfMigrationMap &&
+    let cloneWkfMigrationMap = {};
+    wkfMigrationMap &&
       wkfMigrationMap.map((ele) => {
-        return { key: ele.oldNode.id, value: ele.currentNode.id };
+        cloneWkfMigrationMap[ele.oldNode.id] = ele.currentNode.id;
+        return ele;
       });
+
     let excludeElements = _(oldIds)
       .differenceBy(oldSelectedElements, "id", "name")
       .map(_.partial(_.pick, _, "id", "name"))
@@ -86,13 +88,11 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
         const currentNode = currentIds.find(
           (current) => (current && current.id) === ele.id
         );
-        cloneWkfMigrationMap = [
-          ...cloneWkfMigrationMap,
-          {
-            key: ele && ele.id,
-            value: (currentNode && currentNode.id) || null,
-          },
-        ];
+
+        if (ele && ele.id) {
+          cloneWkfMigrationMap[ele.id] =
+            (currentNode && currentNode.id) || null;
+        }
       });
     onOk(cloneWkfMigrationMap);
   };
