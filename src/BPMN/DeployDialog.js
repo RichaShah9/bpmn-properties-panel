@@ -51,15 +51,31 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
 
   const handleAdd = (oldEle, newEle) => {
     const newElement = currentIds.find((ele) => ele.name === newEle.name);
-    setWkfMigrationMap([
-      ...wkfMigrationMap,
-      { oldNode: oldEle, currentNode: newElement },
-    ]);
+    const elementIndex = wkfMigrationMap.findIndex(
+      (wkf) => (wkf.oldNode && wkf.oldNode.id) === oldEle.id
+    );
+    if (elementIndex > -1) {
+      const cloneWkfMigrationMap = [...wkfMigrationMap];
+      cloneWkfMigrationMap[elementIndex] = {
+        oldNode: oldEle,
+        currentNode: newElement,
+      };
+      setWkfMigrationMap([...cloneWkfMigrationMap]);
+    } else {
+      setWkfMigrationMap([
+        ...wkfMigrationMap,
+        { oldNode: oldEle, currentNode: newElement },
+      ]);
+    }
     setOldElements([...(oldSelectedElements || []), { ...oldEle }]);
   };
 
   const onConfirm = () => {
-    let cloneWkfMigrationMap = [...(wkfMigrationMap || [])];
+    let cloneWkfMigrationMap =
+      wkfMigrationMap &&
+      wkfMigrationMap.map((ele) => {
+        return { key: ele.oldNode.id, value: ele.currentNode.id };
+      });
     let excludeElements = _(oldIds)
       .differenceBy(oldSelectedElements, "id", "name")
       .map(_.partial(_.pick, _, "id", "name"))
@@ -67,15 +83,17 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
 
     excludeElements &&
       excludeElements.forEach((ele) => {
+        const currentNode = currentIds.find(
+          (current) => (current && current.id) === ele.id
+        );
         cloneWkfMigrationMap = [
           ...cloneWkfMigrationMap,
           {
-            oldNode: ele,
-            currentNode: null,
+            key: ele && ele.id,
+            value: (currentNode && currentNode.id) || null,
           },
         ];
       });
-
     onOk(cloneWkfMigrationMap);
   };
 
@@ -126,6 +144,13 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
                       className={classes.select}
                       isLabel={false}
                       options={currentIds}
+                      defaultValue={
+                        currentIds &&
+                        oldEle &&
+                        currentIds.find(
+                          (current) => (current && current.id) === oldEle.id
+                        )
+                      }
                       update={(value) => handleAdd(oldEle, value)}
                     />
                   </TableCell>
