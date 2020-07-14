@@ -303,7 +303,7 @@ function BpmnModelerComponent() {
       oldIds: oldElements,
     });
     if (
-      _.isEqual(_.sortBy(elementIds), _.sortBy(oldElementIds)) ||
+      _.isEqual(_.intersection(oldElementIds, elementIds), oldElementIds) ||
       !oldElementIds
     ) {
       deploy();
