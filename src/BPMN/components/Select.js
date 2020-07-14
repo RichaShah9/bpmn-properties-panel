@@ -48,6 +48,7 @@ export default function SelectComponent({
   isLabel = true,
   error = false,
   className,
+  defaultValue,
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
@@ -120,6 +121,7 @@ export default function SelectComponent({
         e && e.stopPropagation();
         setOpen(true);
       }}
+      defaultValue={defaultValue}
       clearOnEscape
       autoComplete
       className={classnames(classes.autoComplete, className)}
