@@ -105,6 +105,7 @@ body,
   border-left: 1px solid #ccc;
   overflow: auto;
   height: inherit;
+  display: none;
 }
 
 .highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
