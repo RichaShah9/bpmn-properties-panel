@@ -106,7 +106,8 @@ function BpmnModelerComponent() {
 
   const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
     xml,
-    isDeploy
+    isDeploy,
+    id
   ) {
     bpmnModeler.importXML(xml, (error) => {
       if (error) {
@@ -129,7 +130,13 @@ function BpmnModelerComponent() {
           }
           return element;
         });
-        window.localStorage.setItem("elementIds", JSON.stringify(elementIds));
+        window.localStorage.setItem(
+          "elementIds",
+          JSON.stringify({
+            ...(JSON.parse(window.localStorage.getItem("elementIds")) || {}),
+            [`diagram_${id}`]: elementIds,
+          })
+        );
       }
       let canvas = bpmnModeler.get("canvas");
       canvas.zoom("fit-viewport");
@@ -147,7 +154,7 @@ function BpmnModelerComponent() {
   []);
 
   const newBpmnDiagram = React.useCallback(
-    function newBpmnDiagram(rec, isDeploy) {
+    function newBpmnDiagram(rec, isDeploy, id) {
       const diagram =
         rec ||
         `<?xml version="1.0" encoding="UTF-8" ?>
@@ -171,7 +178,7 @@ function BpmnModelerComponent() {
           </bpmndi:BPMNPlane>
         </bpmndi:BPMNDiagram>
       </bpmn2:definitions>`;
-      openBpmnDiagram(diagram, isDeploy);
+      openBpmnDiagram(diagram, isDeploy, id);
     },
     [openBpmnDiagram]
   );
@@ -183,9 +190,9 @@ function BpmnModelerComponent() {
         const wkf = (res && res.data && res.data[0]) || {};
         let { diagramXml } = wkf;
         setWkf(wkf);
-        newBpmnDiagram(diagramXml, isDeploy);
+        newBpmnDiagram(diagramXml, isDeploy, id);
       } else {
-        newBpmnDiagram(undefined, isDeploy);
+        newBpmnDiagram(undefined, isDeploy, id);
       }
     },
     [newBpmnDiagram]
@@ -296,7 +303,8 @@ function BpmnModelerComponent() {
       }
       return element;
     });
-    let oldElements = JSON.parse(window.localStorage.getItem("elementIds"));
+    let localElements = JSON.parse(window.localStorage.getItem("elementIds"));
+    let oldElements = localElements && localElements[`diagram_${id}`];
     let oldElementIds = oldElements && oldElements.map((oldEle) => oldEle.id);
     setIds({
       currentIds: elements,
