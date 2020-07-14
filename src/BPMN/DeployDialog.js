@@ -11,6 +11,7 @@ import {
   TableRow,
   TableBody,
   Paper,
+  DialogTitle,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
@@ -88,6 +89,9 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
         paper: classes.dialogPaper,
       }}
     >
+      <DialogTitle>
+        <strong>Node Mapping</strong>
+      </DialogTitle>
       <DialogContent>
         <TableContainer component={Paper}>
           <Table size="small" aria-label="a dense table">
