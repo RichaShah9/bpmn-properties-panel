@@ -100,8 +100,7 @@ export default function ConfigRecordsDialog({ open, onClose, onOk, wkf }) {
 
   useEffect(() => {
     const fetchProcessConfigs = async () => {
-      const { wkfProcessList, statusSelect } = wkf;
-      if (statusSelect !== 2) return;
+      const { wkfProcessList } = wkf;
       let wkfProcessConfigListIds = [];
       wkfProcessList.forEach((process) => {
         const { wkfProcessConfigList } = process;
