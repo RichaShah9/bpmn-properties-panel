@@ -14,8 +14,8 @@ import { Snackbar } from "@material-ui/core";
 import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
-import Dialog from "./DialogView";
-import DeployDialog from "./DeployDialog";
+import Dialog from "./views/DialogView";
+import DeployDialog from "./views/DeployDialog";
 import AlertDialog from "./components/AlertDialog";
 import { download } from "../utils";
 
