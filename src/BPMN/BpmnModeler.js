@@ -7,17 +7,20 @@ import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camu
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import Alert from "@material-ui/lab/Alert";
-import _ from "lodash";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
 
 import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
-import Dialog from "./views/DialogView";
-import DeployDialog from "./views/DeployDialog";
 import AlertDialog from "./components/AlertDialog";
 import { download } from "../utils";
+import {
+  DeployDialog,
+  DialogView as Dialog,
+  ProcessConfigDialog,
+  ConfigRecordsDialog,
+} from "./views";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -59,6 +62,12 @@ function BpmnModelerComponent() {
   const [element, setElement] = useState(null);
   const [openAlert, setAlert] = useState(false);
   const [openDelopyDialog, setDelopyDialog] = useState(false);
+  const [openProcessConfigDialog, setProcessConfig] = useState(false);
+  const [openConfigRecordsDialog, setConfigRecords] = useState(false);
+  const [selectedRecords, setSelectedRecords] = useState(null);
+  const [model, setModel] = useState(null);
+  const [migrationPlan, setMigrationPlan] = useState(null);
+  const [wkfMigrationMap, setWkfMigrationMap] = useState(null);
   const [ids, setIds] = useState({
     oldIds: null,
     currentIds: null,
@@ -186,7 +195,24 @@ function BpmnModelerComponent() {
   const fetchDiagram = React.useCallback(
     async function fetchDiagram(id, isDeploy = false) {
       if (id) {
-        let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
+        let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id, {
+          fields: [
+            "statusSelect",
+            "wkfTaskConfigList",
+            "previousVersion",
+            "wkfProcessList",
+            "dmnFileSet",
+            "name",
+            "description",
+            "versionTag",
+            "previousVersion.statusSelect",
+            "isActive",
+            "diagramXml",
+          ],
+          related: {
+            wkfProcessList: ["name", "processId", "wkfProcessConfigList"],
+          },
+        });
         const wkf = (res && res.data && res.data[0]) || {};
         let { diagramXml } = wkf;
         setWkf(wkf);
@@ -237,7 +263,7 @@ function BpmnModelerComponent() {
     });
   };
 
-  const deploy = async (wkfMigrationMap = {}) => {
+  const deploy = async (migrationPlan) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
@@ -253,6 +279,12 @@ function BpmnModelerComponent() {
               _model: "com.axelor.apps.bpm.db.WkfModel",
               ...res.data[0],
               wkfMigrationMap: wkfMigrationMap,
+              _migrationPlan: migrationPlan ? migrationPlan.value : null,
+              _selectedModel: model,
+              _selectedIds:
+                (selectedRecords &&
+                  selectedRecords.map((record) => record.id)) ||
+                [],
             },
           },
         });
@@ -279,12 +311,26 @@ function BpmnModelerComponent() {
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
+      setSelectedRecords(null)
+      setMigrationPlan(null)
+      setWkfMigrationMap(null)
+      setModel(null)
     });
   };
 
-  const handleOk = (wkfMigrationMap) => {
+  const handleOk = (wkfMigrationMap, migrationPlan) => {
     setDelopyDialog(false);
-    deploy(wkfMigrationMap);
+    setMigrationPlan(migrationPlan);
+    if (migrationPlan.value === "selected" && wkf.statusSelect === 2) {
+      setProcessConfig(true);
+      setWkfMigrationMap(wkfMigrationMap);
+    }else{
+      deploy(migrationPlan)
+    }
+  };
+
+  const openConfigRecords = () => {
+    setConfigRecords(true);
   };
 
   const deployDiagram = async () => {
@@ -305,19 +351,11 @@ function BpmnModelerComponent() {
     });
     let localElements = JSON.parse(window.localStorage.getItem("elementIds"));
     let oldElements = localElements && localElements[`diagram_${id}`];
-    let oldElementIds = oldElements && oldElements.map((oldEle) => oldEle.id);
     setIds({
       currentIds: elements,
       oldIds: oldElements,
     });
-    if (
-      _.isEqual(_.intersection(oldElementIds, elementIds), oldElementIds) ||
-      !oldElementIds
-    ) {
-      deploy();
-    } else {
-      setDelopyDialog(true);
-    }
+    setDelopyDialog(true);
   };
 
   const toolBarButtons = [
@@ -652,6 +690,7 @@ function BpmnModelerComponent() {
             variant="filled"
             onClose={handleSnackbarClose}
             className="snackbarAlert"
+            severity={openSnackbar.messageType}
           >
             {openSnackbar.message}
           </Alert>
@@ -679,7 +718,33 @@ function BpmnModelerComponent() {
           open={openDelopyDialog}
           onClose={() => setDelopyDialog(false)}
           ids={ids}
-          onOk={(wkfMigrationMap) => handleOk(wkfMigrationMap)}
+          onOk={(wkfMigrationMap, migrationPlan) =>
+            handleOk(wkfMigrationMap, migrationPlan)
+          }
+        />
+      )}
+      {openProcessConfigDialog && (
+        <ProcessConfigDialog
+          open={openProcessConfigDialog}
+          onClose={() => setProcessConfig(false)}
+          openConfigRecords={openConfigRecords}
+          selectedRecords={selectedRecords}
+          onOk={() => {
+            setProcessConfig(false);
+            deploy(migrationPlan);
+          }}
+        />
+      )}
+      {openConfigRecordsDialog && (
+        <ConfigRecordsDialog
+          open={openProcessConfigDialog}
+          onClose={() => setConfigRecords(false)}
+          wkf={wkf}
+          onOk={(selectedRecords, model) => {
+            setSelectedRecords(selectedRecords);
+            setModel(model);
+            setConfigRecords(false);
+          }}
         />
       )}
     </div>
