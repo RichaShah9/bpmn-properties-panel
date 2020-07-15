@@ -12,16 +12,18 @@ import "./css/bpmn.css";
 
 let bpmnViewer = null;
 
-const fetchId = () => {
+const fetchId = (isInstance) => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
   const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
   const regexBPMNActivityCounts = /[?&]activityCount=([^&#]*)/g; // ?id=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
+  const regexBPMNInstanceId = /[?&]instanceId=([^&#]*)/g; // ?id=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
 
   const url = window.location.href;
   let matchBPMNId,
     matchBPMNTasksId,
     matchActivityCounts,
     activityCounts,
+    matchInstanceId,
     id,
     taskIds;
 
@@ -34,9 +36,16 @@ const fetchId = () => {
     activityCounts = matchActivityCounts[1];
   }
 
-  while ((matchBPMNId = regexBPMN.exec(url))) {
-    id = matchBPMNId[1];
-    return { id, taskIds, activityCounts };
+  if (isInstance) {
+    while ((matchInstanceId = regexBPMNInstanceId.exec(url))) {
+      id = matchInstanceId[1];
+      return { id, taskIds, activityCounts };
+    }
+  } else {
+    while ((matchBPMNId = regexBPMN.exec(url))) {
+      id = matchBPMNId[1];
+      return { id, taskIds, activityCounts };
+    }
   }
 };
 
@@ -46,6 +55,30 @@ const fetchDiagram = async (id, taskIds, activityCounts) => {
     const wkf = (res && res.data && res.data[0]) || {};
     const { diagramXml } = wkf;
     openDiagramImage(taskIds, diagramXml, activityCounts);
+  }
+};
+
+const fetchInstanceDiagram = async (id, taskIds, activityCounts) => {
+  if (id) {
+    let actionRes = await Service.action({
+      model: "com.axelor.apps.bpm.db.WkfModel",
+      action: "action-wkf-instance-method-get-instance-xml",
+      data: {
+        context: {
+          _model: "com.axelor.apps.bpm.db.WkfModel",
+          instanceId: id,
+        },
+      },
+    });
+    if (
+      actionRes &&
+      actionRes.data &&
+      actionRes.data[0] &&
+      actionRes.data[0].values
+    ) {
+      const { xml } = actionRes.data[0].values;
+      openDiagramImage(taskIds, xml, activityCounts);
+    }
   }
 };
 
@@ -78,15 +111,14 @@ const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
     let elementRegistry = bpmnViewer.get("elementRegistry");
     let nodes = elementRegistry && elementRegistry._elements;
     if (!nodes) return;
-    let filteredElements = Object.keys(nodes).filter((element) =>
-      taskIds.includes(element)
+    let filteredElements = Object.keys(nodes).filter(
+      (element) => taskIds && taskIds.includes(element)
     );
     filteredElements.forEach((element) => {
       canvas.addMarker(element, "highlight");
     });
 
-    if (!activityCounts) return;
-    const activities = activityCounts.split(",") || [];
+    const activities = (activityCounts && activityCounts.split(",")) || [];
     const overlayActivies = [];
     const nodeKeys = Object.keys(nodes) || [];
     if (nodeKeys.length < 1) return;
@@ -127,7 +159,7 @@ const resetZoom = () => {
   bpmnViewer.get("canvas").zoom("fit-viewport");
 };
 
-function BpmnViewerComponent() {
+function BpmnViewerComponent({ isInstance }) {
   const [taskIds, setTaskIds] = React.useState(null);
 
   const saveSVG = () => {
@@ -176,10 +208,14 @@ function BpmnViewerComponent() {
     bpmnViewer = new BpmnViewer({
       container: "#canvas-task",
     });
-    let { id, taskIds, activityCounts } = fetchId() || {};
+    let { id, taskIds, activityCounts } = fetchId(isInstance) || {};
     setTaskIds(taskIds);
-    fetchDiagram(id, taskIds, activityCounts);
-  }, [setTaskIds]);
+    if (isInstance) {
+      fetchInstanceDiagram(id, taskIds, activityCounts);
+    } else {
+      fetchDiagram(id, taskIds, activityCounts);
+    }
+  }, [isInstance, setTaskIds]);
 
   return (
     <React.Fragment>
