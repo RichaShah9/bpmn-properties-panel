@@ -185,3 +185,47 @@ export async function getRoles(criteria) {
   const { data = [] } = res || {};
   return data;
 }
+
+export async function getGridView(view, isCustom) {
+  let res;
+  if (view) {
+    res = await Service.post(`/ws/meta/view`, {
+      data: {
+        context: {
+          "json-enhance": "true",
+          _id: null,
+        },
+        name: view,
+        type: "grid",
+      },
+    });
+    const { data } = res || {};
+    const { items = [] } = data.view || {};
+    const fields = [];
+    if (isCustom) {
+      const { jsonFields } = items[0];
+      if (jsonFields.length < 1) return [];
+      jsonFields.forEach((item) => {
+        if (!["panel","panel-tab", "spacer"].includes(item.type) && item.name) {
+          fields.push({
+            name: item.name,
+            targetName: item.targetName,
+            title: item.title,
+          });
+        }
+      });
+    } else {
+      if (items.length < 1) return [];
+      items.forEach((item) => {
+        if (item.type === "field") {
+          fields.push({
+            name: item.name,
+            targetName: item.targetName,
+            title: item.autoTitle,
+          });
+        }
+      });
+    }
+    return fields;
+  }
+}
