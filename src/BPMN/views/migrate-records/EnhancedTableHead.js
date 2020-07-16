@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 
 export default function EnhancedTableHead(props) {
   const { onSelectAllClick, numSelected, rowCount } = props;
-
   return (
     <TableHead>
       <TableRow>
@@ -26,7 +25,6 @@ export default function EnhancedTableHead(props) {
 EnhancedTableHead.propTypes = {
   classes: PropTypes.object.isRequired,
   numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
   rowCount: PropTypes.number.isRequired,
 };

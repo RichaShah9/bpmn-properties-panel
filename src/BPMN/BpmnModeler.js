@@ -18,8 +18,8 @@ import { download } from "../utils";
 import {
   DeployDialog,
   DialogView as Dialog,
-  ProcessConfigDialog,
-  ConfigRecordsDialog,
+  SelectRecordsDialog,
+  MigrateRecordsDialog,
 } from "./views";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -62,8 +62,8 @@ function BpmnModelerComponent() {
   const [element, setElement] = useState(null);
   const [openAlert, setAlert] = useState(false);
   const [openDelopyDialog, setDelopyDialog] = useState(false);
-  const [openProcessConfigDialog, setProcessConfig] = useState(false);
-  const [openConfigRecordsDialog, setConfigRecords] = useState(false);
+  const [openSelectRecordsDialog, setSelectRecords] = useState(false);
+  const [openMigrateRecordsDialog, setMigrateRecords] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState(null);
   const [model, setModel] = useState(null);
   const [migrationPlan, setMigrationPlan] = useState(null);
@@ -322,7 +322,7 @@ function BpmnModelerComponent() {
     setDelopyDialog(false);
     setMigrationPlan(migrationPlan);
     if (migrationPlan.value === "selected" && wkf.statusSelect === 2) {
-      setProcessConfig(true);
+      setSelectRecords(true);
       setWkfMigrationMap(wkfMigrationMap);
     }else{
       deploy(migrationPlan)
@@ -330,7 +330,7 @@ function BpmnModelerComponent() {
   };
 
   const openConfigRecords = () => {
-    setConfigRecords(true);
+    setMigrateRecords(true);
   };
 
   const deployDiagram = async () => {
@@ -723,27 +723,27 @@ function BpmnModelerComponent() {
           }
         />
       )}
-      {openProcessConfigDialog && (
-        <ProcessConfigDialog
-          open={openProcessConfigDialog}
-          onClose={() => setProcessConfig(false)}
+      {openSelectRecordsDialog && (
+        <SelectRecordsDialog
+          open={openSelectRecordsDialog}
+          onClose={() => setSelectRecords(false)}
           openConfigRecords={openConfigRecords}
           selectedRecords={selectedRecords}
           onOk={() => {
-            setProcessConfig(false);
+            setSelectRecords(false);
             deploy(migrationPlan);
           }}
         />
       )}
-      {openConfigRecordsDialog && (
-        <ConfigRecordsDialog
-          open={openProcessConfigDialog}
-          onClose={() => setConfigRecords(false)}
+      {openMigrateRecordsDialog && (
+        <MigrateRecordsDialog
+          open={openSelectRecordsDialog}
+          onClose={() => setMigrateRecords(false)}
           wkf={wkf}
           onOk={(selectedRecords, model) => {
             setSelectedRecords(selectedRecords);
             setModel(model);
-            setConfigRecords(false);
+            setMigrateRecords(false);
           }}
         />
       )}

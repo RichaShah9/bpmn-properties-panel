@@ -21,7 +21,7 @@ import Select from "../components/Select";
 const useStyles = makeStyles({
   dialogPaper: {
     padding: 5,
-    minWidth: 300,
+    minWidth: 450,
     overflow: "auto",
   },
   button: {
@@ -41,8 +41,8 @@ const useStyles = makeStyles({
     fontSize: 12,
   },
   migrationPlan: {
-    marginBottom: 34
-  }
+    marginBottom: 34,
+  },
 });
 
 export default function DeployDialog({ open, onClose, ids, onOk }) {
@@ -50,8 +50,8 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
   const [oldSelectedElements, setOldElements] = useState(null);
   const [wkfMigrationMap, setWkfMigrationMap] = useState([]);
   const [migrationPlan, setMigrationPlan] = useState({
-    label: "New",
-    value: "new",
+    label: "Selected",
+    value: "selected",
   });
 
   const classes = useStyles();
@@ -153,38 +153,39 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {oldIds && oldIds.map((oldEle, index) => (
-                <TableRow key={index}>
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    align="center"
-                    className={classes.tableCell}
-                  >
-                    {oldEle.name}
-                  </TableCell>
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    align="center"
-                    className={classes.tableCell}
-                  >
-                    <Select
-                      className={classes.select}
-                      isLabel={false}
-                      options={currentIds}
-                      defaultValue={
-                        currentIds &&
-                        oldEle &&
-                        currentIds.find(
-                          (current) => (current && current.id) === oldEle.id
-                        )
-                      }
-                      update={(value) => handleAdd(oldEle, value)}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+              {oldIds &&
+                oldIds.map((oldEle, index) => (
+                  <TableRow key={index}>
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      align="center"
+                      className={classes.tableCell}
+                    >
+                      {oldEle.name}
+                    </TableCell>
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      align="center"
+                      className={classes.tableCell}
+                    >
+                      <Select
+                        className={classes.select}
+                        isLabel={false}
+                        options={currentIds}
+                        defaultValue={
+                          currentIds &&
+                          oldEle &&
+                          currentIds.find(
+                            (current) => (current && current.id) === oldEle.id
+                          )
+                        }
+                        update={(value) => handleAdd(oldEle, value)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </TableContainer>

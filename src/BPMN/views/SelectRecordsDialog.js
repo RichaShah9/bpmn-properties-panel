@@ -65,7 +65,7 @@ export default function ProcessConfigDialog({
       }}
     >
       <DialogTitle>
-        <strong>Process Config</strong>
+        <strong>Select record</strong>
       </DialogTitle>
       <DialogContent>
         <div style={{ textAlign: "right" }}>

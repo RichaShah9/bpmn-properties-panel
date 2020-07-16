@@ -1,6 +1,6 @@
 import DeployDialog from "./DeployDialog";
 import DialogView from "./DialogView";
-import ProcessConfigDialog from "./ProcessConfigDialog";
-import ConfigRecordsDialog from "./ConfigRecordsDialog";
+import SelectRecordsDialog from "./SelectRecordsDialog";
+import MigrateRecordsDialog from "./migrate-records/MigrateRecordsDialog"
 
-export { DeployDialog, DialogView, ProcessConfigDialog, ConfigRecordsDialog };
+export { DeployDialog, DialogView, SelectRecordsDialog, MigrateRecordsDialog };

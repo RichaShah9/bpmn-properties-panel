@@ -18,7 +18,8 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedToolbar";
-import Service from "../../services/Service";
+import TablePaginationActions from "./TablePaginationActions";
+import Service from "../../../services/Service";
 
 const useStyles = makeStyles((theme) => ({
   dialogPaper: {
@@ -42,13 +43,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ConfigRecordsDialog({ open, onClose, onOk, wkf }) {
+const rowsPerPage = 5;
+export default function MigrateRecordsDialog({ open, onClose, onOk, wkf }) {
   const classes = useStyles();
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [rows, setRows] = useState([]);
   const [model, setModel] = useState(null);
+  const [data, setData] = useState({
+    total: null,
+    offset: 0,
+    limit: 5,
+  });
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -75,20 +81,26 @@ export default function ConfigRecordsDialog({ open, onClose, onOk, wkf }) {
         selected.slice(selectedIndex + 1)
       );
     }
-
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleChangePage = (event, newPage, isBack) => {
+    let { limit, offset, total } = data;
+    if (isBack) {
+      setPage(newPage);
+      setData({
+        ...data,
+        offset: offset - limit,
+      });
+      setSelected([]);
+    } else {
+      getRecords(model, limit, offset + limit < total ? offset + limit : total);
+      setPage(newPage);
+      setSelected([]);
+    }
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const handleConfirm = () => {
     const selectedRows = rows.filter((row) => selected.includes(row.id));
@@ -97,6 +109,28 @@ export default function ConfigRecordsDialog({ open, onClose, onOk, wkf }) {
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+
+  const getRecords = React.useCallback(async function getRecords(
+    model,
+    limit = 5,
+    offset = 0
+  ) {
+    const recordsRes = await Service.search(model, {
+      data: {
+        _domain: "self.processInstanceId is not null",
+      },
+      limit,
+      offset,
+    });
+    const records = (recordsRes && recordsRes.data) || [];
+    setRows((rows) => [...rows, ...records]);
+    setData({
+      limit: 5,
+      offset: recordsRes.offset,
+      total: recordsRes.total,
+    });
+  },
+  []);
 
   useEffect(() => {
     const fetchProcessConfigs = async () => {
@@ -130,16 +164,10 @@ export default function ConfigRecordsDialog({ open, onClose, onOk, wkf }) {
       const { model } = processConfig;
       if (!model) return;
       setModel(model);
-      const recordsRes = await Service.search(model, {
-        data: {
-          _domain: "self.processInstanceId is not null",
-        },
-      });
-      const records = (recordsRes && recordsRes.data) || [];
-      setRows(records);
+      getRecords(model);
     };
     fetchProcessConfigs();
-  }, [wkf]);
+  }, [wkf, getRecords]);
 
   return (
     <Dialog
@@ -152,7 +180,7 @@ export default function ConfigRecordsDialog({ open, onClose, onOk, wkf }) {
       }}
     >
       <DialogTitle>
-        <strong>Configuration</strong>
+        <strong>Records to migrate</strong>
       </DialogTitle>
       <DialogContent>
         <div className={classes.root}>
@@ -177,7 +205,6 @@ export default function ConfigRecordsDialog({ open, onClose, onOk, wkf }) {
                     .map((row, index) => {
                       const isItemSelected = isSelected(row.id);
                       const labelId = `enhanced-table-checkbox-${index}`;
-
                       return (
                         <TableRow
                           hover
@@ -214,15 +241,18 @@ export default function ConfigRecordsDialog({ open, onClose, onOk, wkf }) {
                 </TableBody>
               </Table>
             </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
+            {rows.length > 0 && (
+              <TablePagination
+                rowsPerPageOptions={[]}
+                labelRowsPerPage={""}
+                component="div"
+                count={data.total || 0}
+                rowsPerPage={5}
+                page={page}
+                onChangePage={handleChangePage}
+                ActionsComponent={TablePaginationActions}
+              />
+            )}
           </Paper>
         </div>
       </DialogContent>
