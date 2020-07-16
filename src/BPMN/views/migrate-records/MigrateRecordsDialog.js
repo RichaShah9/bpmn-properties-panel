@@ -14,6 +14,7 @@ import {
   TablePagination,
   Checkbox,
   CircularProgress,
+  TextField,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -65,6 +66,7 @@ export default function MigrateRecordsDialog({
   const [rows, setRows] = useState([]);
   const [fields, setFields] = useState(null);
   const [isLoading, setLoading] = useState(false);
+  const [searchCriteria, setSearchCriteria] = useState([]);
   const [data, setData] = useState({
     total: null,
     offset: 0,
@@ -99,7 +101,7 @@ export default function MigrateRecordsDialog({
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event, newPage, isBack) => {
+  const handleChangePage = (e, newPage, isBack) => {
     let { limit, offset, total } = data;
     if (isBack) {
       setPage(newPage);
@@ -109,9 +111,16 @@ export default function MigrateRecordsDialog({
       });
       setSelected([]);
     } else {
-      getRecords(model, limit, offset + limit < total ? offset + limit : total);
       setPage(newPage);
       setSelected([]);
+      if (searchCriteria && searchCriteria.length > 0) {
+        setData({
+          ...data,
+          offset: offset + limit < total ? offset + limit : total,
+        });
+        return;
+      }
+      getRecords(model, limit, offset + limit < total ? offset + limit : total);
     }
   };
 
@@ -125,32 +134,87 @@ export default function MigrateRecordsDialog({
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
+  const searchRecords = (e, field) => {
+    const cloneSearchCriteria = [...(searchCriteria || [])];
+    if (e.keyCode === 13) {
+      const index = cloneSearchCriteria.findIndex(
+        (c) =>
+          c.fieldName ===
+          (isCustomModel ? `attrs.${e.target.name}` : e.target.name)
+      );
+
+      let query = {
+        fieldName: isCustomModel ? `attrs.${e.target.name}` : e.target.name,
+        operator:
+          isCustomModel && field
+            ? field.type === "decimal" || field.type === "data"
+              ? "="
+              : "like"
+            : isNaN(e.target.value)
+            ? "like"
+            : "=",
+        value: e.target.value,
+      };
+      if (index > -1) {
+        if (e.target.value === "" || !e.target.value) {
+          cloneSearchCriteria.splice(index, 1);
+        } else {
+          cloneSearchCriteria[index] = query;
+        }
+      } else {
+        cloneSearchCriteria.push(query);
+      }
+      setSearchCriteria(cloneSearchCriteria);
+      getRecords(model, 5, 0, cloneSearchCriteria, true);
+    }
+  };
+
   const getRecords = React.useCallback(
-    async function getRecords(model, limit = 5, offset = 0) {
+    async function getRecords(
+      model,
+      limit = 5,
+      offset = 0,
+      criteria,
+      isSearch
+    ) {
       setLoading(true);
-      const recordsRes = await Service.search(model, {
+      let requestPayload = {
         data: {
           _domain: "self.processInstanceId is not null",
         },
-        limit,
-        offset,
-      });
+      };
+
+      if (criteria && criteria.length > 0) {
+        requestPayload.data.criteria = criteria;
+        requestPayload.data.operator = "and";
+      }
+
+      if (!isSearch) {
+        requestPayload.limit = limit;
+        requestPayload.offset = offset;
+      }
+      const recordsRes = await Service.search(model, requestPayload);
       const records = (recordsRes && recordsRes.data) || [];
       let renderRecords = [];
       setLoading(false);
       if (isCustomModel) {
-        records.forEach((record) => {
-          const { attrs } = record;
-          const recs = JSON.parse(attrs);
-          renderRecords.push({
-            ...(record || {}),
-            ...(recs || {})
+        records.length > 0 &&
+          records.forEach((record) => {
+            const { attrs } = record;
+            const recs = JSON.parse(attrs);
+            renderRecords.push({
+              ...(record || {}),
+              ...(recs || {}),
+            });
           });
-        });
       } else {
-        renderRecords = [...records];
+        renderRecords = [...(records || [])];
       }
-      setRows((rows) => [...rows, ...renderRecords]);
+      if (isSearch) {
+        setRows([...renderRecords]);
+      } else {
+        setRows((rows) => [...rows, ...renderRecords]);
+      }
       if (!recordsRes) return;
       setData({
         limit: 5,
@@ -206,22 +270,34 @@ export default function MigrateRecordsDialog({
                     rowCount={rows.length}
                     fields={fields}
                   />
-                  {isLoading ? (
-                    <div className={classes.loader}>
-                      <CircularProgress />
-                    </div>
-                  ) : (
-                    <TableBody>
-                      <TableRow hover key={"search"}>
-                        <TableCell padding="checkbox"></TableCell>
-                        {fields &&
-                          fields.map((field, index) => (
-                            <TableCell key={`${field.title}_${index}_search`}>
-                              Search
-                            </TableCell>
-                          ))}
-                      </TableRow>
-                      {rows
+                  <TableBody>
+                    <TableRow hover key={"search"}>
+                      <TableCell padding="checkbox"></TableCell>
+                      {fields &&
+                        fields.map((field, index) => (
+                          <TableCell key={`${field.title}_${index}_search`}>
+                            <TextField
+                              name={
+                                field && field.name
+                                  ? field.targetName
+                                    ? `${field.name}.${field.targetName}`
+                                    : field.name
+                                  : ""
+                              }
+                              placeholder="Search"
+                              size="small"
+                              InputProps={{ disableUnderline: true }}
+                              onKeyDown={(e) => searchRecords(e, field)}
+                            />
+                          </TableCell>
+                        ))}
+                    </TableRow>
+                    {isLoading ? (
+                      <div className={classes.loader}>
+                        <CircularProgress />
+                      </div>
+                    ) : (
+                      rows
                         .slice(
                           page * rowsPerPage,
                           page * rowsPerPage + rowsPerPage
@@ -264,14 +340,14 @@ export default function MigrateRecordsDialog({
                                 ))}
                             </TableRow>
                           );
-                        })}
-                      {emptyRows > 0 && (
-                        <TableRow style={{ height: 33 * emptyRows }}>
-                          <TableCell colSpan={6} />
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  )}
+                        })
+                    )}
+                    {emptyRows > 0 && (
+                      <TableRow style={{ height: 33 * emptyRows }}>
+                        <TableCell colSpan={6} />
+                      </TableRow>
+                    )}
+                  </TableBody>
                 </Table>
               </TableContainer>
             )}

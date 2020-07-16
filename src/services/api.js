@@ -211,13 +211,14 @@ export async function getGridView(view, isCustom) {
             name: item.name,
             targetName: item.targetName,
             title: item.title,
+            type: item.type
           });
         }
       });
     } else {
       if (items.length < 1) return [];
       items.forEach((item) => {
-        if (item.type === "field") {
+        if (item.type === "field" && item.hidden !== true) {
           fields.push({
             name: item.name,
             targetName: item.targetName,
