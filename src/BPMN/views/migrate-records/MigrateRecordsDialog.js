@@ -49,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     width: "100%",
   },
+  selected: {
+    backgroundColor: "#D3D3D3 !important",
+  },
 }));
 
 const rowsPerPage = 5;
@@ -67,6 +70,7 @@ export default function MigrateRecordsDialog({
   const [fields, setFields] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState([]);
+  const [selectedField, setSelectedField] = useState(null);
   const [data, setData] = useState({
     total: null,
     offset: 0,
@@ -284,7 +288,14 @@ export default function MigrateRecordsDialog({
                                     : field.name
                                   : ""
                               }
-                              placeholder="Search"
+                              onFocus={() => setSelectedField(field)}
+                              onBlur={() => setSelectedField(null)}
+                              placeholder={
+                                (selectedField && selectedField.name) ===
+                                (field && field.name)
+                                  ? "Search"
+                                  : ""
+                              }
                               size="small"
                               InputProps={{ disableUnderline: true }}
                               onKeyDown={(e) => searchRecords(e, field)}
@@ -314,6 +325,9 @@ export default function MigrateRecordsDialog({
                               tabIndex={-1}
                               key={row.id}
                               selected={isItemSelected}
+                              classes={{
+                                selected: classes.selected,
+                              }}
                             >
                               <TableCell padding="checkbox">
                                 <Checkbox
