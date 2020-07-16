@@ -68,6 +68,8 @@ function BpmnModelerComponent() {
   const [model, setModel] = useState(null);
   const [migrationPlan, setMigrationPlan] = useState(null);
   const [wkfMigrationMap, setWkfMigrationMap] = useState(null);
+  const [fields, setFields] = useState(null);
+  const [isCustomModel, setCustomModel] = useState(false);
   const [ids, setIds] = useState({
     oldIds: null,
     currentIds: null,
@@ -311,10 +313,10 @@ function BpmnModelerComponent() {
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
-      setSelectedRecords(null)
-      setMigrationPlan(null)
-      setWkfMigrationMap(null)
-      setModel(null)
+      setSelectedRecords(null);
+      setMigrationPlan(null);
+      setWkfMigrationMap(null);
+      setModel(null);
     });
   };
 
@@ -324,13 +326,16 @@ function BpmnModelerComponent() {
     if (migrationPlan.value === "selected" && wkf.statusSelect === 2) {
       setSelectRecords(true);
       setWkfMigrationMap(wkfMigrationMap);
-    }else{
-      deploy(migrationPlan)
+    } else {
+      deploy(migrationPlan);
     }
   };
 
-  const openConfigRecords = () => {
+  const openConfigRecords = (fields, model, isCustomModel) => {
+    setFields(fields);
+    setModel(model);
     setMigrateRecords(true);
+    setCustomModel(isCustomModel);
   };
 
   const deployDiagram = async () => {
@@ -727,7 +732,10 @@ function BpmnModelerComponent() {
         <SelectRecordsDialog
           open={openSelectRecordsDialog}
           onClose={() => setSelectRecords(false)}
-          openConfigRecords={openConfigRecords}
+          openConfigRecords={(fields, model, isCustomModel) =>
+            openConfigRecords(fields, model, isCustomModel)
+          }
+          wkf={wkf}
           selectedRecords={selectedRecords}
           onOk={() => {
             setSelectRecords(false);
@@ -739,10 +747,11 @@ function BpmnModelerComponent() {
         <MigrateRecordsDialog
           open={openSelectRecordsDialog}
           onClose={() => setMigrateRecords(false)}
-          wkf={wkf}
-          onOk={(selectedRecords, model) => {
+          fields={fields}
+          isCustomModel={isCustomModel}
+          model={model}
+          onOk={(selectedRecords) => {
             setSelectedRecords(selectedRecords);
-            setModel(model);
             setMigrateRecords(false);
           }}
         />

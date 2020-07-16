@@ -1,9 +1,11 @@
 import React from "react";
-import { TableCell, TableHead, TableRow, Checkbox } from "@material-ui/core";
 import PropTypes from "prop-types";
+import { TableCell, TableHead, TableRow, Checkbox } from "@material-ui/core";
+
+import { translate } from "../../../utils";
 
 export default function EnhancedTableHead(props) {
-  const { onSelectAllClick, numSelected, rowCount } = props;
+  const { onSelectAllClick, numSelected, rowCount, fields } = props;
   return (
     <TableHead>
       <TableRow>
@@ -16,7 +18,12 @@ export default function EnhancedTableHead(props) {
             color="primary"
           />
         </TableCell>
-        <TableCell align="left">Name</TableCell>
+        {fields &&
+          fields.map((field) => (
+            <TableCell align="left" key={field.name}>
+              {field.title ? translate(field.title) : ""}
+            </TableCell>
+          ))}
       </TableRow>
     </TableHead>
   );
