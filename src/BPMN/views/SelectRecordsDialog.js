@@ -13,6 +13,7 @@ import {
   Paper,
   DialogTitle,
   CircularProgress,
+  TablePagination,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Search } from "@material-ui/icons";
@@ -21,6 +22,7 @@ import Service from "../../services/Service";
 import { getGridView } from "../../services/api";
 import { pascalToKebabCase } from "../../utils";
 
+const rowsPerPage = 5;
 const useStyles = makeStyles({
   dialogPaper: {
     padding: 5,
@@ -64,6 +66,11 @@ export default function ProcessConfigDialog({
   const [model, setModel] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [isCustomModel, setCustomModel] = useState(false);
+  const [page, setPage] = useState(0);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
 
   useEffect(() => {
     const fetchProcessConfigs = async () => {
@@ -111,7 +118,8 @@ export default function ProcessConfigDialog({
           processConfigRes.data[0]) ||
         {};
       const { model, metaModel } = processConfig;
-      const modelArray = model && model.split(".");
+      if (!model) return;
+      const modelArray = model.split(".");
       const name = modelArray[modelArray.length - 1];
       const isCustom =
         !metaModel && processConfig && processConfig["metaJsonModel.name"];
@@ -181,22 +189,39 @@ export default function ProcessConfigDialog({
               <TableBody>
                 {rows &&
                   rows.length > 0 &&
-                  rows.map((row, index) => (
-                    <TableRow key={index}>
-                      {fields.map((field) => (
-                        <TableCell component="th" scope="row" key={row.id}>
-                          {row[field.name]
-                            ? field.targetName
-                              ? row[field.name][field.targetName]
-                              : row[field.name]
-                            : ""}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
+                  rows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row, index) => (
+                      <TableRow key={`field${index}`}>
+                        {fields.map((field, fieldIndex) => (
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            key={`cell_${fieldIndex}`}
+                          >
+                            {row[field.name]
+                              ? field.targetName
+                                ? row[field.name][field.targetName]
+                                : row[field.name]
+                              : ""}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
               </TableBody>
             </Table>
           </TableContainer>
+          {rows && rows.length > 0 && (
+            <TablePagination
+              rowsPerPageOptions={[]}
+              labelRowsPerPage={""}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+            />
+          )}
         </DialogContent>
       )}
       <DialogActions>
