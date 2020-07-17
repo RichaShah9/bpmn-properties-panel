@@ -4,6 +4,7 @@ import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
 
 import Service from "../services/Service";
+import Tooltip from "./components/Tooltip";
 import { download } from "../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -221,11 +222,15 @@ function BpmnViewerComponent({ isInstance }) {
     <React.Fragment>
       <div style={{ display: "flex", padding: 10 }}>
         {toolBarButtons.map((btn) => (
-          <div className="tooltip" key={btn.name} style={{ display: "flex" }}>
-            <button onClick={btn.onClick} className={btn.classname}>
-              <span className="tooltiptext">{btn.tooltipText}</span>
-              {btn.icon}
-            </button>
+          <div key={btn.name} style={{ display: "flex" }}>
+            <Tooltip
+              title={btn.tooltipText}
+              children={
+                <button onClick={btn.onClick} className={btn.classname}>
+                  {btn.icon}
+                </button>
+              }
+            />
           </div>
         ))}
       </div>

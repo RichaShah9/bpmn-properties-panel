@@ -14,6 +14,7 @@ import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
 import Service from "../services/Service";
 import AlertDialog from "./components/AlertDialog";
+import Tooltip from "./components/Tooltip";
 import { download } from "../utils";
 import {
   DeployDialog,
@@ -660,7 +661,7 @@ function BpmnModelerComponent() {
         <div id="bpmnview">
           <div className="toolbar-buttons">
             {toolBarButtons.map((btn) => (
-              <div className="tooltip" key={btn.name}>
+              <div key={btn.name}>
                 {btn.name === "UploadXml" && (
                   <input
                     id="inputFile"
@@ -670,10 +671,14 @@ function BpmnModelerComponent() {
                     style={{ display: "none" }}
                   />
                 )}
-                <button onClick={btn.onClick} className="property-button">
-                  <span className="tooltiptext">{btn.tooltipText}</span>
-                  {btn.icon}
-                </button>
+                <Tooltip
+                  title={btn.tooltipText}
+                  children={
+                    <button onClick={btn.onClick} className="property-button">
+                      {btn.icon}
+                    </button>
+                  }
+                />
               </div>
             ))}
           </div>
