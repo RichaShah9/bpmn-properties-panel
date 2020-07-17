@@ -216,6 +216,7 @@ export default function MigrateRecordsDialog({
         renderRecords = [...(records || [])];
       }
       if (isSearch) {
+        setPage(0)
         setRows([...renderRecords]);
       } else {
         setRows((rows) => [...rows, ...renderRecords]);
