@@ -49,6 +49,7 @@ export default function SelectComponent({
   error = false,
   className,
   defaultValue,
+  isTranslated = true,
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
@@ -210,7 +211,7 @@ export default function SelectComponent({
             ? ""
             : option;
         }
-        return translate(optionName);
+        return isTranslated ? translate(optionName) : optionName;
       }}
     />
   );
