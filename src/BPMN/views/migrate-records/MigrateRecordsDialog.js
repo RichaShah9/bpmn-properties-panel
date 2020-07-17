@@ -79,7 +79,9 @@ export default function MigrateRecordsDialog({
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.id);
+      let cloneRows = [...(rows || [])];
+      cloneRows = cloneRows.splice(rowsPerPage * page, 6);
+      const newSelecteds = cloneRows.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     }
@@ -107,16 +109,15 @@ export default function MigrateRecordsDialog({
 
   const handleChangePage = (e, newPage, isBack) => {
     let { limit, offset, total } = data;
+    setSelected([]);
     if (isBack) {
       setPage(newPage);
       setData({
         ...data,
         offset: offset - limit,
       });
-      setSelected([]);
     } else {
       setPage(newPage);
-      setSelected([]);
       if (searchCriteria && searchCriteria.length > 0) {
         setData({
           ...data,
@@ -271,7 +272,7 @@ export default function MigrateRecordsDialog({
                     classes={classes}
                     numSelected={selected.length}
                     onSelectAllClick={handleSelectAllClick}
-                    rowCount={rows.length}
+                    rowCount={data.total || 0}
                     fields={fields}
                   />
                   <TableBody>

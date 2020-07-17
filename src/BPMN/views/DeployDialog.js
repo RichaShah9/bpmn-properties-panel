@@ -50,8 +50,8 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
   const [oldSelectedElements, setOldElements] = useState(null);
   const [wkfMigrationMap, setWkfMigrationMap] = useState([]);
   const [migrationPlan, setMigrationPlan] = useState({
-    label: "Selected",
-    value: "selected",
+    label: "New",
+    value: "new",
   });
 
   const classes = useStyles();

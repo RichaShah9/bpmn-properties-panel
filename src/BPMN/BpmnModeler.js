@@ -55,6 +55,34 @@ const downloadXml = () => {
   });
 };
 
+const getType = (element) => {
+  if (!element) return;
+  const type = element.type.toLowerCase();
+  return type.includes("event")
+    ? "event"
+    : type.includes("task")
+    ? "task"
+    : type;
+};
+
+const getElements = () => {
+  let elementRegistry = bpmnModeler.get("elementRegistry");
+  let elements = [],
+    elementIds = [];
+  elementRegistry.filter(function (element) {
+    if (["event", "task"].includes(getType(element))) {
+      elements.push({
+        id: element.id,
+        name: element.businessObject.name || element.id,
+        type: getType(element),
+      });
+      elementIds.push(element.id);
+    }
+    return element;
+  });
+  return { elementIds, elements };
+};
+
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
   const [open, setOpen] = useState(false);
@@ -113,34 +141,6 @@ function BpmnModelerComponent() {
 
   const handleClose = () => {
     setOpen(false);
-  };
-
-  const getType = (element) => {
-    if (!element) return;
-    const type = element.type.toLowerCase();
-    return type.includes("event")
-      ? "event"
-      : type.includes("task")
-      ? "task"
-      : type;
-  };
-
-  const getElements = () => {
-    let elementRegistry = bpmnModeler.get("elementRegistry");
-    let elements = [],
-      elementIds = [];
-    elementRegistry.filter(function (element) {
-      if (["event", "task"].includes(getType(element))) {
-        elements.push({
-          id: element.id,
-          name: element.businessObject.name || element.id,
-          type: getType(element),
-        });
-        elementIds.push(element.id);
-      }
-      return element;
-    });
-    return { elementIds, elements };
   };
 
   const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
@@ -361,6 +361,20 @@ function BpmnModelerComponent() {
       oldElements: oldElements,
     });
     setDelopyDialog(true);
+  };
+
+  const addRecords = (records) => {
+    const recordsIds =
+      (selectedRecords && selectedRecords.map((r) => r.id)) || [];
+    const newRecords = [...(selectedRecords || [])];
+    records &&
+      records.forEach((record) => {
+        if (!recordsIds.includes(record.id)) {
+          newRecords.push(record);
+        }
+      });
+    setSelectedRecords(newRecords);
+    setMigrateRecords(false);
   };
 
   const toolBarButtons = [
@@ -731,7 +745,10 @@ function BpmnModelerComponent() {
       {openSelectRecordsDialog && (
         <SelectRecordsDialog
           open={openSelectRecordsDialog}
-          onClose={() => setSelectRecords(false)}
+          onClose={() => {
+            setSelectRecords(false);
+            setSelectedRecords(null);
+          }}
           openConfigRecords={(fields, model, isCustomModel) =>
             openConfigRecords(fields, model, isCustomModel)
           }
@@ -739,6 +756,7 @@ function BpmnModelerComponent() {
           selectedRecords={selectedRecords}
           onOk={() => {
             setSelectRecords(false);
+            setSelectedRecords(null);
             deploy(migrationPlan);
           }}
         />
@@ -751,8 +769,7 @@ function BpmnModelerComponent() {
           isCustomModel={isCustomModel}
           model={model}
           onOk={(selectedRecords) => {
-            setSelectedRecords(selectedRecords);
-            setMigrateRecords(false);
+            addRecords(selectedRecords);
           }}
         />
       )}
