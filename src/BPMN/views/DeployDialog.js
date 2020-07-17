@@ -137,7 +137,7 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
           update={(value) => setMigrationPlan(value)}
           optionLabel="label"
           value={migrationPlan}
-          label="Migration Plan"
+          label="Migration apply to"
           className={classes.migrationPlan}
           isTranslated={false}
         />
