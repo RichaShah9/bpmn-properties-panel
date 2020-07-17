@@ -295,12 +295,13 @@ function BpmnModelerComponent() {
             context: {
               _model: "com.axelor.apps.bpm.db.WkfModel",
               ...res.data[0],
-              wkfMigrationMap: wkfMigrationMap,
-              _migrationPlan: migrationPlan ? migrationPlan.value : null,
-              _selectedModel: model,
-              _selectedIds:
+              wkfMigrationMap: {
+                ...wkfMigrationMap,
+              },
+              _migrationType: migrationPlan ? migrationPlan.value : null,
+              _processInstanceIds:
                 (selectedRecords &&
-                  selectedRecords.map((record) => record.id)) ||
+                  selectedRecords.map((record) => record.processInstanceId)) ||
                 [],
             },
           },
