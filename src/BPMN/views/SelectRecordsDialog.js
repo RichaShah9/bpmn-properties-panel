@@ -111,7 +111,7 @@ export default function ProcessConfigDialog({
           processConfigRes.data[0]) ||
         {};
       const { model, metaModel } = processConfig;
-      const modelArray = model.split(".");
+      const modelArray = model && model.split(".");
       const name = modelArray[modelArray.length - 1];
       const isCustom =
         !metaModel && processConfig && processConfig["metaJsonModel.name"];

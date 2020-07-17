@@ -46,7 +46,7 @@ const useStyles = makeStyles({
 });
 
 export default function DeployDialog({ open, onClose, ids, onOk }) {
-  const { oldIds, currentIds } = ids || {};
+  const { oldElements, currentElements } = ids || {};
   const [oldSelectedElements, setOldElements] = useState(null);
   const [wkfMigrationMap, setWkfMigrationMap] = useState([]);
   const [migrationPlan, setMigrationPlan] = useState({
@@ -57,7 +57,7 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
   const classes = useStyles();
 
   const handleAdd = (oldEle, newEle) => {
-    const newElement = currentIds.find((ele) => ele.name === newEle.name);
+    const newElement = currentElements.find((ele) => ele.name === (newEle && newEle.name));
     const elementIndex = wkfMigrationMap.findIndex(
       (wkf) => (wkf.oldNode && wkf.oldNode.id) === oldEle.id
     );
@@ -81,24 +81,24 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
     let cloneWkfMigrationMap = {};
     wkfMigrationMap &&
       wkfMigrationMap.map((ele) => {
-        cloneWkfMigrationMap[ele.oldNode.id] = ele.currentNode.id;
+        if(!ele.oldNode || !ele.oldNode.id) return null
+        cloneWkfMigrationMap[ele.oldNode.id] = ele.currentNode && ele.currentNode.id;
         return ele;
       });
 
-    let excludeElements = _(oldIds)
+    let excludeElements = _(oldElements)
       .differenceBy(oldSelectedElements, "id", "name")
       .map(_.partial(_.pick, _, "id", "name"))
       .value();
 
     excludeElements &&
       excludeElements.forEach((ele) => {
-        const currentNode = currentIds.find(
+        const currentNode = currentElements.find(
           (current) => (current && current.id) === ele.id
         );
 
-        if (ele && ele.id) {
-          cloneWkfMigrationMap[ele.id] =
-            (currentNode && currentNode.id) || null;
+        if (ele && ele.id && currentNode && currentNode.id) {
+          cloneWkfMigrationMap[ele.id] = currentNode && currentNode.id;
         }
       });
     onOk(cloneWkfMigrationMap, migrationPlan);
@@ -139,6 +139,7 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
           value={migrationPlan}
           label="Migration Plan"
           className={classes.migrationPlan}
+          isTranslated={false}
         />
         <TableContainer component={Paper}>
           <Table size="small" aria-label="a dense table">
@@ -153,8 +154,8 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {oldIds &&
-                oldIds.map((oldEle, index) => (
+              {oldElements &&
+                oldElements.map((oldEle, index) => (
                   <TableRow key={index}>
                     <TableCell
                       component="th"
@@ -173,15 +174,21 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
                       <Select
                         className={classes.select}
                         isLabel={false}
-                        options={currentIds}
+                        options={
+                          currentElements &&
+                          currentElements.filter(
+                            (element) => element.type === oldEle.type
+                          )
+                        }
                         defaultValue={
-                          currentIds &&
+                          currentElements &&
                           oldEle &&
-                          currentIds.find(
+                          currentElements.find(
                             (current) => (current && current.id) === oldEle.id
                           )
                         }
                         update={(value) => handleAdd(oldEle, value)}
+                        isTranslated={false}
                       />
                     </TableCell>
                   </TableRow>

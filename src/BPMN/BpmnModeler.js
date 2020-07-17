@@ -115,6 +115,34 @@ function BpmnModelerComponent() {
     setOpen(false);
   };
 
+  const getType = (element) => {
+    if (!element) return;
+    const type = element.type.toLowerCase();
+    return type.includes("event")
+      ? "event"
+      : type.includes("task")
+      ? "task"
+      : type;
+  };
+
+  const getElements = () => {
+    let elementRegistry = bpmnModeler.get("elementRegistry");
+    let elements = [],
+      elementIds = [];
+    elementRegistry.filter(function (element) {
+      if (["event", "task"].includes(getType(element))) {
+        elements.push({
+          id: element.id,
+          name: element.businessObject.name || element.id,
+          type: getType(element),
+        });
+        elementIds.push(element.id);
+      }
+      return element;
+    });
+    return { elementIds, elements };
+  };
+
   const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
     xml,
     isDeploy,
@@ -126,26 +154,12 @@ function BpmnModelerComponent() {
         return;
       }
       if (isDeploy) {
-        let elementRegistry = bpmnModeler.get("elementRegistry");
-        let elementIds = [];
-        elementRegistry.filter(function (element) {
-          if (
-            !["label", "bpmn:SequenceFlow", "bpmn:Process"].includes(
-              element.type
-            )
-          ) {
-            elementIds.push({
-              id: element.id,
-              name: element.businessObject.name || element.id,
-            });
-          }
-          return element;
-        });
+        const { elements } = getElements();
         window.localStorage.setItem(
           "elementIds",
           JSON.stringify({
             ...(JSON.parse(window.localStorage.getItem("elementIds")) || {}),
-            [`diagram_${id}`]: elementIds,
+            [`diagram_${id}`]: elements,
           })
         );
       }
@@ -339,26 +353,12 @@ function BpmnModelerComponent() {
   };
 
   const deployDiagram = async () => {
-    let elementRegistry = bpmnModeler.get("elementRegistry");
-    let elements = [];
-    let elementIds = [];
-    elementRegistry.filter((element) => {
-      if (
-        !["label", "bpmn:SequenceFlow", "bpmn:Process"].includes(element.type)
-      ) {
-        elements.push({
-          id: element.id,
-          name: element.businessObject.name || element.id,
-        });
-        elementIds.push(element.id);
-      }
-      return element;
-    });
+    const { elements } = getElements();
     let localElements = JSON.parse(window.localStorage.getItem("elementIds"));
     let oldElements = localElements && localElements[`diagram_${id}`];
     setIds({
-      currentIds: elements,
-      oldIds: oldElements,
+      currentElements: elements,
+      oldElements: oldElements,
     });
     setDelopyDialog(true);
   };
