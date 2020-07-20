@@ -17,7 +17,7 @@ function useDebounceEffect(handler, interval) {
   }, [handler, interval]);
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   autoComplete: {
     "& > div > label": {
       fontSize: 14,
@@ -26,12 +26,12 @@ const useStyles = makeStyles({
   },
   input: {
     fontSize: 14,
-    color: "black",
+    color: theme.palette.common.black,
   },
   label: {
     fontSize: 14,
   },
-});
+}));
 
 export default function SelectComponent({
   name,
