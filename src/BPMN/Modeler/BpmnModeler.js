@@ -15,22 +15,23 @@ import Typography from "@material-ui/core/Typography";
 
 import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
-import Service from "../services/Service";
-import AlertDialog from "./components/AlertDialog";
-import Tooltip from "./components/Tooltip";
-import { Tab, Tabs } from "./components/Tabs";
-import { download } from "../utils";
+import Service from "../../services/Service";
+import AlertDialog from "../../components/AlertDialog";
+import Tooltip from "../../components/Tooltip";
+import { Tab, Tabs } from "../../components/Tabs";
+import { download, translate } from "../../utils";
 import {
   DeployDialog,
   DialogView as Dialog,
   SelectRecordsDialog,
   MigrateRecordsDialog,
 } from "./views";
+import propertiesTabs from "./properties/properties";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
 import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css";
-import "./css/bpmn.css";
+import "../css/bpmn.css";
 
 const drawerWidth = 380;
 
@@ -47,7 +48,6 @@ const useStyles = makeStyles((theme) => ({
     flexShrink: 0,
   },
   drawerPaper: {
-    // width: drawerWidth,
     background: "#F8F8F8",
     width: "calc(100% - 1px)",
     position: "absolute",
@@ -721,7 +721,19 @@ function BpmnModelerComponent() {
   useEffect(() => {
     if (!bpmnModeler) return;
     bpmnModeler.on("element.click", (event) => {
-      console.log("ve", event.element);
+      let canvas = bpmnModeler.get("canvas");
+      let elementRegistry = bpmnModeler.get("elementRegistry");
+      let bpmnFactory = bpmnModeler.get("bpmnFactory");
+      let elementTemplates = bpmnModeler.get("elementTemplates");
+      let tabs = propertiesTabs(
+        event.element,
+        canvas,
+        bpmnFactory,
+        elementRegistry,
+        elementTemplates,
+        translate
+      );
+      console.log("tabs", tabs)
       setSelectedElement(event.element);
       setDrawerOpen(true);
     });

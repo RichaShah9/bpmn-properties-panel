@@ -16,7 +16,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
 
-import Select from "../components/Select";
+import Select from "../../../components/Select";
 
 const useStyles = makeStyles({
   dialogPaper: {

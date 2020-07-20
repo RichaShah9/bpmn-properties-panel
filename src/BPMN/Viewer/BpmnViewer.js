@@ -3,13 +3,13 @@ import BpmnViewer from "bpmn-js/lib/NavigatedViewer";
 import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
 
-import Service from "../services/Service";
-import Tooltip from "./components/Tooltip";
-import { download } from "../utils";
+import Service from "../../services/Service";
+import Tooltip from "../../components/Tooltip";
+import { download } from "../../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
-import "./css/bpmn.css";
+import "../css/bpmn.css";
 
 let bpmnViewer = null;
 

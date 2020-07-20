@@ -20,7 +20,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedToolbar";
 import TablePaginationActions from "./TablePaginationActions";
-import Service from "../../../services/Service";
+import Service from "../../../../services/Service";
 
 const useStyles = makeStyles((theme) => ({
   dialogPaper: {

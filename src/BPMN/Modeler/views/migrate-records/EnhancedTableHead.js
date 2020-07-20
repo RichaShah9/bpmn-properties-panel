@@ -8,7 +8,7 @@ import {
   TextField,
 } from "@material-ui/core";
 
-import { translate } from "../../../utils";
+import { translate } from "../../../../utils";
 
 export default function EnhancedTableHead(props) {
   const {

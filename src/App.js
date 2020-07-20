@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import BpmnModelerComponent from "./BPMN/BpmnModeler";
-import BpmnViewerComponent from "./BPMN/BpmnViewer";
+import BpmnModelerComponent from "./BPMN/Modeler/BpmnModeler";
+import BpmnViewerComponent from "./BPMN/Viewer/BpmnViewer";
 import DMNModeler from "./DMN/DMNModeler";
 
 let isInstance = false;

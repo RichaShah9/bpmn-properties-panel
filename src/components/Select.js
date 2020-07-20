@@ -4,7 +4,7 @@ import AutoComplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { translate } from "../../utils";
+import { translate } from "../utils";
 
 function useDebounceEffect(handler, interval) {
   const isMounted = React.useRef(false);

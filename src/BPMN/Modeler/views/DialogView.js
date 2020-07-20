@@ -24,8 +24,8 @@ import {
 import { Add, Close } from "@material-ui/icons";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
-import Select from "../components/Select";
-import { getModels, getViews, getItems, getRoles } from "../../services/api";
+import Select from "../../../components/Select";
+import { getModels, getViews, getItems, getRoles } from "../../../services/api";
 
 const Ids = require("ids").default;
 

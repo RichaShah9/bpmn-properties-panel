@@ -17,9 +17,9 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { Search } from "@material-ui/icons";
 
-import Service from "../../services/Service";
-import { getGridView } from "../../services/api";
-import { pascalToKebabCase } from "../../utils";
+import Service from "../../../services/Service";
+import { getGridView } from "../../../services/api";
+import { pascalToKebabCase } from "../../../utils";
 
 const rowsPerPage = 20;
 const useStyles = makeStyles({
