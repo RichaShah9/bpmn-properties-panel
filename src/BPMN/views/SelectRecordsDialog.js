@@ -67,8 +67,9 @@ export default function ProcessConfigDialog({
   const [isLoading, setLoading] = useState(false);
   const [isCustomModel, setCustomModel] = useState(false);
   const [page, setPage] = useState(0);
+  const [metaJsonModel, setMetaJsonModel] = useState(null);
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (e, newPage) => {
     setPage(newPage);
   };
 
@@ -123,10 +124,13 @@ export default function ProcessConfigDialog({
       const name = modelArray[modelArray.length - 1];
       const isCustom =
         !metaModel && processConfig && processConfig["metaJsonModel.name"];
+      const metaJsonModel =
+        processConfig && processConfig["metaJsonModel.name"];
       const view = isCustom
-        ? `custom-model-${processConfig["metaJsonModel.name"]}-grid`
+        ? `custom-model-${metaJsonModel}-grid`
         : `${pascalToKebabCase(name)}-grid`;
       const fields = await getGridView(view, isCustom);
+      setMetaJsonModel(metaJsonModel);
       setFields(fields);
       setModel(model);
       setLoading(false);
@@ -163,7 +167,7 @@ export default function ProcessConfigDialog({
             <Button
               variant="outlined"
               startIcon={<Search />}
-              onClick={() => openConfigRecords(fields, model, isCustomModel)}
+              onClick={() => openConfigRecords(fields, model, isCustomModel, metaJsonModel)}
               color="primary"
               className={classes.button}
             >
@@ -226,7 +230,7 @@ export default function ProcessConfigDialog({
       )}
       <DialogActions>
         <Button
-          onClick={() => onOk(rows)}
+          onClick={onOk}
           className={classes.button}
           color="primary"
           variant="outlined"

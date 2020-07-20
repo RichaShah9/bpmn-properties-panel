@@ -108,6 +108,7 @@ function BpmnModelerComponent() {
     messageType: null,
     message: null,
   });
+  const [metaJsonModel, setMetaJsonModel] = useState(null);
 
   const alertOpen = () => {
     setAlert(true);
@@ -345,11 +346,12 @@ function BpmnModelerComponent() {
     }
   };
 
-  const openConfigRecords = (fields, model, isCustomModel) => {
+  const openConfigRecords = (fields, model, isCustomModel, metaJsonModel) => {
     setFields(fields);
     setModel(model);
     setMigrateRecords(true);
     setCustomModel(isCustomModel);
+    setMetaJsonModel(metaJsonModel);
   };
 
   const deployDiagram = async () => {
@@ -753,8 +755,8 @@ function BpmnModelerComponent() {
             setSelectRecords(false);
             setSelectedRecords(null);
           }}
-          openConfigRecords={(fields, model, isCustomModel) =>
-            openConfigRecords(fields, model, isCustomModel)
+          openConfigRecords={(fields, model, isCustomModel, metaJsonModel) =>
+            openConfigRecords(fields, model, isCustomModel, metaJsonModel)
           }
           wkf={wkf}
           selectedRecords={selectedRecords}
@@ -775,6 +777,7 @@ function BpmnModelerComponent() {
           onOk={(selectedRecords) => {
             addRecords(selectedRecords);
           }}
+          metaJsonModel={metaJsonModel}
         />
       )}
     </div>

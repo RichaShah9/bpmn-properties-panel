@@ -62,6 +62,7 @@ export default function MigrateRecordsDialog({
   model,
   fields: tableFields,
   isCustomModel,
+  metaJsonModel,
 }) {
   const classes = useStyles();
   const [selected, setSelected] = useState([]);
@@ -185,7 +186,9 @@ export default function MigrateRecordsDialog({
       setLoading(true);
       let requestPayload = {
         data: {
-          _domain: "self.processInstanceId is not null",
+          _domain: isCustomModel && metaJsonModel
+            ? `self.processInstanceId is not null AND self.jsonModel = '${metaJsonModel}'`
+            : "self.processInstanceId is not null",
         },
       };
 
@@ -216,7 +219,7 @@ export default function MigrateRecordsDialog({
         renderRecords = [...(records || [])];
       }
       if (isSearch) {
-        setPage(0)
+        setPage(0);
         setRows([...renderRecords]);
       } else {
         setRows((rows) => [...rows, ...renderRecords]);
@@ -228,7 +231,7 @@ export default function MigrateRecordsDialog({
         total: recordsRes.total,
       });
     },
-    [isCustomModel]
+    [isCustomModel, metaJsonModel]
   );
 
   useEffect(() => {
