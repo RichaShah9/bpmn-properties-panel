@@ -10,8 +10,7 @@ import Alert from "@material-ui/lab/Alert";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import Drawer from "@material-ui/core/Drawer";
-import Typography from "@material-ui/core/Typography";
+import { Drawer, Typography } from "@material-ui/core";
 
 import propertiesCustomProviderModule from "./custom-provider";
 import templates from "./custom-templates/template.json";
@@ -19,14 +18,21 @@ import Service from "../../services/Service";
 import AlertDialog from "../../components/AlertDialog";
 import Tooltip from "../../components/Tooltip";
 import { Tab, Tabs } from "../../components/Tabs";
-import { download, translate } from "../../utils";
 import {
   DeployDialog,
   DialogView as Dialog,
   SelectRecordsDialog,
   MigrateRecordsDialog,
 } from "./views";
-import propertiesTabs from "./properties/properties";
+import Textbox from "./properties/components/Textbox";
+import {
+  fetchId,
+  uploadXml,
+  getElements,
+  saveSVG,
+  downloadXml,
+  getTabs,
+} from "./extra.js";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -76,62 +82,20 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "120%",
     fontWeight: "bolder",
   },
-}));
-let bpmnModeler = null;
-
-const fetchId = () => {
-  const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
-  const url = window.location.href;
-  let matchBPMNId, id;
-  while ((matchBPMNId = regexBPMN.exec(url))) {
-    id = matchBPMNId[1];
-    return id;
+  groupLabel:{
+    fontWeight: 'bolder',
+    display: 'inline-block',
+    verticalAlign: 'middle',
+    color: '#666',
+    fontSize: '120%',
+    marginTop: 5,
+    marginBottom: 10,
+    transition: 'margin 0.218s linear',
+    fontStyle: 'italic',
   }
-};
+}));
 
-const saveSVG = () => {
-  bpmnModeler.saveSVG({ format: true }, async function (err, svg) {
-    download(svg, "diagram.svg");
-  });
-};
-
-const uploadXml = () => {
-  document.getElementById("inputFile").click();
-};
-
-const downloadXml = () => {
-  bpmnModeler.saveXML({ format: true }, async function (err, xml) {
-    download(xml, "diagram.bpmn");
-  });
-};
-
-const getType = (element) => {
-  if (!element) return;
-  const type = element.type.toLowerCase();
-  return type.includes("event")
-    ? "event"
-    : type.includes("task")
-    ? "task"
-    : type;
-};
-
-const getElements = () => {
-  let elementRegistry = bpmnModeler.get("elementRegistry");
-  let elements = [],
-    elementIds = [];
-  elementRegistry.filter(function (element) {
-    if (["event", "task"].includes(getType(element))) {
-      elements.push({
-        id: element.id,
-        name: element.businessObject.name || element.id,
-        type: getType(element),
-      });
-      elementIds.push(element.id);
-    }
-    return element;
-  });
-  return { elementIds, elements };
-};
+let bpmnModeler = null;
 
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
@@ -161,6 +125,7 @@ function BpmnModelerComponent() {
   const [metaJsonModel, setMetaJsonModel] = useState(null);
   const [selectedElement, setSelectedElement] = useState(null);
   const [tabValue, setTabValue] = useState(0);
+  const [tabs, setTabs] = useState([]);
 
   const classes = useStyles();
 
@@ -212,13 +177,17 @@ function BpmnModelerComponent() {
         handleSnackbarClick("error", "Error! Can't import XML");
         return;
       }
-      setSelectedElement(
+      let element =
         bpmnModeler._definitions &&
-          bpmnModeler._definitions.rootElements &&
-          bpmnModeler._definitions.rootElements[0]
-      );
+        bpmnModeler._definitions.rootElements &&
+        bpmnModeler._definitions.rootElements[0];
+
+      setSelectedElement(element);
+      let tabs = getTabs(bpmnModeler, element);
+      setTabs(tabs);
+
       if (isDeploy) {
-        const { elements } = getElements();
+        const { elements } = getElements(bpmnModeler);
         window.localStorage.setItem(
           "elementIds",
           JSON.stringify({
@@ -417,7 +386,7 @@ function BpmnModelerComponent() {
   };
 
   const deployDiagram = async () => {
-    const { elements } = getElements();
+    const { elements } = getElements(bpmnModeler);
     let localElements = JSON.parse(window.localStorage.getItem("elementIds"));
     let oldElements = localElements && localElements[`diagram_${id}`];
     setIds({
@@ -452,7 +421,7 @@ function BpmnModelerComponent() {
       name: "Image",
       icon: <i className="fa fa-picture-o" style={{ fontSize: 18 }}></i>,
       tooltipText: "Download SVG",
-      onClick: saveSVG,
+      onClick: () => saveSVG(bpmnModeler),
     },
     {
       name: "UploadXml",
@@ -464,7 +433,7 @@ function BpmnModelerComponent() {
       name: "DownloadXml",
       icon: <i className="fa fa-download" style={{ fontSize: 18 }}></i>,
       tooltipText: "Download",
-      onClick: downloadXml,
+      onClick: () => downloadXml(bpmnModeler),
     },
     {
       name: "Deploy",
@@ -721,19 +690,8 @@ function BpmnModelerComponent() {
   useEffect(() => {
     if (!bpmnModeler) return;
     bpmnModeler.on("element.click", (event) => {
-      let canvas = bpmnModeler.get("canvas");
-      let elementRegistry = bpmnModeler.get("elementRegistry");
-      let bpmnFactory = bpmnModeler.get("bpmnFactory");
-      let elementTemplates = bpmnModeler.get("elementTemplates");
-      let tabs = propertiesTabs(
-        event.element,
-        canvas,
-        bpmnFactory,
-        elementRegistry,
-        elementTemplates,
-        translate
-      );
-      console.log("tabs", tabs)
+      let tabs = getTabs(bpmnModeler, event.element);
+      setTabs(tabs);
       setSelectedElement(event.element);
       setDrawerOpen(true);
     });
@@ -799,25 +757,34 @@ function BpmnModelerComponent() {
                 {selectedElement && selectedElement.id}
               </Typography>
               <Tabs value={tabValue} onChange={handleChange}>
-                <Tab label="General Tab" />
-                <Tab label="Tab 2" />
-                <Tab label="Tab 3" />
+                {tabs.map((tab, tabIndex) => (
+                  <Tab label={tab.label} key={tabIndex} />
+                ))}
               </Tabs>
-              {selectedElement && selectedElement.id && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    marginTop: 20,
-                  }}
-                >
-                  <label className={classes.label}>Id</label>
-                  <input
-                    value={selectedElement && selectedElement.id}
-                    onChange={() => {}}
-                  ></input>
-                </div>
-              )}
+              {tabs &&
+                tabs[tabValue] &&
+                tabs[tabValue].groups.map((group) => (
+                  <React.Fragment key={group.id}>
+                    {group.entries.length > 0 && (
+                      <React.Fragment>
+                        <div className={classes.groupLabel}>{group.label}</div>
+                        <div>
+                          {group.entries.map((g) => (
+                            <div key={g.id}>
+                              <Textbox
+                                isResizable={true}
+                                label={g.id}
+                                value={
+                                  selectedElement && selectedElement[g[id]]
+                                }
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </React.Fragment>
+                    )}
+                  </React.Fragment>
+                ))}
             </div>
           </Drawer>
           <div
