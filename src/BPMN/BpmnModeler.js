@@ -280,7 +280,7 @@ function BpmnModelerComponent() {
     });
   };
 
-  const deploy = async (migrationPlan) => {
+  const deploy = async (migrationPlan, wkfMigrationMap) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
@@ -295,9 +295,7 @@ function BpmnModelerComponent() {
             context: {
               _model: "com.axelor.apps.bpm.db.WkfModel",
               ...res.data[0],
-              wkfMigrationMap: {
-                ...wkfMigrationMap,
-              },
+              wkfMigrationMap,
               _migrationType: migrationPlan ? migrationPlan.value : null,
               _processInstanceIds:
                 (selectedRecords &&
@@ -339,11 +337,11 @@ function BpmnModelerComponent() {
   const handleOk = (wkfMigrationMap, migrationPlan) => {
     setDelopyDialog(false);
     setMigrationPlan(migrationPlan);
+    setWkfMigrationMap(wkfMigrationMap);
     if (migrationPlan.value === "selected" && wkf.statusSelect === 2) {
       setSelectRecords(true);
-      setWkfMigrationMap(wkfMigrationMap);
     } else {
-      deploy(migrationPlan);
+      deploy(migrationPlan, wkfMigrationMap);
     }
   };
 
@@ -763,7 +761,7 @@ function BpmnModelerComponent() {
           onOk={() => {
             setSelectRecords(false);
             setSelectedRecords(null);
-            deploy(migrationPlan);
+            deploy(migrationPlan, wkfMigrationMap);
           }}
         />
       )}
