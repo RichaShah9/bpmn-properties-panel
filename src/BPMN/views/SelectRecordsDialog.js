@@ -10,7 +10,6 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  Paper,
   DialogTitle,
   CircularProgress,
   TablePagination,
@@ -22,7 +21,7 @@ import Service from "../../services/Service";
 import { getGridView } from "../../services/api";
 import { pascalToKebabCase } from "../../utils";
 
-const rowsPerPage = 5;
+const rowsPerPage = 20;
 const useStyles = makeStyles({
   dialogPaper: {
     padding: 5,
@@ -49,6 +48,9 @@ const useStyles = makeStyles({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
+  },
+  tableContainer: {
+    maxHeight: 450,
   },
 });
 
@@ -167,18 +169,21 @@ export default function ProcessConfigDialog({
             <Button
               variant="outlined"
               startIcon={<Search />}
-              onClick={() => openConfigRecords(fields, model, isCustomModel, metaJsonModel)}
+              onClick={() =>
+                openConfigRecords(fields, model, isCustomModel, metaJsonModel)
+              }
               color="primary"
               className={classes.button}
             >
               Select
             </Button>
           </div>
-          <TableContainer component={Paper}>
+          <TableContainer className={classes.tableContainer}>
             <Table
               className={classes.table}
               size="small"
               aria-label="a dense table"
+              stickyHeader
             >
               <TableHead>
                 <TableRow>

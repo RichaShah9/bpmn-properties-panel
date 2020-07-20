@@ -52,9 +52,12 @@ const useStyles = makeStyles((theme) => ({
   selected: {
     backgroundColor: "#D3D3D3 !important",
   },
+  tableContainer:{
+    maxHeight: 450
+  }
 }));
 
-const rowsPerPage = 5;
+const rowsPerPage = 20;
 export default function MigrateRecordsDialog({
   open,
   onClose,
@@ -72,16 +75,18 @@ export default function MigrateRecordsDialog({
   const [isLoading, setLoading] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
+  const [isSelectAll, setIsSelectAll] = useState(false)
   const [data, setData] = useState({
     total: null,
     offset: 0,
-    limit: 5,
+    limit: 20,
   });
 
   const handleSelectAllClick = (event) => {
+    setIsSelectAll(prevChecked => !prevChecked);
     if (event.target.checked) {
       let cloneRows = [...(rows || [])];
-      cloneRows = cloneRows.splice(rowsPerPage * page, 6);
+      cloneRows = cloneRows.splice(rowsPerPage * page, rowsPerPage + 1);
       const newSelecteds = cloneRows.map((n) => n.id);
       setSelected(newSelecteds);
       return;
@@ -137,9 +142,6 @@ export default function MigrateRecordsDialog({
     onOk(selectedRows, model);
   };
 
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
   const searchRecords = (e, field) => {
     const cloneSearchCriteria = [...(searchCriteria || [])];
     if (e.keyCode === 13) {
@@ -171,14 +173,14 @@ export default function MigrateRecordsDialog({
         cloneSearchCriteria.push(query);
       }
       setSearchCriteria(cloneSearchCriteria);
-      getRecords(model, 5, 0, cloneSearchCriteria, true);
+      getRecords(model, 20, 0, cloneSearchCriteria, true);
     }
   };
 
   const getRecords = React.useCallback(
     async function getRecords(
       model,
-      limit = 5,
+      limit = 20,
       offset = 0,
       criteria,
       isSearch
@@ -226,7 +228,7 @@ export default function MigrateRecordsDialog({
       }
       if (!recordsRes) return;
       setData({
-        limit: 5,
+        limit: 20,
         offset: recordsRes.offset,
         total: recordsRes.total,
       });
@@ -265,49 +267,25 @@ export default function MigrateRecordsDialog({
           <Paper className={classes.paper}>
             <EnhancedTableToolbar numSelected={selected.length} />
             {fields && fields.length > 0 && (
-              <TableContainer>
+              <TableContainer className={classes.tableContainer}>
                 <Table
                   className={classes.table}
                   aria-labelledby="tableTitle"
                   size={"small"}
                   aria-label="enhanced table"
+                  stickyHeader
                 >
                   <EnhancedTableHead
                     classes={classes}
                     numSelected={selected.length}
                     onSelectAllClick={handleSelectAllClick}
-                    rowCount={data.total || 0}
+                    isSelectAll={isSelectAll}
                     fields={fields}
+                    setSelectedField={setSelectedField}
+                    selectedField={selectedField}
+                    searchRecords={searchRecords}
                   />
                   <TableBody>
-                    <TableRow hover key={"search"}>
-                      <TableCell padding="checkbox"></TableCell>
-                      {fields &&
-                        fields.map((field, index) => (
-                          <TableCell key={`${field.title}_${index}_search`}>
-                            <TextField
-                              name={
-                                field && field.name
-                                  ? field.targetName
-                                    ? `${field.name}.${field.targetName}`
-                                    : field.name
-                                  : ""
-                              }
-                              onFocus={() => setSelectedField(field)}
-                              onBlur={() => setSelectedField(null)}
-                              placeholder={
-                                (selectedField && selectedField.name) ===
-                                (field && field.name)
-                                  ? "Search"
-                                  : ""
-                              }
-                              size="small"
-                              InputProps={{ disableUnderline: true }}
-                              onKeyDown={(e) => searchRecords(e, field)}
-                            />
-                          </TableCell>
-                        ))}
-                    </TableRow>
                     {isLoading ? (
                       <div className={classes.loader}>
                         <CircularProgress />
@@ -361,11 +339,6 @@ export default function MigrateRecordsDialog({
                           );
                         })
                     )}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 33 * emptyRows }}>
-                        <TableCell colSpan={6} />
-                      </TableRow>
-                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -376,7 +349,7 @@ export default function MigrateRecordsDialog({
                 labelRowsPerPage={""}
                 component="div"
                 count={data.total || 0}
-                rowsPerPage={5}
+                rowsPerPage={rowsPerPage}
                 page={page}
                 onChangePage={handleChangePage}
                 ActionsComponent={TablePaginationActions}
