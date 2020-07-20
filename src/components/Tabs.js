@@ -12,6 +12,9 @@ export const Tabs = withStyles({
     backgroundColor: "#52B415",
     top: 0,
   },
+  flexContainer: {
+    height: "100%",
+  },
 })(MaterialTabs);
 
 export const Tab = withStyles((theme) => ({
@@ -19,19 +22,17 @@ export const Tab = withStyles((theme) => ({
     textTransform: "none",
     minWidth: 72,
     fontWeight: theme.typography.fontWeightRegular,
-    marginRight: theme.spacing(4),
+    marginRight: theme.spacing(1),
     padding: 0,
     minHeight: 24,
+    borderLeft: "1px solid #ccc",
+    borderRight: "1px solid #ccc",
+    borderTop: "1px solid #ccc",
     "&:hover": {
-      color: "#40a9ff",
       opacity: 1,
     },
     "&$selected": {
-      color: "#52B415",
       fontWeight: theme.typography.fontWeightMedium,
-    },
-    "&:focus": {
-      color: "#40a9ff",
     },
   },
   selected: {},
