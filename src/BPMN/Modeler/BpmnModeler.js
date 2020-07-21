@@ -646,8 +646,8 @@ function BpmnModelerComponent() {
       case "textField":
         return (
           <Textbox
-            isResizable={true}
-            label={entry.label}
+            isResizable={entry.modelProperty === "name" ? true : false}
+            entry={entry}
             value={selectedElement && selectedElement[entry[id]]}
           />
         );
@@ -658,7 +658,7 @@ function BpmnModelerComponent() {
       case "label":
         return <Label entry={entry} />;
       case "link":
-        return <Link entry={entry} />
+        return <Link entry={entry} />;
       default:
         return (
           <Textbox

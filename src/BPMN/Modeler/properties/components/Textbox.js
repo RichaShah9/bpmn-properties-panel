@@ -1,5 +1,6 @@
 import React from "react";
 import classnames from "classnames";
+import Description from "./Description";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles({
@@ -32,8 +33,9 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Textbox({ label, value, isResizable = false }) {
+export default function Textbox({ entry, value, isResizable = false }) {
   const classes = useStyles();
+  const { label, description } = entry || {};
   return (
     <div className={classes.root}>
       <label className={classes.label}>{label}</label>
@@ -44,6 +46,7 @@ export default function Textbox({ label, value, isResizable = false }) {
       >
         {value}
       </div>
+      {description && <Description desciption={description} />}
     </div>
   );
 }
