@@ -24,7 +24,13 @@ import {
   SelectRecordsDialog,
   MigrateRecordsDialog,
 } from "./views";
-import Textbox from "./properties/components/Textbox";
+import {
+  Textbox,
+  SelectBox,
+  Checkbox,
+  Label,
+  Link,
+} from "./properties/components";
 import {
   fetchId,
   uploadXml,
@@ -82,17 +88,17 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "120%",
     fontWeight: "bolder",
   },
-  groupLabel:{
-    fontWeight: 'bolder',
-    display: 'inline-block',
-    verticalAlign: 'middle',
-    color: '#666',
-    fontSize: '120%',
+  groupLabel: {
+    fontWeight: "bolder",
+    display: "inline-block",
+    verticalAlign: "middle",
+    color: "#666",
+    fontSize: "120%",
     marginTop: 5,
     marginBottom: 10,
-    transition: 'margin 0.218s linear',
-    fontStyle: 'italic',
-  }
+    transition: "margin 0.218s linear",
+    fontStyle: "italic",
+  },
 }));
 
 let bpmnModeler = null;
@@ -617,6 +623,53 @@ function BpmnModelerComponent() {
     setDrawerOpen(width === "0px" ? false : true);
   };
 
+  const renderTab = (group) => {
+    return (
+      <React.Fragment key={group.id}>
+        {group.entries.length > 0 && (
+          <React.Fragment>
+            <div className={classes.groupLabel}>{group.label}</div>
+            <div>
+              {group.entries.map((entry) => (
+                <div key={entry.id}>{renderComponent(entry)}</div>
+              ))}
+            </div>
+          </React.Fragment>
+        )}
+      </React.Fragment>
+    );
+  };
+
+  const renderComponent = (entry) => {
+    if (!entry && entry.widget) return;
+    switch (entry.widget) {
+      case "textField":
+        return (
+          <Textbox
+            isResizable={true}
+            label={entry.label}
+            value={selectedElement && selectedElement[entry[id]]}
+          />
+        );
+      case "selectBox":
+        return <SelectBox entry={entry} element={selectedElement} />;
+      case "checkbox":
+        return <Checkbox entry={entry} />;
+      case "label":
+        return <Label entry={entry} />;
+      case "link":
+        return <Link entry={entry} />
+      default:
+        return (
+          <Textbox
+            isResizable={true}
+            label={entry.label}
+            value={selectedElement && selectedElement[entry[id]]}
+          />
+        );
+    }
+  };
+
   useEffect(() => {
     let modeler = {
       container: "#bpmnview",
@@ -761,30 +814,11 @@ function BpmnModelerComponent() {
                   <Tab label={tab.label} key={tabIndex} />
                 ))}
               </Tabs>
-              {tabs &&
-                tabs[tabValue] &&
-                tabs[tabValue].groups.map((group) => (
-                  <React.Fragment key={group.id}>
-                    {group.entries.length > 0 && (
-                      <React.Fragment>
-                        <div className={classes.groupLabel}>{group.label}</div>
-                        <div>
-                          {group.entries.map((g) => (
-                            <div key={g.id}>
-                              <Textbox
-                                isResizable={true}
-                                label={g.id}
-                                value={
-                                  selectedElement && selectedElement[g[id]]
-                                }
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </React.Fragment>
-                    )}
-                  </React.Fragment>
-                ))}
+              <React.Fragment>
+                {tabs &&
+                  tabs[tabValue] &&
+                  tabs[tabValue].groups.map((group) => renderTab(group))}
+              </React.Fragment>
             </div>
           </Drawer>
           <div
