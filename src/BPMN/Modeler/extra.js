@@ -56,6 +56,22 @@ export const downloadXml = (bpmnModeler) => {
   });
 };
 
+export function isGroupVisible(group, element, groupNode) {
+  if (typeof group.enabled === "function") {
+    return group.enabled(element, groupNode);
+  } else {
+    return true;
+  }
+}
+
+export function isTabVisible(tab, element) {
+  if (typeof tab.enabled === "function") {
+    return tab.enabled(element);
+  } else {
+    return true;
+  }
+}
+
 export function renderTabs(tabs = [], element) {
   const type = element.$type || element.type;
   const subType =
@@ -72,12 +88,8 @@ export function renderTabs(tabs = [], element) {
     tabs.forEach((tab) => {
       if (!tab) return;
       if (objectTabs && objectTabs.includes(tab.id)) {
-        if (tab.enabled) {
-          const isEnable = tab.enabled(element);
-          if (isEnable) {
-            filteredTabs.push(tab);
-          }
-        } else {
+        const isEnable = isTabVisible(tab, element);
+        if (isEnable) {
           filteredTabs.push(tab);
         }
       }
@@ -108,4 +120,6 @@ export default {
   getElements,
   renderTabs,
   getTabs,
+  isGroupVisible,
+  isTabVisible,
 };
