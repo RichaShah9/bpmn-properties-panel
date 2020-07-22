@@ -12,12 +12,11 @@ const useStyles = makeStyles({
 
 export default function Link({ entry }) {
   const classes = useStyles();
-  const { cssClasses, showLink, label, handleClick } = entry || {};
+  const { cssClasses, showLink, label } = entry || {};
 
   return (
     <div className={classes.root}>
       <a
-        data-action={() => handleClick()}
         data-show={showLink ? "showLink" : ""}
         className={classNames("bpp-entry-link", cssClasses ? cssClasses : "")}
         href={label}
