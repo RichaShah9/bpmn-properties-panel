@@ -23,11 +23,12 @@ export const Tab = withStyles((theme) => ({
     minWidth: 72,
     fontWeight: theme.typography.fontWeightRegular,
     marginRight: theme.spacing(1),
-    padding: 0,
+    padding: "0px 10px",
     minHeight: 24,
     borderLeft: "1px solid #ccc",
     borderRight: "1px solid #ccc",
     borderTop: "1px solid #ccc",
+    fontSize: 12,
     "&:hover": {
       opacity: 1,
     },
