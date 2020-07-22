@@ -177,6 +177,7 @@ export default function VariableMappingProps(
     idGeneration: false,
     resizable: true,
     businessObject: signalEventDefinition || getBusinessObject(element),
+    widget: "extensionElementTable",
 
     createExtensionElement: newElement(CAMUNDA_IN_EXTENSION_ELEMENT),
     removeExtensionElement: removeElement(CAMUNDA_IN_EXTENSION_ELEMENT),

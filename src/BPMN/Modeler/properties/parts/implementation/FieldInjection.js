@@ -161,7 +161,7 @@ export default function FieldInjection(
     label: translate("Fields"),
     modelProperty: "fieldName",
     idGeneration: "false",
-
+    widget: "extensionElementTable",
     businessObject: businessObject,
 
     createExtensionElement: newElement(),

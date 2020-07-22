@@ -194,6 +194,7 @@ export default function (element, bpmnFactory, options, translate) {
     modelProperty: "name",
     prefix: "Input",
     resizable: true,
+    widget: "extensionElementTable",
 
     createExtensionElement: newElement(
       "camunda:InputParameter",
@@ -226,6 +227,7 @@ export default function (element, bpmnFactory, options, translate) {
       modelProperty: "name",
       prefix: "Output",
       resizable: true,
+      widget: "extensionElementTable",
 
       createExtensionElement: newElement(
         "camunda:OutputParameter",

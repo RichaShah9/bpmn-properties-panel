@@ -39,8 +39,9 @@ export default function ExtensionElements(
   let id = options.id,
     prefix = options.prefix || "elem",
     idGeneration = options.idGeneration === false ? options.idGeneration : true,
-    businessObject = options.businessObject || getBusinessObject(element);
-
+    businessObject = options.businessObject || getBusinessObject(element),
+    label = options.label,
+    widget = options.widget;
   let modelProperty = options.modelProperty || "id";
 
   let getElements = options.getExtensionElements;
@@ -85,7 +86,8 @@ export default function ExtensionElements(
 
   return {
     id: id,
-
+    label: label,
+    widget: widget,
     get: function (element, node) {
       let elements = getElements(element, node);
 

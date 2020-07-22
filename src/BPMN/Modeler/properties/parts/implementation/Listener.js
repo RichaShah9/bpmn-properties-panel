@@ -114,7 +114,7 @@ export default function Listener(element, bpmnFactory, options, translate) {
           modelProperty: "name",
           idGeneration: "false",
           reference: "processRef",
-
+          widget: "extensionElementTable",
           createExtensionElement: newElement(
             element,
             CAMUNDA_EXECUTION_LISTENER_ELEMENT,
@@ -152,7 +152,7 @@ export default function Listener(element, bpmnFactory, options, translate) {
       label: translate("Task Listener"),
       modelProperty: "name",
       idGeneration: "false",
-
+      widget: "extensionElementTable",
       createExtensionElement: newElement(
         element,
         CAMUNDA_TASK_LISTENER_ELEMENT,
