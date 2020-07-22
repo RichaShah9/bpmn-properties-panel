@@ -19,7 +19,7 @@ export default function Name(element, options, translate) {
     id: id,
     label: label,
     modelProperty: modelProperty,
-    widget: "textField", //textBox
+    widget: "textBox",
     get: options.get,
     set: options.set,
   };

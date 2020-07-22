@@ -269,7 +269,7 @@ export default function FieldInjection(
     id: idPrefix + "field-value",
     label: translate("Value"),
     modelProperty: "fieldValue",
-    widget: "textField", //textBox
+    widget: "textBox",
     get: function (element, node) {
       let bo = getSelectedField(element, node);
       let fieldType = getFieldType(bo);

@@ -172,7 +172,7 @@ export default function InputOutputParameter(
     id: idPrefix + "parameterType-text",
     label: translate("Value"),
     modelProperty: "value",
-    widget: "textField", //textBox
+    widget: "textBox",
     get: function (element, node) {
       return {
         value: (getSelected(element, node) || {}).value,
