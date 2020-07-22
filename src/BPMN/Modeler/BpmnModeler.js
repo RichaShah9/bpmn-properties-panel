@@ -8,7 +8,7 @@ import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import Alert from "@material-ui/lab/Alert";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
-import { Snackbar } from "@material-ui/core";
+import { Snackbar, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Drawer, Typography } from "@material-ui/core";
 
@@ -38,6 +38,7 @@ import {
   saveSVG,
   downloadXml,
   getTabs,
+  isGroupVisible,
 } from "./extra.js";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -94,10 +95,15 @@ const useStyles = makeStyles((theme) => ({
     verticalAlign: "middle",
     color: "#666",
     fontSize: "120%",
-    marginTop: 5,
-    marginBottom: 10,
+    margin: "10px 0px",
     transition: "margin 0.218s linear",
     fontStyle: "italic",
+  },
+  groupContainer: {
+    marginTop: 10,
+  },
+  divider: {
+    marginTop: 15,
   },
 }));
 
@@ -623,30 +629,20 @@ function BpmnModelerComponent() {
     setDrawerOpen(width === "0px" ? false : true);
   };
 
-  const renderTab = (group) => {
-    return (
-      <React.Fragment key={group.id}>
-        {group.entries.length > 0 && (
-          <React.Fragment>
-            <div className={classes.groupLabel}>{group.label}</div>
-            <div>
-              {group.entries.map((entry) => (
-                <div key={entry.id}>{renderComponent(entry)}</div>
-              ))}
-            </div>
-          </React.Fragment>
-        )}
-      </React.Fragment>
-    );
-  };
-
   const renderComponent = (entry) => {
     if (!entry && entry.widget) return;
     switch (entry.widget) {
       case "textField":
         return (
           <Textbox
-            isResizable={entry.modelProperty === "name" ? true : false}
+            entry={entry}
+            value={selectedElement && selectedElement[entry[id]]}
+          />
+        );
+      case "textBox":
+        return (
+          <Textbox
+            isResizable={true}
             entry={entry}
             value={selectedElement && selectedElement[entry[id]]}
           />
@@ -668,6 +664,30 @@ function BpmnModelerComponent() {
           />
         );
     }
+  };
+
+  const TabPanel = ({ group, index }) => {
+    return (
+      <div
+        key={group.id}
+        data-group={group.id}
+        className={classes.groupContainer}
+      >
+        {group.entries.length > 0 && (
+          <React.Fragment>
+            <React.Fragment>
+              {index > 0 && <Divider className={classes.divider} />}
+            </React.Fragment>
+            <div className={classes.groupLabel}>{group.label}</div>
+            <div>
+              {group.entries.map((entry) => (
+                <div key={entry.id}>{renderComponent(entry)}</div>
+              ))}
+            </div>
+          </React.Fragment>
+        )}
+      </div>
+    );
   };
 
   const updateTabs = (event) => {
@@ -819,14 +839,20 @@ function BpmnModelerComponent() {
               </Typography>
               <Tabs value={tabValue} onChange={handleChange}>
                 {tabs.map((tab, tabIndex) => (
-                  <Tab label={tab.label} key={tabIndex} />
+                  <Tab label={tab.label} key={tabIndex} data-tab={tab.id} />
                 ))}
               </Tabs>
               <React.Fragment>
                 {tabs &&
                   tabs[tabValue] &&
                   tabs[tabValue].groups &&
-                  tabs[tabValue].groups.map((group) => renderTab(group))}
+                  tabs[tabValue].groups.map((group, index) => (
+                    <React.Fragment key={group.id}>
+                      {isGroupVisible(group, selectedElement) && (
+                        <TabPanel group={group} index={index} />
+                      )}
+                    </React.Fragment>
+                  ))}
               </React.Fragment>
             </div>
           </Drawer>
