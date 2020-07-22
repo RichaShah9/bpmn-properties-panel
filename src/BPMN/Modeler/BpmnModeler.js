@@ -30,6 +30,8 @@ import {
   Checkbox,
   Label,
   Link,
+  ExtensionElementTable,
+  Table
 } from "./properties/components";
 import {
   fetchId,
@@ -655,16 +657,30 @@ function BpmnModelerComponent() {
         return <Label entry={entry} />;
       case "link":
         return <Link entry={entry} />;
+      case "extensionElementTable":
+        return (
+          <ExtensionElementTable entry={entry} element={selectedElement} />
+        );
+      case "table":
+        return <Table entry={entry} />;
+      case "comboBox":
       default:
         return (
           <Textbox
-            isResizable={true}
-            label={entry.label}
+            entry={entry}
             value={selectedElement && selectedElement[entry[id]]}
           />
         );
     }
   };
+
+  function Entry({ entry }) {
+    return (
+      entry.id !== "elementTemplate-chooser" && (
+        <div key={entry.id}>{renderComponent(entry)}</div>
+      )
+    );
+  }
 
   const TabPanel = ({ group, index }) => {
     return (
@@ -680,12 +696,9 @@ function BpmnModelerComponent() {
             </React.Fragment>
             <div className={classes.groupLabel}>{group.label}</div>
             <div>
-              {group.entries.map(
-                (entry) =>
-                  entry.id !== "elementTemplate-chooser" && (
-                    <div key={entry.id}>{renderComponent(entry)}</div>
-                  )
-              )}
+              {group.entries.map((entry, i) => (
+                <Entry entry={entry} key={i} />
+              ))}
             </div>
           </React.Fragment>
         )}
