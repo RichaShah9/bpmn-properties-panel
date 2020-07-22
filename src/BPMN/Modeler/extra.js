@@ -1,5 +1,6 @@
 import propertiesTabs from "./properties/properties";
 import { download, translate } from "../../utils";
+import { tabProperty } from "./properties/tabProperty";
 
 export const fetchId = () => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
@@ -56,13 +57,21 @@ export const downloadXml = (bpmnModeler) => {
 };
 
 export function renderTabs(tabs = [], element) {
+  const type = element.$type || element.type;
+  const subType =
+    element.businessObject &&
+    element.businessObject.eventDefinitions &&
+    element.businessObject.eventDefinitions[0].$type;
+  const bo =
+    tabProperty.find((tab) => tab.type === type && tab.subType === subType) ||
+    {};
+
+  const objectTabs = bo.tabs;
   let filteredTabs = [];
   tabs &&
     tabs.forEach((tab) => {
       if (!tab) return;
-      let areEntries =
-        tab.groups && tab.groups.filter((g) => g.entries.length > 0);
-      if (areEntries && areEntries.length > 0) {
+      if (objectTabs && objectTabs.includes(tab.id)) {
         if (tab.enabled) {
           const isEnable = tab.enabled(element);
           if (isEnable) {

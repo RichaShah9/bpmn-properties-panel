@@ -670,6 +670,14 @@ function BpmnModelerComponent() {
     }
   };
 
+  const updateTabs = (event) => {
+    let tabs = getTabs(bpmnModeler, event.element);
+    setTabs(tabs);
+    setTabValue(0);
+    setSelectedElement(event.element);
+    setDrawerOpen(true);
+  };
+
   useEffect(() => {
     let modeler = {
       container: "#bpmnview",
@@ -743,10 +751,10 @@ function BpmnModelerComponent() {
   useEffect(() => {
     if (!bpmnModeler) return;
     bpmnModeler.on("element.click", (event) => {
-      let tabs = getTabs(bpmnModeler, event.element);
-      setTabs(tabs);
-      setSelectedElement(event.element);
-      setDrawerOpen(true);
+      updateTabs(event);
+    });
+    bpmnModeler.on("shape.changed", (event) => {
+      updateTabs(event);
     });
   }, []);
 
@@ -817,6 +825,7 @@ function BpmnModelerComponent() {
               <React.Fragment>
                 {tabs &&
                   tabs[tabValue] &&
+                  tabs[tabValue].groups &&
                   tabs[tabValue].groups.map((group) => renderTab(group))}
               </React.Fragment>
             </div>
