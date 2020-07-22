@@ -5,7 +5,7 @@ const useStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
-    marginTop: 20,
+    marginTop: 5,
   },
 });
 

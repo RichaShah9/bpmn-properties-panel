@@ -5,7 +5,7 @@ const useStyles = makeStyles({
   root: {
     display: "flex",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 5,
   },
 });
 

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 
+import Description from "./Description";
+
 const useStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
-    marginTop: 20,
+    marginTop: 5,
   },
 });
 
@@ -19,6 +21,7 @@ export default function SelectBox({ entry, element }) {
     canBeHidden,
     label,
     modelProperty,
+    description,
   } = entry || {};
   const [options, setOptions] = useState([]);
 
@@ -56,6 +59,7 @@ export default function SelectBox({ entry, element }) {
             </option>
           ))}
       </select>
+      {description && <Description desciption={description} />}
     </div>
   );
 }
