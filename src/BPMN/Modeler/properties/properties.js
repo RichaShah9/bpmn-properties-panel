@@ -29,7 +29,7 @@ import listenerDetails from "./parts/ListenerDetailProps";
 import listenerFields from "./parts/ListenerFieldInjectionProps";
 
 import elementTemplateChooserProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/ChooserProps";
-import elementTemplateCustomProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/CustomProps";
+import elementTemplateCustomProps from "./parts/CustomProps";
 
 // Connector
 import connectorDetails from "./parts/ConnectorDetailProps";
@@ -248,9 +248,11 @@ function createGeneralTabGroups(
 
   let groups = [];
   groups.push(generalGroup);
-  customFieldsGroups.forEach(function (group) {
-    groups.push(group);
-  });
+  if (element.type === "bpmn:UserTask") {
+    customFieldsGroups.forEach(function (group) {
+      groups.push(group);
+    });
+  }
   groups.push(detailsGroup);
   groups.push(multiInstanceGroup);
 
@@ -317,9 +319,11 @@ function createListenersTabGroups(
     id: "listener-details",
     entries: [],
     enabled: function (element, node) {
+      if(!node) return false //TODO - Send selected Node
       return options.getSelectedListener(element, node);
     },
     label: function (element, node) {
+      if(!node) return //TODO - Send selected Node
       let param = options.getSelectedListener(element, node);
       return getListenerLabel(param, translate);
     },
@@ -338,6 +342,7 @@ function createListenersTabGroups(
     label: translate("Field Injection"),
     entries: [],
     enabled: function (element, node) {
+      if(!node) return false //TODO - Send selected Node
       return options.getSelectedListener(element, node);
     },
   };
@@ -378,9 +383,11 @@ function createConnectorTabGroups(
     id: "connector-input-output-parameter",
     entries: [],
     enabled: function (element, node) {
+      if(!node) return false //TODO - Send selected Node
       return options.getSelectedParameter(element, node);
     },
     label: function (element, node) {
+      if(!node) return false //TODO - Send selected Node
       let param = options.getSelectedParameter(element, node);
       return getInputOutputParameterLabel(param, translate);
     },
