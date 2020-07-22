@@ -195,7 +195,6 @@ export default function InputOutputParameter(
   let script = scriptImplementation("scriptFormat", "value", true, translate);
   entries.push({
     id: idPrefix + "parameterType-script",
-    html: '<div data-show="isScript">' + script.template + "</div>",
     get: function (element, node) {
       let bo = getSelected(element, node);
       return bo && isScript(bo.definition)

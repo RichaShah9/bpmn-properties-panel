@@ -1,12 +1,12 @@
 import eventDefinitionReference from "./EventDefinitionReference";
 import elementReferenceProperty from "./ElementReferenceProperty";
+import { translate } from "../../../../../utils";
 
 export default function ErrorEventDefinition(
   group,
   element,
   bpmnFactory,
-  errorEventDefinition,
-  translate
+  errorEventDefinition
 ) {
   group.entries = group.entries.concat(
     eventDefinitionReference(element, errorEventDefinition, bpmnFactory, {

@@ -22,7 +22,6 @@ export default function ScriptTaskProps(
   group.entries.push({
     id: "script-implementation",
     label: translate("Script"),
-    html: script.template,
 
     get: function (element) {
       return script.get(element, bo);

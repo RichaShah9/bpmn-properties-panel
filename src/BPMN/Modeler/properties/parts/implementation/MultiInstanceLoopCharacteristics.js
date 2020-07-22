@@ -1,7 +1,6 @@
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
-import { escapeHTML } from "bpmn-js-properties-panel/lib/Utils";
 import { classes as domClasses } from "min-dom";
 
 /**
@@ -171,21 +170,17 @@ function updateFormalExpression(element, propertyName, newValue, bpmnFactory) {
   });
 }
 
-export default function MultiInstanceLoopCharacteristics(element, bpmnFactory, translate) {
+export default function MultiInstanceLoopCharacteristics(
+  element,
+  bpmnFactory,
+  translate
+) {
   let entries = [];
 
   // error message /////////////////////////////////////////////////////////////////
 
   entries.push({
     id: "multiInstance-errorMessage",
-    html:
-      '<div data-show="isValid">' +
-      '<span class="bpp-icon-warning"></span> ' +
-      escapeHTML(
-        translate("Must provide either loop cardinality or collection")
-      ) +
-      "</div>",
-
     isValid: function (element, node, notification, scope) {
       let loopCharacteristics = getLoopCharacteristics(element);
 
@@ -302,4 +297,4 @@ export default function MultiInstanceLoopCharacteristics(element, bpmnFactory, t
   });
 
   return entries;
-};
+}

@@ -1,7 +1,7 @@
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import forEach from "lodash/forEach";
-import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil"
+import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { query as domQuery, closest as domClosest, domify } from "min-dom";
 import utils from "bpmn-js-properties-panel/lib/Utils";
 const { escapeHTML } = utils;
@@ -38,7 +38,6 @@ export default function ExtensionElements(
 ) {
   let id = options.id,
     prefix = options.prefix || "elem",
-    label = options.label || id,
     idGeneration = options.idGeneration === false ? options.idGeneration : true,
     businessObject = options.businessObject || getBusinessObject(element);
 
@@ -46,16 +45,13 @@ export default function ExtensionElements(
 
   let getElements = options.getExtensionElements;
 
-  let createElement = options.createExtensionElement,
-    canCreate = typeof createElement === "function";
+  let createElement = options.createExtensionElement;
 
-  let removeElement = options.removeExtensionElement,
-    canRemove = typeof removeElement === "function";
+  let removeElement = options.removeExtensionElement;
 
   let onSelectionChange = options.onSelectionChange;
 
-  let hideElements = options.hideExtensionElements,
-    canBeHidden = typeof hideElements === "function";
+  let hideElements = options.hideExtensionElements;
 
   let setOptionLabelValue = options.setOptionLabelValue;
 
@@ -89,47 +85,6 @@ export default function ExtensionElements(
 
   return {
     id: id,
-    html:
-      '<div class="bpp-row bpp-element-list" ' +
-      (canBeHidden ? 'data-show="hideElements"' : "") +
-      ">" +
-      '<label for="cam-extensionElements-' +
-      escapeHTML(id) +
-      '">' +
-      escapeHTML(label) +
-      "</label>" +
-      '<div class="bpp-field-wrapper">' +
-      '<select id="cam-extensionElements-' +
-      escapeHTML(id) +
-      '"' +
-      'name="selectedExtensionElement" ' +
-      'size="' +
-      escapeHTML(defaultSize) +
-      '" ' +
-      "data-list-entry-container " +
-      'data-on-change="selectElement">' +
-      "</select>" +
-      (canCreate
-        ? '<button class="add" ' +
-          'id="cam-extensionElements-create-' +
-          escapeHTML(id) +
-          '" ' +
-          'data-action="createElement">' +
-          "<span>+</span>" +
-          "</button>"
-        : "") +
-      (canRemove
-        ? '<button class="clear" ' +
-          'id="cam-extensionElements-remove-' +
-          escapeHTML(id) +
-          '" ' +
-          'data-action="removeElement" ' +
-          'data-disable="disableRemove">' +
-          "<span>-</span>" +
-          "</button>"
-        : "") +
-      "</div>" +
-      "</div>",
 
     get: function (element, node) {
       let elements = getElements(element, node);

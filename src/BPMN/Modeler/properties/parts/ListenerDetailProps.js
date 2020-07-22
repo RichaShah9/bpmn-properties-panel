@@ -245,7 +245,6 @@ export default function ListenerDetailProps(
 
   group.entries.push({
     id: "listener-script-value",
-    html: '<div data-show="isScript">' + script.template + "</div>",
 
     get: function (element, node) {
       let listener = getSelectedListener(element, node);

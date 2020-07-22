@@ -4,7 +4,6 @@ import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefi
 
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
-import { escapeHTML } from "bpmn-js-properties-panel/lib/Utils";
 import { query as domQuery } from "min-dom";
 
 import scriptImplementation from "./implementation/Script";
@@ -38,38 +37,6 @@ export default function ConditionalProps(
   group.entries.push({
     id: "condition",
     label: translate("Condition"),
-    html:
-      '<div class="bpp-row">' +
-      '<label for="cam-condition-type">' +
-      escapeHTML(translate("Condition Type")) +
-      "</label>" +
-      '<div class="bpp-field-wrapper">' +
-      '<select id="cam-condition-type" name="conditionType" data-value>' +
-      '<option value="expression">' +
-      escapeHTML(translate("Expression")) +
-      "</option>" +
-      '<option value="script">' +
-      escapeHTML(translate("Script")) +
-      "</option>" +
-      '<option value="" selected></option>' +
-      "</select>" +
-      "</div>" +
-      "</div>" +
-      // expression
-      '<div class="bpp-row">' +
-      '<label for="cam-condition" data-show="isExpression">' +
-      escapeHTML(translate("Expression")) +
-      "</label>" +
-      '<div class="bpp-field-wrapper" data-show="isExpression">' +
-      '<input id="cam-condition" type="text" name="condition" />' +
-      '<button class="clear" data-action="clear" data-show="canClear">' +
-      "<span>X</span>" +
-      "</button>" +
-      "</div>" +
-      '<div data-show="isScript">' +
-      script.template +
-      "</div>" +
-      "</div>",
 
     get: function (element, propertyName) {
       let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(

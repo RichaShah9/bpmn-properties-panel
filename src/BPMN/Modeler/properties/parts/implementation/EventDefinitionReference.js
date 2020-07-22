@@ -66,30 +66,13 @@ export default function EventDefinitionReference(
 
   let newElementIdPrefix = options.newElementIdPrefix || "elem_";
 
-  let label = options.label || "",
-    description = options.description || "";
+  let description = options.description || "";
 
   let entries = [];
 
   entries.push({
     id: "event-definitions-" + elementName,
     description: description,
-    html:
-      '<div class="bpp-row bpp-select">' +
-      '<label for="camunda-' +
-      escapeHTML(elementName) +
-      '">' +
-      escapeHTML(label) +
-      "</label>" +
-      '<div class="bpp-field-wrapper">' +
-      '<select id="camunda-' +
-      escapeHTML(elementName) +
-      '" name="selectedElement" data-value>' +
-      "</select>" +
-      '<button class="add" id="addElement" data-action="addElement"><span>+</span></button>' +
-      "</div>" +
-      "</div>",
-
     get: function (element, entryNode) {
       utils.updateOptionsDropDown(selector, definition, elementType, entryNode);
       let reference = definition.get(referenceProperty);
