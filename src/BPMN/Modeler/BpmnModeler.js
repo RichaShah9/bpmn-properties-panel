@@ -680,9 +680,12 @@ function BpmnModelerComponent() {
             </React.Fragment>
             <div className={classes.groupLabel}>{group.label}</div>
             <div>
-              {group.entries.map((entry) => (
-                <div key={entry.id}>{renderComponent(entry)}</div>
-              ))}
+              {group.entries.map(
+                (entry) =>
+                  entry.id !== "elementTemplate-chooser" && (
+                    <div key={entry.id}>{renderComponent(entry)}</div>
+                  )
+              )}
             </div>
           </React.Fragment>
         )}
