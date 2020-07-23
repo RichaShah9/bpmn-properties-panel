@@ -319,11 +319,11 @@ function createListenersTabGroups(
     id: "listener-details",
     entries: [],
     enabled: function (element, node) {
-      if(!node) return false //TODO - Send selected Node
+      if (!node) return false; //TODO - Send selected Node
       return options.getSelectedListener(element, node);
     },
     label: function (element, node) {
-      if(!node) return //TODO - Send selected Node
+      if (!node) return; //TODO - Send selected Node
       let param = options.getSelectedListener(element, node);
       return getListenerLabel(param, translate);
     },
@@ -342,7 +342,7 @@ function createListenersTabGroups(
     label: translate("Field Injection"),
     entries: [],
     enabled: function (element, node) {
-      if(!node) return false //TODO - Send selected Node
+      if (!node) return false; //TODO - Send selected Node
       return options.getSelectedListener(element, node);
     },
   };
@@ -383,11 +383,11 @@ function createConnectorTabGroups(
     id: "connector-input-output-parameter",
     entries: [],
     enabled: function (element, node) {
-      if(!node) return false //TODO - Send selected Node
+      if (!node) return false; //TODO - Send selected Node
       return options.getSelectedParameter(element, node);
     },
     label: function (element, node) {
-      if(!node) return false //TODO - Send selected Node
+      if (!node) return false; //TODO - Send selected Node
       let param = options.getSelectedParameter(element, node);
       return getInputOutputParameterLabel(param, translate);
     },
@@ -515,8 +515,21 @@ export default function getTabs(
       translate
     ),
   };
+
+  let viewAttributesTab = {
+    id: "view-attributes",
+    label: translate("View Attributes"),
+    groups:[
+      {
+        id: "view-attributes",
+        label: translate("View Attributes"),
+      }
+    ]
+  };
+
   let tabs = [
     generalTab,
+    viewAttributesTab,
     variablesTab,
     connectorTab,
     formsTab,
