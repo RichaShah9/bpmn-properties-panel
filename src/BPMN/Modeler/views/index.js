@@ -1,6 +1,6 @@
 import DeployDialog from "./DeployDialog";
-import DialogView from "./DialogView";
+import ViewAttributePanel from "./ViewAttributePanel";
 import SelectRecordsDialog from "./SelectRecordsDialog";
 import MigrateRecordsDialog from "./migrate-records/MigrateRecordsDialog";
 
-export { DeployDialog, DialogView, SelectRecordsDialog, MigrateRecordsDialog };
+export { DeployDialog, ViewAttributePanel, SelectRecordsDialog, MigrateRecordsDialog };
