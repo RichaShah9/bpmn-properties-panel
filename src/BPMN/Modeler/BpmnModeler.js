@@ -20,7 +20,7 @@ import Tooltip from "../../components/Tooltip";
 import { Tab, Tabs } from "../../components/Tabs";
 import {
   DeployDialog,
-  DialogView as Dialog,
+  ViewAttributePanel,
   SelectRecordsDialog,
   MigrateRecordsDialog,
 } from "./views";
@@ -31,7 +31,7 @@ import {
   Label,
   Link,
   ExtensionElementTable,
-  Table
+  Table,
 } from "./properties/components";
 import {
   fetchId,
@@ -113,9 +113,7 @@ let bpmnModeler = null;
 
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
-  const [open, setOpen] = useState(false);
   const [id, setId] = useState(null);
-  const [element, setElement] = useState(null);
   const [openAlert, setAlert] = useState(false);
   const [openDelopyDialog, setDelopyDialog] = useState(false);
   const [openSelectRecordsDialog, setSelectRecords] = useState(false);
@@ -173,14 +171,6 @@ function BpmnModelerComponent() {
     });
   };
 
-  const handleClickOpen = async () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
     xml,
     isDeploy,
@@ -212,15 +202,6 @@ function BpmnModelerComponent() {
       }
       let canvas = bpmnModeler.get("canvas");
       canvas.zoom("fit-viewport");
-
-      bpmnModeler.on("element.contextmenu", 1500, (event) => {
-        if (event.element.type === "bpmn:UserTask") {
-          event.originalEvent.preventDefault();
-          event.originalEvent.stopPropagation();
-          setElement(event.element);
-          handleClickOpen();
-        }
-      });
     });
   },
   []);
@@ -301,7 +282,7 @@ function BpmnModelerComponent() {
     }
     reader.readAsText(files[0]);
     reader.onload = (e) => {
-      openBpmnDiagram(e.target.result, handleClickOpen);
+      openBpmnDiagram(e.target.result);
     };
   };
 
@@ -319,9 +300,6 @@ function BpmnModelerComponent() {
           "error",
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
-      }
-      if (open) {
-        handleClose();
       }
     });
   };
@@ -498,12 +476,12 @@ function BpmnModelerComponent() {
   }
 
   const addProperty = (name, value) => {
-    const bo = getBusinessObject(element);
+    const bo = getBusinessObject(selectedElement);
     const bpmnFactory = bpmnModeler.get("bpmnFactory");
-    const businessObject = getBusinessObject(element);
+    const businessObject = getBusinessObject(selectedElement);
 
     let parent;
-    let result = createParent(element, bo);
+    let result = createParent(selectedElement, bo);
     parent = result.parent;
     let properties = getPropertiesElement(parent);
     if (!properties) {
@@ -689,18 +667,29 @@ function BpmnModelerComponent() {
         data-group={group.id}
         className={classes.groupContainer}
       >
-        {group.entries.length > 0 && (
+        {group.id === "view-attributes" ? (
           <React.Fragment>
-            <React.Fragment>
-              {index > 0 && <Divider className={classes.divider} />}
-            </React.Fragment>
             <div className={classes.groupLabel}>{group.label}</div>
-            <div>
-              {group.entries.map((entry, i) => (
-                <Entry entry={entry} key={i} />
-              ))}
-            </div>
+            <ViewAttributePanel
+              id={id}
+              handleAdd={handleAdd}
+              element={selectedElement}
+            />
           </React.Fragment>
+        ) : (
+          group.entries.length > 0 && (
+            <React.Fragment>
+              <React.Fragment>
+                {index > 0 && <Divider className={classes.divider} />}
+              </React.Fragment>
+              <div className={classes.groupLabel}>{group.label}</div>
+              <div>
+                {group.entries.map((entry, i) => (
+                  <Entry entry={entry} key={i} />
+                ))}
+              </div>
+            </React.Fragment>
+          )
         )}
       </div>
     );
@@ -894,15 +883,6 @@ function BpmnModelerComponent() {
             {openSnackbar.message}
           </Alert>
         </Snackbar>
-      )}
-      {open && element && (
-        <Dialog
-          id={id}
-          handleClose={handleClose}
-          handleAdd={handleAdd}
-          open={open}
-          element={element}
-        />
       )}
       {openAlert && (
         <AlertDialog
