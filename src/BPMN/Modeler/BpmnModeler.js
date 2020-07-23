@@ -616,19 +616,10 @@ function BpmnModelerComponent() {
     if (!entry && entry.widget) return;
     switch (entry.widget) {
       case "textField":
-        return (
-          <Textbox
-            entry={entry}
-            value={selectedElement && selectedElement[entry[id]]}
-          />
-        );
+        return <Textbox entry={entry} element={selectedElement} />;
       case "textBox":
         return (
-          <Textbox
-            isResizable={true}
-            entry={entry}
-            value={selectedElement && selectedElement[entry[id]]}
-          />
+          <Textbox isResizable={true} entry={entry} element={selectedElement} />
         );
       case "comboBox":
       case "selectBox":
@@ -648,22 +639,16 @@ function BpmnModelerComponent() {
       case "customSelectBox":
         return <CustomSelectBox entry={entry} element={selectedElement} />;
       default:
-        return (
-          <Textbox
-            entry={entry}
-            value={selectedElement && selectedElement[entry[id]]}
-          />
-        );
+        return <Textbox entry={entry} element={selectedElement} />;
     }
   };
 
   function Entry({ entry }) {
     return (
       entry.id !== "elementTemplate-chooser" &&
-      !isHiddenProperty(
-        selectedElement,
-        entry
-      ) && (<div key={entry.id}>{renderComponent(entry)}</div>)
+      !isHiddenProperty(selectedElement, entry) && (
+        <div key={entry.id}>{renderComponent(entry)}</div>
+      )
     );
   }
 

@@ -2,6 +2,7 @@ import React from "react";
 import classnames from "classnames";
 import Description from "./Description";
 import { makeStyles } from "@material-ui/styles";
+import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 const useStyles = makeStyles({
   root: {
@@ -33,9 +34,20 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Textbox({ entry, value, isResizable = false }) {
+export default function Textbox({ entry, element, isResizable = false }) {
   const classes = useStyles();
-  const { label, description } = entry || {};
+  const { label, description, id } = entry || {};
+
+  const getRenderValue = () => {
+    if (!element) return;
+    if (element[id]) {
+      return element[id];
+    } else {
+      let bo = getBusinessObject(element);
+      return (bo && bo[id]) || "";
+    }
+  };
+
   return (
     <div className={classes.root}>
       <label className={classes.label}>{label}</label>
@@ -44,7 +56,7 @@ export default function Textbox({ entry, value, isResizable = false }) {
         suppressContentEditableWarning={true}
         className={classnames(classes.input, isResizable && classes.resizable)}
       >
-        {value}
+        {getRenderValue()}
       </div>
       {description && <Description desciption={description} />}
     </div>
