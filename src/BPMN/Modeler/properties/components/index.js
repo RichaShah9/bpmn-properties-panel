@@ -1,5 +1,6 @@
 import Textbox from "./Textbox";
 import SelectBox from "./SelectBox";
+import CustomSelectBox from "./CustomSelectBox";
 import Checkbox from "./Checkbox";
 import Label from "./Label";
 import Link from "./Link";
@@ -10,6 +11,7 @@ import Table from "./Table";
 export {
   Textbox,
   SelectBox,
+  CustomSelectBox,
   Checkbox,
   Label,
   Link,

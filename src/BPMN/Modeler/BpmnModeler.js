@@ -32,6 +32,7 @@ import {
   Link,
   ExtensionElementTable,
   Table,
+  CustomSelectBox,
 } from "./properties/components";
 import {
   fetchId,
@@ -641,6 +642,8 @@ function BpmnModelerComponent() {
         );
       case "table":
         return <Table entry={entry} />;
+      case "customSelectBox":
+        return <CustomSelectBox entry={entry} element={selectedElement} />;
       case "comboBox":
       default:
         return (
