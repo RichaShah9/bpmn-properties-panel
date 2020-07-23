@@ -211,7 +211,7 @@ export const tabProperty = [
   {
     type: "bpmn:UserTask",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: ["general", "listeners", "view-attributes"],
   },
   {
     type: "bpmn:ManualTask",
