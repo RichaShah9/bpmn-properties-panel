@@ -34,7 +34,7 @@ export default function SelectBox({ entry, element }) {
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleChange = (e) => {
-    setSelectedOption(e.target.name);
+    setSelectedOption(e.target.value);
   };
 
   useEffect(() => {
