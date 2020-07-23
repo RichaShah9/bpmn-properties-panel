@@ -63,7 +63,6 @@ export default function CustomSelectBox({ entry, element }) {
   return (
     <div className={classes.root}>
       <div
-        className="bpp-row bpp-element-list"
         data-show={canBeHidden ? "hideElements" : ""}
       >
         <label
