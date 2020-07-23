@@ -15,7 +15,7 @@ export default function Label({ entry }) {
 
   return (
     <div className={classes.root}>
-      <label data-value={label} className="entry-label"></label>
+      <label className="entry-label">{label}</label>
     </div>
   );
 }
