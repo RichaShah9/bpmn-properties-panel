@@ -9,6 +9,13 @@ const useStyles = makeStyles({
     flexDirection: "column",
     marginTop: 5,
   },
+  label: {
+    fontWeight: "bolder",
+    display: "inline-block",
+    verticalAlign: "middle",
+    color: "#666",
+    marginBottom: 3,
+  },
 });
 
 export default function SelectBox({ entry, element }) {
@@ -38,11 +45,7 @@ export default function SelectBox({ entry, element }) {
 
   return (
     <div className={classes.root}>
-      <label
-        htmlFor={`camunda-${id}`}
-        data-disable={canBeDisabled ? "isDisabled" : ""}
-        data-show={canBeHidden ? "isHidden" : ""}
-      >
+      <label htmlFor={`camunda-${id}`} className={classes.label}>
         {label}
       </label>
       <select
