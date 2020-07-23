@@ -8,7 +8,7 @@ import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import Alert from "@material-ui/lab/Alert";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
-import { Snackbar, Divider } from "@material-ui/core";
+import { Snackbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Drawer, Typography } from "@material-ui/core";
 
@@ -107,6 +107,7 @@ const useStyles = makeStyles((theme) => ({
   },
   divider: {
     marginTop: 15,
+    border: "1px dotted #ccc",
   },
 }));
 
@@ -628,6 +629,7 @@ function BpmnModelerComponent() {
             value={selectedElement && selectedElement[entry[id]]}
           />
         );
+      case "comboBox":
       case "selectBox":
         return <SelectBox entry={entry} element={selectedElement} />;
       case "checkbox":
@@ -644,7 +646,6 @@ function BpmnModelerComponent() {
         return <Table entry={entry} />;
       case "customSelectBox":
         return <CustomSelectBox entry={entry} element={selectedElement} />;
-      case "comboBox":
       default:
         return (
           <Textbox
@@ -683,7 +684,7 @@ function BpmnModelerComponent() {
           group.entries.length > 0 && (
             <React.Fragment>
               <React.Fragment>
-                {index > 0 && <Divider className={classes.divider} />}
+                {index > 0 && <div className={classes.divider} />}
               </React.Fragment>
               <div className={classes.groupLabel}>{group.label}</div>
               <div>
