@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/styles";
+import utils from "bpmn-js-properties-panel/lib/Utils";
 
 const useStyles = makeStyles({
   root: {
@@ -48,22 +49,30 @@ const useStyles = makeStyles({
 
 export default function ExtensionElementTable({ entry, element }) {
   const classes = useStyles();
-  const {
-    label,
-    canBeHidden,
-    defaultSize = 5,
-    id,
-    removeElement,
-    createElement,
-    selectElement,
-  } = entry || {};
+  const { label, defaultSize = 5, id, newElementIdPrefix } = entry || {};
+  const [options, setOptions] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
+
+  const addElement = () => {
+    let prefix = newElementIdPrefix || "elem_";
+    let id = utils.nextId(prefix);
+    setOptions([...(options || []), id]);
+  };
+
+  const selectElement = (e) => {
+    setSelectedOption(e.target.value);
+  };
+
+  const removeElement = () => {
+    const cloneOptions = [...(options || [])]
+    const optionIndex = cloneOptions.findIndex(opt => opt === selectedOption)
+    cloneOptions.splice(optionIndex, 1)
+    setOptions(cloneOptions)
+  };
 
   return (
     <div className={classes.root}>
-      <div
-        className="bpp-row bpp-element-list"
-        data-show={canBeHidden ? "hideElements" : ""}
-      >
+      <div>
         <label
           htmlFor={`cam-extensionElements-${id}`}
           className={classes.label}
@@ -77,19 +86,28 @@ export default function ExtensionElementTable({ entry, element }) {
             name="selectedExtensionElement"
             size={defaultSize}
             data-list-entry-container
-            onChange={() => selectElement(element)}
-          ></select>
+            value={selectedOption || ""}
+            onChange={selectElement}
+          >
+            {options &&
+              options.length > 0 &&
+              options.map((option) => (
+                <option key={option}>
+                  {option}
+                </option>
+              ))}
+          </select>
           <button
             className={classes.add}
             id={`cam-extensionElements-create-${id}`}
-            onClick={() => createElement(element)}
+            onClick={addElement}
           >
             <span>+</span>
           </button>
           <button
             className={classes.clear}
             id={`cam-extensionElements-remove-${id}`}
-            onClick={() => removeElement(element)}
+            onClick={removeElement}
           >
             <span style={{ fontSize: 10 }}>X</span>
           </button>
