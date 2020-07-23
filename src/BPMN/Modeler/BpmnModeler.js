@@ -688,10 +688,14 @@ function BpmnModelerComponent() {
   };
 
   const updateTabs = (event) => {
-    let tabs = getTabs(bpmnModeler, event.element);
+    let { element } = event;
+    if (element && element.type === "label") {
+      element = element.businessObject
+    }
+    let tabs = getTabs(bpmnModeler, element);
     setTabs(tabs);
     setTabValue(0);
-    setSelectedElement(event.element);
+    setSelectedElement(element);
     setDrawerOpen(true);
   };
 
