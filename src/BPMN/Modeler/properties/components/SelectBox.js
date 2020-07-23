@@ -31,6 +31,11 @@ export default function SelectBox({ entry, element }) {
     description,
   } = entry || {};
   const [options, setOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
+
+  const handleChange = (e) => {
+    setSelectedOption(e.target.name);
+  };
 
   useEffect(() => {
     if (typeof selectOptions === "object") {
@@ -53,6 +58,8 @@ export default function SelectBox({ entry, element }) {
         name={modelProperty}
         data-disable={canBeDisabled ? "isDisabled" : ""}
         data-show={canBeHidden ? "isHidden" : ""}
+        value={selectedOption || ""}
+        onChange={handleChange}
       >
         {emptyParameter && <option value=""></option>}
         {options &&
