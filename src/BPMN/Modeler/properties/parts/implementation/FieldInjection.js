@@ -34,6 +34,7 @@ export default function FieldInjection(
   };
 
   function getSelectedField(element, node) {
+    if(!node) return
     let selected = fieldEntry.getSelected(element, node.parentNode);
 
     if (selected.idx === -1) {

@@ -64,6 +64,16 @@ export function isGroupVisible(group, element, groupNode) {
   }
 }
 
+export function isHiddenProperty(element, entry, node) {
+  if (typeof entry.hidden === "function") {
+    return entry.hidden(element, node);
+  } else if (typeof entry.showLink === "function") {
+    return !entry.showLink(element, node);
+  } else {
+    return false;
+  }
+}
+
 export function isTabVisible(tab, element) {
   if (typeof tab.enabled === "function") {
     return tab.enabled(element);

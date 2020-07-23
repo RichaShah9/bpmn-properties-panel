@@ -42,6 +42,7 @@ import {
   downloadXml,
   getTabs,
   isGroupVisible,
+  isHiddenProperty,
 } from "./extra.js";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -658,9 +659,11 @@ function BpmnModelerComponent() {
 
   function Entry({ entry }) {
     return (
-      entry.id !== "elementTemplate-chooser" && (
-        <div key={entry.id}>{renderComponent(entry)}</div>
-      )
+      entry.id !== "elementTemplate-chooser" &&
+      !isHiddenProperty(
+        selectedElement,
+        entry
+      ) && (<div key={entry.id}>{renderComponent(entry)}</div>)
     );
   }
 
