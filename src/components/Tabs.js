@@ -5,7 +5,7 @@ import { Tab as MaterialTab, Tabs as MaterialTabs } from "@material-ui/core";
 export const Tabs = withStyles({
   root: {
     borderBottom: "1px solid #e8e8e8",
-    minHeight: 30,
+    minHeight: 24,
     marginTop: 10,
   },
   indicator: {
