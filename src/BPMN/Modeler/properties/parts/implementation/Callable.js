@@ -207,6 +207,7 @@ export default function Callable(element, bpmnFactory, options, translate) {
     dataValueLabel: "callableElementLabel",
     modelProperty: "callableElementRef",
     widget: "textField",
+    label: options.label || "",
     get: function (element, node) {
       let callableElementRef;
 

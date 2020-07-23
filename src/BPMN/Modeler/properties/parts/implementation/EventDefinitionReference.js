@@ -1,27 +1,10 @@
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 
-import { query as domQuery } from "min-dom";
-import { domify } from "min-dom";
-import { attr as domAttr } from "min-dom";
-
-import forEach from "lodash/forEach";
 import find from "lodash/find";
 import utils from "bpmn-js-properties-panel/lib/Utils";
-const { escapeHTML } = utils;
 
 let selector = "select[name=selectedElement]";
-
-/**
- * Get select box containing all elements.
- *
- * @param {DOMElement} node
- *
- * @return {DOMElement} the select box
- */
-function getSelectBox(node) {
-  return domQuery(selector, node.parentElement);
-}
 
 /**
  * Find element by given id.
@@ -62,9 +45,8 @@ export default function EventDefinitionReference(
 ) {
   let elementName = options.elementName || "",
     elementType = options.elementType,
+    label = options.label || "",
     referenceProperty = options.referenceProperty;
-
-  let newElementIdPrefix = options.newElementIdPrefix || "elem_";
 
   let description = options.description || "";
 
@@ -73,6 +55,9 @@ export default function EventDefinitionReference(
   entries.push({
     id: "event-definitions-" + elementName,
     description: description,
+    widget: "customSelectBox",
+    label: label,
+    newElementIdPrefix: options.newElementIdPrefix,
     get: function (element, entryNode) {
       utils.updateOptionsDropDown(selector, definition, elementType, entryNode);
       let reference = definition.get(referenceProperty);
@@ -121,36 +106,6 @@ export default function EventDefinitionReference(
       commands.push(cmdHelper.updateBusinessObject(element, definition, props));
 
       return commands;
-    },
-
-    addElement: function (element, inputNode) {
-      // note: this generated id will be used as name
-      // of the element and not as id
-      let id = utils.nextId(newElementIdPrefix);
-
-      let optionTemplate = domify(
-        '<option value="' +
-          escapeHTML(id) +
-          '"> (id=' +
-          escapeHTML(id) +
-          ")" +
-          "</option>"
-      );
-
-      // add new option
-      let selectBox = getSelectBox(inputNode);
-      selectBox.insertBefore(optionTemplate, selectBox.firstChild);
-
-      // select new element in the select box
-      forEach(selectBox, function (option) {
-        if (option.value === id) {
-          domAttr(option, "selected", "selected");
-        } else {
-          domAttr(option, "selected", null);
-        }
-      });
-
-      return true;
     },
   });
 
