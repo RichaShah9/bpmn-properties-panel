@@ -14,6 +14,7 @@
     "bpmn-js-properties-panel": "^0.33.2",
     "camunda-bpmn-moddle": "^4.0.1",
     "camunda-dmn-moddle": "^1.0.0",
+    "classnames": "^2.2.6",
     "diagram-js": "^6.4.1",
     "diagram-js-direct-editing": "^1.6.1",
     "dmn-js": "^8.3.0",
