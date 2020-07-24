@@ -26,6 +26,7 @@ import {
 } from "./views";
 import {
   Textbox,
+  TextField,
   SelectBox,
   Checkbox,
   Label,
@@ -616,7 +617,7 @@ function BpmnModelerComponent() {
     if (!entry && entry.widget) return;
     switch (entry.widget) {
       case "textField":
-        return <Textbox entry={entry} element={selectedElement} />;
+        return <TextField entry={entry} element={selectedElement} canRemove={true} />;
       case "textBox":
         return (
           <Textbox isResizable={true} entry={entry} element={selectedElement} />
