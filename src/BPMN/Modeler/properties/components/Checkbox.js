@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles({
@@ -11,7 +11,19 @@ const useStyles = makeStyles({
 
 export default function Checkbox({ entry, element }) {
   const classes = useStyles();
-  const { id, canBeDisabled, canBeHidden, label, modelProperty } = entry || {};
+  const { id, label, modelProperty, get } = entry || {};
+  const [value, setValue] = useState(false);
+
+  const updateValue = () => {
+    setValue((value) => !value);
+  };
+
+  useEffect(() => {
+    if (!element || !get) return;
+    const values = get && get(element);
+    let value = values && values[modelProperty];
+    setValue(value);
+  }, [element, modelProperty, get]);
 
   return (
     <div className={classes.root}>
@@ -19,16 +31,10 @@ export default function Checkbox({ entry, element }) {
         id={`camunda-${id}`}
         type="checkbox"
         name={modelProperty}
-        data-disable={canBeDisabled ? "isDisabled" : ""}
-        data-show={canBeHidden ? "isHidden" : ""}
+        checked={value}
+        onChange={updateValue}
       />
-      <label
-        htmlFor={`camunda-${id}`}
-        data-disable={canBeDisabled ? "isDisabled" : ""}
-        data-show={canBeHidden ? "isHidden" : ""}
-      >
-        {label}
-      </label>
+      <label htmlFor={`camunda-${id}`}>{label}</label>
     </div>
   );
 }

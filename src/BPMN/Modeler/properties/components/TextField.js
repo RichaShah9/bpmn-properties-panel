@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Description from "./Description";
 import { makeStyles } from "@material-ui/styles";
-import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { Close } from "@material-ui/icons";
 
 const useStyles = makeStyles({
@@ -38,34 +37,45 @@ const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
   },
+  clear: {
+    fontSize: "1rem",
+  },
 });
 
 export default function Textbox({ entry, element, canRemove = false }) {
   const classes = useStyles();
-  const { label, description, id } = entry || {};
+  const { label, description, modelProperty, set, get, getProperty } =
+    entry || {};
   const [value, setValue] = useState(null);
+
+  const updateProperty = () => {
+    if (!set) return;
+    set(element, {
+      [modelProperty]: value,
+    });
+  };
 
   useEffect(() => {
     if (!element) return;
-    if (element[id]) {
-      setValue(element[id]);
-    } else {
-      let bo = getBusinessObject(element);
-      setValue(bo && bo[id]);
-    }
-  }, [element, id]);
+    const values = get && get(element);
+    let value = getProperty
+      ? getProperty(element)
+      : values && values[modelProperty];
+    setValue(value);
+  }, [element, modelProperty, get, getProperty]);
 
   return (
     <div className={classes.root}>
       <label className={classes.label}>{label}</label>
       <div className={classes.fieldWrapper}>
         <input
-          id={`camunda-${id}`}
+          id={`camunda-${modelProperty}`}
           type="text"
-          name={id}
+          name={modelProperty}
           value={value || ""}
           onChange={(e) => setValue(e.target.value)}
           className={classes.input}
+          onBlur={updateProperty}
         />
         {canRemove && value && (
           <button
@@ -74,7 +84,7 @@ export default function Textbox({ entry, element, canRemove = false }) {
             }}
             className={classes.clearButton}
           >
-            <Close fontSize="small" />
+            <Close className={classes.clear} />
           </button>
         )}
       </div>

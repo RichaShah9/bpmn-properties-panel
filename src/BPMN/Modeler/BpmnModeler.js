@@ -617,7 +617,9 @@ function BpmnModelerComponent() {
     if (!entry && entry.widget) return;
     switch (entry.widget) {
       case "textField":
-        return <TextField entry={entry} element={selectedElement} canRemove={true} />;
+        return (
+          <TextField entry={entry} element={selectedElement} canRemove={true} />
+        );
       case "textBox":
         return (
           <Textbox isResizable={true} entry={entry} element={selectedElement} />
@@ -626,11 +628,11 @@ function BpmnModelerComponent() {
       case "selectBox":
         return <SelectBox entry={entry} element={selectedElement} />;
       case "checkbox":
-        return <Checkbox entry={entry} />;
+        return <Checkbox entry={entry} element={selectedElement} />;
       case "label":
-        return <Label entry={entry} />;
+        return <Label entry={entry} element={selectedElement} />;
       case "link":
-        return <Link entry={entry} />;
+        return <Link entry={entry} element={selectedElement} />;
       case "extensionElementTable":
         return (
           <ExtensionElementTable entry={entry} element={selectedElement} />
@@ -691,7 +693,7 @@ function BpmnModelerComponent() {
   const updateTabs = (event) => {
     let { element } = event;
     if (element && element.type === "label") {
-      element = element.businessObject
+      element = element.businessObject;
     }
     let tabs = getTabs(bpmnModeler, element);
     setTabs(tabs);
