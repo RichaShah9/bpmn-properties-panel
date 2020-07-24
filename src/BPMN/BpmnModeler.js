@@ -16,12 +16,7 @@ import Service from "../services/Service";
 import AlertDialog from "./components/AlertDialog";
 import Tooltip from "./components/Tooltip";
 import { download } from "../utils";
-import {
-  DeployDialog,
-  DialogView as Dialog,
-  SelectRecordsDialog,
-  MigrateRecordsDialog,
-} from "./views";
+import { DeployDialog, DialogView as Dialog } from "./views";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -91,14 +86,6 @@ function BpmnModelerComponent() {
   const [element, setElement] = useState(null);
   const [openAlert, setAlert] = useState(false);
   const [openDelopyDialog, setDelopyDialog] = useState(false);
-  const [openSelectRecordsDialog, setSelectRecords] = useState(false);
-  const [openMigrateRecordsDialog, setMigrateRecords] = useState(false);
-  const [selectedRecords, setSelectedRecords] = useState(null);
-  const [model, setModel] = useState(null);
-  const [migrationPlan, setMigrationPlan] = useState(null);
-  const [wkfMigrationMap, setWkfMigrationMap] = useState(null);
-  const [fields, setFields] = useState(null);
-  const [isCustomModel, setCustomModel] = useState(false);
   const [ids, setIds] = useState({
     oldIds: null,
     currentIds: null,
@@ -108,7 +95,6 @@ function BpmnModelerComponent() {
     messageType: null,
     message: null,
   });
-  const [metaJsonModel, setMetaJsonModel] = useState(null);
 
   const alertOpen = () => {
     setAlert(true);
@@ -281,7 +267,7 @@ function BpmnModelerComponent() {
     });
   };
 
-  const deploy = async (migrationPlan, wkfMigrationMap) => {
+  const deploy = async (wkfMigrationMap) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
@@ -297,11 +283,6 @@ function BpmnModelerComponent() {
               _model: "com.axelor.apps.bpm.db.WkfModel",
               ...res.data[0],
               wkfMigrationMap,
-              _migrationType: migrationPlan ? migrationPlan.value : null,
-              _processInstanceIds:
-                (selectedRecords &&
-                  selectedRecords.map((record) => record.processInstanceId)) ||
-                [],
             },
           },
         });
@@ -328,30 +309,12 @@ function BpmnModelerComponent() {
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
-      setSelectedRecords(null);
-      setMigrationPlan(null);
-      setWkfMigrationMap(null);
-      setModel(null);
     });
   };
 
-  const handleOk = (wkfMigrationMap, migrationPlan) => {
+  const handleOk = (wkfMigrationMap) => {
     setDelopyDialog(false);
-    setMigrationPlan(migrationPlan);
-    setWkfMigrationMap(wkfMigrationMap);
-    if (migrationPlan.value === "selected" && wkf.statusSelect === 2) {
-      setSelectRecords(true);
-    } else {
-      deploy(migrationPlan, wkfMigrationMap);
-    }
-  };
-
-  const openConfigRecords = (fields, model, isCustomModel, metaJsonModel) => {
-    setFields(fields);
-    setModel(model);
-    setMigrateRecords(true);
-    setCustomModel(isCustomModel);
-    setMetaJsonModel(metaJsonModel);
+    deploy(wkfMigrationMap);
   };
 
   const deployDiagram = async () => {
@@ -363,20 +326,6 @@ function BpmnModelerComponent() {
       oldElements: oldElements,
     });
     setDelopyDialog(true);
-  };
-
-  const addRecords = (records) => {
-    const recordsIds =
-      (selectedRecords && selectedRecords.map((r) => r.id)) || [];
-    const newRecords = [...(selectedRecords || [])];
-    records &&
-      records.forEach((record) => {
-        if (!recordsIds.includes(record.id)) {
-          newRecords.push(record);
-        }
-      });
-    setSelectedRecords(newRecords);
-    setMigrateRecords(false);
   };
 
   const toolBarButtons = [
@@ -743,41 +692,7 @@ function BpmnModelerComponent() {
           open={openDelopyDialog}
           onClose={() => setDelopyDialog(false)}
           ids={ids}
-          onOk={(wkfMigrationMap, migrationPlan) =>
-            handleOk(wkfMigrationMap, migrationPlan)
-          }
-        />
-      )}
-      {openSelectRecordsDialog && (
-        <SelectRecordsDialog
-          open={openSelectRecordsDialog}
-          onClose={() => {
-            setSelectRecords(false);
-            setSelectedRecords(null);
-          }}
-          openConfigRecords={(fields, model, isCustomModel, metaJsonModel) =>
-            openConfigRecords(fields, model, isCustomModel, metaJsonModel)
-          }
-          wkf={wkf}
-          selectedRecords={selectedRecords}
-          onOk={() => {
-            setSelectRecords(false);
-            setSelectedRecords(null);
-            deploy(migrationPlan, wkfMigrationMap);
-          }}
-        />
-      )}
-      {openMigrateRecordsDialog && (
-        <MigrateRecordsDialog
-          open={openSelectRecordsDialog}
-          onClose={() => setMigrateRecords(false)}
-          fields={fields}
-          isCustomModel={isCustomModel}
-          model={model}
-          onOk={(selectedRecords) => {
-            addRecords(selectedRecords);
-          }}
-          metaJsonModel={metaJsonModel}
+          onOk={(wkfMigrationMap) => handleOk(wkfMigrationMap)}
         />
       )}
     </div>

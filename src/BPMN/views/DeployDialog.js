@@ -40,19 +40,12 @@ const useStyles = makeStyles({
     fontWeight: 600,
     fontSize: 12,
   },
-  migrationPlan: {
-    marginBottom: 34,
-  },
 });
 
 export default function DeployDialog({ open, onClose, ids, onOk }) {
   const { oldElements, currentElements } = ids || {};
   const [oldSelectedElements, setOldElements] = useState(null);
   const [wkfMigrationMap, setWkfMigrationMap] = useState([]);
-  const [migrationPlan, setMigrationPlan] = useState({
-    label: "New",
-    value: "new",
-  });
 
   const classes = useStyles();
 
@@ -101,7 +94,7 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
           cloneWkfMigrationMap[ele.id] = currentNode && currentNode.id;
         }
       });
-    onOk(cloneWkfMigrationMap, migrationPlan);
+    onOk(cloneWkfMigrationMap);
   };
 
   return (
@@ -118,29 +111,6 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
         <strong>Node Mapping</strong>
       </DialogTitle>
       <DialogContent>
-        <Select
-          isLabel={true}
-          options={[
-            {
-              label: "New",
-              value: "new",
-            },
-            {
-              label: "All",
-              value: "all",
-            },
-            {
-              label: "Selected",
-              value: "selected",
-            },
-          ]}
-          update={(value) => setMigrationPlan(value)}
-          optionLabel="label"
-          value={migrationPlan}
-          label="Migration apply to"
-          className={classes.migrationPlan}
-          isTranslated={false}
-        />
         <TableContainer component={Paper}>
           <Table size="small" aria-label="a dense table">
             <TableHead>
