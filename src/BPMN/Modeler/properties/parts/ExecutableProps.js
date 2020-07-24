@@ -1,4 +1,5 @@
 import participantHelper from "bpmn-js-properties-panel/lib/helper/ParticipantHelper";
+import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 export default function ExecutableProps(group, element, translate) {
@@ -17,6 +18,19 @@ export default function ExecutableProps(group, element, translate) {
       label: translate("Executable"),
       modelProperty: "isExecutable",
       widget: "checkbox",
+    };
+
+    executableEntry.get = function (element) {
+      var bo = getBusinessObject(element),
+        res = {};
+      res["isExecutable"] = bo.get("isExecutable");
+      return res;
+    };
+
+    executableEntry.set = function (element, values) {
+      var res = {};
+      res["isExecutable"] = !!values["isExecutable"];
+      return cmdHelper.updateProperties(element, res);
     };
 
     // in participants we have to change the default behavior of set and get
