@@ -86,6 +86,17 @@ const getElements = () => {
   return allProcess;
 };
 
+const addOldNodes = async (wkf, setWkf) => {
+  const elements = getElements();
+  let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
+    ...wkf,
+    oldNodes: JSON.stringify(elements),
+  });
+  if (res && res.data && res.data[0]) {
+    setWkf({ ...res.data[0] });
+  }
+};
+
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
   const [open, setOpen] = useState(false);
@@ -141,7 +152,8 @@ function BpmnModelerComponent() {
   const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
     xml,
     isDeploy,
-    id
+    id,
+    oldWkf
   ) {
     bpmnModeler.importXML(xml, (error) => {
       if (error) {
@@ -149,14 +161,7 @@ function BpmnModelerComponent() {
         return;
       }
       if (isDeploy) {
-        const elements = getElements();
-        window.localStorage.setItem(
-          "deployIds",
-          JSON.stringify({
-            ...(JSON.parse(window.localStorage.getItem("deployIds")) || {}),
-            [`diagram_${id}`]: elements,
-          })
-        );
+        addOldNodes(oldWkf, setWkf);
       }
       let canvas = bpmnModeler.get("canvas");
       canvas.zoom("fit-viewport");
@@ -174,7 +179,7 @@ function BpmnModelerComponent() {
   []);
 
   const newBpmnDiagram = React.useCallback(
-    function newBpmnDiagram(rec, isDeploy, id) {
+    function newBpmnDiagram(rec, isDeploy, id, oldWkf) {
       const diagram =
         rec ||
         `<?xml version="1.0" encoding="UTF-8" ?>
@@ -198,7 +203,7 @@ function BpmnModelerComponent() {
           </bpmndi:BPMNPlane>
         </bpmndi:BPMNDiagram>
       </bpmn2:definitions>`;
-      openBpmnDiagram(diagram, isDeploy, id);
+      openBpmnDiagram(diagram, isDeploy, id, oldWkf);
     },
     [openBpmnDiagram]
   );
@@ -219,6 +224,7 @@ function BpmnModelerComponent() {
             "previousVersion.statusSelect",
             "isActive",
             "diagramXml",
+            "oldNodes",
           ],
           related: {
             wkfProcessList: ["name", "processId", "wkfProcessConfigList"],
@@ -227,7 +233,7 @@ function BpmnModelerComponent() {
         const wkf = (res && res.data && res.data[0]) || {};
         let { diagramXml } = wkf;
         setWkf(wkf);
-        newBpmnDiagram(diagramXml, isDeploy, id);
+        newBpmnDiagram(diagramXml, isDeploy, id, res.data[0]);
       } else {
         newBpmnDiagram(undefined, isDeploy, id);
       }
@@ -278,6 +284,7 @@ function BpmnModelerComponent() {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
+
         diagramXml: xml,
       });
       if (res && res.data && res.data[0]) {
@@ -357,8 +364,7 @@ function BpmnModelerComponent() {
 
   const deployDiagram = async () => {
     const elements = getElements();
-    let localElements = JSON.parse(window.localStorage.getItem("deployIds"));
-    let oldElements = localElements && localElements[`diagram_${id}`];
+    let oldElements = JSON.parse(wkf.oldNodes);
     setIds({
       currentElements: elements,
       oldElements: oldElements,
