@@ -299,7 +299,9 @@ function BpmnModelerComponent() {
           actionRes.data[0] &&
           actionRes.data[0].reload
         ) {
-          handleSnackbarClick("success", "Deployed Successfully");
+          if (wkf && wkf.statusSelect !== 1) {
+            handleSnackbarClick("success", "Deployed Successfully");
+          }
           fetchDiagram(wkf.id, true);
         } else {
           handleSnackbarClick(
@@ -315,6 +317,35 @@ function BpmnModelerComponent() {
           "error",
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
+      }
+      if (wkf && wkf.statusSelect === 1) {
+        let actionStart = await Service.action({
+          model: "com.axelor.apps.bpm.db.WkfModel",
+          action: "action-wkf-model-method-start",
+          data: {
+            context: {
+              _model: "com.axelor.apps.bpm.db.WkfModel",
+              ...res.data[0],
+            },
+          },
+        });
+        if (
+          actionStart &&
+          actionStart.data &&
+          actionStart.data[0] &&
+          actionStart.data[0].reload
+        ) {
+          handleSnackbarClick("success", "Started Successfully");
+          fetchDiagram(wkf.id, true);
+        } else {
+          handleSnackbarClick(
+            "error",
+            (actionStart &&
+              actionStart.data &&
+              (actionStart.data.message || actionStart.data.title)) ||
+              "Error!"
+          );
+        }
       }
     });
   };
@@ -363,7 +394,7 @@ function BpmnModelerComponent() {
     {
       name: "Deploy",
       icon: <i className="fa fa-rocket" style={{ fontSize: 18 }}></i>,
-      tooltipText: "Deploy",
+      tooltipText: wkf && wkf.statusSelect === 1 ? "Start" : "Deploy",
       onClick: deployDiagram,
     },
   ];
