@@ -233,7 +233,12 @@ function BpmnModelerComponent() {
         const wkf = (res && res.data && res.data[0]) || {};
         let { diagramXml } = wkf;
         setWkf(wkf);
-        newBpmnDiagram(diagramXml, isDeploy, id, res.data[0]);
+        newBpmnDiagram(
+          diagramXml,
+          isDeploy,
+          id,
+          res && res.data && res.data[0]
+        );
       } else {
         newBpmnDiagram(undefined, isDeploy, id);
       }
