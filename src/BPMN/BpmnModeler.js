@@ -53,7 +53,7 @@ const downloadXml = () => {
 
 const getType = (element) => {
   if (!element) return;
-  const type = element.type.toLowerCase();
+  const type = (element.type || element.$type).toLowerCase();
   return type.includes("event")
     ? "event"
     : type.includes("task")
@@ -62,21 +62,28 @@ const getType = (element) => {
 };
 
 const getElements = () => {
-  let elementRegistry = bpmnModeler.get("elementRegistry");
-  let elements = [],
-    elementIds = [];
-  elementRegistry.filter(function (element) {
-    if (["event", "task"].includes(getType(element))) {
-      elements.push({
-        id: element.id,
-        name: element.businessObject.name || element.id,
-        type: getType(element),
-      });
-      elementIds.push(element.id);
-    }
-    return element;
-  });
-  return { elementIds, elements };
+  const rootElements =
+    bpmnModeler._definitions && bpmnModeler._definitions.rootElements;
+  const processes = rootElements.filter((ele) => ele.$type === "bpmn:Process");
+  const allProcess = {};
+  processes &&
+    processes.forEach((process) => {
+      let elements = [];
+      process.flowElements &&
+        process.flowElements.forEach((element) => {
+          if (["event", "task"].includes(getType(element))) {
+            elements.push({
+              id: element.id,
+              name: element.name || element.id,
+              type: getType(element),
+            });
+          }
+        });
+      allProcess[process.id] = {
+        elements: elements,
+      };
+    });
+  return allProcess;
 };
 
 function BpmnModelerComponent() {
@@ -142,11 +149,11 @@ function BpmnModelerComponent() {
         return;
       }
       if (isDeploy) {
-        const { elements } = getElements();
+        const elements = getElements();
         window.localStorage.setItem(
-          "elementIds",
+          "deployIds",
           JSON.stringify({
-            ...(JSON.parse(window.localStorage.getItem("elementIds")) || {}),
+            ...(JSON.parse(window.localStorage.getItem("deployIds")) || {}),
             [`diagram_${id}`]: elements,
           })
         );
@@ -318,8 +325,8 @@ function BpmnModelerComponent() {
   };
 
   const deployDiagram = async () => {
-    const { elements } = getElements();
-    let localElements = JSON.parse(window.localStorage.getItem("elementIds"));
+    const elements = getElements();
+    let localElements = JSON.parse(window.localStorage.getItem("deployIds"));
     let oldElements = localElements && localElements[`diagram_${id}`];
     setIds({
       currentElements: elements,
