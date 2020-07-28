@@ -50,7 +50,6 @@ export default function ExecutableProps(group, element, translate) {
         var processRef = getBusinessObject(element).get("processRef");
         processRef["isExecutable"] = !values["isExecutable"];
         element.businessObject.processRef = processRef;
-        console.log(bo);
       };
 
       // return participantHelper.modifyProcessBusinessObject(
