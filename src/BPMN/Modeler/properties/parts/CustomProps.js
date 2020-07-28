@@ -485,7 +485,8 @@ export function setPropertyValue(element, property, value, bpmnFactory) {
   }
 
   // camunda:property
-  var camundaProperties, existingCamundaProperty, newCamundaProperty;
+  var camundaProperties, newCamundaProperty;
+  // existingCamundaProperty
 
   if (bindingType === CAMUNDA_PROPERTY_TYPE) {
     if (scope) {
@@ -520,20 +521,36 @@ export function setPropertyValue(element, property, value, bpmnFactory) {
       }
     }
 
-    existingCamundaProperty = findCamundaProperty(camundaProperties, binding);
+    // existingCamundaProperty = findCamundaProperty(camundaProperties, binding);
 
     newCamundaProperty = createCamundaProperty(binding, value, bpmnFactory);
 
-    updates.push(
-      cmdHelper.addAndRemoveElementsFromList(
-        element,
-        camundaProperties,
-        "values",
-        null,
-        [newCamundaProperty],
-        existingCamundaProperty ? [existingCamundaProperty] : []
-      )
+    const elements =
+      bo.extensionElements &&
+      bo.extensionElements.values &&
+      bo.extensionElements.values[0] &&
+      bo.extensionElements.values[0].values;
+    const newExtensionElements = elements.filter(
+      (element) => element.name !== binding.name
     );
+    newExtensionElements.push(newCamundaProperty);
+    if (
+      bo.extensionElements &&
+      bo.extensionElements.values &&
+      bo.extensionElements.values[0]
+    ) {
+      bo.extensionElements.values[0].values = newExtensionElements;
+    }
+    // updates.push(
+    //   cmdHelper.addAndRemoveElementsFromList(
+    //     element,
+    //     camundaProperties,
+    //     "values",
+    //     null,
+    //     [newCamundaProperty],
+    //     existingCamundaProperty ? [existingCamundaProperty] : []
+    //   )
+    // );
   }
 
   // camunda:inputParameter
