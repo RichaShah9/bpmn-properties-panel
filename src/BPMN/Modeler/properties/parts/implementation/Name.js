@@ -1,3 +1,5 @@
+import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+
 /**
  * Create an entry to modify the name of an an element.
  *
@@ -15,13 +17,26 @@ export default function Name(element, options, translate) {
     label = options.label || translate("Name"),
     modelProperty = options.modelProperty || "name";
 
+  const get = function () {
+    var bo = getBusinessObject(element);
+    return { [modelProperty]: bo.get([modelProperty]) };
+  };
+
+  const set = function (element, values) {
+    if (element.businessObject) {
+      element.businessObject[modelProperty] = values[modelProperty];
+    } else {
+      element[modelProperty] = values[modelProperty];
+    }
+  };
+
   var nameEntry = {
     id: id,
     label: label,
     modelProperty: modelProperty,
     widget: "textBox",
-    get: options.get,
-    set: options.set,
+    get: options.get || get,
+    set: options.set || set,
   };
 
   return [nameEntry];

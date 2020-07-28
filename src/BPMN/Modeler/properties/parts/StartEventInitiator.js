@@ -16,6 +16,12 @@ export default function StartEventInitiator(group, element, translate) {
       label: translate("Initiator"),
       modelProperty: "initiator",
       widget: "textField",
+      get: function () {
+        return { initiator: bo.get("initiator") };
+      },
+      set: function (element, values) {
+        element.businessObject.initiator = values["initiator"];
+      },
     });
   }
 }

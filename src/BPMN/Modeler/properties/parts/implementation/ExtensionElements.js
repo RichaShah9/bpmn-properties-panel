@@ -88,7 +88,9 @@ export default function ExtensionElements(
     id: id,
     label: label,
     widget: widget,
+    ...options,
     get: function (element, node) {
+      if (!node) return;
       let elements = getElements(element, node);
 
       let result = [];

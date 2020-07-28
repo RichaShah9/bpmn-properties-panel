@@ -1,5 +1,5 @@
 import participantHelper from "bpmn-js-properties-panel/lib/helper/ParticipantHelper";
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
+// import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 export default function ExecutableProps(group, element, translate) {
@@ -28,9 +28,10 @@ export default function ExecutableProps(group, element, translate) {
     };
 
     executableEntry.set = function (element, values) {
-      var res = {};
-      res["isExecutable"] = !!values["isExecutable"];
-      return cmdHelper.updateProperties(element, res);
+      // var res = {};
+      // res["isExecutable"] = !values["isExecutable"];
+      element.businessObject.isExecutable = !values["isExecutable"];
+      // return cmdHelper.updateProperties(element, res);
     };
 
     // in participants we have to change the default behavior of set and get
@@ -43,12 +44,21 @@ export default function ExecutableProps(group, element, translate) {
       };
 
       executableEntry.set = function (element, values) {
-        return participantHelper.modifyProcessBusinessObject(
-          element,
-          "isExecutable",
-          values
-        );
+        if (!is(element, "bpmn:Participant")) {
+          return {};
+        }
+        var processRef = getBusinessObject(element).get("processRef");
+        processRef["isExecutable"] = !values["isExecutable"];
+        element.businessObject.processRef = processRef;
+        console.log(bo);
       };
+
+      // return participantHelper.modifyProcessBusinessObject(
+      //   element,
+      //   "isExecutable",
+      //   values
+      // );
+      // };
     }
 
     group.entries.push(executableEntry);

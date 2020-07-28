@@ -1,5 +1,5 @@
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
+// import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import forEach from "lodash/forEach";
 
 function getLinkEventDefinition(element) {
@@ -40,14 +40,15 @@ export default function LinkProps(group, element, translate) {
         };
 
         entry.set = function (element, values) {
-          var newProperties = {
-            name: values["link-name"],
-          };
-          return cmdHelper.updateBusinessObject(
-            element,
-            linkEventDefinition,
-            newProperties
-          );
+          // var newProperties = {
+          //   name: values["link-name"],
+          // };
+          // return cmdHelper.updateBusinessObject(
+          //   element,
+          //   {...linkEventDefinition, name: values["link-name"]},
+          //   newProperties
+          // );
+          element.businessObject.eventDefinitions[0].name = values["link-name"];
         };
 
         group.entries.push(entry);
