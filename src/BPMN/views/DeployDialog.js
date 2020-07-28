@@ -13,6 +13,8 @@ import {
   Paper,
   DialogTitle,
   Typography,
+  Switch,
+  FormControlLabel
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -43,16 +45,16 @@ const useStyles = makeStyles({
   process: {
     marginTop: 10,
   },
-  processHeader:{
+  processHeader: {
     marginBottom: 10,
     fontSize: 12,
-  }
+  },
 });
 
-export default function DeployDialog({ open, onClose, ids, onOk }) {
+export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
   const { oldElements, currentElements } = ids || {};
   const [wkfMigrationMap, setWkfMigrationMap] = useState({});
-
+  const [isMigrateOld, setIsMigrateOld] = useState(true);
   const classes = useStyles();
 
   const handleAdd = (oldEle, newEle, processId) => {
@@ -65,7 +67,7 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
   };
 
   const onConfirm = () => {
-    onOk(wkfMigrationMap);
+    onOk(wkfMigrationMap, isMigrateOld);
   };
 
   const getCurrentElements = (processId, elementType) => {
@@ -117,6 +119,21 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
         <strong>Node Mapping</strong>
       </DialogTitle>
       <DialogContent>
+        {wkf && wkf.statusSelect === 1 && oldElements && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isMigrateOld}
+                onChange={() => {
+                  setIsMigrateOld((isMigrateOld) => !isMigrateOld);
+                }}
+                color="primary"
+                name="isMigrateOld"
+              />
+            }
+            label="Migrate previous version records?"
+          />
+        )}
         {oldElements &&
           Object.entries(oldElements).map(([key, value]) => (
             <div key={key} className={classes.process}>

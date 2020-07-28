@@ -285,7 +285,7 @@ function BpmnModelerComponent() {
     });
   };
 
-  const deploy = async (wkfMigrationMap) => {
+  const deploy = async (wkfMigrationMap, isMigrateOld) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
@@ -294,14 +294,20 @@ function BpmnModelerComponent() {
       });
       if (res && res.data && res.data[0]) {
         setWkf({ ...res.data[0] });
+        let context = {
+          _model: "com.axelor.apps.bpm.db.WkfModel",
+          ...res.data[0],
+          wkfMigrationMap,
+        };
+        if (wkf && wkf.statusSelect === 1 && wkf.oldNodes) {
+          context.isMigrateOld = isMigrateOld;
+        }
         let actionRes = await Service.action({
           model: "com.axelor.apps.bpm.db.WkfModel",
           action: "action-wkf-model-method-deploy",
           data: {
             context: {
-              _model: "com.axelor.apps.bpm.db.WkfModel",
-              ...res.data[0],
-              wkfMigrationMap,
+              ...context,
             },
           },
         });
@@ -362,9 +368,9 @@ function BpmnModelerComponent() {
     });
   };
 
-  const handleOk = (wkfMigrationMap) => {
+  const handleOk = (wkfMigrationMap, isMigrateOld) => {
     setDelopyDialog(false);
-    deploy(wkfMigrationMap);
+    deploy(wkfMigrationMap, isMigrateOld);
   };
 
   const deployDiagram = async () => {
@@ -741,7 +747,10 @@ function BpmnModelerComponent() {
           open={openDelopyDialog}
           onClose={() => setDelopyDialog(false)}
           ids={ids}
-          onOk={(wkfMigrationMap) => handleOk(wkfMigrationMap)}
+          onOk={(wkfMigrationMap, isMigrateOld) =>
+            handleOk(wkfMigrationMap, isMigrateOld)
+          }
+          wkf={wkf}
         />
       )}
     </div>
