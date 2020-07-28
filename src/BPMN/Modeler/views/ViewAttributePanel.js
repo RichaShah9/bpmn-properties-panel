@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Table,
@@ -52,6 +53,17 @@ function createData(values = []) {
 const useStyles = makeStyles({
   button: {
     textTransform: "none",
+  },
+  addButton: {
+    borderRadius: 0,
+    marginLeft: 5,
+    padding: 0,
+    height: 23,
+    border: "1px solid #ccc",
+    color: "#727272",
+    "&:hover": {
+      border: "1px solid #727272",
+    },
   },
   grid: {
     padding: "0px 5px 0px 0px",
@@ -638,12 +650,12 @@ export default function DialogView({ id, handleAdd, element }) {
         </div>
       )}
       <Button
-        className={classes.button}
+        className={classnames(classes.button, classes.addButton)}
         variant="outlined"
         onClick={handlePropertyAdd}
         color="primary"
       >
-        Ok
+        Add
       </Button>
     </div>
   );
