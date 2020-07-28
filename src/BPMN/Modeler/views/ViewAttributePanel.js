@@ -99,7 +99,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function DialogView({ id, handleAdd, element }) {
+export default function ViewAttributePanel({ id, handleAdd, element }) {
   const classes = useStyles();
   const [row, setRow] = useState(null);
 

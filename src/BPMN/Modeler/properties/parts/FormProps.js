@@ -38,6 +38,7 @@ function formFieldTextField(options, getSelectedFormField) {
     modelProperty: modelProperty,
     widget: "textField",
     get: function (element, node) {
+      if(!node) return
       let selectedFormField = getSelectedFormField(element, node) || {},
         values = {};
 
@@ -98,6 +99,7 @@ export default function FromProps(group, element, bpmnFactory, translate) {
    * @return {ModdleElement} the currently selected form field
    */
   function getSelectedFormField(element, node) {
+    if (!node) return;
     let selected = formFieldsEntry.getSelected(element, node.parentNode);
 
     if (selected.idx === -1) {
@@ -346,6 +348,7 @@ export default function FromProps(group, element, bpmnFactory, translate) {
     emptyParameter: true,
     widget: "comboBox",
     get: function (element, node) {
+      if(!node) return
       let selectedFormField = getSelectedFormField(element, node);
 
       if (selectedFormField) {

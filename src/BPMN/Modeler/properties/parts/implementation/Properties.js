@@ -7,7 +7,7 @@ import utils from "bpmn-js-properties-panel/lib/Utils";
 import assign from "lodash/assign";
 import forEach from "lodash/forEach";
 import find from "lodash/find";
-import factory from "bpmn-js-properties-panel/lib/factory/EntryFactory";
+// import factory from "bpmn-js-properties-panel/lib/factory/EntryFactory";
 
 function generatePropertyId() {
   return utils.nextId("Property_");
@@ -225,6 +225,6 @@ export default function Properties(element, bpmnFactory, options, translate) {
       return commands;
     },
   });
-
-  return factory.table(options);
+  return options
+  // return factory.table(options);
 }
