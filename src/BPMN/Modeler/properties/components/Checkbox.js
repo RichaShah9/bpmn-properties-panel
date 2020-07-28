@@ -11,18 +11,19 @@ const useStyles = makeStyles({
 
 export default function Checkbox({ entry, element }) {
   const classes = useStyles();
-  const { id, label, modelProperty, get } = entry || {};
+  const { id, label, modelProperty, get, set } = entry || {};
   const [value, setValue] = useState(false);
 
   const updateValue = () => {
     setValue((value) => !value);
+    set(element, { [modelProperty]: value });
   };
 
   useEffect(() => {
     if (!element || !get) return;
     const values = get && get(element);
     let value = values && values[modelProperty];
-    setValue(value);
+    setValue(value || false);
   }, [element, modelProperty, get]);
 
   return (

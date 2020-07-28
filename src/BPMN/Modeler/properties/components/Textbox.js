@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import classnames from "classnames";
 import Description from "./Description";
 import { makeStyles } from "@material-ui/styles";
-import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 const useStyles = makeStyles({
   root: {
@@ -36,27 +35,54 @@ const useStyles = makeStyles({
 
 export default function Textbox({ entry, element, isResizable = false }) {
   const classes = useStyles();
-  const { label, description, id } = entry || {};
+  const {
+    label,
+    description,
+    id,
+    get,
+    set,
+    modelProperty,
+    getProperty,
+    setProperty,
+  } = entry || {};
+  const [value, setValue] = useState(null);
 
-  const getRenderValue = () => {
-    if (!element) return;
-    if (element[id]) {
-      return element[id];
+  const updateProperty = () => {
+    const value = document.getElementById(`camunda_name_${id}`).innerHTML
+    if (!set && !setProperty) return;
+    if (set) {
+      set(element, {
+        [modelProperty]: value,
+      });
+      setValue(value);
     } else {
-      let bo = getBusinessObject(element);
-      return (bo && bo[id]) || "";
+      setProperty(element, {
+        [modelProperty]: value,
+      });
+      setValue(value);
     }
   };
+
+  useEffect(() => {
+    if (!element) return;
+    const values = get && get(element);
+    let value = getProperty
+      ? getProperty(element)
+      : values && values[modelProperty];
+    setValue(value);
+  }, [element, modelProperty, get, getProperty]);
 
   return (
     <div className={classes.root}>
       <label className={classes.label}>{label}</label>
       <div
+        id={`camunda_name_${id}`}
         contentEditable={true}
         suppressContentEditableWarning={true}
         className={classnames(classes.input, isResizable && classes.resizable)}
+        onBlur={updateProperty}
       >
-        {getRenderValue()}
+        {value}
       </div>
       {description && <Description desciption={description} />}
     </div>

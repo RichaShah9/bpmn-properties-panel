@@ -29,13 +29,36 @@ export default function SelectBox({ entry, element }) {
     label,
     modelProperty,
     description,
+    set,
+    get,
+    getProperty,
+    setProperty,
   } = entry || {};
   const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleChange = (e) => {
     setSelectedOption(e.target.value);
+    if (!set && !setProperty) return;
+    if (set) {
+      set(element, {
+        [modelProperty]: e.target.value,
+      });
+    } else {
+      setProperty(element, {
+        [modelProperty]: e.target.value,
+      });
+    }
   };
+
+  useEffect(() => {
+    if (!element) return;
+    const values = get && get(element);
+    let value = getProperty
+      ? getProperty(element)
+      : values && values[modelProperty];
+      setSelectedOption(value);
+  }, [element, modelProperty, get, getProperty]);
 
   useEffect(() => {
     if (typeof selectOptions === "object") {

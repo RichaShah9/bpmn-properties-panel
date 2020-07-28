@@ -44,15 +44,28 @@ const useStyles = makeStyles({
 
 export default function Textbox({ entry, element, canRemove = false }) {
   const classes = useStyles();
-  const { label, description, modelProperty, set, get, getProperty } =
-    entry || {};
+  const {
+    label,
+    description,
+    modelProperty,
+    set,
+    get,
+    setProperty,
+    getProperty,
+  } = entry || {};
   const [value, setValue] = useState(null);
 
   const updateProperty = () => {
-    if (!set) return;
-    set(element, {
-      [modelProperty]: value,
-    });
+    if (!set && !setProperty) return;
+    if (set) {
+      set(element, {
+        [modelProperty]: value,
+      });
+    } else {
+      setProperty(element, {
+        [modelProperty]: value,
+      });
+    }
   };
 
   useEffect(() => {
