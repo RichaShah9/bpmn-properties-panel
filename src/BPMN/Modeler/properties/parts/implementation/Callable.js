@@ -202,12 +202,25 @@ export default function Callable(element, bpmnFactory, options, translate) {
     return delegateVariableMappingType;
   }
 
+  function getLabel(element){
+    let label = "";
+    let type = getCallableType(element);
+    if (type === "bpmn") {
+      label = translate("Called Element");
+    } else if (type === "cmmn") {
+      label = translate("Case Ref");
+    } else if (type === "dmn") {
+      label = translate("Decision Ref");
+    }
+    return label
+  }
+
   entries.push({
     id: "callable-element-ref",
     dataValueLabel: "callableElementLabel",
     modelProperty: "callableElementRef",
     widget: "textField",
-    label: options.label || "",
+    label: getLabel(element),
     get: function (element, node) {
       let callableElementRef;
 

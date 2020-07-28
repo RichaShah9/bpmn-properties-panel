@@ -95,10 +95,12 @@ export default function VariableMappingProps(
   }
 
   var isSelected = function (element, node) {
+    if (!node) return;
     return !!getSelected(element, node);
   };
 
   var getSelected = function (element, node) {
+    if (!node) return;
     var parentNode = node.parentNode;
     var selection = inEntry.getSelected(element, parentNode);
 
@@ -254,12 +256,14 @@ export default function VariableMappingProps(
     widget: "selectBox",
 
     get: function (element, node) {
+    if(!node) return
       var mapping = getSelected(element, node) || {};
       return {
         inOutType: getInOutType(mapping),
       };
     },
     set: function (element, values, node) {
+      if (!node) return;
       var inOutType = values.inOutType;
 
       var props = {
