@@ -23,6 +23,7 @@ import {
   ViewAttributePanel,
   SelectRecordsDialog,
   MigrateRecordsDialog,
+  FormsPanel,
 } from "./views";
 import {
   Textbox,
@@ -669,6 +670,16 @@ function BpmnModelerComponent() {
               id={id}
               handleAdd={handleAdd}
               element={selectedElement}
+            />
+          </React.Fragment>
+        ) : group.id === "forms" ? (
+          <React.Fragment>
+            <div className={classes.groupLabel}>{group.label}</div>
+            <FormsPanel
+              id={id}
+              handleAdd={handleAdd}
+              element={selectedElement}
+              bpmnFactory={bpmnModeler && bpmnModeler.get("bpmnFactory")}
             />
           </React.Fragment>
         ) : (
