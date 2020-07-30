@@ -23,7 +23,6 @@ import {
   ViewAttributePanel,
   SelectRecordsDialog,
   MigrateRecordsDialog,
-  FormsPanel,
 } from "./views";
 import {
   Textbox,
@@ -45,6 +44,7 @@ import {
   getTabs,
   isGroupVisible,
   isHiddenProperty,
+  hidePanelElements,
 } from "./extra.js";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -672,17 +672,6 @@ function BpmnModelerComponent() {
               element={selectedElement}
             />
           </React.Fragment>
-        ) : group.id === "forms" ? (
-          <React.Fragment>
-            <div className={classes.groupLabel}>{group.label}</div>
-            <FormsPanel
-              id={id}
-              handleAdd={handleAdd}
-              element={selectedElement}
-              bpmnFactory={bpmnModeler && bpmnModeler.get("bpmnFactory")}
-              createParent={createParent}
-            />
-          </React.Fragment>
         ) : (
           group.entries.length > 0 && (
             <React.Fragment>
@@ -735,6 +724,7 @@ function BpmnModelerComponent() {
     let id = fetchId();
     setId(id);
     fetchDiagram(id);
+    hidePanelElements();
   }, [fetchDiagram]);
 
   useEffect(() => {

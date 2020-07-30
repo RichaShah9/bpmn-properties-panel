@@ -124,6 +124,21 @@ export function getTabs(bpmnModeler, element) {
   return filteredTabs;
 }
 
+export function hidePanelElements() {
+  const dataObject = document.querySelector(
+    '[title="Create DataObjectReference"]'
+  );
+  const dataStore = document.querySelector(
+    '[title="Create DataStoreReference"]'
+  );
+  if (dataObject && dataObject.style) {
+    dataObject.style.display = "none";
+  }
+  if (dataStore && dataStore.style) {
+    dataStore.style.display = "none";
+  }
+};
+
 export default {
   fetchId,
   uploadXml,
@@ -132,4 +147,5 @@ export default {
   getTabs,
   isGroupVisible,
   isTabVisible,
+  hidePanelElements,
 };
