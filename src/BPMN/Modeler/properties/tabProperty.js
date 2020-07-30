@@ -54,16 +54,6 @@ export const tabProperty = [
     tabs: commonTabs,
   },
   {
-    type: "bpmn:DataObjectReference",
-    subType: null || undefined,
-    tabs: commonTabs,
-  },
-  {
-    type: "bpmn:DataStoreReference",
-    subType: null || undefined,
-    tabs: commonTabs,
-  },
-  {
     type: "bpmn:StartEvent",
     subType: "bpmn:MessageEventDefinition",
     tabs: commonTabs,
