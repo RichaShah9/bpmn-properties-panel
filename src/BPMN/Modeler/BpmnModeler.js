@@ -680,6 +680,7 @@ function BpmnModelerComponent() {
               handleAdd={handleAdd}
               element={selectedElement}
               bpmnFactory={bpmnModeler && bpmnModeler.get("bpmnFactory")}
+              createParent={createParent}
             />
           </React.Fragment>
         ) : (

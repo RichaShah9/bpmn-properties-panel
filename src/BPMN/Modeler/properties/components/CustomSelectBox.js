@@ -62,9 +62,7 @@ export default function CustomSelectBox({ entry, element }) {
 
   return (
     <div className={classes.root}>
-      <div
-        data-show={canBeHidden ? "hideElements" : ""}
-      >
+      <div data-show={canBeHidden ? "hideElements" : ""}>
         <label
           htmlFor={`cam-extensionElements-${id}`}
           className={classes.label}
@@ -77,7 +75,9 @@ export default function CustomSelectBox({ entry, element }) {
             className={classes.extensionElements}
             name="selectedExtensionElement"
             data-list-entry-container
-            onChange={() => selectElement(element)}
+            onChange={() => {
+              selectElement && selectElement(element);
+            }}
           >
             {options &&
               options.length > 0 &&
