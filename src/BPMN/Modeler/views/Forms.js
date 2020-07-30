@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import formHelper from "bpmn-js-properties-panel/lib/helper/FormHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import utils from "bpmn-js-properties-panel/lib/Utils";
+import _ from "lodash";
 import { Close } from "@material-ui/icons";
+import { makeStyles } from "@material-ui/core/styles";
+import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
+import Table from "../properties/components/Table";
 import TextField from "../properties/components/TextField";
 import { translate } from "../../../utils";
 
@@ -99,7 +101,11 @@ const TYPES = [
   { name: "custom", value: "custom" },
 ];
 
-export default function Forms({ element, id, bpmnFactory }) {
+function generateId(prefix) {
+  return utils.nextId(prefix);
+}
+
+export default function Forms({ element, id, bpmnFactory, createParent }) {
   const classes = useStyles();
   const [options, setOptions] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -109,24 +115,24 @@ export default function Forms({ element, id, bpmnFactory }) {
   const [defaultValue, setDefaultValue] = useState(null);
   const [customType, setCustomType] = useState(null);
 
-  const isCustomType = (type) => {
-    return TYPES.find((t) => t.value === type);
+  const isType = (type) => {
+    return TYPES.findIndex((t) => t.value === type);
   };
+
   const addElement = () => {
     let bo = getBusinessObject(element);
-    let prefix = "FormField_";
-    let id = utils.nextId(prefix);
+    let id = generateId("FormField_");
     let option = createExtensionElement(bo.extensionElements, id);
-    setOptions([...(options || []), option]);
+    setOptions(_.uniqBy([...(options || []), option], "id"));
     setSelectedOption(option);
     if (!option) return;
     setFormFieldId(option.id);
-    if (option.type) {
-      if (!isCustomType(option.type)) {
-        setType(option.type);
-      } else {
-        setCustomType(option.type);
-      }
+    if (isType(option.type) > -1) {
+      setType(option.type);
+    } else if (!option.type) {
+      setType("");
+    } else {
+      setCustomType(option.type);
     }
     setLabel(option.label);
     setDefaultValue(option.defaultValue);
@@ -137,12 +143,12 @@ export default function Forms({ element, id, bpmnFactory }) {
     setSelectedOption(option);
     if (!option) return;
     setFormFieldId(option.id);
-    if (option.type) {
-      if (!isCustomType(option.type)) {
-        setType(option.type);
-      } else {
-        setCustomType(option.type);
-      }
+    if (isType(option.type) > -1) {
+      setType(option.type);
+    } else if (!option.type) {
+      setType("");
+    } else {
+      setCustomType(option.type);
     }
     setLabel(option.label);
     setDefaultValue(option.defaultValue);
@@ -155,6 +161,7 @@ export default function Forms({ element, id, bpmnFactory }) {
     );
     cloneOptions.splice(optionIndex, 1);
     setOptions(cloneOptions);
+    removeExtensionElement();
   };
 
   function createExtensionElement(extensionElements, value) {
@@ -196,33 +203,40 @@ export default function Forms({ element, id, bpmnFactory }) {
     return field;
   }
 
-  // function removeExtensionElement(element, extensionElements, value, idx) {
-  //   let formData = getExtensionElements(
-  //       getBusinessObject(element),
-  //       "camunda:FormData"
-  //     )[0],
-  //     entry = formData.fields[idx],
-  //     commands = [];
+  function getPropertyValues() {
+    const { formData, fieldIndex } = getSelectedFormField();
+    const formField = formData[fieldIndex];
+    const { properties } = formField || {};
+    if (properties && properties.values) {
+      return properties.values;
+    }
+    return [];
+  }
 
-  //   if (formData.fields.length < 2) {
-  //     commands.push(removeEntry(getBusinessObject(element), element, formData));
-  //   } else {
-  //     commands.push(
-  //       cmdHelper.removeElementsFromList(element, formData, "fields", null, [
-  //         entry,
-  //       ])
-  //     );
+  function getPropertiesElement() {
+    const { formData, fieldIndex } = getSelectedFormField();
+    const formField = formData[fieldIndex];
+    const { properties } = formField || {};
+    return properties;
+  }
 
-  //     if (entry.id === formData.get("businessKey")) {
-  //       commands.push(
-  //         cmdHelper.updateBusinessObject(element, formData, {
-  //           businessKey: undefined,
-  //         })
-  //       );
-  //     }
-  //   }
-  //   return commands;
-  // }
+  function removeExtensionElement() {
+    let formData = formHelper.getFormData(element);
+    const { fieldIndex } = getSelectedFormField();
+    const formField = formData.fields[fieldIndex];
+    if (formData.fields.length < 2) {
+      const extensionElements = element.businessObject.extensionElements.values;
+      const index = extensionElements.findIndex(
+        (e) => e.$type === formData.$type
+      );
+      extensionElements.splice(index, 1);
+    } else {
+      formData.fields.splice(fieldIndex, 1);
+    }
+    if ((formField && formField.id) === formData.businessKey) {
+      formData.businessKey = undefined;
+    }
+  }
 
   function getExtensionElements(element) {
     return formHelper.getFormFields(element);
@@ -270,8 +284,10 @@ export default function Forms({ element, id, bpmnFactory }) {
       setSelectedOption(formDataExtension[0]);
       setFormFieldId(formDataExtension[0].id);
       if (formDataExtension[0].type) {
-        if (!isCustomType(formDataExtension[0].type)) {
+        if (isType(formDataExtension[0].type) > -1) {
           setType(formDataExtension[0].type);
+        } else if (!formDataExtension[0].type) {
+          setType("");
         } else {
           setCustomType(formDataExtension[0].type);
         }
@@ -532,6 +548,243 @@ export default function Forms({ element, id, bpmnFactory }) {
                     </button>
                   )}
                 </div>
+              </div>
+              {type === "enum" && (
+                <div className={classes.root}>
+                  <label
+                    id="form-field-enum-values-header"
+                    className={classes.groupLabel}
+                  >
+                    {translate("Values")}
+                  </label>
+                  <Table
+                    entry={{
+                      id: "form-field-enum-values",
+                      labels: [translate("Id"), translate("Name")],
+                      modelProperties: ["id", "name"],
+                      addLabel: translate("Add value"),
+                      showDefaultEntry: false,
+                      getElements: function () {
+                        return formHelper.getEnumValues(selectedOption);
+                      },
+                      addElement: function () {
+                        let id = generateId("Value_");
+                        let enumValue = elementHelper.createElement(
+                          "camunda:Value",
+                          { id: id, name: undefined },
+                          getBusinessObject(element),
+                          bpmnFactory
+                        );
+                        const { formData, fieldIndex } = getSelectedFormField();
+                        if (
+                          formData[fieldIndex].values &&
+                          formData[fieldIndex].values.length > 0
+                        ) {
+                          formData[fieldIndex].values.push(enumValue);
+                        } else {
+                          formData[fieldIndex].values = [enumValue];
+                        }
+                        return enumValue;
+                      },
+                      removeElement: function (enumValue) {
+                        const { formData, fieldIndex } = getSelectedFormField();
+                        let index = formData[fieldIndex].values.findIndex(
+                          (e) => e.id === enumValue.id
+                        );
+                        formData[fieldIndex].values.splice(index, 1);
+                      },
+                      updateElement: function (value, label, option) {
+                        const { formData, fieldIndex } = getSelectedFormField();
+                        let index = formData[fieldIndex].values.findIndex(
+                          (e) => e.id === option.id
+                        );
+                        formData[fieldIndex].values[index][label] = value;
+                      },
+                      validate: function (value, index) {
+                        const { formData, fieldIndex } = getSelectedFormField();
+                        const selectedFormField = formData[fieldIndex];
+                        const enumValue = selectedFormField.values[index];
+
+                        if (enumValue) {
+                          // check if id is valid
+                          let validationError = utils.isIdValid(
+                            enumValue,
+                            value,
+                            translate
+                          );
+
+                          if (validationError) {
+                            return { id: validationError };
+                          }
+                        }
+                      },
+                    }}
+                  />
+                </div>
+              )}
+              <div className={classes.root}>
+                <label
+                  id="form-field-validation-header"
+                  className={classes.groupLabel}
+                >
+                  {translate("Validation")}
+                </label>
+                <Table
+                  entry={{
+                    id: "constraints-list",
+                    modelProperties: ["name", "config"],
+                    labels: [translate("Name"), translate("Config")],
+                    addLabel: translate("Add Constraint"),
+                    showDefaultEntry: false,
+                    getElements: function () {
+                      const { formData, fieldIndex } = getSelectedFormField();
+                      return formHelper.getConstraints(formData[fieldIndex]);
+                    },
+                    addElement: function () {
+                      const { formData, fieldIndex } = getSelectedFormField();
+                      let validation = formData[fieldIndex].validation;
+                      if (!validation) {
+                        // create validation business object and add it to form data, if it doesn't exist
+                        validation = elementHelper.createElement(
+                          "camunda:Validation",
+                          {},
+                          getBusinessObject(element),
+                          bpmnFactory
+                        );
+                        formData[fieldIndex].validation = validation;
+                      }
+
+                      let newConstraint = elementHelper.createElement(
+                        "camunda:Constraint",
+                        { name: undefined, config: undefined },
+                        validation,
+                        bpmnFactory
+                      );
+
+                      if (
+                        validation.constraints &&
+                        validation.constraints.length > 0
+                      ) {
+                        validation.constraints.push(newConstraint);
+                      } else {
+                        validation.constraints = [newConstraint];
+                      }
+                      return newConstraint;
+                    },
+                    updateElement: function (value, label, option, index) {
+                      const { formData, fieldIndex } = getSelectedFormField();
+                      formData[fieldIndex].validation.constraints[index][
+                        label
+                      ] = value || undefined;
+                    },
+                    removeElement: function (option, index) {
+                      const { formData, fieldIndex } = getSelectedFormField();
+                      const formField = formData[fieldIndex];
+                      formField.validation.constraints.splice(index, 1);
+                      // remove camunda:validation if the last existing constraint has been removed
+                      if (formField.validation.constraints.length < 1) {
+                        formField.validation = undefined;
+                      }
+                    },
+                  }}
+                />
+              </div>
+              <div className={classes.root}>
+                <label
+                  id="form-field-properties-header"
+                  className={classes.groupLabel}
+                >
+                  {translate("Properties")}
+                </label>
+                <Table
+                  //Check properties
+                  entry={{
+                    id: "form-field-properties",
+                    addLabel: translate("Add Properties"),
+                    modelProperties: ["id", "value"],
+                    labels: [translate("Id"), translate("Value")],
+                    showDefaultEntry: false,
+                    getElements: function () {
+                      return getPropertyValues();
+                    },
+                    addElement: function () {
+                      let properties = getPropertiesElement();
+                      const { formData, fieldIndex } = getSelectedFormField();
+                      let bo = getBusinessObject(element);
+                      let parent = properties && properties.parent;
+                      if (!parent && typeof createParent === "function") {
+                        let result = createParent(element, bo);
+                        parent = result.parent;
+                      }
+                      if (!properties) {
+                        properties = elementHelper.createElement(
+                          "camunda:Properties",
+                          {},
+                          parent,
+                          bpmnFactory
+                        );
+                        formData[fieldIndex].properties = properties;
+                      }
+                      let propertyProps = {};
+                      ["id", "value"].forEach((prop) => {
+                        propertyProps[prop] = undefined;
+                      });
+                      // create id if necessary
+                      if (["id", "value"].indexOf("id") >= 0) {
+                        propertyProps.id = generateId("Property_");
+                      }
+                      let property = elementHelper.createElement(
+                        "camunda:Property",
+                        propertyProps,
+                        properties,
+                        bpmnFactory
+                      );
+                      if (properties.values && properties.values.length > 0) {
+                        properties.values.push(property);
+                      } else {
+                        properties.values = [property];
+                      }
+                      return property;
+                    },
+                    updateElement: function (value, label, option, index) {
+                      const { formData, fieldIndex } = getSelectedFormField();
+                      console.log(
+                        formData[fieldIndex].properties,
+                        formData[fieldIndex]
+                      );
+                      formData[fieldIndex].properties.values[index][label] =
+                        value || undefined;
+                    },
+                    // validate: function (element, value, node, idx) {
+                    //   // validate id if necessary
+                    //   if (["id", "value"].indexOf("id") >= 0) {
+                    //     var parent = getParent(element, node, bo),
+                    //       properties = getPropertyValues(),
+                    //       property = properties[idx];
+                    //     if (property) {
+                    //       // check if id is valid
+                    //       var validationError = utils.isIdValid(
+                    //         property,
+                    //         value.id,
+                    //         translate
+                    //       );
+                    //       if (validationError) {
+                    //         return { id: validationError };
+                    //       }
+                    //     }
+                    //   }
+                    // },
+                    removeElement: function (option, index) {
+                      const { formData, fieldIndex } = getSelectedFormField();
+                      const formField = formData[fieldIndex];
+                      formField.properties.values.splice(index, 1);
+                      // remove camunda:properties if the last existing property has been removed
+                      if (formField.properties.values.length < 1) {
+                        formField.properties = undefined;
+                      }
+                    },
+                  }}
+                />
               </div>
             </div>
           </div>
