@@ -23,7 +23,6 @@ import multiInstanceProps from "bpmn-js-properties-panel/lib/provider/camunda/pa
 import conditionalProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/ConditionalProps";
 import scriptProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/ScriptTaskProps";
 import errorProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/ErrorEventProps";
-import formProps from "bpmn-js-properties-panel/lib/provider/camunda/parts/FormProps";
 import startEventInitiator from "bpmn-js-properties-panel/lib/provider/camunda/parts/StartEventInitiator";
 import variableMapping from "bpmn-js-properties-panel/lib/provider/camunda/parts/VariableMappingProps";
 import versionTag from "bpmn-js-properties-panel/lib/provider/camunda/parts/VersionTagProps";
@@ -34,11 +33,6 @@ import listenerFields from "bpmn-js-properties-panel/lib/provider/camunda/parts/
 
 import elementTemplateChooserProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/ChooserProps";
 import elementTemplateCustomProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/CustomProps";
-
-// Connector
-import connectorDetails from "bpmn-js-properties-panel/lib/provider/camunda/parts/ConnectorDetailProps";
-import connectorInputOutput from "bpmn-js-properties-panel/lib/provider/camunda/parts/ConnectorInputOutputProps";
-import connectorInputOutputParameter from "bpmn-js-properties-panel/lib/provider/camunda/parts/ConnectorInputOutputParameterProps";
 
 // job configuration
 import jobConfiguration from "bpmn-js-properties-panel/lib/provider/camunda/parts/JobConfigurationProps";
@@ -55,12 +49,8 @@ import tasklist from "bpmn-js-properties-panel/lib/provider/camunda/parts/Taskli
 // external task configuration
 import externalTaskConfiguration from "bpmn-js-properties-panel/lib/provider/camunda/parts/ExternalTaskConfigurationProps";
 
-// field injection
-import fieldInjections from "bpmn-js-properties-panel/lib/provider/camunda/parts/FieldInjectionProps";
-
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefinitionHelper";
-import implementationTypeHelper from "bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper";
 
 // helpers
 
@@ -112,18 +102,6 @@ let isJobConfigEnabled = function (element) {
   }
 
   return false;
-};
-
-let getInputOutputParameterLabel = function (param, translate) {
-  if (is(param, "camunda:InputParameter")) {
-    return translate("Input Parameter");
-  }
-
-  if (is(param, "camunda:OutputParameter")) {
-    return translate("Output Parameter");
-  }
-
-  return "";
 };
 
 let getListenerLabel = function (param, translate) {
@@ -284,25 +262,6 @@ function createVariablesTabGroups(
   return [variablesGroup];
 }
 
-function createFormsTabGroups(
-  element,
-  bpmnFactory,
-  elementRegistry,
-  translate
-) {
-  if (is(element, "bpmn:UserTask")) {
-    return;
-  }
-  let formGroup = {
-    id: "forms",
-    label: translate("Forms"),
-    entries: [],
-  };
-  formProps(formGroup, element, bpmnFactory, translate);
-
-  return [formGroup];
-}
-
 function createListenersTabGroups(
   element,
   bpmnFactory,
@@ -349,77 +308,6 @@ function createListenersTabGroups(
   listenerFields(listenerFieldsGroup, element, bpmnFactory, options, translate);
 
   return [listenersGroup, listenerDetailsGroup, listenerFieldsGroup];
-}
-
-function createConnectorTabGroups(
-  element,
-  bpmnFactory,
-  elementRegistry,
-  translate
-) {
-  let connectorDetailsGroup = {
-    id: "connector-details",
-    label: translate("Details"),
-    entries: [],
-  };
-
-  connectorDetails(connectorDetailsGroup, element, bpmnFactory, translate);
-
-  let connectorInputOutputGroup = {
-    id: "connector-input-output",
-    label: translate("Input/Output"),
-    entries: [],
-  };
-
-  let options = connectorInputOutput(
-    connectorInputOutputGroup,
-    element,
-    bpmnFactory,
-    translate
-  );
-
-  let connectorInputOutputParameterGroup = {
-    id: "connector-input-output-parameter",
-    entries: [],
-    enabled: function (element, node) {
-      return options.getSelectedParameter(element, node);
-    },
-    label: function (element, node) {
-      let param = options.getSelectedParameter(element, node);
-      return getInputOutputParameterLabel(param, translate);
-    },
-  };
-
-  connectorInputOutputParameter(
-    connectorInputOutputParameterGroup,
-    element,
-    bpmnFactory,
-    options,
-    translate
-  );
-
-  return [
-    connectorDetailsGroup,
-    connectorInputOutputGroup,
-    connectorInputOutputParameterGroup,
-  ];
-}
-
-function createFieldInjectionsTabGroups(
-  element,
-  bpmnFactory,
-  elementRegistry,
-  translate
-) {
-  let fieldGroup = {
-    id: "field-injections-properties",
-    label: translate("Field Injections"),
-    entries: [],
-  };
-
-  fieldInjections(fieldGroup, element, bpmnFactory, translate);
-
-  return [fieldGroup];
 }
 
 // Camunda Properties Provider /////////////////////////////////////
@@ -469,17 +357,6 @@ export default function CustomPropertiesProvider(
       ),
     };
 
-    let formsTab = {
-      id: "forms",
-      label: translate("Forms"),
-      groups: createFormsTabGroups(
-        element,
-        bpmnFactory,
-        elementRegistry,
-        translate
-      ),
-    };
-
     let listenersTab = {
       id: "listeners",
       label: translate("Listeners"),
@@ -498,44 +375,10 @@ export default function CustomPropertiesProvider(
       },
     };
 
-    let connectorTab = {
-      id: "connector",
-      label: translate("Connector"),
-      groups: createConnectorTabGroups(
-        element,
-        bpmnFactory,
-        elementRegistry,
-        translate
-      ),
-      enabled: function (element) {
-        let bo = implementationTypeHelper.getServiceTaskLikeBusinessObject(
-          element
-        );
-        return (
-          bo &&
-          implementationTypeHelper.getImplementationType(bo) === "connector"
-        );
-      },
-    };
-
-    let fieldInjectionsTab = {
-      id: "field-injections",
-      label: translate("Field Injections"),
-      groups: createFieldInjectionsTabGroups(
-        element,
-        bpmnFactory,
-        elementRegistry,
-        translate
-      ),
-    };
-
     return [
       generalTab,
       variablesTab,
-      connectorTab,
-      formsTab,
       listenersTab,
-      fieldInjectionsTab,
     ];
   };
 }

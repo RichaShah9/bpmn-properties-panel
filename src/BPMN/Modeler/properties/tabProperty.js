@@ -1,8 +1,5 @@
 const commonTabs = ["general", "listeners"];
 const defaultTabs = ["general"];
-const allTabs = ["general", "listeners", "forms"];
-const withFieldInjections = ["general", "listeners", "field-injections"];
-const withConnector = ["general", "listeners", "connector", "field-injections"];
 const variableTabs = ["general", "variables", "listeners"];
 
 export const tabProperty = [
@@ -14,7 +11,7 @@ export const tabProperty = [
   {
     type: "bpmn:StartEvent",
     subType: null || undefined,
-    tabs: allTabs,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:EndEvent",
@@ -69,22 +66,22 @@ export const tabProperty = [
   {
     type: "bpmn:StartEvent",
     subType: "bpmn:MessageEventDefinition",
-    tabs: allTabs,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:StartEvent",
     subType: "bpmn:TimerEventDefinition",
-    tabs: allTabs,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:StartEvent",
     subType: "bpmn:ConditionalEventDefinition",
-    tabs: allTabs,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:StartEvent",
     subType: "bpmn:SignalEventDefinition",
-    tabs: allTabs,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:EndEvent",
@@ -110,7 +107,7 @@ export const tabProperty = [
   {
     type: "bpmn:IntermediateThrowEvent",
     subType: "bpmn:MessageEventDefinition",
-    tabs: withConnector,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:IntermediateCatchEvent",
@@ -201,7 +198,7 @@ export const tabProperty = [
   {
     type: "bpmn:SendTask",
     subType: null || undefined,
-    tabs: withFieldInjections,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:RecieveTask",
@@ -221,12 +218,12 @@ export const tabProperty = [
   {
     type: "bpmn:BusinessRuleTask",
     subType: null || undefined,
-    tabs: withFieldInjections,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:ServiceTask",
     subType: null || undefined,
-    tabs: withFieldInjections,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:ReceiveTask",
@@ -260,7 +257,7 @@ export const tabProperty = [
   },
   {
     type: "bpmn:TextAnnotation",
-    subType:  null || undefined,
+    subType: null || undefined,
     tabs: defaultTabs,
   },
 ];
