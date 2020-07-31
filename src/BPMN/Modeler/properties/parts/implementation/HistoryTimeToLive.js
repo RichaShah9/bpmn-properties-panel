@@ -1,5 +1,3 @@
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
-
 export default function HistoryTimeToLive(
   element,
   bpmnFactory,
@@ -23,10 +21,14 @@ export default function HistoryTimeToLive(
     },
 
     set: function (element, values) {
-      let bo = getBusinessObject(element);
-      return cmdHelper.updateBusinessObject(element, bo, {
-        "camunda:historyTimeToLive": values.historyTimeToLive || undefined,
-      });
+      if (
+        element &&
+        element.businessObject &&
+        element.businessObject.processRef
+      ) {
+        element.businessObject.processRef.historyTimeToLive =
+          values.historyTimeToLive || undefined;
+      }
     },
   };
 
