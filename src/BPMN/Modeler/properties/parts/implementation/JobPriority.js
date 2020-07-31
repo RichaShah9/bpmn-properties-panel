@@ -1,4 +1,3 @@
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 
 export default function JobPriority(element, bpmnFactory, options, translate) {
   let getBusinessObject = options.getBusinessObject;
@@ -16,10 +15,7 @@ export default function JobPriority(element, bpmnFactory, options, translate) {
     },
 
     set: function (element, values) {
-      let bo = getBusinessObject(element);
-      return cmdHelper.updateBusinessObject(element, bo, {
-        "camunda:jobPriority": values.jobPriority || undefined,
-      });
+      element.businessObject.jobPriority = values.jobPriority || undefined;
     },
   };
 
