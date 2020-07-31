@@ -19,6 +19,19 @@ export default function VersionTagProps(group, element, translate) {
       widget: "textField",
     };
 
+    versionTagEntry.get = function (element) {
+      var bo = getBusinessObject(element),
+        res = {};
+      res["versionTag"] = bo.get("versionTag");
+      return res;
+    };
+
+    versionTagEntry.set = function (element, values) {
+      if (element && element.businessObject) {
+        element.businessObject.versionTag = values.versionTag;
+      }
+    };
+
     // in participants we have to change the default behavior of set and get
     if (is(element, "bpmn:Participant")) {
       versionTagEntry.get = function (element) {
@@ -30,11 +43,13 @@ export default function VersionTagProps(group, element, translate) {
       };
 
       versionTagEntry.set = function (element, values) {
-        let processBo = bo.get("processRef");
-
-        return cmdHelper.updateBusinessObject(element, processBo, {
-          "camunda:versionTag": values.versionTag || undefined,
-        });
+        if (
+          element &&
+          element.businessObject &&
+          element.businessObject.processRef
+        ) {
+          element.businessObject.processRef.versionTag = values.versionTag;
+        }
       };
     }
 
