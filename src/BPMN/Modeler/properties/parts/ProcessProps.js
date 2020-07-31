@@ -34,9 +34,13 @@ export default function ProcessProps(group, element, translate, options) {
       };
 
       idEntry.set = function (element, values) {
-        return participantHelper.modifyProcessBusinessObject(element, "id", {
-          id: values.processId,
-        });
+        if (
+          element &&
+          element.businessObject &&
+          element.businessObject.processRef
+        ) {
+          element.businessObject.processRef.id = values.processId;
+        }
       };
 
       idEntry.validate = function (element, values) {
@@ -65,11 +69,13 @@ export default function ProcessProps(group, element, translate, options) {
       };
 
       processNameEntry.set = function (element, values) {
-        return participantHelper.modifyProcessBusinessObject(
-          element,
-          "name",
-          values
-        );
+        if (
+          element &&
+          element.businessObject &&
+          element.businessObject.processRef
+        ) {
+          element.businessObject.processRef.name = values.name;
+        }
       };
 
       group.entries.push(processNameEntry);
