@@ -1,7 +1,6 @@
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import multiInstanceLoopCharacteristics from "./implementation/MultiInstanceLoopCharacteristics";
 import jobRetryTimeCycle from "./implementation/JobRetryTimeCycle";
-// import asyncContinuation from "./implementation/AsyncContinuation";
 
 function getLoopCharacteristics(element) {
   var bo = getBusinessObject(element);
@@ -24,20 +23,6 @@ export default function MultiInstanceLoopProps(group, element, bpmnFactory, tran
   group.entries = group.entries.concat(
     multiInstanceLoopCharacteristics(element, bpmnFactory, translate)
   );
-
-  // // async continuation ///////////////////////////////////////////////////////
-  // group.entries = group.entries.concat(
-  //   asyncContinuation(
-  //     element,
-  //     bpmnFactory,
-  //     {
-  //       getBusinessObject: getLoopCharacteristics,
-  //       idPrefix: "multiInstance-",
-  //       labelPrefix: translate("Multi Instance "),
-  //     },
-  //     translate
-  //   )
-  // );
 
   // retry time cycle //////////////////////////////////////////////////////////
   group.entries = group.entries.concat(
