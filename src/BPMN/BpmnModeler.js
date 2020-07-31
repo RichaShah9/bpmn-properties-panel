@@ -260,7 +260,7 @@ function BpmnModelerComponent() {
     }
     reader.readAsText(files[0]);
     reader.onload = (e) => {
-      openBpmnDiagram(e.target.result, handleClickOpen);
+      openBpmnDiagram(e.target.result, handleClickOpen, id, wkf);
     };
   };
 
@@ -289,7 +289,6 @@ function BpmnModelerComponent() {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
-
         diagramXml: xml,
       });
       if (res && res.data && res.data[0]) {
