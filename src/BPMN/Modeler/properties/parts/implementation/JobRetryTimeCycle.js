@@ -1,4 +1,3 @@
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefinitionHelper";
 import asyncCapableHelper from "bpmn-js-properties-panel/lib/helper/AsyncCapableHelper";
@@ -14,10 +13,6 @@ function isAsyncAfter(bo) {
 
 function getFailedJobRetryTimeCycle(bo) {
   return asyncCapableHelper.getFailedJobRetryTimeCycle(bo);
-}
-
-function removeFailedJobRetryTimeCycle(bo, element) {
-  return asyncCapableHelper.removeFailedJobRetryTimeCycle(bo, element);
 }
 
 function createExtensionElements(parent, bpmnFactory) {
@@ -67,26 +62,25 @@ export default function JobRetryTimeCycle(
     set: function (element, values, node) {
       let newCycle = values.cycle;
       let bo = getBusinessObject(element);
-
-      if (newCycle === "" || typeof newCycle === "undefined") {
+      if (newCycle === "" || typeof newCycle === "undefined" || !newCycle) {
         // remove retry time cycle element(s)
-        return removeFailedJobRetryTimeCycle(bo, element);
+        const extensionElements = bo.extensionElements.values;
+        const index = extensionElements.findIndex(
+          (e) => e.$type === "camunda:FailedJobRetryTimeCycle"
+        );
+        if (index > -1) {
+          extensionElements.splice(index, 1);
+        }
       }
 
       let retryTimeCycle = getFailedJobRetryTimeCycle(bo);
 
       if (!retryTimeCycle) {
         // add new retry time cycle element
-        let commands = [];
-
         let extensionElements = bo.get("extensionElements");
         if (!extensionElements) {
           extensionElements = createExtensionElements(bo, bpmnFactory);
-          commands.push(
-            cmdHelper.updateBusinessObject(element, bo, {
-              extensionElements: extensionElements,
-            })
-          );
+          bo.extensionElements = extensionElements;
         }
 
         retryTimeCycle = createFailedJobRetryTimeCycle(
@@ -94,24 +88,11 @@ export default function JobRetryTimeCycle(
           bpmnFactory,
           newCycle
         );
-        commands.push(
-          cmdHelper.addAndRemoveElementsFromList(
-            element,
-            extensionElements,
-            "values",
-            "extensionElements",
-            [retryTimeCycle],
-            []
-          )
-        );
-
-        return commands;
+        extensionElements.values.push(retryTimeCycle);
+        return;
       }
-
       // update existing retry time cycle element
-      return cmdHelper.updateBusinessObject(element, retryTimeCycle, {
-        body: newCycle,
-      });
+      retryTimeCycle.body = newCycle;
     },
 
     hidden: function (element) {

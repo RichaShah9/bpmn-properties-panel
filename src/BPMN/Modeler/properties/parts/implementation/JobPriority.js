@@ -15,7 +15,9 @@ export default function JobPriority(element, bpmnFactory, options, translate) {
     },
 
     set: function (element, values) {
-      element.businessObject.jobPriority = values.jobPriority || undefined;
+      if(element && element.businessObject){
+        element.businessObject.jobPriority = values.jobPriority || undefined;
+      }
     },
   };
 
