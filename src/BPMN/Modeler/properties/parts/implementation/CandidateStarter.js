@@ -28,11 +28,15 @@ export default function CandidateStarter(
     },
 
     set: function (element, values) {
-      let bo = getBusinessObject(element);
-      return cmdHelper.updateBusinessObject(element, bo, {
-        "camunda:candidateStarterGroups":
-          values.candidateStarterGroups || undefined,
-      });
+      if (
+        element &&
+        element.businessObject &&
+        element.businessObject.processRef
+      ) {
+        element.businessObject.processRef.candidateStarterGroups =
+          values.candidateStarterGroups || undefined;
+      }
+      return;
     },
   };
 
@@ -56,11 +60,15 @@ export default function CandidateStarter(
     },
 
     set: function (element, values) {
-      let bo = getBusinessObject(element);
-      return cmdHelper.updateBusinessObject(element, bo, {
-        "camunda:candidateStarterUsers":
-          values.candidateStarterUsers || undefined,
-      });
+      if (
+        element &&
+        element.businessObject &&
+        element.businessObject.processRef
+      ) {
+        element.businessObject.processRef.candidateStarterUsers =
+          values.candidateStarterUsers || undefined;
+      }
+      return;
     },
   };
 
