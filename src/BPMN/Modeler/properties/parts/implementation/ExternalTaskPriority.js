@@ -21,10 +21,14 @@ export default function ExternalTaskPriority(
     },
 
     set: function (element, values) {
-      let bo = getBusinessObject(element);
-      return cmdHelper.updateBusinessObject(element, bo, {
-        "camunda:taskPriority": values.taskPriority || undefined,
-      });
+      if (
+        element &&
+        element.businessObject &&
+        element.businessObject.processRef
+      ) {
+        element.businessObject.processRef.taskPriority =
+          values.taskPriority || undefined;
+      }
     },
   };
 
