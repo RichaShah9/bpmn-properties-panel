@@ -1,5 +1,3 @@
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
-
 export default function Tasklist(element, bpmnFactory, options, translate) {
   let getBusinessObject = options.getBusinessObject;
 
@@ -20,10 +18,14 @@ export default function Tasklist(element, bpmnFactory, options, translate) {
     },
 
     set: function (element, values) {
-      let bo = getBusinessObject(element);
-      return cmdHelper.updateBusinessObject(element, bo, {
-        "camunda:isStartableInTasklist": !!values.isStartableInTasklist,
-      });
+      if (
+        element &&
+        element.businessObject &&
+        element.businessObject.processRef
+      ) {
+        element.businessObject.processRef.isStartableInTasklist =
+          !values.isStartableInTasklist || undefined;
+      }
     },
   };
 
