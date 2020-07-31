@@ -1,5 +1,3 @@
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
-
 export default function CandidateStarter(
   element,
   bpmnFactory,
