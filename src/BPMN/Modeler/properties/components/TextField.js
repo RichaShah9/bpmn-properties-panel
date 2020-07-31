@@ -55,7 +55,7 @@ export default function Textbox({ entry, element, canRemove = false }) {
   } = entry || {};
   const [value, setValue] = useState(null);
 
-  const updateProperty = () => {
+  const updateProperty = (value) => {
     if (!set && !setProperty) return;
     if (set) {
       set(element, {
@@ -88,12 +88,13 @@ export default function Textbox({ entry, element, canRemove = false }) {
           value={value || ""}
           onChange={(e) => setValue(e.target.value)}
           className={classes.input}
-          onBlur={updateProperty}
+          onBlur={(e) => updateProperty(e.target.value)}
         />
         {canRemove && value && (
           <button
             onClick={() => {
-              setValue(null);
+              setValue(undefined);
+              updateProperty(undefined)
             }}
             className={classes.clearButton}
           >
