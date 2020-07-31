@@ -6,20 +6,19 @@ import { is } from "bpmn-js/lib/util/ModelUtil";
 // Require all properties you need from existing providers.
 // In this case all available bpmn relevant properties without camunda extensions.
 import processProps from "./parts/ProcessProps";
-import eventProps from "./parts/EventProps";
-import linkProps from "./parts/LinkProps";
+// import eventProps from "./parts/EventProps";
 import idProps from "./parts/IdProps";
 import nameProps from "./parts/NameProps";
 import executableProps from "./parts/ExecutableProps";
 
 // camunda properties
-import serviceTaskDelegateProps from "./parts/ServiceTaskDelegateProps";
-import callActivityProps from "./parts/CallActivityProps";
+// import serviceTaskDelegateProps from "./parts/ServiceTaskDelegateProps";
+// import callActivityProps from "./parts/CallActivityProps";
 import multiInstanceProps from "./parts/MultiInstanceLoopProps";
-import conditionalProps from "./parts/ConditionalProps";
-import scriptProps from "./parts/ScriptTaskProps";
-import errorProps from "./parts/ErrorEventProps";
-import startEventInitiator from "./parts/StartEventInitiator";
+// import conditionalProps from "./parts/ConditionalProps";
+// import scriptProps from "./parts/ScriptTaskProps";
+// import errorProps from "./parts/ErrorEventProps";
+// import startEventInitiator from "./parts/StartEventInitiator";
 import variableMapping from "./parts/VariableMappingProps";
 import versionTag from "./parts/VersionTagProps";
 
@@ -47,6 +46,16 @@ import externalTaskConfiguration from "./parts/ExternalTaskConfigurationProps";
 
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefinitionHelper";
+import {
+  CallActivityProps,
+  ConditionalProps,
+  ErrorProps,
+  EventProps,
+  LinkProps,
+  ScriptProps,
+  ServiceTaskDelegateProps,
+  StartEventInitiator,
+} from "./parts/CustomImplementation";
 
 // helpers
 
@@ -166,19 +175,78 @@ function createGeneralTabGroups(
     translate
   );
 
-  let detailsGroup = {
-    id: "details",
+   // let detailsGroup = {
+  //   id: "details",
+  //   label: translate("Details"),
+  //   entries: [],
+  // };
+
+  let serviceTaskDelegateProps = {
+    id: "serviceTaskDelegateProps",
     label: translate("Details"),
     entries: [],
+    component: ServiceTaskDelegateProps,
   };
-  serviceTaskDelegateProps(detailsGroup, element, bpmnFactory, translate);
-  scriptProps(detailsGroup, element, bpmnFactory, translate);
-  linkProps(detailsGroup, element, translate);
-  callActivityProps(detailsGroup, element, bpmnFactory, translate);
-  eventProps(detailsGroup, element, bpmnFactory, elementRegistry, translate);
-  errorProps(detailsGroup, element, bpmnFactory, translate);
-  conditionalProps(detailsGroup, element, bpmnFactory, translate);
-  startEventInitiator(detailsGroup, element, translate); // this must be the last element of the details group!
+
+  let scriptProps = {
+    id: "scriptProps",
+    label: translate("Details"),
+    entries: [],
+    component: ScriptProps,
+  };
+
+  let linkProps = {
+    id: "linkProps",
+    label: translate("Details"),
+    entries: [],
+    component: LinkProps,
+  };
+
+  let callActivityProps = {
+    id: "callActivityProps",
+    label: translate("Details"),
+    entries: [],
+    component: CallActivityProps,
+  };
+
+  let eventProps = {
+    id: "eventProps",
+    label: translate("Details"),
+    entries: [],
+    component: EventProps,
+  };
+  let errorProps = {
+    id: "errorProps",
+    label: translate("Details"),
+    entries: [],
+    component: ErrorProps,
+  };
+  let conditionalProps = {
+    id: "conditionalProps",
+    label: translate("Details"),
+    entries: [],
+    component: ConditionalProps,
+  };
+  let startEventInitiator = {
+    id: "startEventInitiator",
+    label: translate("Details"),
+    entries: [],
+    component: StartEventInitiator,
+  };
+
+  // let detailsGroup = {
+  //   id: "details",
+  //   label: translate("Details"),
+  //   entries: [],
+  // };
+  // serviceTaskDelegateProps(detailsGroup, element, bpmnFactory, translate);
+  // scriptProps(detailsGroup, element, bpmnFactory, translate);
+  // linkProps(detailsGroup, element, translate);
+  // callActivityProps(detailsGroup, element, bpmnFactory, translate);
+  // eventProps(detailsGroup, element, bpmnFactory, elementRegistry, translate);
+  // errorProps(detailsGroup, element, bpmnFactory, translate);
+  // conditionalProps(detailsGroup, element, bpmnFactory, translate);
+  // startEventInitiator(detailsGroup, element, translate); // this must be the last element of the details group!
 
   let multiInstanceGroup = {
     id: "multiInstance",
@@ -231,7 +299,16 @@ function createGeneralTabGroups(
       groups.push(group);
     });
   }
-  groups.push(detailsGroup);
+  groups.push(serviceTaskDelegateProps);
+  groups.push(scriptProps);
+  groups.push(linkProps);
+  groups.push(callActivityProps);
+  groups.push(eventProps);
+  groups.push(errorProps);
+  groups.push(conditionalProps);
+  groups.push(startEventInitiator);
+
+  // groups.push(detailsGroup);
   groups.push(multiInstanceGroup);
 
   if (element.type !== "bpmn:Process") {

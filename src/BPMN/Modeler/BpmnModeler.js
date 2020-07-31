@@ -672,6 +672,12 @@ function BpmnModelerComponent() {
               element={selectedElement}
             />
           </React.Fragment>
+        ) : group.component ? (
+          <group.component
+            element={selectedElement}
+            index={index}
+            label={group.label}
+          />
         ) : (
           group.entries.length > 0 && (
             <React.Fragment>
