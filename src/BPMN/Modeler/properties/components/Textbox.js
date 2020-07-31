@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import classnames from "classnames";
+import React, { useEffect, useState, useRef } from "react";
 import Description from "./Description";
 import { makeStyles } from "@material-ui/styles";
 
@@ -9,21 +8,6 @@ const useStyles = makeStyles({
     flexDirection: "column",
     marginTop: 5,
   },
-  input: {
-    "-moz-appearance": "textfield",
-    "-webkit-appearance": "textfield",
-    backgroundColor: "white",
-    border: "1px solid darkgray",
-    boxShadow: "1px 1px 1px 0 lightgray inset",
-    marginTop: 5,
-    padding: "2px 3px",
-    minHeight: 16,
-    display: "flex",
-  },
-  resizable: {
-    overflowY: "auto",
-    resize: "vertical",
-  },
   label: {
     fontWeight: "bolder",
     display: "inline-block",
@@ -31,9 +15,17 @@ const useStyles = makeStyles({
     color: "#666",
     marginBottom: 3,
   },
+  textarea: {
+    display: "block",
+    overflow: "hidden",
+    width: "100%",
+    overflowY: "auto",
+    resize: "vertical",
+    fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
+  },
 });
 
-export default function Textbox({ entry, element, isResizable = false }) {
+export default function Textbox({ entry, element, rows = 1 }) {
   const classes = useStyles();
   const {
     label,
@@ -47,8 +39,7 @@ export default function Textbox({ entry, element, isResizable = false }) {
   } = entry || {};
   const [value, setValue] = useState(null);
 
-  const updateProperty = () => {
-    const value = document.getElementById(`camunda_name_${id}`).innerHTML
+  const updateProperty = (value) => {
     if (!set && !setProperty) return;
     if (set) {
       set(element, {
@@ -72,18 +63,39 @@ export default function Textbox({ entry, element, isResizable = false }) {
     setValue(value);
   }, [element, modelProperty, get, getProperty]);
 
+  const textareaRef = useRef(null);
+
+  const getTextareaHeight = () => {
+    let currentHeight = textareaRef.current.offsetHeight;
+    textareaRef.current.style.minHeight = currentHeight + "px";
+    window.removeEventListener("mouseup", getTextareaHeight);
+  };
+
+  const handleClick = (e) => {
+    window.addEventListener("mouseup", getTextareaHeight);
+  };
+
+  useEffect(() => {
+    textareaRef.current.style.height = "0px";
+    const scrollHeight = textareaRef.current.scrollHeight;
+    textareaRef.current.style.height = scrollHeight + "px";
+  }, [value]);
+
   return (
     <div className={classes.root}>
       <label className={classes.label}>{label}</label>
-      <div
+      <textarea
         id={`camunda_name_${id}`}
-        contentEditable={true}
-        suppressContentEditableWarning={true}
-        className={classnames(classes.input, isResizable && classes.resizable)}
-        onBlur={updateProperty}
-      >
-        {value}
-      </div>
+        ref={textareaRef}
+        defaultValue={value}
+        className={classes.textarea}
+        rows={rows}
+        onMouseDown={handleClick}
+        onBlur={(e) => updateProperty(e.target.value)}
+        onChange={(e) => {
+          setValue(e.target.value);
+        }}
+      />
       {description && <Description desciption={description} />}
     </div>
   );
