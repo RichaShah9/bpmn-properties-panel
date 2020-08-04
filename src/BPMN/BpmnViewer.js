@@ -17,7 +17,7 @@ const fetchId = (isInstance) => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
   const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
   const regexBPMNActivityCounts = /[?&]activityCount=([^&#]*)/g; // ?id=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
-  const regexBPMNInstanceId = /[?&]instanceId=([^&#]*)/g; // ?id=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
+  const regexBPMNInstanceId = /[?&]instanceId=([^&#]*)/g; // ?instanceId=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
 
   const url = window.location.href;
   let matchBPMNId,
