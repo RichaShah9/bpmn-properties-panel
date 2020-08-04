@@ -3,6 +3,7 @@ import BpmnModelerComponent from "./BPMN/BpmnModeler";
 import BpmnViewerComponent from "./BPMN/BpmnViewer";
 import DMNModeler from "./DMN/DMNModeler";
 import CMMNModeler from "./CMMN/CMMNModeler";
+import CMMNViewer from "./CMMN/CMMNViewer";
 
 let isInstance = false;
 
@@ -12,6 +13,8 @@ const fetchId = () => {
   const regexBPMNInstance = /[?&]instanceId=([^&#]*)/g; // ?instanceId=1
   const regexDMN = /[?&]type=dmn([^&#]*)/g; // ?type=dmn?id=1
   const regexCMMN = /[?&]type=cmmn([^&#]*)/g; // ?type=cmmn?id=1
+  const regexCMMNTask = /[?&]type=cmmn([^&#]*)&id=([^&#]*)&taskIds=([^&#]*)/g; // ?type=cmmn?id=1&taskIds=1,2
+  const regexCMMNInstance = /[?&]type=cmmn([^&#]*)&instanceId=([^&#]*)/g; // ?type=cmmn?instanceId=1
 
   const url = window.location.href;
   let type = "bpmnModeler";
@@ -32,8 +35,17 @@ const fetchId = () => {
     type = "cmmnModeler";
   }
 
+  while (regexCMMNTask.exec(url)) {
+    type = "cmmnViewer";
+  }
+
   while (regexBPMNInstance.exec(url)) {
     type = "bpmnViewer";
+    isInstance = true;
+  }
+
+  while (regexCMMNInstance.exec(url)) {
+    type = "cmmnViewer";
     isInstance = true;
   }
 
@@ -58,6 +70,8 @@ function App() {
         <BpmnViewerComponent isInstance={isInstance} />
       ) : type === "cmmnModeler" ? (
         <CMMNModeler />
+      ) : type === "cmmnViewer" ? (
+        <CMMNViewer isInstance={isInstance} />
       ) : (
         <React.Fragment></React.Fragment>
       )}
