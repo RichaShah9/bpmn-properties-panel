@@ -93,8 +93,8 @@ export default function Textbox({ entry, element, canRemove = false }) {
         {canRemove && value && (
           <button
             onClick={() => {
-              setValue(undefined);
-              updateProperty(undefined)
+              setValue('');
+              updateProperty('')
             }}
             className={classes.clearButton}
           >
