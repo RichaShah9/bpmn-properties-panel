@@ -18,9 +18,6 @@ const useStyles = makeStyles({
     transition: "margin 0.218s linear",
     fontStyle: "italic",
   },
-  groupContainer: {
-    marginTop: 10,
-  },
   divider: {
     marginTop: 15,
     border: "1px dotted #ccc",
