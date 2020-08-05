@@ -677,6 +677,7 @@ function BpmnModelerComponent() {
             element={selectedElement}
             index={index}
             label={group.label}
+            bpmnFactory={bpmnModeler && bpmnModeler.get("bpmnFactory")}
           />
         ) : (
           group.entries.length > 0 && (
