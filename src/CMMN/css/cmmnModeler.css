@@ -87,3 +87,7 @@ body,
 .snackbarAlert > .MuiAlert-message {
   font-size: 14px;
 }
+
+.cpp-textfield input{
+  padding-right: 7px;
+}
