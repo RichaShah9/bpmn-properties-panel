@@ -57,7 +57,7 @@ export default function SelectBox({ entry, element }) {
     let value = getProperty
       ? getProperty(element)
       : values && values[modelProperty];
-      setSelectedOption(value);
+    setSelectedOption(value);
   }, [element, modelProperty, get, getProperty]);
 
   useEffect(() => {
@@ -84,13 +84,13 @@ export default function SelectBox({ entry, element }) {
         value={selectedOption || ""}
         onChange={handleChange}
       >
-        {emptyParameter && <option value=""></option>}
         {options &&
           options.map((option, index) => (
             <option value={option.value} key={index}>
               {option.name ? option.name : ""}{" "}
             </option>
           ))}
+        {emptyParameter && <option value=""></option>}
       </select>
       {description && <Description desciption={description} />}
     </div>

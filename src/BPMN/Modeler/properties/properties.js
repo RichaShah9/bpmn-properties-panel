@@ -133,7 +133,7 @@ function createGeneralTabGroups(
   translate
 ) {
   // refer to target element for external labels
-  element = element.labelTarget || element;
+  element = element && (element.labelTarget || element);
 
   let generalGroup = {
     id: "general",
