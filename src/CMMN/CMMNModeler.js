@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CmmnModeler from "cmmn-js/lib/Modeler";
 import propertiesPanelModule from "cmmn-js-properties-panel";
-import propertiesProviderModule from "cmmn-js-properties-panel/lib/provider/cmmn";
+import propertiesProviderModule from "cmmn-js-properties-panel/lib/provider/camunda";
 import camundaModdleDescriptor from "camunda-cmmn-moddle/resources/camunda";
 import Alert from "@material-ui/lab/Alert";
 import { Snackbar } from "@material-ui/core";
@@ -221,7 +221,6 @@ function CMMNModeler() {
       propertiesPanel: {
         parent: "#properties",
       },
-      // make camunda prefix known for import, editing and export
       moddleExtensions: {
         camunda: camundaModdleDescriptor,
       },
