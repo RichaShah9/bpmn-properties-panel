@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
-import utils from "bpmn-js-properties-panel/lib/Utils";
 
 const useStyles = makeStyles({
   root: {
@@ -47,28 +46,48 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ExtensionElementTable({ entry, element }) {
+export default function ExtensionElementTable({
+  entry,
+  options: defaultOptions,
+}) {
   const classes = useStyles();
-  const { label, defaultSize = 5, id, newElementIdPrefix } = entry || {};
-  const [options, setOptions] = useState(null);
+  const {
+    label,
+    defaultSize = 5,
+    id,
+    setOptionLabelValue,
+    createExtensionElement,
+    onSelectionChange,
+    removeExtensionElement,
+  } = entry || {};
+  const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
 
   const addElement = () => {
-    let prefix = newElementIdPrefix || "elem_";
-    let id = utils.nextId(prefix);
-    setOptions([...(options || []), id]);
+    createExtensionElement();
+    let label = setOptionLabelValue(options.length);
+    setOptions((options) => [
+      ...(options || []),
+      { id: options.length, text: label },
+    ]);
+    setSelectedOption(options.length);
+    onSelectionChange(options.length);
   };
 
-  const selectElement = (e) => {
+  const handleChange = (e) => {
     setSelectedOption(e.target.value);
+    onSelectionChange(e.target.value);
   };
 
   const removeElement = () => {
-    const cloneOptions = [...(options || [])]
-    const optionIndex = cloneOptions.findIndex(opt => opt === selectedOption)
-    cloneOptions.splice(optionIndex, 1)
-    setOptions(cloneOptions)
+    removeExtensionElement(selectedOption);
   };
+
+  useEffect(() => {
+    if (defaultOptions) {
+      setOptions(defaultOptions);
+    }
+  }, [defaultOptions]);
 
   return (
     <div className={classes.root}>
@@ -87,13 +106,17 @@ export default function ExtensionElementTable({ entry, element }) {
             size={defaultSize}
             data-list-entry-container
             value={selectedOption || ""}
-            onChange={selectElement}
+            onChange={() => {}}
           >
             {options &&
               options.length > 0 &&
               options.map((option) => (
-                <option key={option}>
-                  {option}
+                <option
+                  key={option.id}
+                  value={option.id}
+                  onClick={handleChange}
+                >
+                  {option.text}
                 </option>
               ))}
           </select>
