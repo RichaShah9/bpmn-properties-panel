@@ -455,6 +455,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
             {(selectedTaskEntity || selectedTaskEntity === 0) && (
               <TextField
                 element={element}
+                canRemove={true}
                 entry={{
                   id: "listener-id",
                   label: translate("Listener Id"),
@@ -547,6 +548,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
             {listenerType === classProp && (
               <TextField
                 element={element}
+                canRemove={true}
                 entry={{
                   id: "class",
                   label: translate("Java Class"),
@@ -564,7 +566,6 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                     listener.delegateExpression = undefined;
                   },
                 }}
-                canRemove={true}
               />
             )}
             {listenerType === expressionProp && (
@@ -786,6 +787,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                 {(timerDefinitionType || timerDefinitionType !== "") && (
                   <TextField
                     element={element}
+                    canRemove={true}
                     entry={{
                       id: "listener-timer-event-definition",
                       label: translate("Timer Definition"),
