@@ -7,6 +7,7 @@ import ScriptProps from "./ScriptProps";
 import ServiceTaskDelegateProps from "./ServiceTaskDelegateProps";
 import StartEventInitiator from "./StartEventInitiator";
 import ListenerProps from "./ListenerProps";
+import VariableMapping from "./VariableMapping";
 
 export {
   CallActivityProps,
@@ -18,4 +19,5 @@ export {
   ServiceTaskDelegateProps,
   StartEventInitiator,
   ListenerProps,
+  VariableMapping,
 };

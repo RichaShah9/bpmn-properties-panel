@@ -19,7 +19,7 @@ import multiInstanceProps from "./parts/MultiInstanceLoopProps";
 // import scriptProps from "./parts/ScriptTaskProps";
 // import errorProps from "./parts/ErrorEventProps";
 // import startEventInitiator from "./parts/StartEventInitiator";
-import variableMapping from "./parts/VariableMappingProps";
+// import variableMapping from "./parts/VariableMappingProps";
 import versionTag from "./parts/VersionTagProps";
 
 // import listenerProps from "./parts/ListenerProps";
@@ -55,7 +55,8 @@ import {
   ScriptProps,
   ServiceTaskDelegateProps,
   StartEventInitiator,
-  ListenerProps
+  ListenerProps,
+  VariableMapping
 } from "./parts/CustomImplementation";
 
 // helpers
@@ -332,8 +333,9 @@ function createVariablesTabGroups(
     id: "variables",
     label: translate("Variables"),
     entries: [],
+    component: VariableMapping
   };
-  variableMapping(variablesGroup, element, bpmnFactory, translate);
+  // variableMapping(variablesGroup, element, bpmnFactory, translate);
 
   return [variablesGroup];
 }
