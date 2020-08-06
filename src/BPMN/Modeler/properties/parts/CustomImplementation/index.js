@@ -6,6 +6,7 @@ import LinkProps from "./LinkProps";
 import ScriptProps from "./ScriptProps";
 import ServiceTaskDelegateProps from "./ServiceTaskDelegateProps";
 import StartEventInitiator from "./StartEventInitiator";
+import ListenerProps from "./ListenerProps";
 
 export {
   CallActivityProps,
@@ -16,4 +17,5 @@ export {
   ScriptProps,
   ServiceTaskDelegateProps,
   StartEventInitiator,
+  ListenerProps,
 };
