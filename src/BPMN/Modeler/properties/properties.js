@@ -22,9 +22,9 @@ import multiInstanceProps from "./parts/MultiInstanceLoopProps";
 import variableMapping from "./parts/VariableMappingProps";
 import versionTag from "./parts/VersionTagProps";
 
-import listenerProps from "./parts/ListenerProps";
-import listenerDetails from "./parts/ListenerDetailProps";
-import listenerFields from "./parts/ListenerFieldInjectionProps";
+// import listenerProps from "./parts/ListenerProps";
+// import listenerDetails from "./parts/ListenerDetailProps";
+// import listenerFields from "./parts/ListenerFieldInjectionProps";
 
 import elementTemplateChooserProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/ChooserProps";
 import elementTemplateCustomProps from "./parts/CustomProps";
@@ -55,6 +55,7 @@ import {
   ScriptProps,
   ServiceTaskDelegateProps,
   StartEventInitiator,
+  ListenerProps
 } from "./parts/CustomImplementation";
 
 // helpers
@@ -175,7 +176,7 @@ function createGeneralTabGroups(
     translate
   );
 
-   // let detailsGroup = {
+  // let detailsGroup = {
   //   id: "details",
   //   label: translate("Details"),
   //   entries: [],
@@ -347,46 +348,60 @@ function createListenersTabGroups(
     id: "listeners",
     label: translate("Listeners"),
     entries: [],
+    component: ListenerProps,
   };
-
-  let options = listenerProps(listenersGroup, element, bpmnFactory, translate);
-
-  let listenerDetailsGroup = {
-    id: "listener-details",
-    entries: [],
-    enabled: function (element, node) {
-      if (!node) return false; //TODO - Send selected Node
-      return options.getSelectedListener(element, node);
-    },
-    label: function (element, node) {
-      if (!node) return; //TODO - Send selected Node
-      let param = options.getSelectedListener(element, node);
-      return getListenerLabel(param, translate);
-    },
-  };
-
-  listenerDetails(
-    listenerDetailsGroup,
-    element,
-    bpmnFactory,
-    options,
-    translate
-  );
-
-  let listenerFieldsGroup = {
-    id: "listener-fields",
-    label: translate("Field Injection"),
-    entries: [],
-    enabled: function (element, node) {
-      if (!node) return false; //TODO - Send selected Node
-      return options.getSelectedListener(element, node);
-    },
-  };
-
-  listenerFields(listenerFieldsGroup, element, bpmnFactory, options, translate);
-
-  return [listenersGroup, listenerDetailsGroup, listenerFieldsGroup];
+  return [listenersGroup];
 }
+// function createListenersTabGroups(
+//   element,
+//   bpmnFactory,
+//   elementRegistry,
+//   translate
+// ) {
+//   let listenersGroup = {
+//     id: "listeners",
+//     label: translate("Listeners"),
+//     entries: [],
+//   };
+
+//   let options = listenerProps(listenersGroup, element, bpmnFactory, translate);
+
+//   let listenerDetailsGroup = {
+//     id: "listener-details",
+//     entries: [],
+//     enabled: function (element, node) {
+//       if (!node) return false; //TODO - Send selected Node
+//       return options.getSelectedListener(element, node);
+//     },
+//     label: function (element, node) {
+//       if (!node) return; //TODO - Send selected Node
+//       let param = options.getSelectedListener(element, node);
+//       return getListenerLabel(param, translate);
+//     },
+//   };
+
+//   listenerDetails(
+//     listenerDetailsGroup,
+//     element,
+//     bpmnFactory,
+//     options,
+//     translate
+//   );
+
+//   let listenerFieldsGroup = {
+//     id: "listener-fields",
+//     label: translate("Field Injection"),
+//     entries: [],
+//     enabled: function (element, node) {
+//       if (!node) return false; //TODO - Send selected Node
+//       return options.getSelectedListener(element, node);
+//     },
+//   };
+
+//   listenerFields(listenerFieldsGroup, element, bpmnFactory, options, translate);
+
+//   return [listenersGroup, listenerDetailsGroup, listenerFieldsGroup];
+// }
 
 export default function getTabs(
   element,
@@ -429,13 +444,13 @@ export default function getTabs(
       elementRegistry,
       translate
     ),
-    enabled: function (element) {
-      return (
-        !eventDefinitionHelper.getLinkEventDefinition(element) ||
-        (!is(element, "bpmn:IntermediateThrowEvent") &&
-          eventDefinitionHelper.getLinkEventDefinition(element))
-      );
-    },
+    // enabled: function (element) {
+    //   return (
+    //     !eventDefinitionHelper.getLinkEventDefinition(element) ||
+    //     (!is(element, "bpmn:IntermediateThrowEvent") &&
+    //       eventDefinitionHelper.getLinkEventDefinition(element))
+    //   );
+    // },
   };
 
   let viewAttributesTab = {
