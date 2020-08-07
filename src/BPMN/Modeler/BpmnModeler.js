@@ -770,6 +770,11 @@ function BpmnModelerComponent() {
     bpmnModeler.on("shape.changed", (event) => {
       updateTabs(event);
     });
+    bpmnModeler.on("shape.removed", (event) => {
+      const canvas = bpmnModeler.get("canvas");
+      let element = canvas.getRootElement();
+      updateTabs({ element });
+    });
   }, []);
 
   return (
