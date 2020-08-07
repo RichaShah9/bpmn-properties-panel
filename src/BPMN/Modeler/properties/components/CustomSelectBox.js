@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/styles";
 import utils from "bpmn-js-properties-panel/lib/Utils";
 import find from "lodash/find";
+import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles({
   root: {
@@ -130,24 +130,6 @@ export default function CustomSelectBox({
     let selectedOption = get();
     setSelectedOption(selectedOption[referenceProperty]);
   }, [get, referenceProperty]);
-
-  // useEffect(() => {
-  //   const rootElements =
-  //     bpmnModeler &&
-  //     bpmnModeler.get("canvas").getRootElement().businessObject.$parent
-  //       .rootElements;
-  //   const elements =
-  //     rootElements && rootElements.filter((r) => r.$type === elementType);
-  //   const options =
-  //     elements &&
-  //     elements.map((element) => {
-  //       return {
-  //         value: element.name,
-  //         name: `${element.name} (id=${element.id})`,
-  //       };
-  //     });
-  //   setOptions(options || []);
-  // }, [bpmnModeler, elementType]);
 
   useEffect(() => {
     setOptions(defaultOptions);
