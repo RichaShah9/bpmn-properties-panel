@@ -66,7 +66,14 @@ const conditionalEvents = [
 // Compensate Event Definition
 const compensationEvents = ["bpmn:EndEvent", "bpmn:IntermediateThrowEvent"];
 
-export default function EventProps({ element, index, label, bpmnFactory }) {
+export default function EventProps({
+  element,
+  index,
+  label,
+  bpmnFactory,
+  bpmnModdle,
+  bpmnModeler,
+}) {
   const [isVisible, setVisible] = useState(false);
   const [renderType, setRenderType] = useState(null);
   const classes = useStyles();
@@ -87,6 +94,8 @@ export default function EventProps({ element, index, label, bpmnFactory }) {
           <Signal
             element={element}
             bpmnFactory={bpmnFactory}
+            bpmnModdle={bpmnModdle}
+            bpmnModeler={bpmnModeler}
             signalEventDefinition={renderType.eventDefinition}
           />
         );
@@ -95,6 +104,8 @@ export default function EventProps({ element, index, label, bpmnFactory }) {
           <Escalation
             element={element}
             bpmnFactory={bpmnFactory}
+            bpmnModdle={bpmnModdle}
+            bpmnModeler={bpmnModeler}
             escalationEventDefinition={renderType.eventDefinition}
             showEscalationCodeVariable={renderType.showEscalationCodeVariable}
           />
@@ -129,6 +140,8 @@ export default function EventProps({ element, index, label, bpmnFactory }) {
             element={element}
             bpmnFactory={bpmnFactory}
             errorEventDefinition={renderType.eventDefinition}
+            bpmnModdle={bpmnModdle}
+            bpmnModeler={bpmnModeler}
           />
         );
       default:
