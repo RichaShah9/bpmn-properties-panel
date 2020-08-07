@@ -92,7 +92,7 @@ export default function SignalEventProps({
               if (signalEventDefinition && signalEventDefinition.signalRef) {
                 signalEventDefinition.signalRef.name = value.name;
                 getOptions();
-                setSelectedSignal(ele.id);
+                setSelectedSignal(ele && ele.id);
               }
             },
           }}

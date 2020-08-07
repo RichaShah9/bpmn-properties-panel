@@ -101,7 +101,7 @@ export default function EscalationEventProps({
                 ) {
                   escalationEventDefinition.escalationRef.name = value.name;
                   getOptions();
-                  setSelectedEscalation(ele.id);
+                  setSelectedEscalation(ele && ele.id);
                 }
               },
             }}
