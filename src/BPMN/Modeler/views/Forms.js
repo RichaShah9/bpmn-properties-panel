@@ -748,10 +748,6 @@ export default function Forms({ element, id, bpmnFactory, createParent }) {
                     },
                     updateElement: function (value, label, option, index) {
                       const { formData, fieldIndex } = getSelectedFormField();
-                      console.log(
-                        formData[fieldIndex].properties,
-                        formData[fieldIndex]
-                      );
                       formData[fieldIndex].properties.values[index][label] =
                         value || undefined;
                     },

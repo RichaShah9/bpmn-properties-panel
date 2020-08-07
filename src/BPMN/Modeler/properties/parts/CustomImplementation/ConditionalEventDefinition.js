@@ -147,7 +147,6 @@ export default function ConditionalEventProps({
               if (!conditionOrConditionExpression) return;
               conditionOrConditionExpression[key] = value;
             });
-            console.log(conditionOrConditionExpression);
             if (conditionalEventDefinition) {
               conditionalEventDefinition.condition = conditionOrConditionExpression;
             } else {

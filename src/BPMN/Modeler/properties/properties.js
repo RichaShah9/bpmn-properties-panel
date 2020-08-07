@@ -111,17 +111,17 @@ let isJobConfigEnabled = function (element) {
   return false;
 };
 
-let getListenerLabel = function (param, translate) {
-  if (is(param, "camunda:ExecutionListener")) {
-    return translate("Execution Listener");
-  }
+// let getListenerLabel = function (param, translate) {
+//   if (is(param, "camunda:ExecutionListener")) {
+//     return translate("Execution Listener");
+//   }
 
-  if (is(param, "camunda:TaskListener")) {
-    return translate("Task Listener");
-  }
+//   if (is(param, "camunda:TaskListener")) {
+//     return translate("Task Listener");
+//   }
 
-  return "";
-};
+//   return "";
+// };
 
 let PROCESS_KEY_HINT = "This maps to the process definition key.";
 let TASK_KEY_HINT = "This maps to the task definition key.";
