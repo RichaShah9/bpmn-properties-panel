@@ -423,7 +423,8 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                 modelProperty: "eventType",
                 emptyParameter: false,
                 selectOptions: function () {
-                  return selectedExecutionEntity
+                  return selectedExecutionEntity ||
+                    selectedExecutionEntity === 0
                     ? getExecutionOptions()
                     : taskListenerEventTypeOptions;
                 },

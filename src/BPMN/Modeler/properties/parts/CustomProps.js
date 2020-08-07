@@ -485,7 +485,7 @@ export function setPropertyValue(element, property, value, bpmnFactory) {
   }
 
   // camunda:property
-  var camundaProperties, newCamundaProperty;
+  var camundaProperties;
   // existingCamundaProperty
 
   if (bindingType === CAMUNDA_PROPERTY_TYPE) {
@@ -523,24 +523,24 @@ export function setPropertyValue(element, property, value, bpmnFactory) {
 
     // existingCamundaProperty = findCamundaProperty(camundaProperties, binding);
 
-    newCamundaProperty = createCamundaProperty(binding, value, bpmnFactory);
-
-    const elements =
+    const extensionElement =
       bo.extensionElements &&
       bo.extensionElements.values &&
-      bo.extensionElements.values[0] &&
-      bo.extensionElements.values[0].values;
-    const newExtensionElements = elements.filter(
-      (element) => element.name !== binding.name
-    );
-    newExtensionElements.push(newCamundaProperty);
-    if (
-      bo.extensionElements &&
-      bo.extensionElements.values &&
-      bo.extensionElements.values[0]
-    ) {
-      bo.extensionElements.values[0].values = newExtensionElements;
+      bo.extensionElements.values.find((e) => e.$type === "camunda:Properties");
+    const elements = extensionElement.values;
+    const existingElement =
+      elements && elements.find((element) => element.name === binding.name);
+    if (existingElement) {
+      existingElement.value = value;
     }
+    // newExtensionElements && newExtensionElements.push(newCamundaProperty);
+    // if (
+    //   bo.extensionElements &&
+    //   bo.extensionElements.values &&
+    //   bo.extensionElements.values[0]
+    // ) {
+    //   bo.extensionElements.values[0].values = newExtensionElements;
+    // }
     // updates.push(
     //   cmdHelper.addAndRemoveElementsFromList(
     //     element,
