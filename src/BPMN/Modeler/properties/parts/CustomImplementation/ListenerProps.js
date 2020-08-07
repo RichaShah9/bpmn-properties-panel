@@ -242,7 +242,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
       let listenerType = ImplementationTypeHelper.getImplementationType(
         listener
       );
-
+      if(!listener) return ""
       let event = listener.get("event") ? listener.get("event") : "<empty>";
 
       let label =
@@ -601,6 +601,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                   modelProperty: "delegateExpression",
                   get: function () {
                     const listener = getListener();
+                    if(!listener) return
                     return {
                       [delegateExpressionProp]: listener.delegateExpression,
                     };
@@ -608,6 +609,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
 
                   set: function (element, values) {
                     const listener = getListener();
+                    if(!listener) return
                     listener.class = undefined;
                     listener.expression = undefined;
                     listener.delegateExpression =
@@ -627,12 +629,14 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                     modelProperty: "scriptFormat",
                     get: function () {
                       const listener = getListener();
+                      if(!listener) return
                       if (listener && listener.script) {
                         return { scriptFormat: listener.script.scriptFormat };
                       }
                     },
                     set: function (element, values) {
                       const listener = getListener();
+                      if(!listener) return
                       if (listener && listener.script) {
                         listener.script.scriptFormat = values.scriptFormat;
                       }
@@ -781,6 +785,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                       Object.entries(props).forEach(([key, value]) => {
                         timerDefinition[key] = value;
                       });
+                      if(!listener) return
                       listener.eventDefinitions = [timerDefinition];
                     },
                   }}
@@ -821,6 +826,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                         if (definition) {
                           definition.body = values.timerDefinition || undefined;
                         }
+                      if(!listener) return
                         listener.eventDefinitions = [timerDefinition];
                       },
                       //   validate: function (element, node) {
