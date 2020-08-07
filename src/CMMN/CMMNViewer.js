@@ -4,7 +4,7 @@ import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
 
 import Service from "../services/Service";
-import Tooltip from "../BPMN/components/Tooltip";
+import Tooltip from "../components/Tooltip";
 import { download } from "../utils";
 
 import "cmmn-js/dist/assets/diagram-js.css";

@@ -1,6 +1,7 @@
 import propertiesTabs from "./properties/properties";
 import { download, translate } from "../../utils";
 import { tabProperty } from "./properties/tabProperty";
+import Service from "../../services/Service";
 
 export const fetchId = () => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
@@ -18,7 +19,7 @@ export const uploadXml = () => {
 
 export const getType = (element) => {
   if (!element) return;
-  const type = element.type.toLowerCase();
+  const type = (element.type || element.$type).toLowerCase();
   return type.includes("event")
     ? "event"
     : type.includes("task")
@@ -26,22 +27,41 @@ export const getType = (element) => {
     : type;
 };
 
-export const getElements = (bpmnModeler) => {
-  let elementRegistry = bpmnModeler.get("elementRegistry");
-  let elements = [],
-    elementIds = [];
-  elementRegistry.filter(function (element) {
-    if (["event", "task"].includes(getType(element))) {
-      elements.push({
-        id: element.id,
-        name: element.businessObject.name || element.id,
-        type: getType(element),
-      });
-      elementIds.push(element.id);
-    }
-    return element;
+export const addOldNodes = async (wkf, setWkf, bpmnModeler) => {
+  const elements = getElements(bpmnModeler);
+  let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
+    ...wkf,
+    oldNodes: JSON.stringify(elements),
   });
-  return { elementIds, elements };
+  if (res && res.data && res.data[0]) {
+    setWkf({ ...res.data[0] });
+  }
+};
+
+export const getElements = (bpmnModeler) => {
+  const rootElements =
+    bpmnModeler._definitions && bpmnModeler._definitions.rootElements;
+  const processes =
+    rootElements && rootElements.filter((ele) => ele.$type === "bpmn:Process");
+  const allProcess = {};
+  processes &&
+    processes.forEach((process) => {
+      let elements = [];
+      process.flowElements &&
+        process.flowElements.forEach((element) => {
+          if (["event", "task"].includes(getType(element))) {
+            elements.push({
+              id: element.id,
+              name: element.name || element.id,
+              type: getType(element),
+            });
+          }
+        });
+      allProcess[process.id] = {
+        elements: elements,
+      };
+    });
+  return allProcess;
 };
 
 export const saveSVG = (bpmnModeler) => {
@@ -137,7 +157,7 @@ export function hidePanelElements() {
   if (dataStore && dataStore.style) {
     dataStore.style.display = "none";
   }
-};
+}
 
 export default {
   fetchId,
@@ -148,4 +168,5 @@ export default {
   isGroupVisible,
   isTabVisible,
   hidePanelElements,
+  addOldNodes,
 };

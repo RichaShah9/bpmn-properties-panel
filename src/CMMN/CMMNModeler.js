@@ -7,7 +7,7 @@ import Alert from "@material-ui/lab/Alert";
 import { Snackbar } from "@material-ui/core";
 
 import Service from "../services/Service";
-import Tooltip from "../BPMN/components/Tooltip";
+import Tooltip from "../components/Tooltip";
 import { download } from "../utils";
 
 import "cmmn-js-properties-panel/dist/assets/cmmn-js-properties-panel.css";

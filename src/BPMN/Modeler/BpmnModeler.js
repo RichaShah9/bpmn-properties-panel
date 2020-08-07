@@ -184,7 +184,7 @@ function BpmnModelerComponent() {
       setTabs(tabs);
 
       if (isDeploy) {
-        addOldNodes(oldWkf, setWkf);
+        addOldNodes(oldWkf, setWkf, bpmnModeler);
       }
       let canvas = bpmnModeler.get("canvas");
       canvas.zoom("fit-viewport");
