@@ -147,7 +147,7 @@ export const tabProperty = [
   {
     type: "bpmn:EndEvent",
     subType: "bpmn:ErrorEventDefinition",
-    tabs: variableTabs,
+    tabs: commonTabs,
   },
   {
     type: "bpmn:EndEvent",
