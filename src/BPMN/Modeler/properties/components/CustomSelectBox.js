@@ -57,8 +57,6 @@ function findElementById(eventDefinition, type, id) {
 
 export default function CustomSelectBox({
   entry,
-  element,
-  bpmnFactory,
   bpmnModdle,
   definition,
   bpmnModeler,
@@ -81,15 +79,22 @@ export default function CustomSelectBox({
     {
       name: "",
       value: "",
+      id: "",
     },
   ]);
 
   const setSelectedElement = React.useCallback(
-    (value) => {
-      setSelectedOption(value);
-      set(value);
+    (id) => {
+      let rootElements =
+        bpmnModeler &&
+        bpmnModeler.get("canvas").getRootElement().businessObject.$parent
+          .rootElements;
+      let element = rootElements && rootElements.find((r) => r.id === id);
+      definition[referenceProperty] = element;
+      setSelectedOption(id);
+      set(id, element);
     },
-    [set]
+    [set, bpmnModeler, referenceProperty, definition]
   );
 
   const addElement = () => {
@@ -121,9 +126,10 @@ export default function CustomSelectBox({
       {
         name: `${name} (id=${id})`,
         value: name,
+        id: id,
       },
     ]);
-    setSelectedElement(name);
+    setSelectedElement(id);
   };
 
   useEffect(() => {
@@ -158,7 +164,7 @@ export default function CustomSelectBox({
             {options &&
               options.length > 0 &&
               options.map((option) => (
-                <option value={option.value} key={option.value}>
+                <option value={option.id} key={option.value}>
                   {option.name}
                 </option>
               ))}

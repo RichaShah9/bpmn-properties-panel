@@ -12,6 +12,7 @@ export default function SignalEventProps({
 }) {
   const [selectedSignal, setSelectedSignal] = useState(null);
   const [signalOptions, setSignalOptions] = useState([]);
+  const [ele, setEle] = useState(null);
 
   const getOptions = React.useCallback(() => {
     const rootElements =
@@ -26,6 +27,7 @@ export default function SignalEventProps({
         return {
           value: element.name,
           name: `${element.name} (id=${element.id})`,
+          id: element.id,
         };
       });
     setSignalOptions(options || []);
@@ -33,7 +35,7 @@ export default function SignalEventProps({
 
   useEffect(() => {
     let reference = signalEventDefinition.get("signalRef");
-    setSelectedSignal(reference && reference.name);
+    setSelectedSignal(reference && reference.id);
   }, [signalEventDefinition]);
 
   useEffect(() => {
@@ -55,10 +57,11 @@ export default function SignalEventProps({
           elementType: "bpmn:Signal",
           referenceProperty: "signalRef",
           newElementIdPrefix: "Signal_",
-          set: function (value) {
+          set: function (value, ele) {
+            setEle(ele);
             setSelectedSignal(value);
             if (signalEventDefinition && signalEventDefinition.signalRef) {
-              signalEventDefinition.signalRef.name = value;
+              signalEventDefinition.signalRef.name = ele.name;
             }
           },
           get: function () {
@@ -79,15 +82,17 @@ export default function SignalEventProps({
             modelProperty: "name",
             shouldValidate: true,
             get: function () {
+              if (!signalEventDefinition) return;
+              let reference = signalEventDefinition.get("signalRef");
               return {
-                name: selectedSignal,
+                name: reference && reference.name,
               };
             },
             set: function (e, value) {
               if (signalEventDefinition && signalEventDefinition.signalRef) {
                 signalEventDefinition.signalRef.name = value.name;
                 getOptions();
-                setSelectedSignal(value.name);
+                setSelectedSignal(ele.id);
               }
             },
           }}
