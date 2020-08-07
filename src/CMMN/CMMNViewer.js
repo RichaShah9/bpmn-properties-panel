@@ -1,50 +1,49 @@
 import React, { useEffect } from "react";
-import BpmnViewer from "bpmn-js/lib/NavigatedViewer";
+import CmmnViewer from "cmmn-js/lib/NavigatedViewer";
 import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
 
-import Service from "../../services/Service";
-import Tooltip from "../../components/Tooltip";
-import { download } from "../../utils";
+import Service from "../services/Service";
+import Tooltip from "../BPMN/components/Tooltip";
+import { download } from "../utils";
 
-import "bpmn-js/dist/assets/diagram-js.css";
-import "bpmn-font/dist/css/bpmn-embedded.css";
-import "../css/bpmn.css";
+import "cmmn-js/dist/assets/diagram-js.css";
+import "cmmn-font/dist/css/cmmn-embedded.css";
 
-let bpmnViewer = null;
+let cmmnViewer = null;
 
 const fetchId = (isInstance) => {
-  const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
-  const regexBPMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
-  const regexBPMNActivityCounts = /[?&]activityCount=([^&#]*)/g; // ?id=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
-  const regexBPMNInstanceId = /[?&]instanceId=([^&#]*)/g; // ?instanceId=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
+  const regexCMMN = /[?&]id=([^&#]*)/g; // ?id=1
+  const regexCMMNTask = /[?&]taskIds=([^&#]*)/g; // ?id=1&taskIds=1,2
+  const regexCMMNActivityCounts = /[?&]activityCount=([^&#]*)/g; // ?id=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
+  const regexCMMNInstanceId = /[?&]instanceId=([^&#]*)/g; // ?instanceId=1&taskIds=1,2&activityCount=activiti1:1,activit2:1,activit3:2,activit4:1
 
   const url = window.location.href;
-  let matchBPMNId,
-    matchBPMNTasksId,
+  let matchCMMNId,
+    matchCMMNTasksId,
     matchActivityCounts,
     activityCounts,
     matchInstanceId,
     id,
     taskIds;
 
-  while ((matchBPMNTasksId = regexBPMNTask.exec(url))) {
-    let ids = matchBPMNTasksId[1];
+  while ((matchCMMNTasksId = regexCMMNTask.exec(url))) {
+    let ids = matchCMMNTasksId[1];
     taskIds = ids.split(",");
   }
 
-  while ((matchActivityCounts = regexBPMNActivityCounts.exec(url))) {
+  while ((matchActivityCounts = regexCMMNActivityCounts.exec(url))) {
     activityCounts = matchActivityCounts[1];
   }
 
   if (isInstance) {
-    while ((matchInstanceId = regexBPMNInstanceId.exec(url))) {
+    while ((matchInstanceId = regexCMMNInstanceId.exec(url))) {
       id = matchInstanceId[1];
       return { id, taskIds, activityCounts };
     }
   } else {
-    while ((matchBPMNId = regexBPMN.exec(url))) {
-      id = matchBPMNId[1];
+    while ((matchCMMNId = regexCMMN.exec(url))) {
+      id = matchCMMNId[1];
       return { id, taskIds, activityCounts };
     }
   }
@@ -52,7 +51,7 @@ const fetchId = (isInstance) => {
 
 const fetchDiagram = async (id, taskIds, activityCounts) => {
   if (id) {
-    let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id);
+    let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfCmmnModel", id);
     const wkf = (res && res.data && res.data[0]) || {};
     const { diagramXml } = wkf;
     openDiagramImage(taskIds, diagramXml, activityCounts);
@@ -62,11 +61,11 @@ const fetchDiagram = async (id, taskIds, activityCounts) => {
 const fetchInstanceDiagram = async (id, taskIds, activityCounts) => {
   if (id) {
     let actionRes = await Service.action({
-      model: "com.axelor.apps.bpm.db.WkfModel",
-      action: "action-wkf-instance-method-get-instance-xml",
+      model: "com.axelor.apps.bpm.db.WkfCmmnModel",
+      action: "action-wkf-case-instance-method-get-instance-xml",
       data: {
         context: {
-          _model: "com.axelor.apps.bpm.db.WkfModel",
+          _model: "com.axelor.apps.bpm.db.WkfCmmnModel",
           instanceId: id,
         },
       },
@@ -103,13 +102,13 @@ function updateSVGStroke(obj, taskIds = []) {
 
 const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
   if (!diagramXml) return;
-  bpmnViewer.importXML(diagramXml, (err) => {
+  cmmnViewer.importXML(diagramXml, (err) => {
     if (err) {
-      return console.error("could not import BPMN 2.0 diagram", err);
+      return console.error("could not import CMMN diagram", err);
     }
-    let canvas = bpmnViewer.get("canvas");
+    let canvas = cmmnViewer.get("canvas");
     canvas.zoom("fit-viewport");
-    let elementRegistry = bpmnViewer.get("elementRegistry");
+    let elementRegistry = cmmnViewer.get("elementRegistry");
     let nodes = elementRegistry && elementRegistry._elements;
     if (!nodes) return;
     let filteredElements = Object.keys(nodes).filter(
@@ -134,7 +133,7 @@ const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
       }
     });
 
-    let overlays = bpmnViewer.get("overlays");
+    let overlays = cmmnViewer.get("overlays");
     if (overlayActivies.length <= 0) return;
     overlayActivies.forEach((overlayActivity) => {
       overlays.add(overlayActivity.id, "note", {
@@ -149,22 +148,22 @@ const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
 };
 
 const zoomIn = () => {
-  bpmnViewer.get("zoomScroll").stepZoom(1);
+  cmmnViewer.get("zoomScroll").stepZoom(1);
 };
 
 const zoomOut = () => {
-  bpmnViewer.get("zoomScroll").stepZoom(-1);
+  cmmnViewer.get("zoomScroll").stepZoom(-1);
 };
 
 const resetZoom = () => {
-  bpmnViewer.get("canvas").zoom("fit-viewport");
+  cmmnViewer.get("canvas").zoom("fit-viewport");
 };
 
-function BpmnViewerComponent({ isInstance }) {
+function CmmnViewerComponent({ isInstance }) {
   const [taskIds, setTaskIds] = React.useState(null);
 
   const saveSVG = () => {
-    bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
+    cmmnViewer.saveSVG({ format: true }, async function (err, svg) {
       parseString(svg, function (err, result) {
         let updatedSVG = updateSVGStroke(result, taskIds);
         let builder = new xml2js.Builder();
@@ -206,7 +205,7 @@ function BpmnViewerComponent({ isInstance }) {
   ];
 
   useEffect(() => {
-    bpmnViewer = new BpmnViewer({
+    cmmnViewer = new CmmnViewer({
       container: "#canvas-task",
     });
     let { id, taskIds, activityCounts } = fetchId(isInstance) || {};
@@ -239,4 +238,4 @@ function BpmnViewerComponent({ isInstance }) {
   );
 }
 
-export default BpmnViewerComponent;
+export default CmmnViewerComponent;

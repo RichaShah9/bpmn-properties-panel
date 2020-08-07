@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogActions,
@@ -12,9 +12,11 @@ import {
   TableBody,
   Paper,
   DialogTitle,
+  Typography,
+  Switch,
+  FormControlLabel
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import _ from "lodash";
 
 import Select from "../../../components/Select";
 
@@ -40,69 +42,68 @@ const useStyles = makeStyles({
     fontWeight: 600,
     fontSize: 12,
   },
-  migrationPlan: {
-    marginBottom: 34,
+  process: {
+    marginTop: 10,
+  },
+  processHeader: {
+    marginBottom: 10,
+    fontSize: 12,
   },
 });
 
-export default function DeployDialog({ open, onClose, ids, onOk }) {
+export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
   const { oldElements, currentElements } = ids || {};
-  const [oldSelectedElements, setOldElements] = useState(null);
-  const [wkfMigrationMap, setWkfMigrationMap] = useState([]);
-  const [migrationPlan, setMigrationPlan] = useState({
-    label: "New",
-    value: "new",
-  });
-
+  const [wkfMigrationMap, setWkfMigrationMap] = useState({});
+  const [isMigrateOld, setIsMigrateOld] = useState(true);
   const classes = useStyles();
 
-  const handleAdd = (oldEle, newEle) => {
-    const newElement = currentElements.find((ele) => ele.name === (newEle && newEle.name));
-    const elementIndex = wkfMigrationMap.findIndex(
-      (wkf) => (wkf.oldNode && wkf.oldNode.id) === oldEle.id
-    );
-    if (elementIndex > -1) {
-      const cloneWkfMigrationMap = [...wkfMigrationMap];
-      cloneWkfMigrationMap[elementIndex] = {
-        oldNode: oldEle,
-        currentNode: newElement,
-      };
-      setWkfMigrationMap([...cloneWkfMigrationMap]);
-    } else {
-      setWkfMigrationMap([
-        ...wkfMigrationMap,
-        { oldNode: oldEle, currentNode: newElement },
-      ]);
-    }
-    setOldElements([...(oldSelectedElements || []), { ...oldEle }]);
+  const handleAdd = (oldEle, newEle, processId) => {
+    const cloneWkfMigrationMap = { ...wkfMigrationMap };
+    cloneWkfMigrationMap[processId] = {
+      ...cloneWkfMigrationMap[processId],
+      [oldEle.id]: newEle.id,
+    };
+    setWkfMigrationMap(cloneWkfMigrationMap);
   };
 
   const onConfirm = () => {
-    let cloneWkfMigrationMap = {};
-    wkfMigrationMap &&
-      wkfMigrationMap.map((ele) => {
-        if(!ele.oldNode || !ele.oldNode.id) return null
-        cloneWkfMigrationMap[ele.oldNode.id] = ele.currentNode && ele.currentNode.id;
-        return ele;
-      });
+    onOk(wkfMigrationMap, isMigrateOld);
+  };
 
-    let excludeElements = _(oldElements)
-      .differenceBy(oldSelectedElements, "id", "name")
-      .map(_.partial(_.pick, _, "id", "name"))
-      .value();
+  const getCurrentElements = (processId, elementType) => {
+    const currentProcess = currentElements[processId];
+    const elements =
+      currentProcess &&
+      currentProcess.elements &&
+      currentProcess.elements.filter((element) => element.type === elementType);
+    return elements || [];
+  };
 
-    excludeElements &&
-      excludeElements.forEach((ele) => {
-        const currentNode = currentElements.find(
-          (current) => (current && current.id) === ele.id
-        );
+  const getCurrentElement = (processId, elementId) => {
+    const currentProcess = currentElements[processId];
+    const element =
+      currentProcess &&
+      currentProcess.elements &&
+      currentProcess.elements.find((element) => element.id === elementId);
+    return element || {};
+  };
 
-        if (ele && ele.id && currentNode && currentNode.id) {
-          cloneWkfMigrationMap[ele.id] = currentNode && currentNode.id;
+  useEffect(() => {
+    const wkfMigrationMap = {};
+    if (!oldElements) return;
+    Object.entries(oldElements).forEach(([key, value]) => {
+      let values = {};
+      value.elements.forEach((element) => {
+        if (element) {
+          values[element.id] = element.id;
         }
       });
-    onOk(cloneWkfMigrationMap, migrationPlan);
-  };
+      if (key) {
+        wkfMigrationMap[key] = values;
+      }
+    });
+    setWkfMigrationMap(wkfMigrationMap);
+  }, [oldElements]);
 
   return (
     <Dialog
@@ -118,84 +119,73 @@ export default function DeployDialog({ open, onClose, ids, onOk }) {
         <strong>Node Mapping</strong>
       </DialogTitle>
       <DialogContent>
-        <Select
-          isLabel={true}
-          options={[
-            {
-              label: "New",
-              value: "new",
-            },
-            {
-              label: "All",
-              value: "all",
-            },
-            {
-              label: "Selected",
-              value: "selected",
-            },
-          ]}
-          update={(value) => setMigrationPlan(value)}
-          optionLabel="label"
-          value={migrationPlan}
-          label="Migration apply to"
-          className={classes.migrationPlan}
-          isTranslated={false}
-        />
-        <TableContainer component={Paper}>
-          <Table size="small" aria-label="a dense table">
-            <TableHead>
-              <TableRow>
-                <TableCell className={classes.tableHead} align="center">
-                  Old Node
-                </TableCell>
-                <TableCell className={classes.tableHead} align="center">
-                  Current Node
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {oldElements &&
-                oldElements.map((oldEle, index) => (
-                  <TableRow key={index}>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      align="center"
-                      className={classes.tableCell}
-                    >
-                      {oldEle.name}
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      align="center"
-                      className={classes.tableCell}
-                    >
-                      <Select
-                        className={classes.select}
-                        isLabel={false}
-                        options={
-                          currentElements &&
-                          currentElements.filter(
-                            (element) => element.type === oldEle.type
-                          )
-                        }
-                        defaultValue={
-                          currentElements &&
-                          oldEle &&
-                          currentElements.find(
-                            (current) => (current && current.id) === oldEle.id
-                          )
-                        }
-                        update={(value) => handleAdd(oldEle, value)}
-                        isTranslated={false}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {wkf && wkf.statusSelect === 1 && oldElements && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isMigrateOld}
+                onChange={() => {
+                  setIsMigrateOld((isMigrateOld) => !isMigrateOld);
+                }}
+                color="primary"
+                name="isMigrateOld"
+              />
+            }
+            label="Migrate previous version records?"
+          />
+        )}
+        {oldElements &&
+          Object.entries(oldElements).map(([key, value]) => (
+            <div key={key} className={classes.process}>
+              <Typography className={classes.processHeader}>
+                <strong>{key}</strong>
+              </Typography>
+              <TableContainer component={Paper}>
+                <Table size="small" aria-label="a dense table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell className={classes.tableHead} align="center">
+                        Old Node
+                      </TableCell>
+                      <TableCell className={classes.tableHead} align="center">
+                        Current Node
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {value.elements &&
+                      value.elements.map((oldEle, index) => (
+                        <TableRow key={index}>
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            align="center"
+                            className={classes.tableCell}
+                          >
+                            {oldEle.name}
+                          </TableCell>
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            align="center"
+                            className={classes.tableCell}
+                          >
+                            <Select
+                              className={classes.select}
+                              isLabel={false}
+                              options={getCurrentElements(key, oldEle.type)}
+                              defaultValue={getCurrentElement(key, oldEle.id)}
+                              update={(value) => handleAdd(oldEle, value, key)}
+                              isTranslated={false}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          ))}
       </DialogContent>
       <DialogActions>
         <Button

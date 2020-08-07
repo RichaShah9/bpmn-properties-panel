@@ -18,12 +18,7 @@ import Service from "../../services/Service";
 import AlertDialog from "../../components/AlertDialog";
 import Tooltip from "../../components/Tooltip";
 import { Tab, Tabs } from "../../components/Tabs";
-import {
-  DeployDialog,
-  ViewAttributePanel,
-  SelectRecordsDialog,
-  MigrateRecordsDialog,
-} from "./views";
+import { DeployDialog, ViewAttributePanel } from "./views";
 import {
   Textbox,
   TextField,
@@ -45,6 +40,7 @@ import {
   isGroupVisible,
   isHiddenProperty,
   hidePanelElements,
+  addOldNodes,
 } from "./extra.js";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -121,14 +117,6 @@ function BpmnModelerComponent() {
   const [id, setId] = useState(null);
   const [openAlert, setAlert] = useState(false);
   const [openDelopyDialog, setDelopyDialog] = useState(false);
-  const [openSelectRecordsDialog, setSelectRecords] = useState(false);
-  const [openMigrateRecordsDialog, setMigrateRecords] = useState(false);
-  const [selectedRecords, setSelectedRecords] = useState(null);
-  const [model, setModel] = useState(null);
-  const [migrationPlan, setMigrationPlan] = useState(null);
-  const [wkfMigrationMap, setWkfMigrationMap] = useState(null);
-  const [fields, setFields] = useState(null);
-  const [isCustomModel, setCustomModel] = useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(true);
   const [ids, setIds] = useState({
     oldIds: null,
@@ -139,7 +127,6 @@ function BpmnModelerComponent() {
     messageType: null,
     message: null,
   });
-  const [metaJsonModel, setMetaJsonModel] = useState(null);
   const [selectedElement, setSelectedElement] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [tabs, setTabs] = useState([]);
@@ -179,7 +166,8 @@ function BpmnModelerComponent() {
   const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
     xml,
     isDeploy,
-    id
+    id,
+    oldWkf
   ) {
     bpmnModeler.importXML(xml, (error) => {
       if (error) {
@@ -196,14 +184,7 @@ function BpmnModelerComponent() {
       setTabs(tabs);
 
       if (isDeploy) {
-        const { elements } = getElements(bpmnModeler);
-        window.localStorage.setItem(
-          "elementIds",
-          JSON.stringify({
-            ...(JSON.parse(window.localStorage.getItem("elementIds")) || {}),
-            [`diagram_${id}`]: elements,
-          })
-        );
+        addOldNodes(oldWkf, setWkf);
       }
       let canvas = bpmnModeler.get("canvas");
       canvas.zoom("fit-viewport");
@@ -212,7 +193,7 @@ function BpmnModelerComponent() {
   []);
 
   const newBpmnDiagram = React.useCallback(
-    function newBpmnDiagram(rec, isDeploy, id) {
+    function newBpmnDiagram(rec, isDeploy, id, oldWkf) {
       const diagram =
         rec ||
         `<?xml version="1.0" encoding="UTF-8" ?>
@@ -236,7 +217,7 @@ function BpmnModelerComponent() {
           </bpmndi:BPMNPlane>
         </bpmndi:BPMNDiagram>
       </bpmn2:definitions>`;
-      openBpmnDiagram(diagram, isDeploy, id);
+      openBpmnDiagram(diagram, isDeploy, id, oldWkf);
     },
     [openBpmnDiagram]
   );
@@ -257,6 +238,7 @@ function BpmnModelerComponent() {
             "previousVersion.statusSelect",
             "isActive",
             "diagramXml",
+            "oldNodes",
           ],
           related: {
             wkfProcessList: ["name", "processId", "wkfProcessConfigList"],
@@ -265,7 +247,12 @@ function BpmnModelerComponent() {
         const wkf = (res && res.data && res.data[0]) || {};
         let { diagramXml } = wkf;
         setWkf(wkf);
-        newBpmnDiagram(diagramXml, isDeploy, id);
+        newBpmnDiagram(
+          diagramXml,
+          isDeploy,
+          id,
+          res && res.data && res.data[0]
+        );
       } else {
         newBpmnDiagram(undefined, isDeploy, id);
       }
@@ -287,7 +274,7 @@ function BpmnModelerComponent() {
     }
     reader.readAsText(files[0]);
     reader.onload = (e) => {
-      openBpmnDiagram(e.target.result);
+      openBpmnDiagram(e.target.result, false, id, wkf);
     };
   };
 
@@ -309,7 +296,7 @@ function BpmnModelerComponent() {
     });
   };
 
-  const deploy = async (migrationPlan, wkfMigrationMap) => {
+  const deploy = async (wkfMigrationMap, isMigrateOld) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
@@ -317,19 +304,20 @@ function BpmnModelerComponent() {
       });
       if (res && res.data && res.data[0]) {
         setWkf({ ...res.data[0] });
+        let context = {
+          _model: "com.axelor.apps.bpm.db.WkfModel",
+          ...res.data[0],
+          wkfMigrationMap,
+        };
+        if (wkf && wkf.statusSelect === 1 && wkf.oldNodes) {
+          context.isMigrateOld = isMigrateOld;
+        }
         let actionRes = await Service.action({
           model: "com.axelor.apps.bpm.db.WkfModel",
           action: "action-wkf-model-method-deploy",
           data: {
             context: {
-              _model: "com.axelor.apps.bpm.db.WkfModel",
-              ...res.data[0],
-              wkfMigrationMap,
-              _migrationType: migrationPlan ? migrationPlan.value : null,
-              _processInstanceIds:
-                (selectedRecords &&
-                  selectedRecords.map((record) => record.processInstanceId)) ||
-                [],
+              ...context,
             },
           },
         });
@@ -339,7 +327,9 @@ function BpmnModelerComponent() {
           actionRes.data[0] &&
           actionRes.data[0].reload
         ) {
-          handleSnackbarClick("success", "Deployed Successfully");
+          if (wkf && wkf.statusSelect !== 1) {
+            handleSnackbarClick("success", "Deployed Successfully");
+          }
           fetchDiagram(wkf.id, true);
         } else {
           handleSnackbarClick(
@@ -356,55 +346,51 @@ function BpmnModelerComponent() {
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
-      setSelectedRecords(null);
-      setMigrationPlan(null);
-      setWkfMigrationMap(null);
-      setModel(null);
+      if (wkf && wkf.statusSelect === 1) {
+        let actionStart = await Service.action({
+          model: "com.axelor.apps.bpm.db.WkfModel",
+          action: "action-wkf-model-method-start",
+          data: {
+            context: {
+              _model: "com.axelor.apps.bpm.db.WkfModel",
+              ...res.data[0],
+            },
+          },
+        });
+        if (
+          actionStart &&
+          actionStart.data &&
+          actionStart.data[0] &&
+          actionStart.data[0].reload
+        ) {
+          handleSnackbarClick("success", "Started Successfully");
+          fetchDiagram(wkf.id, true);
+        } else {
+          handleSnackbarClick(
+            "error",
+            (actionStart &&
+              actionStart.data &&
+              (actionStart.data.message || actionStart.data.title)) ||
+              "Error!"
+          );
+        }
+      }
     });
   };
 
-  const handleOk = (wkfMigrationMap, migrationPlan) => {
+  const handleOk = (wkfMigrationMap, isMigrateOld) => {
     setDelopyDialog(false);
-    setMigrationPlan(migrationPlan);
-    setWkfMigrationMap(wkfMigrationMap);
-    if (migrationPlan.value === "selected" && wkf.statusSelect === 2) {
-      setSelectRecords(true);
-    } else {
-      deploy(migrationPlan, wkfMigrationMap);
-    }
-  };
-
-  const openConfigRecords = (fields, model, isCustomModel, metaJsonModel) => {
-    setFields(fields);
-    setModel(model);
-    setMigrateRecords(true);
-    setCustomModel(isCustomModel);
-    setMetaJsonModel(metaJsonModel);
+    deploy(wkfMigrationMap, isMigrateOld);
   };
 
   const deployDiagram = async () => {
-    const { elements } = getElements(bpmnModeler);
-    let localElements = JSON.parse(window.localStorage.getItem("elementIds"));
-    let oldElements = localElements && localElements[`diagram_${id}`];
+    const elements = getElements(bpmnModeler);
+    let oldElements = JSON.parse(wkf.oldNodes);
     setIds({
       currentElements: elements,
       oldElements: oldElements,
     });
     setDelopyDialog(true);
-  };
-
-  const addRecords = (records) => {
-    const recordsIds =
-      (selectedRecords && selectedRecords.map((r) => r.id)) || [];
-    const newRecords = [...(selectedRecords || [])];
-    records &&
-      records.forEach((record) => {
-        if (!recordsIds.includes(record.id)) {
-          newRecords.push(record);
-        }
-      });
-    setSelectedRecords(newRecords);
-    setMigrateRecords(false);
   };
 
   const toolBarButtons = [
@@ -435,7 +421,7 @@ function BpmnModelerComponent() {
     {
       name: "Deploy",
       icon: <i className="fa fa-rocket" style={{ fontSize: 18 }}></i>,
-      tooltipText: "Deploy",
+      tooltipText: wkf && wkf.statusSelect === 1 ? "Start" : "Deploy",
       onClick: deployDiagram,
     },
   ];
@@ -905,41 +891,10 @@ function BpmnModelerComponent() {
           open={openDelopyDialog}
           onClose={() => setDelopyDialog(false)}
           ids={ids}
-          onOk={(wkfMigrationMap, migrationPlan) =>
-            handleOk(wkfMigrationMap, migrationPlan)
-          }
-        />
-      )}
-      {openSelectRecordsDialog && (
-        <SelectRecordsDialog
-          open={openSelectRecordsDialog}
-          onClose={() => {
-            setSelectRecords(false);
-            setSelectedRecords(null);
-          }}
-          openConfigRecords={(fields, model, isCustomModel, metaJsonModel) =>
-            openConfigRecords(fields, model, isCustomModel, metaJsonModel)
+          onOk={(wkfMigrationMap, isMigrateOld) =>
+            handleOk(wkfMigrationMap, isMigrateOld)
           }
           wkf={wkf}
-          selectedRecords={selectedRecords}
-          onOk={() => {
-            setSelectRecords(false);
-            setSelectedRecords(null);
-            deploy(migrationPlan, wkfMigrationMap);
-          }}
-        />
-      )}
-      {openMigrateRecordsDialog && (
-        <MigrateRecordsDialog
-          open={openSelectRecordsDialog}
-          onClose={() => setMigrateRecords(false)}
-          fields={fields}
-          isCustomModel={isCustomModel}
-          model={model}
-          onOk={(selectedRecords) => {
-            addRecords(selectedRecords);
-          }}
-          metaJsonModel={metaJsonModel}
         />
       )}
     </div>
