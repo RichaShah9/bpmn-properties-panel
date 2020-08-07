@@ -49,7 +49,6 @@ export default function Table({ entry }) {
     validate,
   } = entry || {};
   const [options, setOptions] = useState(null);
-  const [errors, setErrors] = useState({});
 
   const getOptions = React.useCallback(() => {
     const options = getElements && getElements();

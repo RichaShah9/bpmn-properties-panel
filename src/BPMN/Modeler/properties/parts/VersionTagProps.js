@@ -1,5 +1,4 @@
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 
 export default function VersionTagProps(group, element, translate) {
   let bo = getBusinessObject(element);
