@@ -174,20 +174,15 @@ function BpmnModelerComponent() {
         handleSnackbarClick("error", "Error! Can't import XML");
         return;
       }
-      let element =
-        bpmnModeler._definitions &&
-        bpmnModeler._definitions.rootElements &&
-        bpmnModeler._definitions.rootElements[0];
-
-      setSelectedElement(element);
-      let tabs = getTabs(bpmnModeler, element);
-      setTabs(tabs);
-
       if (isDeploy) {
         addOldNodes(oldWkf, setWkf, bpmnModeler);
       }
       let canvas = bpmnModeler.get("canvas");
       canvas.zoom("fit-viewport");
+      let element = canvas.getRootElement();
+      setSelectedElement(element);
+      let tabs = getTabs(bpmnModeler, element);
+      setTabs(tabs);
     });
   },
   []);
