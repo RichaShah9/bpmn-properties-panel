@@ -156,7 +156,7 @@ export default function CustomSelectBox({
             className={classes.extensionElements}
             name="selectedExtensionElement"
             data-list-entry-container
-            value={selectedOption}
+            value={selectedOption || ""}
             onChange={(e) => {
               setSelectedElement(e.target.value);
             }}
