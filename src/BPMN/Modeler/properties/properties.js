@@ -49,7 +49,7 @@ import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefi
 import {
   CallActivityProps,
   ConditionalProps,
-  ErrorProps,
+  // ErrorProps,
   EventProps,
   LinkProps,
   ScriptProps,
@@ -217,12 +217,12 @@ function createGeneralTabGroups(
     entries: [],
     component: EventProps,
   };
-  let errorProps = {
-    id: "errorProps",
-    label: translate("Details"),
-    entries: [],
-    component: ErrorProps,
-  };
+  // let errorProps = {
+  //   id: "errorProps",
+  //   label: translate("Details"),
+  //   entries: [],
+  //   component: ErrorProps,
+  // };
   let conditionalProps = {
     id: "conditionalProps",
     label: translate("Details"),
@@ -306,7 +306,7 @@ function createGeneralTabGroups(
   groups.push(linkProps);
   groups.push(callActivityProps);
   groups.push(eventProps);
-  groups.push(errorProps);
+  // groups.push(errorProps);
   groups.push(conditionalProps);
   groups.push(startEventInitiator);
 
