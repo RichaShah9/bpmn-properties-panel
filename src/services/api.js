@@ -186,3 +186,48 @@ export async function getRoles(criteria) {
   return data;
 }
 
+export async function getMetaModels() {
+  const res = await Service.search("com.axelor.meta.db.MetaModel");
+  const { data = [] } = res || {};
+  return data;
+}
+
+export async function getCustomModels() {
+  const res = await Service.search("com.axelor.meta.db.MetaJsonModel");
+  const { data = [] } = res || {};
+  return data;
+}
+
+export async function getAllModels() {
+  const models = (await getMetaModels()) || [];
+  const metaJsonModels = (await getCustomModels()) || [];
+  const data = [...models, ...metaJsonModels];
+  return data;
+}
+
+export async function getParentMenus() {
+  const res = await Service.search("com.axelor.meta.db.MetaMenu", {
+    data: {
+      _domain: `self.action is null`,
+    },
+  });
+  const { data = [] } = res || {};
+  if (data.status === -1) {
+    return [];
+  }
+  return data;
+}
+
+export async function getSubMenus(parentMenu) {
+  const res = await Service.search("com.axelor.meta.db.MetaMenu", {
+    data: {
+      criteria: [{ fieldName: "parent", operator: "=", value: parentMenu }],
+      operator: "and",
+    },
+  });
+  const { data = [] } = res || {};
+  if (data.status === -1) {
+    return [];
+  }
+  return data;
+}
