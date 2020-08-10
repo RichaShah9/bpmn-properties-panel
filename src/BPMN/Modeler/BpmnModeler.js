@@ -18,7 +18,7 @@ import Service from "../../services/Service";
 import AlertDialog from "../../components/AlertDialog";
 import Tooltip from "../../components/Tooltip";
 import { Tab, Tabs } from "../../components/Tabs";
-import { DeployDialog, ViewAttributePanel } from "./views";
+import { DeployDialog } from "./views";
 import {
   Textbox,
   TextField,
@@ -644,16 +644,7 @@ function BpmnModelerComponent() {
         data-group={group.id}
         className={classes.groupContainer}
       >
-        {group.id === "view-attributes" ? (
-          <React.Fragment>
-            <div className={classes.groupLabel}>{group.label}</div>
-            <ViewAttributePanel
-              id={id}
-              handleAdd={handleAdd}
-              element={selectedElement}
-            />
-          </React.Fragment>
-        ) : group.component ? (
+        {group.component ? (
           <group.component
             element={selectedElement}
             index={index}
@@ -661,6 +652,8 @@ function BpmnModelerComponent() {
             bpmnModeler={bpmnModeler}
             bpmnFactory={bpmnModeler && bpmnModeler.get("bpmnFactory")}
             bpmnModdle={bpmnModeler && bpmnModeler.get("moddle")}
+            id={id}
+            handleAdd={handleAdd}
           />
         ) : (
           group.entries.length > 0 && (

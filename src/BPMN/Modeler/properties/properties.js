@@ -56,9 +56,11 @@ import {
   ServiceTaskDelegateProps,
   StartEventInitiator,
   ListenerProps,
-  VariableMapping
+  VariableMapping,
 } from "./parts/CustomImplementation";
 
+import ViewAttributePanel from "../views/ViewAttributePanel";
+import TimeEmailPanel from "../views/TimeEmailPanel";
 // helpers
 
 let isExternalTaskPriorityEnabled = function (element) {
@@ -333,7 +335,7 @@ function createVariablesTabGroups(
     id: "variables",
     label: translate("Variables"),
     entries: [],
-    component: VariableMapping
+    component: VariableMapping,
   };
   // variableMapping(variablesGroup, element, bpmnFactory, translate);
 
@@ -354,6 +356,37 @@ function createListenersTabGroups(
   };
   return [listenersGroup];
 }
+
+function createViewAttributsGroups(
+  element,
+  bpmnFactory,
+  elementRegistry,
+  translate
+) {
+  let viewAttributesGroup = {
+    id: "view-attributes",
+    label: translate("View Attributes"),
+    entries: [],
+    component: ViewAttributePanel,
+  };
+  return [viewAttributesGroup];
+}
+
+function createTimeEmailGroups(
+  element,
+  bpmnFactory,
+  elementRegistry,
+  translate
+) {
+  let timeEmailGroup = {
+    id: "time-email-tab",
+    label: translate("Time/Email"),
+    entries: [],
+    component: TimeEmailPanel,
+  };
+  return [timeEmailGroup];
+}
+
 // function createListenersTabGroups(
 //   element,
 //   bpmnFactory,
@@ -458,14 +491,31 @@ export default function getTabs(
   let viewAttributesTab = {
     id: "view-attributes",
     label: translate("View Attributes"),
-    groups: [
-      {
-        id: "view-attributes",
-        label: translate("View Attributes"),
-      },
-    ],
+    groups: createViewAttributsGroups(
+      element,
+      bpmnFactory,
+      elementRegistry,
+      translate
+    ),
   };
 
-  let tabs = [generalTab, viewAttributesTab, variablesTab, listenersTab];
+  let timeEmailTab = {
+    id: "time-email-tab",
+    label: translate("Time/Email"),
+    groups: createTimeEmailGroups(
+      element,
+      bpmnFactory,
+      elementRegistry,
+      translate
+    ),
+  };
+
+  let tabs = [
+    generalTab,
+    viewAttributesTab,
+    variablesTab,
+    listenersTab,
+    timeEmailTab,
+  ];
   return tabs;
 }

@@ -299,6 +299,7 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
     }
     if (
       extensionElements &&
+      extensionElements.values && 
       extensionElements.values[0] &&
       extensionElements.values[0].values &&
       extensionElements.values[0].values.length > 0
