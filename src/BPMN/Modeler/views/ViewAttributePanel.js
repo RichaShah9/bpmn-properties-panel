@@ -22,6 +22,7 @@ import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../components/Select";
 import { getModels, getViews, getItems, getRoles } from "../../../services/api";
+import { translate } from "../../../utils";
 
 const Ids = require("ids").default;
 
@@ -96,6 +97,13 @@ const useStyles = makeStyles({
     borderRadius: 0,
     border: "1px solid #ccc",
     padding: 2,
+  },
+  label: {
+    fontWeight: "bolder",
+    display: "inline-block",
+    verticalAlign: "middle",
+    color: "#666",
+    margin: "3px 0px",
   },
 });
 
@@ -299,7 +307,7 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
     }
     if (
       extensionElements &&
-      extensionElements.values && 
+      extensionElements.values &&
       extensionElements.values[0] &&
       extensionElements.values[0].values &&
       extensionElements.values[0].values.length > 0
@@ -367,6 +375,9 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
                         <Grid>
                           <Grid container>
                             <Grid item xs={6} className={classes.grid}>
+                              <label className={classes.label}>
+                                {translate("Model")}
+                              </label>
                               <Select
                                 fetchMethod={(data) => getModels(id, data)}
                                 update={(value) =>
@@ -376,7 +387,7 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
                                 value={val.model}
                                 error={val.modelError}
                                 optionLabel="name"
-                                label="Model"
+                                isLabel={false}
                               />
                             </Grid>
                             <Grid
@@ -386,32 +397,42 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
                               className={classes.grid}
                             >
                               {val.model && (
-                                <Select
-                                  fetchMethod={(data) =>
-                                    getViews(val.model, data)
-                                  }
-                                  update={(value) =>
-                                    updateValue(value, "view", "name", index)
-                                  }
-                                  name="view"
-                                  value={val.view || ""}
-                                  label="View"
-                                />
+                                <div>
+                                  <label className={classes.label}>
+                                    {translate("View")}
+                                  </label>
+                                  <Select
+                                    fetchMethod={(data) =>
+                                      getViews(val.model, data)
+                                    }
+                                    update={(value) =>
+                                      updateValue(value, "view", "name", index)
+                                    }
+                                    name="view"
+                                    value={val.view || ""}
+                                    isLabel={false}
+                                  />
+                                </div>
                               )}
                             </Grid>
                           </Grid>
                           {(val.model || val.view) && (
-                            <Select
-                              fetchMethod={(data) => getRoles(data)}
-                              update={(value) =>
-                                updateValue(value, "roles", undefined, index)
-                              }
-                              name="roles"
-                              value={val.roles || []}
-                              multiple={true}
-                              label="Roles"
-                              optionLabel="name"
-                            />
+                            <div>
+                              <label className={classes.label}>
+                                {translate("Roles")}
+                              </label>
+                              <Select
+                                fetchMethod={(data) => getRoles(data)}
+                                update={(value) =>
+                                  updateValue(value, "roles", undefined, index)
+                                }
+                                name="roles"
+                                value={val.roles || []}
+                                multiple={true}
+                                isLabel={false}
+                                optionLabel="name"
+                              />
+                            </div>
                           )}
                           <Grid container alignItems="center">
                             <Grid item xs={6}>
