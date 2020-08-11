@@ -196,7 +196,11 @@ export default function ViewAttributePanel({
     if (Array.isArray(values)) {
       values &&
         values.forEach((value) => {
-          if (!value) return;
+          if (!value) {
+            addProperty("modelIds", undefined);
+            addProperty("modelNames", undefined);
+            return;
+          }
           modelIds.push(value.id);
           modelNames.push(value.name);
         });
@@ -211,9 +215,15 @@ export default function ViewAttributePanel({
     if (!value) {
       addProperty(name, undefined);
       addProperty(`${name}Id`, undefined);
+      return;
     }
     addProperty(name, value[optionLabel]);
     addProperty(`${name}Id`, value.id);
+  };
+
+  const getBool = (val) => {
+    if (!val) return false;
+    return !!JSON.parse(String(val).toLowerCase());
   };
 
   const getSelectValue = React.useCallback(
@@ -306,13 +316,13 @@ export default function ViewAttributePanel({
     const modelIds = getProperty("modelIds");
     const modelNames = getProperty("modelNames");
     const models = [];
-    setAttributeValue(attributeValue || false);
-    setEmailNotification(emailNotification || false);
-    setNewMenu(newMenu || false);
-    setNewUserMenu(newUserMenu || false);
-    setDisplayStatus(displayStatus || false);
+    setAttributeValue(getBool(attributeValue));
+    setEmailNotification(getBool(emailNotification));
+    setNewMenu(getBool(newMenu));
+    setNewUserMenu(getBool(newUserMenu));
+    setDisplayStatus(getBool(displayStatus));
     setMenuName(menuName);
-    setApplyAllModels(applyAllModels || false);
+    setApplyAllModels(getBool(applyAllModels));
     setTaskEmailTitle(taskEmailTitle);
     setUser(user);
     setMenuParent(menuParent);
@@ -355,8 +365,13 @@ export default function ViewAttributePanel({
               };
             },
             set: function (e, value) {
-              setAttributeValue(!value.attributeValue);
-              addProperty("attributeValue", !value.attributeValue);
+              let attributeValue = !value.attributeValue;
+              setAttributeValue(attributeValue);
+              addProperty("attributeValue", attributeValue);
+              if (attributeValue === false) {
+                setTaskEmailTitle(undefined);
+                addProperty("taskEmailTitle", undefined);
+              }
             },
           }}
         />
@@ -397,6 +412,22 @@ export default function ViewAttributePanel({
             set: function (e, value) {
               setUser(value.user);
               addProperty("user", value.user);
+              if ((user && user.toLowerCase()) !== "current user") {
+                setNewUserMenu(false);
+                addProperty("newUserMenu", false);
+                setUserMenuName(undefined);
+                addProperty("userMenuName", undefined);
+                setUserParentMenu(undefined);
+                updateValue("userParentMenu", undefined);
+                setUserPosition(undefined);
+                updateValue("userPosition", undefined);
+                setUserPositionSubMenu(undefined);
+                updateValue("userPositionSubMenu", undefined);
+                setMetaModel(undefined);
+                updateValue("metaModel", undefined);
+                setMetaJsonModel(undefined);
+                updateValue("metaJsonModel", undefined);
+              }
             },
           }}
         />
@@ -433,8 +464,19 @@ export default function ViewAttributePanel({
               };
             },
             set: function (e, value) {
-              setNewMenu(!value.newMenu);
-              addProperty("newMenu", !value.newMenu);
+              const newMenu = !value.newMenu;
+              setNewMenu(newMenu);
+              addProperty("newMenu", newMenu);
+              if (newMenu === false) {
+                setMenuName(undefined);
+                addProperty("menuName", undefined);
+                setMenuParent(undefined);
+                updateValue("menuParent", undefined);
+                setPosition(undefined);
+                updateValue("position", undefined);
+                setPosition(undefined);
+                updateValue("position", undefined);
+              }
             },
           }}
         />
@@ -494,8 +536,8 @@ export default function ViewAttributePanel({
               className={classes.select}
               options={subMenuOptions}
               update={(value) => {
-                setSubMenu(value);
-                updateValue("subMenu", value);
+                setPosition(value);
+                updateValue("position", value);
               }}
               fetchMethod={() => getSubMenus(menuParent)}
               name="subMenu"
@@ -520,8 +562,23 @@ export default function ViewAttributePanel({
                 };
               },
               set: function (e, value) {
-                setNewUserMenu(!value.newUserMenu);
-                addProperty("newUserMenu", !value.newUserMenu);
+                const newUserMenu = !value.newUserMenu;
+                setNewUserMenu(newUserMenu);
+                addProperty("newUserMenu", newUserMenu);
+                if (newUserMenu === false) {
+                  setUserMenuName(undefined);
+                  addProperty("userMenuName", undefined);
+                  setUserParentMenu(undefined);
+                  updateValue("userParentMenu", undefined);
+                  setUserPosition(undefined);
+                  updateValue("userPosition", undefined);
+                  setUserPositionSubMenu(undefined);
+                  updateValue("userPositionSubMenu", undefined);
+                  setMetaModel(undefined);
+                  updateValue("metaModel", undefined);
+                  setMetaJsonModel(undefined);
+                  updateValue("metaJsonModel", undefined);
+                }
               },
             }}
           />
@@ -639,8 +696,17 @@ export default function ViewAttributePanel({
               };
             },
             set: function (e, value) {
-              setDisplayStatus(!value.displayStatus);
-              addProperty("displayStatus", !value.displayStatus);
+              const displayStatus = !value.displayStatus;
+              setDisplayStatus(displayStatus);
+              addProperty("displayStatus", displayStatus);
+              if (displayStatus === false) {
+                setStatusTitle(undefined);
+                addProperty("statusTitle", undefined);
+                setApplyAllModels(false);
+                addProperty("applyAllModels", false);
+                setModels([]);
+                addModels([]);
+              }
             },
           }}
         />
