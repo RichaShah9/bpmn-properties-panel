@@ -514,8 +514,8 @@ export default function getTabs(
     generalTab,
     viewAttributesTab,
     variablesTab,
-    listenersTab,
     timeEmailTab,
+    listenersTab,
   ];
   return tabs;
 }
