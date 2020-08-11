@@ -23,10 +23,14 @@ const useStyles = makeStyles((theme) => ({
       fontSize: 14,
     },
     margin: "8px 0px",
+    background: "white",
+    border: "1px solid #ccc",
+    padding: "0px 28px 0px 6px",
   },
   input: {
     fontSize: 14,
     color: theme.palette.common.black,
+    padding: "3px 0 3px !important"
   },
   label: {
     fontSize: 14,
@@ -69,7 +73,7 @@ export default function SelectComponent({
       if (!fetchMethod || !open) return;
       return fetchMethod(criteria).then((res) => {
         if (res) {
-          setOptions(res);
+          setOptions(res || []);
         }
       });
     },
@@ -85,10 +89,10 @@ export default function SelectComponent({
   useDebounceEffect(optionDebounceHandler, 500);
 
   useEffect(() => {
-    if (!open) {
+    if (!open || (propOptions && propOptions.length < 1)) {
       setOptions([]);
     }
-  }, [open]);
+  }, [open, propOptions]);
 
   useEffect(() => {
     if (open) {
@@ -100,6 +104,11 @@ export default function SelectComponent({
     }
   }, [fetchOptions, open, criteriaIds, propOptions]);
 
+  useEffect(() => {
+    if (propOptions) {
+      setOptions(propOptions);
+    }
+  }, [propOptions]);
   return (
     <AutoComplete
       classes={{
@@ -174,6 +183,7 @@ export default function SelectComponent({
           InputProps={{
             ...(params.InputProps || {}),
             onClick: (e) => e && e.stopPropagation(),
+            disableUnderline: true,
           }}
           inputProps={{
             ...(params.inputProps || {}),
