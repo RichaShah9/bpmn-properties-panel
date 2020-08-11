@@ -187,13 +187,17 @@ export async function getRoles(criteria) {
 }
 
 export async function getMetaModels() {
-  const res = await Service.search("com.axelor.meta.db.MetaModel");
+  const res = await Service.search("com.axelor.meta.db.MetaModel", {
+    limit: 80,
+  });
   const { data = [] } = res || {};
   return data;
 }
 
 export async function getCustomModels() {
-  const res = await Service.search("com.axelor.meta.db.MetaJsonModel");
+  const res = await Service.search("com.axelor.meta.db.MetaJsonModel", {
+    limit: 80,
+  });
   const { data = [] } = res || {};
   return data;
 }
@@ -207,6 +211,7 @@ export async function getAllModels() {
 
 export async function getParentMenus() {
   const res = await Service.search("com.axelor.meta.db.MetaMenu", {
+    limit: 80,
     data: {
       _domain: `self.action is null`,
     },
@@ -220,6 +225,7 @@ export async function getParentMenus() {
 
 export async function getSubMenus(parentMenu) {
   const res = await Service.search("com.axelor.meta.db.MetaMenu", {
+    limit: 80,
     data: {
       criteria: [{ fieldName: "parent", operator: "=", value: parentMenu }],
       operator: "and",
