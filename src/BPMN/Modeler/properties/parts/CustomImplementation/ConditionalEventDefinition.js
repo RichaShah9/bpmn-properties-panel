@@ -78,7 +78,7 @@ export default function ConditionalEventProps({
           set: setValue("variableName"),
         }}
       />
-      {!is(element, "bpmn:StartEvent") && isEventSubProcess(element.parent) && (
+      {!(is(element, 'bpmn:StartEvent') && !isEventSubProcess(element.parent)) && (
         <TextField
           element={element}
           entry={{
