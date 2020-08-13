@@ -1,4 +1,5 @@
 import React from "react";
+import classnames from "classnames";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles({
@@ -6,9 +7,16 @@ const useStyles = makeStyles({
     marginTop: 5,
     color: "#999",
   },
+  error:{
+    color: "#CC3333"
+  }
 });
 
-export default function Description({ desciption }) {
+export default function Description({ desciption, type }) {
   const classes = useStyles();
-  return <div className={classes.desciption}>{desciption}</div>;
+  return (
+    <div className={classnames(classes.desciption, type && classes.error)}>
+      {desciption}
+    </div>
+  );
 }
