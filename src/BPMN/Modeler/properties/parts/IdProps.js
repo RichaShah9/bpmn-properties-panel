@@ -21,11 +21,8 @@ export default function IdProps(group, element, translate, options) {
     },
     validate: function (element, values) {
       let idValue = values.id;
-
       let bo = getBusinessObject(element);
-
       let idError = utils.isIdValid(bo, idValue, translate);
-
       return idError ? { id: idError } : {};
     },
   });
