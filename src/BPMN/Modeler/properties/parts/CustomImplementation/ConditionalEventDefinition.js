@@ -11,7 +11,7 @@ export default function ConditionalEventProps({
   conditionalEventDefinition,
   bpmnFactory,
 }) {
-  const [conditionType, setConditionType] = useState("");
+  const [conditionType, setConditionType] = useState("expression");
   const [scriptType, setScriptType] = useState("script");
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function ConditionalEventProps({
     let conditionExpression = conditionalEventDefinition
       ? conditionalEventDefinition.condition
       : bo.conditionExpression;
-    let conditionType = "";
+    let conditionType = "expression";
     if (conditionExpression) {
       let conditionLanguage = conditionExpression.language;
       if (conditionLanguage || conditionLanguage === "") {
@@ -180,6 +180,11 @@ export default function ConditionalEventProps({
                 conditionalEventDefinition.condition.body = values.expression;
               }
             },
+            validate: function (e, values) {
+              if (!values.expression && conditionType === "expression") {
+                return { expression: "Must provide a value" };
+              }
+            },
           }}
           canRemove={true}
         />
@@ -209,6 +214,11 @@ export default function ConditionalEventProps({
                   conditionalEventDefinition.condition
                 ) {
                   conditionalEventDefinition.condition.language = scriptFormat;
+                }
+              },
+              validate: function (e, values) {
+                if (!values.scriptFormat && conditionType === "script") {
+                  return { scriptFormat: "Must provide a value" };
                 }
               },
             }}
@@ -303,6 +313,11 @@ export default function ConditionalEventProps({
                   if (conditionalEventDefinition) {
                     conditionalEventDefinition.condition.body = values.script;
                     conditionalEventDefinition.condition.resource = undefined;
+                  }
+                },
+                validate: function (e, values) {
+                  if (!values.script && conditionType === "script") {
+                    return { script: "Must provide a value" };
                   }
                 },
               }}
