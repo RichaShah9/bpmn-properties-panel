@@ -96,7 +96,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                 element.businessObject.resultVariable = undefined;
                 element.businessObject.topic = undefined;
                 element.businessObject.taskPriority = undefined;
-              }else{
+              } else {
                 values.implementationType !== "external"
                   ? (element.businessObject[values.implementationType] = "")
                   : (element.businessObject.topic = "");
@@ -130,6 +130,11 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   element.businessObject.topic = undefined;
                 }
               },
+              validate: function (e, values) {
+                if (!values.class && implementationType === "class") {
+                  return { class: "Must provide a value" };
+                }
+              },
             }}
             canRemove={true}
           />
@@ -157,6 +162,11 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     element.businessObject.class = undefined;
                     element.businessObject.delegateExpression = undefined;
                     element.businessObject.topic = undefined;
+                  }
+                },
+                validate: function (e, values) {
+                  if (!values.expression && implementationType === "expression") {
+                    return { expression: "Must provide a value" };
                   }
                 },
               }}
@@ -209,6 +219,11 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   element.businessObject.topic = undefined;
                 }
               },
+              validate: function (e, values) {
+                if (!values.delegateExpression && implementationType === "delegateExpression") {
+                  return { delegateExpression: "Must provide a value" };
+                }
+              },
             }}
             canRemove={true}
           />
@@ -237,6 +252,11 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     element.businessObject.expression = undefined;
                     element.businessObject.resultVariable = undefined;
                     element.businessObject.delegateExpression = undefined;
+                  }
+                },
+                validate: function (e, values) {
+                  if (!values.topic && implementationType === "external") {
+                    return { topic: "Must provide a value" };
                   }
                 },
               }}
