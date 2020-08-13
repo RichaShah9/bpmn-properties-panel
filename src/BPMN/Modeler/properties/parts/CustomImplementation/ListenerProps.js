@@ -242,7 +242,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
       let listenerType = ImplementationTypeHelper.getImplementationType(
         listener
       );
-      if(!listener) return ""
+      if (!listener) return "";
       let event = listener.get("event") ? listener.get("event") : "<empty>";
 
       let label =
@@ -566,6 +566,11 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                     listener.expression = undefined;
                     listener.delegateExpression = undefined;
                   },
+                  validate: function (e, values) {
+                    if (!values.class && listenerType === classProp) {
+                      return { class: "Must provide a value" };
+                    }
+                  },
                 }}
               />
             )}
@@ -588,6 +593,11 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                     listener.class = undefined;
                     listener.delegateExpression = undefined;
                   },
+                  validate: function (e, values) {
+                    if (!values.expression && listenerType === expressionProp) {
+                      return { expression: "Must provide a value" };
+                    }
+                  },
                 }}
                 canRemove={true}
               />
@@ -601,19 +611,26 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                   modelProperty: "delegateExpression",
                   get: function () {
                     const listener = getListener();
-                    if(!listener) return
+                    if (!listener) return;
                     return {
                       [delegateExpressionProp]: listener.delegateExpression,
                     };
                   },
-
                   set: function (element, values) {
                     const listener = getListener();
-                    if(!listener) return
+                    if (!listener) return;
                     listener.class = undefined;
                     listener.expression = undefined;
                     listener.delegateExpression =
                       values[delegateExpressionProp];
+                  },
+                  validate: function (e, values) {
+                    if (
+                      !values.delegateExpression &&
+                      listenerType === delegateExpressionProp
+                    ) {
+                      return { delegateExpression: "Must provide a value" };
+                    }
                   },
                 }}
                 canRemove={true}
@@ -629,16 +646,21 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                     modelProperty: "scriptFormat",
                     get: function () {
                       const listener = getListener();
-                      if(!listener) return
+                      if (!listener) return;
                       if (listener && listener.script) {
                         return { scriptFormat: listener.script.scriptFormat };
                       }
                     },
                     set: function (element, values) {
                       const listener = getListener();
-                      if(!listener) return
+                      if (!listener) return;
                       if (listener && listener.script) {
                         listener.script.scriptFormat = values.scriptFormat;
+                      }
+                    },
+                    validate: function (e, values) {
+                      if (!values.scriptFormat && listenerType === scriptProp) {
+                        return { scriptFormat: "Must provide a value" };
                       }
                     },
                   }}
@@ -695,6 +717,15 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                           listener.script.value = undefined;
                         }
                       },
+                      validate: function (e, values) {
+                        if (
+                          !values.resource &&
+                          listenerType === scriptProp &&
+                          scriptType === "scriptResource"
+                        ) {
+                          return { resource: "Must provide a value" };
+                        }
+                      },
                     }}
                     canRemove={true}
                   />
@@ -717,6 +748,15 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                         if (listener && listener.script) {
                           listener.script.value = values.script;
                           listener.script.resource = undefined;
+                        }
+                      },
+                      validate: function (e, values) {
+                        if (
+                          !values.script &&
+                          listenerType === scriptProp &&
+                          scriptType === "script"
+                        ) {
+                          return { script: "Must provide a value" };
                         }
                       },
                     }}
@@ -785,7 +825,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                       Object.entries(props).forEach(([key, value]) => {
                         timerDefinition[key] = value;
                       });
-                      if(!listener) return
+                      if (!listener) return;
                       listener.eventDefinitions = [timerDefinition];
                     },
                   }}
@@ -826,28 +866,14 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                         if (definition) {
                           definition.body = values.timerDefinition || undefined;
                         }
-                      if(!listener) return
+                        if (!listener) return;
                         listener.eventDefinitions = [timerDefinition];
                       },
-                      //   validate: function (element, node) {
-                      //     let timerDefinition = getTimerDefinition(
-                      //         timerEventDefinitionHandler(),
-                      //         element,
-                      //         node
-                      //       ),
-                      //       type = getTimerDefinitionType(timerDefinition),
-                      //       definition = type && timerDefinition.get(type);
-                      //     if (definition) {
-                      //       let value = definition.get("body");
-                      //       if (!value) {
-                      //         return {
-                      //           timerDefinition: translate(
-                      //             "Must provide a value"
-                      //           ),
-                      //         };
-                      //       }
-                      //     }
-                      //   },
+                      validate: function (e, values) {
+                        if (!values.timerDefinition && timerDefinitionType) {
+                          return { timerDefinition: "Must provide a value" };
+                        }
+                      },
                     }}
                   />
                 )}
