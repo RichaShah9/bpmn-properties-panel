@@ -45,11 +45,9 @@ export default function ProcessProps(group, element, translate, options) {
 
       idEntry.validate = function (element, values) {
         let idValue = values.processId;
-
         let bo = getBusinessObject(element);
-
+        if (!bo.processRef) return;
         let processIdError = utils.isIdValid(bo.processRef, idValue, translate);
-
         return processIdError ? { processId: processIdError } : {};
       };
 
