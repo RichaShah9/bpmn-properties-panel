@@ -89,6 +89,11 @@ export default function Script({ element }) {
                 element.businessObject.script = undefined;
               }
             },
+            validate: function (e, values) {
+              if (!values.resource && scriptType === "scriptResource") {
+                return { resource: "Must provide a value" };
+              }
+            },
           }}
           canRemove={true}
         />
@@ -108,6 +113,11 @@ export default function Script({ element }) {
               if (element.businessObject) {
                 element.businessObject.script = values.script;
                 element.businessObject.resource = undefined;
+              }
+            },
+            validate: function (e, values) {
+              if (!values.script && scriptType === "script") {
+                return { script: "Must provide a value" };
               }
             },
           }}
