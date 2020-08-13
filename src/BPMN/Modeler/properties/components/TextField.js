@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
-import Description from "./Description";
+import classnames from "classnames";
 import { makeStyles } from "@material-ui/styles";
 import { Close } from "@material-ui/icons";
+
+import Description from "./Description";
 
 const useStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
     marginTop: 5,
+  },
+  error: {
+    borderColor: "#cc3333 !important",
+    background: "#f0c2c2",
   },
   label: {
     fontWeight: "bolder",
@@ -52,8 +58,11 @@ export default function Textbox({ entry, element, canRemove = false }) {
     get,
     setProperty,
     getProperty,
+    validate,
   } = entry || {};
   const [value, setValue] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [isError, setError] = useState(false);
 
   const updateProperty = (value) => {
     if (!set && !setProperty) return;
@@ -66,7 +75,43 @@ export default function Textbox({ entry, element, canRemove = false }) {
         [modelProperty]: value,
       });
     }
+    const isError = getValidation();
+    setError(isError);
   };
+
+  const handleClear = () => {
+    setValue("");
+    const isError = getValidation();
+    setError(isError);
+    if (isError) {
+      updateProperty("");
+    }
+  };
+
+  const getValidation = React.useCallback(() => {
+    if (
+      !validate ||
+      ((value === null || value === undefined) && modelProperty === "id")
+    ) {
+      setErrorMessage(null);
+      return false;
+    }
+    let valid = validate(element, {
+      [modelProperty]: value === "" ? undefined : value,
+    });
+    if (valid && valid[modelProperty]) {
+      setErrorMessage(valid[modelProperty]);
+      return true;
+    } else {
+      setErrorMessage(null);
+      return false;
+    }
+  }, [validate, element, value, modelProperty]);
+
+  useEffect(() => {
+    const isError = getValidation();
+    setError(isError);
+  }, [getValidation]);
 
   useEffect(() => {
     if (!element) return;
@@ -87,17 +132,12 @@ export default function Textbox({ entry, element, canRemove = false }) {
           name={modelProperty}
           value={value || ""}
           onChange={(e) => setValue(e.target.value)}
-          className={classes.input}
+          className={classnames(classes.input, isError && classes.error)}
           onBlur={(e) => updateProperty(e.target.value)}
         />
+        {errorMessage && <Description desciption={errorMessage} type="error" />}
         {canRemove && value && (
-          <button
-            onClick={() => {
-              setValue('');
-              updateProperty('')
-            }}
-            className={classes.clearButton}
-          >
+          <button onClick={handleClear} className={classes.clearButton}>
             <Close className={classes.clear} />
           </button>
         )}
