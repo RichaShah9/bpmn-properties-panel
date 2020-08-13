@@ -142,6 +142,11 @@ export default function TimerEventProps({
               }
               bo.eventDefinitions = [timerDefinition];
             },
+            validate: function (e, values) {
+              if (!values.timerDefinition && timerDefinitionType) {
+                return { timerDefinition: "Must provide a value" };
+              }
+            },
           }}
         />
       )}
