@@ -104,6 +104,11 @@ export default function EscalationEventProps({
                   setSelectedEscalation(ele && ele.id);
                 }
               },
+              validate: function (e, values) {
+                if (!values.name && selectedEscalation) {
+                  return { name: "Must provide a value" };
+                }
+              },
             }}
           />
           <TextField
