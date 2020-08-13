@@ -12,7 +12,6 @@ import {
   findCamundaInOut,
 } from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/Helper";
 import {
-  createCamundaProperty,
   createInputParameter,
   createOutputParameter,
   createCamundaIn,

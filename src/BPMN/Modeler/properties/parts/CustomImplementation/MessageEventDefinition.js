@@ -40,7 +40,7 @@ export default function MessageProps({
             }
           },
           get: function () {
-            let reference = messageEventDefinition.get("messageRef");
+            let reference = messageEventDefinition && messageEventDefinition.get("messageRef");
             let props = {};
             props["name"] = reference && reference.get("name");
             return props;

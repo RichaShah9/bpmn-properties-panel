@@ -7,6 +7,10 @@ const useStyles = makeStyles({
     alignItems: "center",
     marginTop: 5,
   },
+  label: {
+    fontWeight: "bolder",
+    color: "#666",
+  },
 });
 
 export default function Checkbox({ entry, element }) {
@@ -35,7 +39,9 @@ export default function Checkbox({ entry, element }) {
         checked={value}
         onChange={updateValue}
       />
-      <label htmlFor={`camunda-${id}`}>{label}</label>
+      <label htmlFor={`camunda-${id}`} className={classes.label}>
+        {label}
+      </label>
     </div>
   );
 }
