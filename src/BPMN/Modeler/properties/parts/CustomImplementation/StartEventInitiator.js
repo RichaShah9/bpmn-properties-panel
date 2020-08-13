@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefinitionHelper";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
@@ -26,6 +27,35 @@ export default function StartEventInitiator({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
   const classes = useStyles();
 
+  const showLabel = () => {
+    if (!element) return;
+    let messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(
+      element
+    );
+    if (messageEventDefinition) {
+      return false;
+    }
+    let timerEventDefinition = eventDefinitionHelper.getTimerEventDefinition(
+      element
+    );
+    if (timerEventDefinition) {
+      return false;
+    }
+    let signalEventDefinition = eventDefinitionHelper.getSignalEventDefinition(
+      element
+    );
+    if (signalEventDefinition) {
+      return false;
+    }
+    let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
+      element
+    );
+    if (conditionalEventDefinition) {
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     if (
       is(element, "camunda:Initiator") &&
@@ -38,10 +68,14 @@ export default function StartEventInitiator({ element, index, label }) {
   return (
     isVisible && (
       <div>
-        <React.Fragment>
-          {index > 0 && <div className={classes.divider} />}
-        </React.Fragment>
-        <div className={classes.groupLabel}>{label}</div>
+        {showLabel() && (
+          <React.Fragment>
+            <React.Fragment>
+              {index > 0 && <div className={classes.divider} />}
+            </React.Fragment>
+            <div className={classes.groupLabel}>{label}</div>
+          </React.Fragment>
+        )}
         <TextField
           element={element}
           entry={{

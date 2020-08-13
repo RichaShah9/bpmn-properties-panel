@@ -149,6 +149,22 @@ export default function EventProps({
         return <React.Fragment></React.Fragment>;
     }
   };
+
+  const showLabel = () => {
+    if(!element) return
+    let messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(
+      element
+    );
+    if (
+      (is(element, "bpmn:IntermediateThrowEvent") ||
+        is(element, "bpmn:EndEvent")) &&
+      messageEventDefinition
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     let renderType = null;
     // Message and Signal Event Definition
@@ -277,10 +293,14 @@ export default function EventProps({
   return (
     isVisible && (
       <div>
-        <React.Fragment>
-          {index > 0 && <div className={classes.divider} />}
-        </React.Fragment>
-        <div className={classes.groupLabel}>{label}</div>
+        {showLabel() && (
+          <React.Fragment>
+            <React.Fragment>
+              {index > 0 && <div className={classes.divider} />}
+            </React.Fragment>
+            <div className={classes.groupLabel}>{label}</div>
+          </React.Fragment>
+        )}
         <div>{renderComponent()}</div>
       </div>
     )
