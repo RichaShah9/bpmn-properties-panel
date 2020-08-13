@@ -471,17 +471,14 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                     if (!listener) return;
                     listener.id = values.listenerId;
                   },
-                  //   validate: function (element, values, node) {
-                  //     var value = values.listenerId,
-                  //       listener = getSelectedListener(element, node),
-                  //       validate = {};
-                  //     if (!value && isTimeoutTaskListener(listener)) {
-                  //       validate.listenerId = translate(
-                  //         "Must provide a value for timeout task listener"
-                  //       );
-                  //     }
-                  //     return validate;
-                  //   },
+                  validate: function (e, values) {
+                    if (!values.listenerId && eventType === "timeout") {
+                      return {
+                        listenerId:
+                          "Must provide a value for timeout task listener",
+                      };
+                    }
+                  },
                 }}
               />
             )}
