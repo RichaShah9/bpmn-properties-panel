@@ -157,14 +157,9 @@ export default function CallActivityProps({
   const [isBusinessKey, setBusinessKey] = useState(false);
   const classes = useStyles();
 
-  const getPropertyValue = (
-    propertyName,
-    type = callActivityType
-  ) => {
+  const getPropertyValue = (propertyName, type = callActivityType) => {
     const bo = getBusinessObject(element);
-    return bo[
-      `${type === "bpmn" ? "calledElement" : "case"}${propertyName}`
-    ];
+    return bo[`${type === "bpmn" ? "calledElement" : "case"}${propertyName}`];
   };
   const setPropertyValue = (propertyName, value) => {
     const bo = getBusinessObject(element);
@@ -215,7 +210,10 @@ export default function CallActivityProps({
 
             set: function (element, values) {
               setCallActivityType(values.callActivityType);
-              let bindingType = getPropertyValue("Binding", values.callActivityType);
+              let bindingType = getPropertyValue(
+                "Binding",
+                values.callActivityType
+              );
               setBindingType(bindingType);
             },
           }}
@@ -236,6 +234,11 @@ export default function CallActivityProps({
                 element.businessObject.calledElementBinding = bindingType;
                 element.businessObject.caseRef = undefined;
               },
+              validate: function (e, values) {
+                if (!values.calledElement && callActivityType === "bpmn") {
+                  return { calledElement: "Must provide a value" };
+                }
+              },
             }}
             canRemove={true}
           />
@@ -255,6 +258,11 @@ export default function CallActivityProps({
                 element.businessObject.caseRef = values.caseRef;
                 element.businessObject.calledElement = undefined;
                 element.businessObject.caseBinding = bindingType;
+              },
+              validate: function (e, values) {
+                if (!values.caseRef && callActivityType === "cmmn") {
+                  return { caseRef: "Must provide a value" };
+                }
               },
             }}
             canRemove={true}
@@ -307,6 +315,14 @@ export default function CallActivityProps({
                     setPropertyValue("Version", values.calledElementVersion);
                     setPropertyValue("VersionTag", undefined);
                   },
+                  validate: function (e, values) {
+                    if (
+                      !values.calledElementVersion &&
+                      bindingType === "version"
+                    ) {
+                      return { calledElementVersion: "Must provide a value" };
+                    }
+                  },
                 }}
                 canRemove={true}
               />
@@ -329,6 +345,16 @@ export default function CallActivityProps({
                       values.calledElementVersionTag
                     );
                     setPropertyValue("Version", undefined);
+                  },
+                  validate: function (e, values) {
+                    if (
+                      !values.calledElementVersionTag &&
+                      bindingType === "versionTag"
+                    ) {
+                      return {
+                        calledElementVersionTag: "Must provide a value",
+                      };
+                    }
                   },
                 }}
                 canRemove={true}
@@ -443,6 +469,15 @@ export default function CallActivityProps({
                     values.variableMappingClass;
                   element.businessObject.variableMappingDelegateExpression = undefined;
                 },
+                validate: function (e, values) {
+                  if (
+                    !values.variableMappingClass &&
+                    callActivityType === "bpmn" &&
+                    delegateMappingType === "variableMappingClass"
+                  ) {
+                    return { variableMappingClass: "Must provide a value" };
+                  }
+                },
               }}
               canRemove={true}
             />
@@ -466,6 +501,18 @@ export default function CallActivityProps({
                   element.businessObject.variableMappingDelegateExpression =
                     values.variableMappingDelegateExpression;
                   element.businessObject.variableMappingClass = undefined;
+                },
+                validate: function (e, values) {
+                  if (
+                    !values.calledElement &&
+                    delegateMappingType ===
+                      "variableMappingDelegateExpression" &&
+                    callActivityType === "bpmn"
+                  ) {
+                    return {
+                      variableMappingDelegateExpression: "Must provide a value",
+                    };
+                  }
                 },
               }}
               canRemove={true}
