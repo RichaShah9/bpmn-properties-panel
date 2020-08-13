@@ -14,7 +14,7 @@ import executableProps from "./parts/ExecutableProps";
 // camunda properties
 // import serviceTaskDelegateProps from "./parts/ServiceTaskDelegateProps";
 // import callActivityProps from "./parts/CallActivityProps";
-import multiInstanceProps from "./parts/MultiInstanceLoopProps";
+// import multiInstanceProps from "./parts/MultiInstanceLoopProps";
 // import conditionalProps from "./parts/ConditionalProps";
 // import scriptProps from "./parts/ScriptTaskProps";
 // import errorProps from "./parts/ErrorEventProps";
@@ -57,6 +57,7 @@ import {
   StartEventInitiator,
   ListenerProps,
   VariableMapping,
+  MultiInstanceProps,
 } from "./parts/CustomImplementation";
 
 import ViewAttributePanel from "../views/ViewAttributePanel";
@@ -256,8 +257,8 @@ function createGeneralTabGroups(
     id: "multiInstance",
     label: translate("Multi Instance"),
     entries: [],
+    component: MultiInstanceProps,
   };
-  multiInstanceProps(multiInstanceGroup, element, bpmnFactory, translate);
 
   let jobConfigurationGroup = {
     id: "jobConfiguration",

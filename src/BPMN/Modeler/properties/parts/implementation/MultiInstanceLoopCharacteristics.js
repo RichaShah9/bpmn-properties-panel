@@ -1,7 +1,10 @@
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
-import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { classes as domClasses } from "min-dom";
+
+import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+import multiInstanceLoopCharacteristics from "../implementation/MultiInstanceLoopCharacteristics";
+import jobRetryTimeCycle from "../implementation/JobRetryTimeCycle";
 
 /**
  * Get a property value of the loop characteristics.
@@ -170,11 +173,23 @@ function updateFormalExpression(element, propertyName, newValue, bpmnFactory) {
   });
 }
 
-export default function MultiInstanceLoopCharacteristics(
+function ensureMultiInstanceSupported(element) {
+  var loopCharacteristics = getLoopCharacteristics(element);
+  return (
+    !!loopCharacteristics && is(loopCharacteristics, "camunda:Collectable")
+  );
+}
+
+export default function MultiInstanceLoopProps(
+  group,
   element,
   bpmnFactory,
   translate
 ) {
+  if (!ensureMultiInstanceSupported(element)) {
+    return;
+  }
+
   let entries = [];
 
   // error message /////////////////////////////////////////////////////////////////
@@ -295,6 +310,25 @@ export default function MultiInstanceLoopCharacteristics(
       );
     },
   });
+
+  // multi instance properties
+  group.entries = group.entries.concat(
+    multiInstanceLoopCharacteristics(element, bpmnFactory, translate)
+  );
+
+  // retry time cycle //////////////////////////////////////////////////////////
+  group.entries = group.entries.concat(
+    jobRetryTimeCycle(
+      element,
+      bpmnFactory,
+      {
+        getBusinessObject: getLoopCharacteristics,
+        idPrefix: "multiInstance-",
+        labelPrefix: translate("Multi Instance "),
+      },
+      translate
+    )
+  );
 
   return entries;
 }
