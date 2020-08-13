@@ -28,7 +28,7 @@ export default function ErrorEventProps({
 
   const setValue = (modelProperty) => {
     return function (element, values) {
-      if(!errorEventDefinition) return
+      if (!errorEventDefinition) return;
       errorEventDefinition["camunda:" + modelProperty] =
         values[modelProperty] || undefined;
     };
@@ -115,6 +115,11 @@ export default function ErrorEventProps({
                   errorEventDefinition.errorRef.name = value.name;
                   getOptions();
                   setSelectedError(ele && ele.id);
+                }
+              },
+              validate: function (e, values) {
+                if (!values.name && selectedError) {
+                  return { name: "Must provide a value" };
                 }
               },
             }}
