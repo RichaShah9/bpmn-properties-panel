@@ -409,6 +409,21 @@ export default function VariableMapping({
                       });
                       addOptions(element);
                     },
+                    validate: function (e, values) {
+                      if (
+                        type === "source"
+                          ? !values["source"]
+                          : !values["sourceExpression"]
+                      ) {
+                        return {
+                          [type === "source"
+                            ? "source"
+                            : "sourceExpression"]: `Mapping must have a ${
+                            type === "source" ? "source" : "source expression"
+                          }`,
+                        };
+                      }
+                    },
                   }}
                 />
                 <TextField
@@ -432,6 +447,11 @@ export default function VariableMapping({
                       if (!mapping) return;
                       mapping.target = values.target;
                       addOptions(element);
+                    },
+                    validate: function (e, values) {
+                      if (!values.target) {
+                        return { target: "Mapping must have a target" };
+                      }
                     },
                   }}
                 />
