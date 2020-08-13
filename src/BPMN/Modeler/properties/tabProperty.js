@@ -250,4 +250,9 @@ export const tabProperty = [
     subType: null || undefined,
     tabs: defaultTabs,
   },
+  {
+    type: "bpmn:Association",
+    subType: null || undefined,
+    tabs: defaultTabs,
+  },
 ];
