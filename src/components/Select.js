@@ -22,18 +22,24 @@ const useStyles = makeStyles((theme) => ({
     "& > div > label": {
       fontSize: 14,
     },
+    "& > div > div": {
+      paddingRight: "15px !important",
+    },
     margin: "8px 0px",
     background: "white",
     border: "1px solid #ccc",
-    padding: "0px 28px 0px 6px",
+    padding: "0px 5px",
   },
   input: {
     fontSize: 14,
     color: theme.palette.common.black,
-    padding: "3px 0 3px !important"
+    padding: "3px 0 3px !important",
   },
   label: {
     fontSize: 14,
+  },
+  endAdornment: {
+    top: 0,
   },
 }));
 
@@ -115,6 +121,7 @@ export default function SelectComponent({
         inputFocused: classes.input,
         clearIndicator: classes.input,
         popupIndicator: classes.input,
+        endAdornment: classes.endAdornment,
       }}
       size="small"
       key={index}
