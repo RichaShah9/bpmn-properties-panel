@@ -95,6 +95,11 @@ export default function SignalEventProps({
                 setSelectedSignal(ele && ele.id);
               }
             },
+            validate: function (e, values) {
+              if (!values.name && selectedSignal) {
+                return { name: "Must provide a value" };
+              }
+            },
           }}
         />
       )}
