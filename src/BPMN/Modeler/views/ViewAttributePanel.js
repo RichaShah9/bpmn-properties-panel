@@ -208,13 +208,14 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
   const handlePropertyAdd = () => {
     const businessObject = getBusinessObject(element);
     const extensionElements = businessObject.extensionElements;
-    if (
-      extensionElements &&
-      extensionElements.values[0] &&
-      extensionElements.values[0].values &&
-      extensionElements.values[0].values.length > 0
-    ) {
-      let { values } = extensionElements.values[0];
+    let values, camundaProperty;
+    if (extensionElements && extensionElements.values) {
+      camundaProperty = extensionElements.values.find(
+        (e) => e.$type === "camunda:Properties"
+      );
+      values = camundaProperty.values;
+    }
+    if (values) {
       let elements = values.filter(
         (val) =>
           ![
@@ -235,7 +236,7 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
             "itemLabel",
           ].includes(val.name)
       );
-      businessObject.extensionElements.get("values")[0].values = [...elements];
+      camundaProperty.values = [...elements];
     }
     let isValid = true;
     if (row.values.length > 0) {
@@ -305,17 +306,15 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
       setRow(createData([]));
       return;
     }
-    if (
-      extensionElements &&
-      extensionElements.values &&
-      extensionElements.values[0] &&
-      extensionElements.values[0].values &&
-      extensionElements.values[0].values.length > 0
-    ) {
+    let extensionElementValues, camundaProperty;
+    if (extensionElements && extensionElements.values) {
+      camundaProperty = extensionElements.values.find(
+        (e) => e.$type === "camunda:Properties"
+      );
+      extensionElementValues = camundaProperty.values;
     }
-    const elements = extensionElements.values[0].values;
-    if (elements && elements.length < 1) return;
-    let models = getKeyData(elements, "model");
+    if (extensionElementValues && extensionElementValues.length < 1) return;
+    let models = getKeyData(extensionElementValues, "model");
     let values = [];
     models &&
       models.forEach((modelArr) => {
@@ -677,7 +676,7 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
         onClick={handlePropertyAdd}
         color="primary"
       >
-        Add
+        Ok
       </Button>
     </div>
   );

@@ -521,8 +521,6 @@ export function setPropertyValue(element, property, value, bpmnFactory) {
       }
     }
 
-    // existingCamundaProperty = findCamundaProperty(camundaProperties, binding);
-
     const extensionElement =
       bo.extensionElements &&
       bo.extensionElements.values &&
@@ -533,24 +531,6 @@ export function setPropertyValue(element, property, value, bpmnFactory) {
     if (existingElement) {
       existingElement.value = value;
     }
-    // newExtensionElements && newExtensionElements.push(newCamundaProperty);
-    // if (
-    //   bo.extensionElements &&
-    //   bo.extensionElements.values &&
-    //   bo.extensionElements.values[0]
-    // ) {
-    //   bo.extensionElements.values[0].values = newExtensionElements;
-    // }
-    // updates.push(
-    //   cmdHelper.addAndRemoveElementsFromList(
-    //     element,
-    //     camundaProperties,
-    //     "values",
-    //     null,
-    //     [newCamundaProperty],
-    //     existingCamundaProperty ? [existingCamundaProperty] : []
-    //   )
-    // );
   }
 
   // camunda:inputParameter
