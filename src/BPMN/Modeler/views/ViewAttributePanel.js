@@ -10,7 +10,6 @@ import {
   TableHead,
   Button,
   Grid,
-  Checkbox,
   TextField,
   Card,
   CardContent,
@@ -291,11 +290,6 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
       }, [])
     );
   }
-
-  const getBool = (val) => {
-    if (!val) return;
-    return !!JSON.parse(String(val).toLowerCase());
-  };
 
   useEffect(() => {
     if (!element) return;
@@ -581,15 +575,12 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
                                               ].includes(
                                                 item.attributeName
                                               ) && (
-                                                <Checkbox
-                                                  checked={
-                                                    getBool(
-                                                      item.attributeValue
-                                                    ) || false
-                                                  }
-                                                  onChange={(e) => {
+                                                <Select
+                                                  isLabel={false}
+                                                  options={["true", "false"]}
+                                                  update={(value) => {
                                                     handleItems(
-                                                      e.target.checked,
+                                                      value,
                                                       "attributeValue",
                                                       undefined,
                                                       index,
@@ -597,7 +588,11 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
                                                     );
                                                   }}
                                                   name="attributeValue"
-                                                  color="primary"
+                                                  value={
+                                                    item.attributeValue ||
+                                                    "false"
+                                                  }
+                                                  label="Attribute value"
                                                 />
                                               )}
                                             {item.attributeName &&
