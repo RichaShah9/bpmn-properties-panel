@@ -11,7 +11,7 @@ import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
  * @return {Array<Object>} return an array containing
  *                         the entry to modify the name
  */
-export default function Name(element, options, translate) {
+export default function Name(element, options, translate, bpmnModeler) {
   options = options || {};
   var id = options.id || "name",
     label = options.label || translate("Name"),
@@ -28,6 +28,13 @@ export default function Name(element, options, translate) {
     } else {
       element[modelProperty] = values[modelProperty];
     }
+    if (!bpmnModeler) return;
+    let elementRegistry = bpmnModeler.get("elementRegistry");
+    let modeling = bpmnModeler.get("modeling");
+    let shape = elementRegistry.get(element.id);
+    modeling && modeling.updateProperties(shape, {
+      [modelProperty]: values[modelProperty],
+    });
   };
 
   var nameEntry = {
