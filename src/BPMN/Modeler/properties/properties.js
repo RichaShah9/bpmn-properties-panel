@@ -49,7 +49,6 @@ import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefi
 import {
   CallActivityProps,
   ConditionalProps,
-  // ErrorProps,
   EventProps,
   LinkProps,
   ScriptProps,
@@ -114,18 +113,6 @@ let isJobConfigEnabled = function (element) {
   return false;
 };
 
-// let getListenerLabel = function (param, translate) {
-//   if (is(param, "camunda:ExecutionListener")) {
-//     return translate("Execution Listener");
-//   }
-
-//   if (is(param, "camunda:TaskListener")) {
-//     return translate("Task Listener");
-//   }
-
-//   return "";
-// };
-
 let PROCESS_KEY_HINT = "This maps to the process definition key.";
 let TASK_KEY_HINT = "This maps to the task definition key.";
 
@@ -135,7 +122,8 @@ function createGeneralTabGroups(
   bpmnFactory,
   elementRegistry,
   elementTemplates,
-  translate
+  translate,
+  bpmnModeler
 ) {
   // refer to target element for external labels
   element = element && (element.labelTarget || element);
@@ -162,7 +150,7 @@ function createGeneralTabGroups(
   }
 
   idProps(generalGroup, element, translate, idOptions);
-  nameProps(generalGroup, element, bpmnFactory, canvas, translate);
+  nameProps(generalGroup, element, bpmnFactory, canvas, translate, bpmnModeler);
   processProps(generalGroup, element, translate, processOptions);
   versionTag(generalGroup, element, translate);
   executableProps(generalGroup, element, translate);
@@ -220,12 +208,7 @@ function createGeneralTabGroups(
     entries: [],
     component: EventProps,
   };
-  // let errorProps = {
-  //   id: "errorProps",
-  //   label: translate("Details"),
-  //   entries: [],
-  //   component: ErrorProps,
-  // };
+
   let conditionalProps = {
     id: "conditionalProps",
     label: translate("Details"),
@@ -238,20 +221,6 @@ function createGeneralTabGroups(
     entries: [],
     component: StartEventInitiator,
   };
-
-  // let detailsGroup = {
-  //   id: "details",
-  //   label: translate("Details"),
-  //   entries: [],
-  // };
-  // serviceTaskDelegateProps(detailsGroup, element, bpmnFactory, translate);
-  // scriptProps(detailsGroup, element, bpmnFactory, translate);
-  // linkProps(detailsGroup, element, translate);
-  // callActivityProps(detailsGroup, element, bpmnFactory, translate);
-  // eventProps(detailsGroup, element, bpmnFactory, elementRegistry, translate);
-  // errorProps(detailsGroup, element, bpmnFactory, translate);
-  // conditionalProps(detailsGroup, element, bpmnFactory, translate);
-  // startEventInitiator(detailsGroup, element, translate); // this must be the last element of the details group!
 
   let multiInstanceGroup = {
     id: "multiInstance",
@@ -388,64 +357,14 @@ function createTimeEmailGroups(
   return [timeEmailGroup];
 }
 
-// function createListenersTabGroups(
-//   element,
-//   bpmnFactory,
-//   elementRegistry,
-//   translate
-// ) {
-//   let listenersGroup = {
-//     id: "listeners",
-//     label: translate("Listeners"),
-//     entries: [],
-//   };
-
-//   let options = listenerProps(listenersGroup, element, bpmnFactory, translate);
-
-//   let listenerDetailsGroup = {
-//     id: "listener-details",
-//     entries: [],
-//     enabled: function (element, node) {
-//       if (!node) return false; //TODO - Send selected Node
-//       return options.getSelectedListener(element, node);
-//     },
-//     label: function (element, node) {
-//       if (!node) return; //TODO - Send selected Node
-//       let param = options.getSelectedListener(element, node);
-//       return getListenerLabel(param, translate);
-//     },
-//   };
-
-//   listenerDetails(
-//     listenerDetailsGroup,
-//     element,
-//     bpmnFactory,
-//     options,
-//     translate
-//   );
-
-//   let listenerFieldsGroup = {
-//     id: "listener-fields",
-//     label: translate("Field Injection"),
-//     entries: [],
-//     enabled: function (element, node) {
-//       if (!node) return false; //TODO - Send selected Node
-//       return options.getSelectedListener(element, node);
-//     },
-//   };
-
-//   listenerFields(listenerFieldsGroup, element, bpmnFactory, options, translate);
-
-//   return [listenersGroup, listenerDetailsGroup, listenerFieldsGroup];
-// }
-
 export default function getTabs(
   element,
   canvas,
   bpmnFactory,
   elementRegistry,
   elementTemplates,
-  translate
+  translate,
+  bpmnModeler
 ) {
   let generalTab = {
     id: "general",
@@ -456,7 +375,8 @@ export default function getTabs(
       bpmnFactory,
       elementRegistry,
       elementTemplates,
-      translate
+      translate,
+      bpmnModeler
     ),
   };
 
@@ -479,14 +399,7 @@ export default function getTabs(
       bpmnFactory,
       elementRegistry,
       translate
-    ),
-    // enabled: function (element) {
-    //   return (
-    //     !eventDefinitionHelper.getLinkEventDefinition(element) ||
-    //     (!is(element, "bpmn:IntermediateThrowEvent") &&
-    //       eventDefinitionHelper.getLinkEventDefinition(element))
-    //   );
-    // },
+    )
   };
 
   let viewAttributesTab = {

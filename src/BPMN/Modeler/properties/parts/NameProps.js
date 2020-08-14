@@ -8,7 +8,8 @@ export default function NameProps(
   element,
   bpmnFactory,
   canvas,
-  translate
+  translate,
+  bpmnModeler
 ) {
   function initializeCategory(semantic) {
     var rootElement = canvas.getRootElement(),
@@ -58,7 +59,7 @@ export default function NameProps(
 
     // name
     group.entries = group.entries.concat(
-      nameEntryFactory(element, options, translate)
+      nameEntryFactory(element, options, translate, bpmnModeler)
     );
   }
 }

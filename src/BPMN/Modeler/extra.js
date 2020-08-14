@@ -138,7 +138,8 @@ export function getTabs(bpmnModeler, element) {
     bpmnFactory,
     elementRegistry,
     elementTemplates,
-    translate
+    translate,
+    bpmnModeler
   );
   let filteredTabs = renderTabs(tabs, element);
   return filteredTabs;
