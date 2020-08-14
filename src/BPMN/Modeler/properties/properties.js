@@ -6,25 +6,12 @@ import { is } from "bpmn-js/lib/util/ModelUtil";
 // Require all properties you need from existing providers.
 // In this case all available bpmn relevant properties without camunda extensions.
 import processProps from "./parts/ProcessProps";
-// import eventProps from "./parts/EventProps";
 import idProps from "./parts/IdProps";
 import nameProps from "./parts/NameProps";
 import executableProps from "./parts/ExecutableProps";
 
 // camunda properties
-// import serviceTaskDelegateProps from "./parts/ServiceTaskDelegateProps";
-// import callActivityProps from "./parts/CallActivityProps";
-// import multiInstanceProps from "./parts/MultiInstanceLoopProps";
-// import conditionalProps from "./parts/ConditionalProps";
-// import scriptProps from "./parts/ScriptTaskProps";
-// import errorProps from "./parts/ErrorEventProps";
-// import startEventInitiator from "./parts/StartEventInitiator";
-// import variableMapping from "./parts/VariableMappingProps";
 import versionTag from "./parts/VersionTagProps";
-
-// import listenerProps from "./parts/ListenerProps";
-// import listenerDetails from "./parts/ListenerDetailProps";
-// import listenerFields from "./parts/ListenerFieldInjectionProps";
 
 import elementTemplateChooserProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/ChooserProps";
 import elementTemplateCustomProps from "./parts/CustomProps";
