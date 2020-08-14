@@ -41,6 +41,7 @@ export default function ConditionalProps({
   index,
   label,
   bpmnFactory,
+  bpmnModeler,
 }) {
   const [isVisible, setVisible] = useState(false);
   const [conditionType, setConditionType] = useState("");
@@ -151,6 +152,16 @@ export default function ConditionalProps({
               } else {
                 element.businessObject.conditionExpression = conditionOrConditionExpression;
               }
+              if(!bpmnModeler) return
+              let elementRegistry = bpmnModeler.get("elementRegistry");
+              let modeling = bpmnModeler.get("modeling");
+              let shape = elementRegistry.get(element.id);
+              modeling &&
+                modeling.updateProperties(shape, {
+                  [conditionalEventDefinition
+                    ? "condition"
+                    : "conditionExpression"]: conditionOrConditionExpression,
+                });
             },
           }}
         />
