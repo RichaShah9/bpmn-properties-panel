@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import classnames from "classnames";
+import TextareaAutosize from '@material-ui/core/TextareaAutosize';
 import { makeStyles } from "@material-ui/styles";
 
 import Description from "./Description";
@@ -18,11 +19,6 @@ const useStyles = makeStyles({
     marginBottom: 3,
   },
   textarea: {
-    display: "block",
-    overflow: "hidden",
-    width: "100%",
-    overflowY: "auto",
-    resize: "vertical",
     fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
   },
   error: {
@@ -31,7 +27,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Textbox({ entry, element, rows = 3 }) {
+export default function Textbox({ entry, element, rows = 1 }) {
   const classes = useStyles();
   const {
     label,
@@ -47,7 +43,6 @@ export default function Textbox({ entry, element, rows = 3 }) {
   const [value, setValue] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isError, setError] = useState(false);
-  const textareaRef = useRef(null);
 
   const updateProperty = (value) => {
     if (!set && !setProperty) return;
@@ -64,16 +59,6 @@ export default function Textbox({ entry, element, rows = 3 }) {
     }
     const isError = getValidation();
     setError(isError);
-  };
-
-  const getTextareaHeight = () => {
-    let currentHeight = textareaRef.current.offsetHeight;
-    textareaRef.current.style.minHeight = currentHeight + "px";
-    window.removeEventListener("mouseup", getTextareaHeight);
-  };
-
-  const handleClick = (e) => {
-    window.addEventListener("mouseup", getTextareaHeight);
   };
 
   const getValidation = React.useCallback(() => {
@@ -110,22 +95,14 @@ export default function Textbox({ entry, element, rows = 3 }) {
     setValue(value);
   }, [element, modelProperty, get, getProperty]);
 
-  useEffect(() => {
-    textareaRef.current.style.height = "0px";
-    const scrollHeight = textareaRef.current.scrollHeight;
-    textareaRef.current.style.height = scrollHeight + "px";
-  }, [value]);
-
   return (
     <div className={classes.root}>
       <label className={classes.label}>{label}</label>
-      <textarea
+      <TextareaAutosize
         id={`camunda_name_${id}`}
-        ref={textareaRef}
         defaultValue={value}
         className={classnames(classes.textarea, isError && classes.error)}
-        rows={rows}
-        onMouseDown={handleClick}
+        rowsMin={rows}
         onBlur={(e) => updateProperty(e.target.value)}
         onChange={(e) => {
           setValue(e.target.value);
