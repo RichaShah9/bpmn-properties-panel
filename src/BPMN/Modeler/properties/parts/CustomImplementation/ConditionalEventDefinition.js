@@ -295,6 +295,7 @@ export default function ConditionalEventProps({
           {scriptType === "script" && (
             <Textbox
               element={element}
+              rows={3}
               entry={{
                 id: "script",
                 label: translate("Script"),

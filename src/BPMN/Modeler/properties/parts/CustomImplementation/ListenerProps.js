@@ -730,6 +730,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                 {scriptType === "script" && (
                   <Textbox
                     element={element}
+                    rows={3}
                     entry={{
                       id: "script",
                       label: translate("Script"),
