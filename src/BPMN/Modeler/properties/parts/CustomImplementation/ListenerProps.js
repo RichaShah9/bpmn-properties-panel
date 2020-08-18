@@ -117,7 +117,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
 
   const classes = useStyles();
   const isSequenceFlow = ImplementationTypeHelper.isSequenceFlow(element);
-
+  
   const getExecutionOptions = () => {
     const executionListenerEventTypeOptions = ImplementationTypeHelper.isSequenceFlow(
       element
@@ -205,14 +205,14 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
   }, [element]);
 
   const getListener = React.useCallback(() => {
-    let type = selectedExecutionEntity
+    let type = selectedExecutionEntity === 0 || selectedExecutionEntity
       ? CAMUNDA_EXECUTION_LISTENER_ELEMENT
       : CAMUNDA_TASK_LISTENER_ELEMENT;
     let bo = getBO();
     const listeners = getListeners(bo, type);
     const listener =
       listeners[
-        selectedExecutionEntity ? selectedExecutionEntity : selectedTaskEntity
+        selectedExecutionEntity === 0 || selectedExecutionEntity ? selectedExecutionEntity : selectedTaskEntity
       ];
     return listener || (listeners && listeners[0]);
   }, [getBO, selectedExecutionEntity, selectedTaskEntity]);
