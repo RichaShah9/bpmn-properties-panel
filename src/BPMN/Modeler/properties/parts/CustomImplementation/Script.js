@@ -122,7 +122,6 @@ export default function Script({ element }) {
               }
             },
           }}
-          rows={2}
         />
       )}
     </div>

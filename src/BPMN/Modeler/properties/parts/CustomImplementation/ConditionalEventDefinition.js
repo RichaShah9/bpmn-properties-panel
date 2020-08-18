@@ -322,7 +322,6 @@ export default function ConditionalEventProps({
                   }
                 },
               }}
-              rows={2}
             />
           )}
         </div>

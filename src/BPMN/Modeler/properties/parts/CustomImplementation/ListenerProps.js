@@ -758,7 +758,6 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                         }
                       },
                     }}
-                    rows={2}
                   />
                 )}
               </div>

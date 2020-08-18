@@ -315,7 +315,6 @@ export default function ConditionalProps({
                     }
                   },
                 }}
-                rows={2}
               />
             )}
           </div>
