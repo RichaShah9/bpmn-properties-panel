@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-import find from "lodash/find";
 import classnames from "classnames";
-import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
-import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import { makeStyles } from "@material-ui/core/styles";
-import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
+import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../components/Select";
 import { TextField, Checkbox } from "../properties/components";
@@ -76,122 +73,14 @@ export default function ViewAttributePanel({
 
   const classes = useStyles();
 
-  function isExtensionElements(element) {
-    return is(element, "bpmn:ExtensionElements");
-  }
-
-  function createParent(element, bo) {
-    let parent = elementHelper.createElement(
-      "bpmn:ExtensionElements",
-      { values: [] },
-      bo,
-      bpmnFactory
-    );
-    let cmd = cmdHelper.updateBusinessObject(element, bo, {
-      extensionElements: parent,
-    });
-    return {
-      cmd: cmd,
-      parent: parent,
-    };
-  }
-
-  function getPropertiesElementInsideExtensionElements(extensionElements) {
-    return find(
-      extensionElements.$parent.extensionElements &&
-        extensionElements.$parent.extensionElements.values,
-      function (elem) {
-        return is(elem, "camunda:Properties");
-      }
-    );
-  }
-
-  function getPropertiesElement(element) {
-    if (!isExtensionElements(element)) {
-      return element.properties;
-    } else {
-      return getPropertiesElementInsideExtensionElements(element);
-    }
-  }
-
-  const getProperty = React.useCallback(
-    (name) => {
-      const bo = getBusinessObject(element);
-      const extensionElementValues =
-        bo.extensionElements && bo.extensionElements.get("values");
-      const camundaProperty =
-        extensionElementValues &&
-        extensionElementValues.find((e) => e.$type === "camunda:Properties");
-      let property =
-        camundaProperty &&
-        camundaProperty.values &&
-        camundaProperty.values.find((e) => e.name === name);
-      return property && property.value;
-    },
-    [element]
-  );
-
-  const addProperty = (name, value) => {
+  const setProperty = (name, value) => {
     const bo = getBusinessObject(element);
-    const businessObject = getBusinessObject(element);
-
-    let parent;
-    let result = createParent(element, bo);
-    parent = result.parent;
-    let properties = getPropertiesElement(parent);
-    if (!properties) {
-      properties = elementHelper.createElement(
-        "camunda:Properties",
-        {},
-        parent,
-        bpmnFactory
-      );
-    }
-
-    let propertyProps = {
-      name: name,
-      value: value,
-    };
-
-    let property = elementHelper.createElement(
-      "camunda:Property",
-      propertyProps,
-      properties,
-      bpmnFactory
-    );
-
-    let camundaProps = bpmnFactory.create("camunda:Properties");
-    camundaProps.get("values").push(property);
-    if (!businessObject.extensionElements) {
-      businessObject.extensionElements = bpmnFactory.create(
-        "bpmn:ExtensionElements"
-      );
-      businessObject.extensionElements.get("values").push(camundaProps);
+    let propertyName = `camunda:${name}`;
+    if (!bo) return;
+    if (bo.$attrs) {
+      bo.$attrs[propertyName] = value;
     } else {
-      const extensionElementValues = businessObject.extensionElements.get(
-        "values"
-      );
-      const camundaProperty = extensionElementValues.find(
-        (e) => e.$type === "camunda:Properties"
-      );
-      if (!camundaProperty) {
-        businessObject.extensionElements.get("values").push(camundaProps);
-      }
-      const extensionCamundaProperty = extensionElementValues.find(
-        (e) => e.$type === "camunda:Properties"
-      );
-      if (extensionCamundaProperty.values) {
-        let prop = extensionCamundaProperty.values.find(
-          (e) => (e && e.name) === name
-        );
-        if (prop) {
-          prop.value = value;
-        } else {
-          extensionCamundaProperty.values.push(property);
-        }
-      } else {
-        extensionCamundaProperty.values = [property];
-      }
+      bo.$attrs = { [propertyName]: value };
     }
   };
 
@@ -202,8 +91,8 @@ export default function ViewAttributePanel({
       values &&
         values.forEach((value) => {
           if (!value) {
-            addProperty("modelIds", undefined);
-            addProperty("modelNames", undefined);
+            setProperty("modelIds", undefined);
+            setProperty("modelNames", undefined);
             return;
           }
           modelIds.push(value.id);
@@ -211,25 +100,34 @@ export default function ViewAttributePanel({
         });
     }
     if (modelIds.length > 0 && modelNames.length > 0) {
-      addProperty("modelIds", modelIds.toString());
-      addProperty("modelNames", modelNames.toString());
+      setProperty("modelIds", modelIds.toString());
+      setProperty("modelNames", modelNames.toString());
     }
   };
 
   const updateValue = (name, value, optionLabel = "name") => {
     if (!value) {
-      addProperty(name, undefined);
-      addProperty(`${name}Id`, undefined);
+      setProperty(name, undefined);
+      setProperty(`${name}Id`, undefined);
       return;
     }
-    addProperty(name, value[optionLabel]);
-    addProperty(`${name}Id`, value.id);
+    setProperty(name, value[optionLabel]);
+    setProperty(`${name}Id`, value.id);
   };
 
   const getBool = (val) => {
     if (!val) return false;
     return !!JSON.parse(String(val).toLowerCase());
   };
+
+  const getProperty = React.useCallback(
+    (name) => {
+      let propertyName = `camunda:${name}`;
+      const bo = getBusinessObject(element);
+      return (bo.$attrs && bo.$attrs[propertyName]) || "";
+    },
+    [element]
+  );
 
   const getSelectValue = React.useCallback(
     (name) => {
@@ -374,10 +272,10 @@ export default function ViewAttributePanel({
             set: function (e, value) {
               let createUserAction = !value.createUserAction;
               setCreateUserAction(createUserAction);
-              addProperty("createUserAction", createUserAction);
+              setProperty("createUserAction", createUserAction);
               if (createUserAction === false) {
                 setActionEmailTitle(undefined);
-                addProperty("actionEmailTitle", undefined);
+                setProperty("actionEmailTitle", undefined);
               }
             },
           }}
@@ -398,7 +296,7 @@ export default function ViewAttributePanel({
               },
               set: function (e, value) {
                 setActionEmailTitle(value.actionEmailTitle);
-                addProperty("actionEmailTitle", value.actionEmailTitle);
+                setProperty("actionEmailTitle", value.actionEmailTitle);
               },
             }}
           />
@@ -418,7 +316,7 @@ export default function ViewAttributePanel({
             },
             set: function (e, value) {
               setUserFieldPath(value.userFieldPath);
-              addProperty("userFieldPath", value.userFieldPath);
+              setProperty("userFieldPath", value.userFieldPath);
             },
           }}
         />
@@ -437,7 +335,7 @@ export default function ViewAttributePanel({
             },
             set: function (e, value) {
               setDeadlineFieldPath(value.deadlineFieldPath);
-              addProperty("deadlineFieldPath", value.deadlineFieldPath);
+              setProperty("deadlineFieldPath", value.deadlineFieldPath);
             },
           }}
         />
@@ -456,7 +354,7 @@ export default function ViewAttributePanel({
             },
             set: function (e, value) {
               setEmailNotification(!value.emailNotification);
-              addProperty("emailNotification", !value.emailNotification);
+              setProperty("emailNotification", !value.emailNotification);
             },
           }}
         />
@@ -476,16 +374,16 @@ export default function ViewAttributePanel({
             set: function (e, value) {
               const newMenu = !value.newMenu;
               setNewMenu(newMenu);
-              addProperty("newMenu", newMenu);
+              setProperty("newMenu", newMenu);
               if (newMenu === false) {
                 setMenuName(undefined);
-                addProperty("menuName", undefined);
+                setProperty("menuName", undefined);
                 setMenuParent(undefined);
                 updateValue("menuParent", undefined);
                 setPosition(undefined);
                 updateValue("position", undefined);
-                setPosition(undefined);
-                updateValue("position", undefined);
+                setSubMenu(undefined);
+                updateValue("subMenu", undefined);
               }
             },
           }}
@@ -507,7 +405,7 @@ export default function ViewAttributePanel({
                 },
                 set: function (e, value) {
                   setMenuName(value.menuName);
-                  addProperty("menuName", value.menuName);
+                  setProperty("menuName", value.menuName);
                 },
               }}
             />
@@ -546,8 +444,8 @@ export default function ViewAttributePanel({
               className={classes.select}
               options={subMenuOptions}
               update={(value) => {
-                setPosition(value);
-                updateValue("position", value);
+                setSubMenu(value);
+                updateValue("subMenu", value);
               }}
               fetchMethod={() => getSubMenus(menuParent)}
               name="subMenu"
@@ -573,10 +471,10 @@ export default function ViewAttributePanel({
             set: function (e, value) {
               const newUserMenu = !value.newUserMenu;
               setNewUserMenu(newUserMenu);
-              addProperty("newUserMenu", newUserMenu);
+              setProperty("newUserMenu", newUserMenu);
               if (newUserMenu === false) {
                 setUserMenuName(undefined);
-                addProperty("userMenuName", undefined);
+                setProperty("userMenuName", undefined);
                 setUserParentMenu(undefined);
                 updateValue("userParentMenu", undefined);
                 setUserPosition(undefined);
@@ -608,7 +506,7 @@ export default function ViewAttributePanel({
                 },
                 set: function (e, value) {
                   setUserMenuName(value.userMenuName);
-                  addProperty("userMenuName", value.userMenuName);
+                  setProperty("userMenuName", value.userMenuName);
                 },
               }}
             />
@@ -706,12 +604,12 @@ export default function ViewAttributePanel({
             set: function (e, value) {
               const displayStatus = !value.displayStatus;
               setDisplayStatus(displayStatus);
-              addProperty("displayStatus", displayStatus);
+              setProperty("displayStatus", displayStatus);
               if (displayStatus === false) {
                 setStatusTitle(undefined);
-                addProperty("statusTitle", undefined);
+                setProperty("statusTitle", undefined);
                 setApplyAllModels(false);
-                addProperty("applyAllModels", false);
+                setProperty("applyAllModels", false);
                 setModels([]);
                 addModels([]);
               }
@@ -735,7 +633,7 @@ export default function ViewAttributePanel({
                 },
                 set: function (e, value) {
                   setStatusTitle(value.statusTitle);
-                  addProperty("statusTitle", value.statusTitle);
+                  setProperty("statusTitle", value.statusTitle);
                 },
               }}
             />
@@ -752,7 +650,7 @@ export default function ViewAttributePanel({
                 },
                 set: function (e, value) {
                   setApplyAllModels(!value.applyAllModels);
-                  addProperty("applyAllModels", !value.applyAllModels);
+                  setProperty("applyAllModels", !value.applyAllModels);
                 },
               }}
             />
