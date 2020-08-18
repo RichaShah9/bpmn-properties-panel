@@ -83,7 +83,7 @@ export default function Textbox({ entry, element, canRemove = false }) {
     setValue("");
     const isError = getValidation();
     setError(isError);
-    if (isError) {
+    if (!isError) {
       updateProperty("");
     }
   };
