@@ -8,7 +8,8 @@ import ServiceTaskDelegateProps from "./ServiceTaskDelegateProps";
 import StartEventInitiator from "./StartEventInitiator";
 import ListenerProps from "./ListenerProps";
 import VariableMapping from "./VariableMapping";
-import MultiInstanceProps from "./MultiInstanceProps.js"
+import MultiInstanceProps from "./MultiInstanceProps.js";
+import UserTaskProps from "./UserTaskProps.js";
 
 export {
   CallActivityProps,
@@ -21,5 +22,6 @@ export {
   StartEventInitiator,
   ListenerProps,
   VariableMapping,
-  MultiInstanceProps
+  MultiInstanceProps,
+  UserTaskProps,
 };
