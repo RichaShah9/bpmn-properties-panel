@@ -1,5 +1,4 @@
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
-// import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import utils from "bpmn-js-properties-panel/lib/Utils";
 
 export default function IdProps(group, element, translate, options) {
@@ -10,14 +9,12 @@ export default function IdProps(group, element, translate, options) {
     label: translate("Id"),
     description: description && translate(description),
     modelProperty: "id",
-    widget: "textField", //validationAwareTextField
+    widget: "textField",
     getProperty: function (element) {
       return getBusinessObject(element).id;
     },
     setProperty: function (element, properties) {
-      // element = element.labelTarget || element;
       element.id = properties["id"];
-      // return cmdHelper.updateProperties(element, properties);
     },
     validate: function (element, values) {
       let idValue = values.id;
