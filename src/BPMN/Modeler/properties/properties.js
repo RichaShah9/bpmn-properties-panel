@@ -13,9 +13,6 @@ import executableProps from "./parts/ExecutableProps";
 // camunda properties
 import versionTag from "./parts/VersionTagProps";
 
-import elementTemplateChooserProps from "bpmn-js-properties-panel/lib/provider/camunda/element-templates/parts/ChooserProps";
-import elementTemplateCustomProps from "./parts/CustomProps";
-
 // job configuration
 import jobConfiguration from "./parts/JobConfigurationProps";
 
@@ -44,6 +41,7 @@ import {
   ListenerProps,
   VariableMapping,
   MultiInstanceProps,
+  UserTaskProps
 } from "./parts/CustomImplementation";
 
 import ViewAttributePanel from "../views/ViewAttributePanel";
@@ -141,25 +139,13 @@ function createGeneralTabGroups(
   processProps(generalGroup, element, translate, processOptions);
   versionTag(generalGroup, element, translate);
   executableProps(generalGroup, element, translate);
-  elementTemplateChooserProps(
-    generalGroup,
-    element,
-    elementTemplates,
-    translate
-  );
 
-  let customFieldsGroups = elementTemplateCustomProps(
-    element,
-    elementTemplates,
-    bpmnFactory,
-    translate
-  );
-
-  // let detailsGroup = {
-  //   id: "details",
-  //   label: translate("Details"),
-  //   entries: [],
-  // };
+  let userTaskProps = {
+    id: "userTaskProps",
+    label: translate("Details"),
+    entries: [],
+    component: UserTaskProps,
+  };
 
   let serviceTaskDelegateProps = {
     id: "serviceTaskDelegateProps",
@@ -255,11 +241,7 @@ function createGeneralTabGroups(
 
   let groups = [];
   groups.push(generalGroup);
-  if (element.type === "bpmn:UserTask") {
-    customFieldsGroups.forEach(function (group) {
-      groups.push(group);
-    });
-  }
+  groups.push(userTaskProps)
   groups.push(serviceTaskDelegateProps);
   groups.push(scriptProps);
   groups.push(linkProps);
@@ -294,8 +276,6 @@ function createVariablesTabGroups(
     entries: [],
     component: VariableMapping,
   };
-  // variableMapping(variablesGroup, element, bpmnFactory, translate);
-
   return [variablesGroup];
 }
 

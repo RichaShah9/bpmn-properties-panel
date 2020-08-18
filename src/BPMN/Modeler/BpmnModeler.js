@@ -6,6 +6,7 @@ import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
+import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import Alert from "@material-ui/lab/Alert";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
@@ -13,7 +14,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Drawer, Typography } from "@material-ui/core";
 
 import propertiesCustomProviderModule from "./custom-provider";
-import templates from "./custom-templates/template.json";
 import Service from "../../services/Service";
 import AlertDialog from "../../components/AlertDialog";
 import Tooltip from "../../components/Tooltip";
@@ -461,6 +461,22 @@ function BpmnModelerComponent() {
     }
   }
 
+  const createCamundaProperty = () => {
+    const bpmnFactory = bpmnModeler.get("bpmnFactory");
+    const bo = getBusinessObject(selectedElement);
+    let result = createParent(selectedElement, bo);
+    let camundaProperties = elementHelper.createElement(
+      "camunda:Properties",
+      {},
+      result && result.parent,
+      bpmnFactory
+    );
+    selectedElement.businessObject.extensionElements &&
+      selectedElement.businessObject.extensionElements.values.push(
+        camundaProperties
+      );
+  };
+
   const addProperty = (name, value) => {
     const bo = getBusinessObject(selectedElement);
     const bpmnFactory = bpmnModeler.get("bpmnFactory");
@@ -499,7 +515,24 @@ function BpmnModelerComponent() {
       );
       businessObject.extensionElements.get("values").push(camundaProps);
     } else {
-      businessObject.extensionElements.get("values")[0].values.push(property);
+      let camundaProperties = extensionElementsHelper.getExtensionElements(
+        bo,
+        "camunda:Properties"
+      );
+      if (
+        camundaProperties &&
+        camundaProperties[0] &&
+        camundaProperties[0].values
+      ) {
+        camundaProperties[0].values.push(property);
+      } else {
+        createCamundaProperty();
+        let camundaProperties = extensionElementsHelper.getExtensionElements(
+          bo,
+          "camunda:Properties"
+        );
+        camundaProperties[0].values = [property];
+      }
     }
   };
 
@@ -570,23 +603,6 @@ function BpmnModelerComponent() {
       }
     } else {
       onSave();
-    }
-  };
-
-  const removeLabels = (isUserTask = false) => {
-    let element = document.querySelectorAll("[data-group=customField]");
-    let elementTemplate = document.querySelectorAll(
-      "[data-entry=elementTemplate-chooser]"
-    );
-    if (element && element[0] && element[0].childNodes) {
-      if (isUserTask) {
-        element[0].childNodes[1].style.display = "none";
-      } else {
-        element[0].style.display = "none";
-      }
-    }
-    if (elementTemplate && elementTemplate[0]) {
-      elementTemplate[0].style.display = "none";
     }
   };
 
@@ -698,7 +714,6 @@ function BpmnModelerComponent() {
         propertiesProviderModule,
         propertiesCustomProviderModule,
       ],
-      elementTemplates: templates,
       moddleExtensions: {
         camunda: camundaModdleDescriptor,
       },
@@ -741,20 +756,6 @@ function BpmnModelerComponent() {
       },
       false
     );
-  });
-
-  useEffect(() => {
-    bpmnModeler.get("eventBus").on("propertiesPanel.changed", function (event) {
-      if (
-        event &&
-        event.current &&
-        event.current.element &&
-        event.current.element.type
-      ) {
-        let isUserTask = event.current.element.type === "bpmn:UserTask";
-        removeLabels(isUserTask);
-      }
-    });
   });
 
   useEffect(() => {
