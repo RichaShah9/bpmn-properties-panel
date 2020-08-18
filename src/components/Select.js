@@ -60,6 +60,7 @@ export default function SelectComponent({
   className,
   defaultValue,
   isTranslated = true,
+  placeholder
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
@@ -201,6 +202,7 @@ export default function SelectComponent({
                 params.inputProps.onClick(e);
             },
           }}
+          placeholder={placeholder || ""}
           InputLabelProps={{
             className: classes && classes.label,
           }}
