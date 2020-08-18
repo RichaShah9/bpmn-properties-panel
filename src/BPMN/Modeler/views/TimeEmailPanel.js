@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import find from "lodash/find";
+import classnames from "classnames";
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import { makeStyles } from "@material-ui/core/styles";
@@ -34,6 +35,9 @@ const useStyles = makeStyles({
   select: {
     margin: 0,
   },
+  metajsonModel: {
+    marginTop: 10,
+  },
 });
 
 export default function ViewAttributePanel({
@@ -42,15 +46,16 @@ export default function ViewAttributePanel({
   element,
   bpmnFactory,
 }) {
-  const [attributeValue, setAttributeValue] = useState(false);
+  const [createUserAction, setCreateUserAction] = useState(false);
+  const [deadlineFieldPath, setDeadlineFieldPath] = useState(null);
   const [emailNotification, setEmailNotification] = useState(false);
   const [newMenu, setNewMenu] = useState(false);
   const [newUserMenu, setNewUserMenu] = useState(false);
   const [displayStatus, setDisplayStatus] = useState(false);
   const [applyAllModels, setApplyAllModels] = useState(false);
-  const [user, setUser] = useState(null);
+  const [userFieldPath, setUserFieldPath] = useState(null);
   const [menuName, setMenuName] = useState(null);
-  const [taskEmailTitle, setTaskEmailTitle] = useState(null);
+  const [actionEmailTitle, setActionEmailTitle] = useState(null);
   const [menuParent, setMenuParent] = useState(null);
   const [position, setPosition] = useState(null);
   const [subMenu, setSubMenu] = useState(null);
@@ -294,9 +299,9 @@ export default function ViewAttributePanel({
   }, [displayStatus]);
 
   useEffect(() => {
-    const attributeValue = getProperty("attributeValue");
-    const taskEmailTitle = getProperty("taskEmailTitle");
-    const user = getProperty("user");
+    const createUserAction = getProperty("createUserAction");
+    const actionEmailTitle = getProperty("actionEmailTitle");
+    const userFieldPath = getProperty("userFieldPath");
     const emailNotification = getProperty("emailNotification");
     const newMenu = getProperty("newMenu");
     const menuName = getProperty("menuName");
@@ -315,16 +320,17 @@ export default function ViewAttributePanel({
     const applyAllModels = getProperty("applyAllModels");
     const modelIds = getProperty("modelIds");
     const modelNames = getProperty("modelNames");
+    const deadlineFieldPath = getProperty("deadlineFieldPath");
     const models = [];
-    setAttributeValue(getBool(attributeValue));
+    setCreateUserAction(getBool(createUserAction));
     setEmailNotification(getBool(emailNotification));
     setNewMenu(getBool(newMenu));
     setNewUserMenu(getBool(newUserMenu));
     setDisplayStatus(getBool(displayStatus));
     setMenuName(menuName);
     setApplyAllModels(getBool(applyAllModels));
-    setTaskEmailTitle(taskEmailTitle);
-    setUser(user);
+    setActionEmailTitle(actionEmailTitle);
+    setUserFieldPath(userFieldPath);
     setMenuParent(menuParent);
     setPosition(position);
     setSubMenu(subMenu);
@@ -335,6 +341,7 @@ export default function ViewAttributePanel({
     setMetaModel(metaModel);
     setMetaJsonModel(metaJsonModel);
     setStatusTitle(statusTitle);
+    setDeadlineFieldPath(deadlineFieldPath);
 
     if (modelIds && modelNames) {
       const ids = modelIds.split(",");
@@ -356,42 +363,42 @@ export default function ViewAttributePanel({
         <Checkbox
           element={element}
           entry={{
-            id: "attributeValue",
-            label: translate("Attribute value"),
-            modelProperty: "attributeValue",
-            get: function (element) {
+            id: "createUserAction",
+            label: translate("Create user action"),
+            modelProperty: "createUserAction",
+            get: function () {
               return {
-                attributeValue: attributeValue,
+                createUserAction: createUserAction,
               };
             },
             set: function (e, value) {
-              let attributeValue = !value.attributeValue;
-              setAttributeValue(attributeValue);
-              addProperty("attributeValue", attributeValue);
-              if (attributeValue === false) {
-                setTaskEmailTitle(undefined);
-                addProperty("taskEmailTitle", undefined);
+              let createUserAction = !value.createUserAction;
+              setCreateUserAction(createUserAction);
+              addProperty("createUserAction", createUserAction);
+              if (createUserAction === false) {
+                setActionEmailTitle(undefined);
+                addProperty("actionEmailTitle", undefined);
               }
             },
           }}
         />
-        {attributeValue && (
+        {createUserAction && (
           <TextField
             element={element}
             canRemove={true}
             entry={{
-              id: "taskEmailTitle",
-              name: "taskEmailTitle",
-              label: translate("Task/email title"),
-              modelProperty: "taskEmailTitle",
+              id: "actionEmailTitle",
+              name: "actionEmailTitle",
+              label: translate("Action/Email Title"),
+              modelProperty: "actionEmailTitle",
               get: function () {
                 return {
-                  taskEmailTitle: taskEmailTitle || "",
+                  actionEmailTitle: actionEmailTitle || "",
                 };
               },
               set: function (e, value) {
-                setTaskEmailTitle(value.taskEmailTitle);
-                addProperty("taskEmailTitle", value.taskEmailTitle);
+                setActionEmailTitle(value.actionEmailTitle);
+                addProperty("actionEmailTitle", value.actionEmailTitle);
               },
             }}
           />
@@ -400,34 +407,37 @@ export default function ViewAttributePanel({
           element={element}
           canRemove={true}
           entry={{
-            id: "user",
-            name: "user",
-            label: translate("User"),
-            modelProperty: "user",
+            id: "userFieldPath",
+            name: "userFieldPath",
+            label: translate("User field path"),
+            modelProperty: "userFieldPath",
             get: function () {
               return {
-                user: user || "",
+                userFieldPath: userFieldPath || "",
               };
             },
             set: function (e, value) {
-              setUser(value.user);
-              addProperty("user", value.user);
-              if ((user && user.toLowerCase()) !== "current user") {
-                setNewUserMenu(false);
-                addProperty("newUserMenu", false);
-                setUserMenuName(undefined);
-                addProperty("userMenuName", undefined);
-                setUserParentMenu(undefined);
-                updateValue("userParentMenu", undefined);
-                setUserPosition(undefined);
-                updateValue("userPosition", undefined);
-                setUserPositionSubMenu(undefined);
-                updateValue("userPositionSubMenu", undefined);
-                setMetaModel(undefined);
-                updateValue("metaModel", undefined);
-                setMetaJsonModel(undefined);
-                updateValue("metaJsonModel", undefined);
-              }
+              setUserFieldPath(value.userFieldPath);
+              addProperty("userFieldPath", value.userFieldPath);
+            },
+          }}
+        />
+        <TextField
+          element={element}
+          canRemove={true}
+          entry={{
+            id: "deadlineFieldPath",
+            name: "deadlineFieldPath",
+            label: translate("Deadline field path"),
+            modelProperty: "deadlineFieldPath",
+            get: function () {
+              return {
+                deadlineFieldPath: deadlineFieldPath || "",
+              };
+            },
+            set: function (e, value) {
+              setDeadlineFieldPath(value.deadlineFieldPath);
+              addProperty("deadlineFieldPath", value.deadlineFieldPath);
             },
           }}
         />
@@ -439,7 +449,7 @@ export default function ViewAttributePanel({
             id: "emailNotification",
             label: translate("Email notification"),
             modelProperty: "emailNotification",
-            get: function (element) {
+            get: function () {
               return {
                 emailNotification: emailNotification,
               };
@@ -548,141 +558,139 @@ export default function ViewAttributePanel({
           </React.Fragment>
         )}
       </div>
-      {user && user.toLowerCase() === "current user" && (
-        <div className={classes.container}>
-          <Checkbox
-            element={element}
-            entry={{
-              id: "newUserMenu",
-              label: translate("New user menu"),
-              modelProperty: "newUserMenu",
-              get: function () {
-                return {
-                  newUserMenu: newUserMenu,
-                };
-              },
-              set: function (e, value) {
-                const newUserMenu = !value.newUserMenu;
-                setNewUserMenu(newUserMenu);
-                addProperty("newUserMenu", newUserMenu);
-                if (newUserMenu === false) {
-                  setUserMenuName(undefined);
-                  addProperty("userMenuName", undefined);
-                  setUserParentMenu(undefined);
-                  updateValue("userParentMenu", undefined);
-                  setUserPosition(undefined);
-                  updateValue("userPosition", undefined);
-                  setUserPositionSubMenu(undefined);
-                  updateValue("userPositionSubMenu", undefined);
-                  setMetaModel(undefined);
-                  updateValue("metaModel", undefined);
-                  setMetaJsonModel(undefined);
-                  updateValue("metaJsonModel", undefined);
-                }
-              },
-            }}
-          />
-          {newUserMenu && (
-            <React.Fragment>
-              <TextField
-                element={element}
-                canRemove={true}
-                entry={{
-                  id: "userMenuName",
-                  name: "userMenuName",
-                  label: translate("User menu name"),
-                  modelProperty: "userMenuName",
-                  get: function () {
-                    return {
-                      userMenuName: userMenuName,
-                    };
-                  },
-                  set: function (e, value) {
-                    setUserMenuName(value.userMenuName);
-                    addProperty("userMenuName", value.userMenuName);
-                  },
-                }}
-              />
-              <label className={classes.label}>
-                {translate("User Parent menu")}
-              </label>
-              <Select
-                className={classes.select}
-                options={parentMenuOptions}
-                update={(value) => {
-                  setUserParentMenu(value);
-                  updateValue("userParentMenu", value);
-                }}
-                fetchMethod={() => getParentMenus()}
-                name="userParentMenu"
-                value={userParentMenu}
-                optionLabel="name"
-                label="User Parent menu"
-                isLabel={false}
-              />
-              <label className={classes.label}>{translate("Position")}</label>
-              <Select
-                className={classes.select}
-                name="userPosition"
-                value={userPosition}
-                optionLabel="name"
-                label="Position"
-                update={(value) => {
-                  setUserPosition(value);
-                  updateValue("userPosition", value);
-                }}
-                isLabel={false}
-                options={[
-                  { name: "After", id: "after" },
-                  { name: "Before", id: "before" },
-                ]}
-              />
-              <label className={classes.label}>{translate("Sub menu")}</label>
-              <Select
-                className={classes.select}
-                update={(value) => {
-                  setUserPositionSubMenu(value);
-                  updateValue("userPositionSubMenu", value);
-                }}
-                fetchMethod={() => getSubMenus(userParentMenu)}
-                options={userSubMenuOptions}
-                name="userPositionSubMenu"
-                value={userPositionSubMenu}
-                optionLabel="name"
-                label="Sub menu"
-                isLabel={false}
-              />
-              <label className={classes.label}>{translate("Model")}</label>
-              <Select
-                className={classes.select}
-                options={metaModelOptions}
-                fetchMethod={() => getCustomModels()}
-                update={(value) => {
-                  setMetaModel(value);
-                  updateValue("metaModel", value);
-                }}
-                name="metaModel"
-                value={metaModel}
-                optionLabel="name"
-                label="Model"
-                isLabel={false}
-              />
-              <Select
-                className={classes.select}
-                options={customModelOptions}
-                update={(value) => {
-                  setMetaJsonModel(value);
-                  updateValue("metaJsonModel", value);
-                }}
-                name="metaJsonModel"
-                value={metaJsonModel}
-                optionLabel="name"
-                label="Custom model"
-              />
-            </React.Fragment>
-          )}
-        </div>
-      )}
+      <div className={classes.container}>
+        <Checkbox
+          element={element}
+          entry={{
+            id: "newUserMenu",
+            label: translate("New user menu"),
+            modelProperty: "newUserMenu",
+            get: function () {
+              return {
+                newUserMenu: newUserMenu,
+              };
+            },
+            set: function (e, value) {
+              const newUserMenu = !value.newUserMenu;
+              setNewUserMenu(newUserMenu);
+              addProperty("newUserMenu", newUserMenu);
+              if (newUserMenu === false) {
+                setUserMenuName(undefined);
+                addProperty("userMenuName", undefined);
+                setUserParentMenu(undefined);
+                updateValue("userParentMenu", undefined);
+                setUserPosition(undefined);
+                updateValue("userPosition", undefined);
+                setUserPositionSubMenu(undefined);
+                updateValue("userPositionSubMenu", undefined);
+                setMetaModel(undefined);
+                updateValue("metaModel", undefined);
+                setMetaJsonModel(undefined);
+                updateValue("metaJsonModel", undefined);
+              }
+            },
+          }}
+        />
+        {newUserMenu && (
+          <React.Fragment>
+            <TextField
+              element={element}
+              canRemove={true}
+              entry={{
+                id: "userMenuName",
+                name: "userMenuName",
+                label: translate("User menu name"),
+                modelProperty: "userMenuName",
+                get: function () {
+                  return {
+                    userMenuName: userMenuName,
+                  };
+                },
+                set: function (e, value) {
+                  setUserMenuName(value.userMenuName);
+                  addProperty("userMenuName", value.userMenuName);
+                },
+              }}
+            />
+            <label className={classes.label}>
+              {translate("User Parent menu")}
+            </label>
+            <Select
+              className={classes.select}
+              options={parentMenuOptions}
+              update={(value) => {
+                setUserParentMenu(value);
+                updateValue("userParentMenu", value);
+              }}
+              fetchMethod={() => getParentMenus()}
+              name="userParentMenu"
+              value={userParentMenu}
+              optionLabel="name"
+              label="User Parent menu"
+              isLabel={false}
+            />
+            <label className={classes.label}>{translate("Position")}</label>
+            <Select
+              className={classes.select}
+              name="userPosition"
+              value={userPosition}
+              optionLabel="name"
+              update={(value) => {
+                setUserPosition(value);
+                updateValue("userPosition", value);
+              }}
+              isLabel={false}
+              options={[
+                { name: "After", id: "after" },
+                { name: "Before", id: "before" },
+              ]}
+            />
+            <label className={classes.label}>{translate("Sub menu")}</label>
+            <Select
+              className={classes.select}
+              update={(value) => {
+                setUserPositionSubMenu(value);
+                updateValue("userPositionSubMenu", value);
+              }}
+              fetchMethod={() => getSubMenus(userParentMenu)}
+              options={userSubMenuOptions}
+              name="userPositionSubMenu"
+              value={userPositionSubMenu}
+              optionLabel="name"
+              isLabel={false}
+            />
+            <label className={classes.label}>{translate("Model")}</label>
+            <Select
+              className={classes.select}
+              options={metaModelOptions}
+              fetchMethod={() => getCustomModels()}
+              update={(value) => {
+                setMetaModel(value);
+                updateValue("metaModel", value);
+              }}
+              name="metaModel"
+              value={metaModel}
+              optionLabel="name"
+              isLabel={false}
+              placeholder={translate("Model")}
+            />
+            <Select
+              className={classnames(classes.select, classes.metajsonModel)}
+              options={customModelOptions}
+              update={(value) => {
+                setMetaJsonModel(value);
+                updateValue("metaJsonModel", value);
+              }}
+              name="metaJsonModel"
+              value={metaJsonModel}
+              optionLabel="name"
+              placeholder={translate("Custom model")}
+              isLabel={false}
+            />
+          </React.Fragment>
+        )}
+      </div>
+
       <div className={classes.container}>
         <Checkbox
           element={element}
