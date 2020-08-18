@@ -646,7 +646,6 @@ function BpmnModelerComponent() {
 
   function Entry({ entry }) {
     return (
-      entry.id !== "elementTemplate-chooser" &&
       !isHiddenProperty(selectedElement, entry) && (
         <div key={entry.id}>{renderComponent(entry)}</div>
       )
