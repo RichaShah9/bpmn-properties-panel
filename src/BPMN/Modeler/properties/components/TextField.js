@@ -14,6 +14,11 @@ const useStyles = makeStyles({
   error: {
     borderColor: "#cc3333 !important",
     background: "#f0c2c2",
+    "&:focus": {
+      boxShadow: "rgba(204,58,51, 0.2) 0px 0px 1px 2px !important",
+      outline: "none",
+      borderColor: "#cc3333 !important",
+    },
   },
   label: {
     fontWeight: "bolder",
@@ -29,6 +34,11 @@ const useStyles = makeStyles({
     width: "calc(100% - 35px)",
     padding: "3px 28px 3px 6px ",
     border: "1px solid #ccc",
+    "&:focus": {
+      boxShadow: "rgba(82, 180, 21, 0.2) 0px 0px 1px 2px",
+      outline: "none",
+      borderColor: "rgb(82, 180, 21)",
+    },
   },
   clearButton: {
     background: "transparent",

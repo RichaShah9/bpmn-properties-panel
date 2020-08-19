@@ -20,10 +20,20 @@ const useStyles = makeStyles({
   },
   textarea: {
     fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
+    "&:focus": {
+      boxShadow: "rgba(82, 180, 21, 0.2) 0px 0px 1px 2px",
+      outline: "none",
+      borderColor: "rgb(82, 180, 21)",
+    },
   },
   error: {
     borderColor: "#cc3333 !important",
     background: "#f0c2c2",
+    "&:focus": {
+      boxShadow: "rgba(204,58,51, 0.2) 0px 0px 1px 2px !important",
+      outline: "none",
+      borderColor: "#cc3333 !important",
+    },
   },
 });
 
