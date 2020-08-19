@@ -68,7 +68,7 @@ const useStyles = makeStyles({
   },
   divider: {
     marginTop: 15,
-    border: "1px dotted #ccc",
+    borderTop: "1px dotted #ccc",
   },
 });
 

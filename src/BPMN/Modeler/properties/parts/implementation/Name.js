@@ -32,6 +32,7 @@ export default function Name(element, options, translate, bpmnModeler) {
     let elementRegistry = bpmnModeler.get("elementRegistry");
     let modeling = bpmnModeler.get("modeling");
     let shape = elementRegistry.get(element.id);
+    if(!shape) return
     modeling && modeling.updateProperties(shape, {
       [modelProperty]: values[modelProperty],
     });

@@ -106,7 +106,7 @@ const useStyles = makeStyles((theme) => ({
   },
   divider: {
     marginTop: 15,
-    border: "1px dotted #ccc",
+    borderTop: "1px dotted #ccc",
   },
 }));
 

@@ -21,7 +21,7 @@ const useStyles = makeStyles({
   },
   divider: {
     marginTop: 15,
-    border: "1px dotted #ccc",
+    borderTop: "1px dotted #ccc",
   },
 });
 
@@ -156,6 +156,7 @@ export default function ConditionalProps({
               let elementRegistry = bpmnModeler.get("elementRegistry");
               let modeling = bpmnModeler.get("modeling");
               let shape = elementRegistry.get(element.id);
+              if(!shape) return
               modeling &&
                 modeling.updateProperties(shape, {
                   [conditionalEventDefinition
