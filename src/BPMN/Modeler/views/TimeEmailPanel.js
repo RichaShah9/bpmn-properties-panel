@@ -35,6 +35,9 @@ const useStyles = makeStyles({
   metajsonModel: {
     marginTop: 10,
   },
+  allModels: {
+    paddingBottom: 10,
+  },
 });
 
 export default function ViewAttributePanel({
@@ -55,11 +58,11 @@ export default function ViewAttributePanel({
   const [actionEmailTitle, setActionEmailTitle] = useState(null);
   const [menuParent, setMenuParent] = useState(null);
   const [position, setPosition] = useState(null);
-  const [subMenu, setSubMenu] = useState(null);
+  const [positionMenu, setPositionMenu] = useState(null);
   const [userMenuName, setUserMenuName] = useState(null);
   const [userParentMenu, setUserParentMenu] = useState(null);
   const [userPosition, setUserPosition] = useState(null);
-  const [userPositionSubMenu, setUserPositionSubMenu] = useState(null);
+  const [userPositionMenu, setUserPositionMenu] = useState(null);
   const [metaModel, setMetaModel] = useState(null);
   const [metaJsonModel, setMetaJsonModel] = useState(null);
   const [statusTitle, setStatusTitle] = useState(null);
@@ -115,6 +118,14 @@ export default function ViewAttributePanel({
     setProperty(`${name}Id`, value.id);
   };
 
+  const updateMenuValue = (name, value, label, optionLabel = "name") => {
+    updateValue(name, value, optionLabel);
+    if (!value) {
+      setProperty(`${name}Label`, undefined);
+    }
+    setProperty(`${name}Label`, label);
+  };
+
   const getBool = (val) => {
     if (!val) return false;
     return !!JSON.parse(String(val).toLowerCase());
@@ -132,9 +143,13 @@ export default function ViewAttributePanel({
   const getSelectValue = React.useCallback(
     (name) => {
       let id = getProperty(`${name}Id`);
+      let label = getProperty(`${name}Label`);
       let newName = getProperty(name);
       if (id) {
         let value = { id: id, name: newName };
+        if (label) {
+          value.title = label;
+        }
         return value;
       } else {
         return null;
@@ -205,12 +220,12 @@ export default function ViewAttributePanel({
     const menuName = getProperty("menuName");
     const menuParent = getSelectValue("menuParent");
     const position = getSelectValue("position");
-    const subMenu = getSelectValue("subMenu");
+    const positionMenu = getSelectValue("positionMenu");
     const newUserMenu = getProperty("newUserMenu");
     const userMenuName = getProperty("userMenuName");
     const userParentMenu = getSelectValue("userParentMenu");
     const userPosition = getSelectValue("userPosition");
-    const userPositionSubMenu = getSelectValue("userPositionSubMenu");
+    const userPositionMenu = getSelectValue("userPositionMenu");
     const metaModel = getSelectValue("metaModel");
     const metaJsonModel = getSelectValue("metaJsonModel");
     const statusTitle = getProperty("statusTitle");
@@ -231,11 +246,11 @@ export default function ViewAttributePanel({
     setUserFieldPath(userFieldPath);
     setMenuParent(menuParent);
     setPosition(position);
-    setSubMenu(subMenu);
+    setPositionMenu(positionMenu);
     setUserMenuName(userMenuName);
     setUserParentMenu(userParentMenu);
     setUserPosition(userPosition);
-    setUserPositionSubMenu(userPositionSubMenu);
+    setUserPositionMenu(userPositionMenu);
     setMetaModel(metaModel);
     setMetaJsonModel(metaJsonModel);
     setStatusTitle(statusTitle);
@@ -379,11 +394,11 @@ export default function ViewAttributePanel({
                 setMenuName(undefined);
                 setProperty("menuName", undefined);
                 setMenuParent(undefined);
-                updateValue("menuParent", undefined);
+                updateMenuValue("menuParent", undefined);
                 setPosition(undefined);
                 updateValue("position", undefined);
-                setSubMenu(undefined);
-                updateValue("subMenu", undefined);
+                setPositionMenu(undefined);
+                updateMenuValue("positionMenu", undefined);
               }
             },
           }}
@@ -413,13 +428,13 @@ export default function ViewAttributePanel({
             <Select
               className={classes.select}
               options={parentMenuOptions}
-              update={(value) => {
+              update={(value, label) => {
                 setMenuParent(value);
-                updateValue("menuParent", value);
+                updateMenuValue("menuParent", value, label);
               }}
               name="menuParent"
               value={menuParent}
-              optionLabel="name"
+              optionLabel="title"
               isLabel={false}
               fetchMethod={() => getParentMenus()}
             />
@@ -439,18 +454,20 @@ export default function ViewAttributePanel({
                 { name: "Before", id: "before" },
               ]}
             />
-            <label className={classes.label}>{translate("Sub menu")}</label>
+            <label className={classes.label}>
+              {translate("Position menu")}
+            </label>
             <Select
               className={classes.select}
               options={subMenuOptions}
-              update={(value) => {
-                setSubMenu(value);
-                updateValue("subMenu", value);
+              update={(value, label) => {
+                setPositionMenu(value);
+                updateMenuValue("positionMenu", value, label);
               }}
               fetchMethod={() => getSubMenus(menuParent)}
-              name="subMenu"
-              value={subMenu}
-              optionLabel="name"
+              name="positionMenu"
+              value={positionMenu}
+              optionLabel="title"
               isLabel={false}
             />
           </React.Fragment>
@@ -476,11 +493,11 @@ export default function ViewAttributePanel({
                 setUserMenuName(undefined);
                 setProperty("userMenuName", undefined);
                 setUserParentMenu(undefined);
-                updateValue("userParentMenu", undefined);
+                updateMenuValue("userParentMenu", undefined);
                 setUserPosition(undefined);
                 updateValue("userPosition", undefined);
-                setUserPositionSubMenu(undefined);
-                updateValue("userPositionSubMenu", undefined);
+                setUserPositionMenu(undefined);
+                updateMenuValue("userPositionMenu", undefined);
                 setMetaModel(undefined);
                 updateValue("metaModel", undefined);
                 setMetaJsonModel(undefined);
@@ -516,14 +533,14 @@ export default function ViewAttributePanel({
             <Select
               className={classes.select}
               options={parentMenuOptions}
-              update={(value) => {
+              update={(value, label) => {
                 setUserParentMenu(value);
-                updateValue("userParentMenu", value);
+                updateMenuValue("userParentMenu", value, label);
               }}
               fetchMethod={() => getParentMenus()}
               name="userParentMenu"
               value={userParentMenu}
-              optionLabel="name"
+              optionLabel="title"
               label="User Parent menu"
               isLabel={false}
             />
@@ -543,25 +560,26 @@ export default function ViewAttributePanel({
                 { name: "Before", id: "before" },
               ]}
             />
-            <label className={classes.label}>{translate("Sub menu")}</label>
+            <label className={classes.label}>
+              {translate("Position menu")}
+            </label>
             <Select
               className={classes.select}
-              update={(value) => {
-                setUserPositionSubMenu(value);
-                updateValue("userPositionSubMenu", value);
+              update={(value, label) => {
+                setUserPositionMenu(value);
+                updateMenuValue("userPositionMenu", value, label);
               }}
               fetchMethod={() => getSubMenus(userParentMenu)}
               options={userSubMenuOptions}
-              name="userPositionSubMenu"
-              value={userPositionSubMenu}
-              optionLabel="name"
+              name="userPositionMenu"
+              value={userPositionMenu}
+              optionLabel="title"
               isLabel={false}
             />
             <label className={classes.label}>{translate("Model")}</label>
             <Select
               className={classes.select}
               options={metaModelOptions}
-              fetchMethod={() => getCustomModels()}
               update={(value) => {
                 setMetaModel(value);
                 updateValue("metaModel", value);
@@ -654,21 +672,25 @@ export default function ViewAttributePanel({
                 },
               }}
             />
-            <label className={classes.label}>{translate("Select model")}</label>
-            <Select
-              className={classes.select}
-              update={(value) => {
-                setModels(value);
-                addModels(value);
-              }}
-              fetchMethod={() => getAllModels()}
-              name="models"
-              value={models || []}
-              multiple={true}
-              isLabel={false}
-              optionLabel="name"
-              options={allModelsOptions}
-            />
+            <div className={classes.allModels}>
+              <label className={classes.label}>
+                {translate("Select model")}
+              </label>
+              <Select
+                className={classes.select}
+                update={(value) => {
+                  setModels(value);
+                  addModels(value);
+                }}
+                fetchMethod={() => getAllModels()}
+                name="models"
+                value={models || []}
+                multiple={true}
+                isLabel={false}
+                optionLabel="name"
+                options={allModelsOptions}
+              />
+            </div>
           </React.Fragment>
         )}
       </div>
