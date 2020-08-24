@@ -60,7 +60,7 @@ export default function SelectComponent({
   className,
   defaultValue,
   isTranslated = true,
-  placeholder
+  placeholder,
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
@@ -178,7 +178,7 @@ export default function SelectComponent({
                 i === self.findIndex((t) => t[optionLabel] === val[optionLabel])
             );
         }
-        update(values);
+        update(values, value && value[optionLabel]);
       }}
       name={name}
       onInputChange={(e, val) => setsearchText(value)}
@@ -221,6 +221,13 @@ export default function SelectComponent({
             : typeof option === "object"
             ? ""
             : option;
+        } else if (
+          name === "menuParent" ||
+          name === "positionMenu" ||
+          name === "userParentMenu" ||
+          name === "userPositionMenu"
+        ) {
+          optionName = `${option["title"]} (${option["name"]})`;
         } else {
           optionName = option[optionLabel]
             ? option[optionLabel]
