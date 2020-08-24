@@ -6,7 +6,7 @@ export const tabProperty = [
   {
     type: "bpmn:Process",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: ["general", "listeners"],
   },
   {
     type: "bpmn:StartEvent",
@@ -172,7 +172,7 @@ export const tabProperty = [
   {
     type: "bpmn:Collaboration",
     subType: null || undefined,
-    tabs: defaultTabs,
+    tabs: ["general"],
   },
   {
     type: "bpmn:SequenceFlow",
