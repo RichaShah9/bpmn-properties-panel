@@ -231,3 +231,28 @@ export async function getSubMenus(parentMenu) {
   }
   return _.uniqBy(data || [], "name") || [];
 }
+
+export async function getWkfModel(processId) {
+  const res = await Service.search("com.axelor.apps.bpm.db.WkfModel", {
+    data: {
+      criteria: [
+        {
+          fieldName: "wkfProcessList.processId",
+          operator: "=",
+          value: processId,
+        },
+      ],
+    },
+  });
+  const { data = [] } = res || {};
+  const model = data[0];
+  // if (!model) {
+  //   let resModel = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
+  //     name: "Model",
+  //   });
+  //   const { data = [] } = resModel || {};
+  //   const wkfModel = data[0] || {};
+  //   return wkfModel;
+  // }
+  return model;
+}
