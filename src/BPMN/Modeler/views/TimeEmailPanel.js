@@ -85,6 +85,9 @@ export default function ViewAttributePanel({
     } else {
       bo.$attrs = { [propertyName]: value };
     }
+    if (!value) {
+      delete bo.$attrs[propertyName];
+    }
   };
 
   const addModels = (values) => {
