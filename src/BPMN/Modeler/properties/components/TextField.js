@@ -10,6 +10,7 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     marginTop: 5,
+    width: '100%'
   },
   error: {
     borderColor: "#cc3333 !important",

@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import { TextField, SelectBox, Checkbox } from "../../components";
 import { translate } from "../../../../../utils";
+import { getWkfModel } from "../../../../../services/api";
+
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? ".."
+    : "http://vps818119.ovh.net:8081/aos-wip";
 
 const useStyles = makeStyles({
   groupLabel: {
@@ -22,6 +29,15 @@ const useStyles = makeStyles({
     marginTop: 15,
     borderTop: "1px dotted #ccc",
   },
+  bpmn:{
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  linkIcon:{
+    color: "#58B423",
+    marginLeft: 5
+  }
 });
 
 const bindingOptions = [
@@ -155,6 +171,7 @@ export default function CallActivityProps({
   const [delegateMappingType, setDelegateMappingType] = useState("");
   const [bindingType, setBindingType] = useState("latest");
   const [isBusinessKey, setBusinessKey] = useState(false);
+  const [wkfModel, setWkfModel] = useState(null);
   const classes = useStyles();
 
   const getPropertyValue = (propertyName, type = callActivityType) => {
@@ -166,6 +183,11 @@ export default function CallActivityProps({
     bo[
       `${callActivityType === "bpmn" ? "calledElement" : "case"}${propertyName}`
     ] = value;
+  };
+
+  const updateModel = async (calledElement) => {
+    const wkfModel = await getWkfModel(calledElement);
+    setWkfModel(wkfModel);
   };
 
   useEffect(() => {
@@ -183,6 +205,13 @@ export default function CallActivityProps({
       setDelegateMappingType(delegateMappingType);
       setBindingType(calledElementBinding);
       setBusinessKey(camundaIn && camundaIn.length > 0 ? true : false);
+    }
+  }, [element]);
+
+  useEffect(() => {
+    const bo = getBusinessObject(element);
+    if (bo && bo.calledElement) {
+      updateModel(bo.calledElement);
     }
   }, [element]);
 
@@ -219,29 +248,41 @@ export default function CallActivityProps({
           }}
         />
         {callActivityType === "bpmn" && (
-          <TextField
-            element={element}
-            entry={{
-              id: "calledElement",
-              label: translate("Called Element"),
-              modelProperty: "calledElement",
-              get: function () {
-                const bo = getBusinessObject(element);
-                return { calledElement: bo.calledElement };
-              },
-              set: function (e, values) {
-                element.businessObject.calledElement = values.calledElement;
-                element.businessObject.calledElementBinding = bindingType;
-                element.businessObject.caseRef = undefined;
-              },
-              validate: function (e, values) {
-                if (!values.calledElement && callActivityType === "bpmn") {
-                  return { calledElement: "Must provide a value" };
-                }
-              },
-            }}
-            canRemove={true}
-          />
+          <div className={classes.bpmn}>
+            <TextField
+              element={element}
+              entry={{
+                id: "calledElement",
+                label: translate("Called Element"),
+                modelProperty: "calledElement",
+                get: function () {
+                  const bo = getBusinessObject(element);
+                  return { calledElement: bo.calledElement };
+                },
+                set: function (e, values) {
+                  element.businessObject.calledElement = values.calledElement;
+                  element.businessObject.calledElementBinding = bindingType;
+                  element.businessObject.caseRef = undefined;
+                  updateModel(values.calledElement);
+                },
+                validate: function (e, values) {
+                  if (!values.calledElement && callActivityType === "bpmn") {
+                    return { calledElement: "Must provide a value" };
+                  }
+                },
+              }}
+              canRemove={true}
+            />
+            {wkfModel && (
+              <a
+                href={`${baseURL}/wkf-editor/?id=${wkfModel && wkfModel.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <OpenInNewIcon className={classes.linkIcon} />
+              </a>
+            )}
+          </div>
         )}
         {callActivityType === "cmmn" && (
           <TextField
