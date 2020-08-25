@@ -40,12 +40,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ViewAttributePanel({
-  id,
-  handleAdd,
-  element,
-  bpmnFactory,
-}) {
+export default function TimeEmailPanel({ element }) {
   const [createUserAction, setCreateUserAction] = useState(false);
   const [deadlineFieldPath, setDeadlineFieldPath] = useState(null);
   const [emailNotification, setEmailNotification] = useState(false);
