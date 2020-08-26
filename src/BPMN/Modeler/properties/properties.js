@@ -41,7 +41,8 @@ import {
   ListenerProps,
   VariableMapping,
   MultiInstanceProps,
-  UserTaskProps
+  UserTaskProps,
+  ModelProps,
 } from "./parts/CustomImplementation";
 
 import ViewAttributePanel from "../views/ViewAttributePanel";
@@ -195,6 +196,13 @@ function createGeneralTabGroups(
     component: StartEventInitiator,
   };
 
+  let modelProps = {
+    id: "modelProps",
+    label: translate("Details"),
+    entries: [],
+    component: ModelProps,
+  };
+
   let multiInstanceGroup = {
     id: "multiInstance",
     label: translate("Multi Instance"),
@@ -241,7 +249,7 @@ function createGeneralTabGroups(
 
   let groups = [];
   groups.push(generalGroup);
-  groups.push(userTaskProps)
+  groups.push(userTaskProps);
   groups.push(serviceTaskDelegateProps);
   groups.push(scriptProps);
   groups.push(linkProps);
@@ -250,7 +258,7 @@ function createGeneralTabGroups(
   // groups.push(errorProps);
   groups.push(conditionalProps);
   groups.push(startEventInitiator);
-
+  groups.push(modelProps);
   // groups.push(detailsGroup);
   groups.push(multiInstanceGroup);
 
@@ -366,7 +374,7 @@ export default function getTabs(
       bpmnFactory,
       elementRegistry,
       translate
-    )
+    ),
   };
 
   let viewAttributesTab = {

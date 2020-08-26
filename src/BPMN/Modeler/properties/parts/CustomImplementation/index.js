@@ -10,6 +10,7 @@ import ListenerProps from "./ListenerProps";
 import VariableMapping from "./VariableMapping";
 import MultiInstanceProps from "./MultiInstanceProps.js";
 import UserTaskProps from "./UserTaskProps.js";
+import ModelProps from "./ModelProps.js";
 
 export {
   CallActivityProps,
@@ -24,4 +25,5 @@ export {
   VariableMapping,
   MultiInstanceProps,
   UserTaskProps,
+  ModelProps,
 };
