@@ -194,7 +194,7 @@ export default function SelectComponent({
         update(values, value && value[optionLabel]);
       }}
       name={name}
-      onInputChange={(e, val) => setsearchText(value)}
+      onInputChange={(e, val) => setsearchText(val)}
       renderInput={(params) => (
         <TextField
           error={error}
