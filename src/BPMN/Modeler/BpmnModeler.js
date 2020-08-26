@@ -695,8 +695,8 @@ function BpmnModelerComponent() {
       element = element.businessObject;
     }
     let tabs = getTabs(bpmnModeler, element);
-    setTabs(tabs);
     setTabValue(0);
+    setTabs(tabs);
     setSelectedElement(element);
     setDrawerOpen(true);
   };
