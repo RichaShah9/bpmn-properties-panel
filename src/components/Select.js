@@ -44,6 +44,19 @@ const useStyles = makeStyles((theme) => ({
   circularProgress: {
     color: "#0A73FA",
   },
+  error: {
+    borderColor: "#cc3333 !important",
+    background: "#f0c2c2",
+    "&:focus": {
+      boxShadow: "rgba(204,58,51, 0.2) 0px 0px 1px 2px !important",
+      outline: "none",
+      borderColor: "#cc3333 !important",
+    },
+  },
+  errorDescription: {
+    marginTop: 5,
+    color: "#CC3333",
+  },
 }));
 
 export default function SelectComponent({
@@ -64,11 +77,14 @@ export default function SelectComponent({
   defaultValue,
   isTranslated = true,
   placeholder,
+  validate,
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
   const [searchText, setsearchText] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [isError, setError] = useState(false);
   const classes = useStyles();
 
   const fetchOptions = useCallback(
@@ -104,6 +120,31 @@ export default function SelectComponent({
 
   useDebounceEffect(optionDebounceHandler, 500);
 
+  const getValidation = React.useCallback(() => {
+    if (
+      !validate ||
+      ((value === null || value === undefined) && name === "id")
+    ) {
+      setErrorMessage(null);
+      return false;
+    }
+    let valid = validate({
+      [name]: value === "" ? undefined : value,
+    });
+    if (valid && valid[name]) {
+      setErrorMessage(valid[name]);
+      return true;
+    } else {
+      setErrorMessage(null);
+      return false;
+    }
+  }, [validate, value, name]);
+
+  useEffect(() => {
+    const isError = getValidation();
+    setError(isError);
+  }, [getValidation]);
+
   useEffect(() => {
     if (!open || (propOptions && propOptions.length < 1)) {
       setOptions([]);
@@ -129,140 +170,151 @@ export default function SelectComponent({
   }, [propOptions]);
 
   return (
-    <AutoComplete
-      classes={{
-        inputFocused: classes.input,
-        clearIndicator: classes.input,
-        popupIndicator: classes.input,
-        endAdornment: classes.endAdornment,
-      }}
-      size="small"
-      key={index}
-      open={open}
-      onOpen={(e) => {
-        e && e.stopPropagation();
-        setOpen(true);
-      }}
-      onClose={(e) => {
-        e && e.stopPropagation();
-        setOpen(false);
-      }}
-      onClick={(e) => {
-        e && e.stopPropagation();
-        setOpen(true);
-      }}
-      loading={loading}
-      defaultValue={defaultValue}
-      clearOnEscape
-      autoComplete
-      className={classnames(classes.autoComplete, className)}
-      options={options}
-      multiple={multiple}
-      value={value}
-      getOptionSelected={(option, val) => {
-        if (!val) return;
-        let optionName = "";
-        if (name === "itemName") {
-          optionName = option["label"]
-            ? "label"
-            : option["title"]
-            ? "title"
-            : option["name"]
-            ? "name"
-            : "name";
-        } else {
-          optionName = option[optionLabel]
-            ? optionLabel
-            : option["title"]
-            ? "title"
-            : "name";
-        }
-        return name === "view"
-          ? option[optionName] === val
-          : option[optionName] === val[optionName];
-      }}
-      onChange={(e, value) => {
-        let values = value;
-        if (type === "multiple") {
-          values =
-            value &&
-            value.filter(
-              (val, i, self) =>
-                i === self.findIndex((t) => t[optionLabel] === val[optionLabel])
-            );
-        }
-        update(values, value && value[optionLabel]);
-      }}
-      name={name}
-      onInputChange={(e, val) => setsearchText(val)}
-      renderInput={(params) => (
-        <TextField
-          error={error}
-          helperText={error ? "Required" : ""}
-          fullWidth
-          {...params}
-          InputProps={{
-            ...(params.InputProps || {}),
-            endAdornment: (
-              <React.Fragment>
-                {loading ? (
-                  <CircularProgress
-                    className={classes.circularProgress}
-                    size={15}
-                  />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
-            onClick: (e) => e && e.stopPropagation(),
-            disableUnderline: true,
-          }}
-          inputProps={{
-            ...(params.inputProps || {}),
-            onClick: (e) => {
-              e && e.stopPropagation();
-              params.inputProps &&
-                params.inputProps.onClick &&
-                params.inputProps.onClick(e);
-            },
-          }}
-          placeholder={placeholder || ""}
-          InputLabelProps={{
-            className: classes && classes.label,
-          }}
-          label={isLabel ? label : undefined}
-        />
+    <React.Fragment>
+      <AutoComplete
+        classes={{
+          inputFocused: classes.input,
+          clearIndicator: classes.input,
+          popupIndicator: classes.input,
+          endAdornment: classes.endAdornment,
+        }}
+        size="small"
+        key={index}
+        open={open}
+        onOpen={(e) => {
+          e && e.stopPropagation();
+          setOpen(true);
+        }}
+        onClose={(e) => {
+          e && e.stopPropagation();
+          setOpen(false);
+        }}
+        onClick={(e) => {
+          e && e.stopPropagation();
+          setOpen(true);
+        }}
+        loading={loading}
+        defaultValue={defaultValue}
+        clearOnEscape
+        autoComplete
+        className={classnames(
+          classes.autoComplete,
+          className,
+          isError && classes.error
+        )}
+        options={options}
+        multiple={multiple}
+        value={value}
+        getOptionSelected={(option, val) => {
+          if (!val) return;
+          let optionName = "";
+          if (name === "itemName") {
+            optionName = option["label"]
+              ? "label"
+              : option["title"]
+              ? "title"
+              : option["name"]
+              ? "name"
+              : "name";
+          } else {
+            optionName = option[optionLabel]
+              ? optionLabel
+              : option["title"]
+              ? "title"
+              : "name";
+          }
+          return name === "view"
+            ? option[optionName] === val
+            : option[optionName] === val[optionName];
+        }}
+        onChange={(e, value) => {
+          let values = value;
+          if (type === "multiple") {
+            values =
+              value &&
+              value.filter(
+                (val, i, self) =>
+                  i ===
+                  self.findIndex((t) => t[optionLabel] === val[optionLabel])
+              );
+          }
+          update(values, value && value[optionLabel]);
+        }}
+        name={name}
+        onInputChange={(e, val) => setsearchText(val)}
+        renderInput={(params) => (
+          <TextField
+            error={error}
+            helperText={error ? "Required" : ""}
+            className={isError ? classes.error : ""}
+            fullWidth
+            {...params}
+            InputProps={{
+              ...(params.InputProps || {}),
+              endAdornment: (
+                <React.Fragment>
+                  {loading ? (
+                    <CircularProgress
+                      className={classes.circularProgress}
+                      size={15}
+                    />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              ),
+              onClick: (e) => e && e.stopPropagation(),
+              disableUnderline: true,
+            }}
+            inputProps={{
+              ...(params.inputProps || {}),
+              onClick: (e) => {
+                e && e.stopPropagation();
+                params.inputProps &&
+                  params.inputProps.onClick &&
+                  params.inputProps.onClick(e);
+              },
+            }}
+            placeholder={placeholder || ""}
+            InputLabelProps={{
+              className: classes && classes.label,
+            }}
+            label={isLabel ? label : undefined}
+          />
+        )}
+        getOptionLabel={(option) => {
+          let optionName = "";
+          if (name === "itemName") {
+            optionName = option["label"]
+              ? option["label"]
+              : option["title"]
+              ? option["title"]
+              : option["name"]
+              ? option["name"]
+              : typeof option === "object"
+              ? ""
+              : option;
+          } else if (
+            name === "menuParent" ||
+            name === "positionMenu" ||
+            name === "userParentMenu" ||
+            name === "userPositionMenu"
+          ) {
+            optionName = `${option["title"]} (${option["name"]})`;
+          } else {
+            optionName = option[optionLabel]
+              ? option[optionLabel]
+              : option["title"]
+              ? option["title"]
+              : typeof option === "object"
+              ? ""
+              : option;
+          }
+          return isTranslated ? translate(optionName) : optionName;
+        }}
+      />
+      {errorMessage && (
+        <div className={classes.errorDescription}>{errorMessage}</div>
       )}
-      getOptionLabel={(option) => {
-        let optionName = "";
-        if (name === "itemName") {
-          optionName = option["label"]
-            ? option["label"]
-            : option["title"]
-            ? option["title"]
-            : option["name"]
-            ? option["name"]
-            : typeof option === "object"
-            ? ""
-            : option;
-        } else if (
-          name === "menuParent" ||
-          name === "positionMenu" ||
-          name === "userParentMenu" ||
-          name === "userPositionMenu"
-        ) {
-          optionName = `${option["title"]} (${option["name"]})`;
-        } else {
-          optionName = option[optionLabel]
-            ? option[optionLabel]
-            : option["title"]
-            ? option["title"]
-            : typeof option === "object"
-            ? ""
-            : option;
-        }
-        return isTranslated ? translate(optionName) : optionName;
-      }}
-    />
+    </React.Fragment>
   );
 }
