@@ -255,4 +255,9 @@ export const tabProperty = [
     subType: null || undefined,
     tabs: defaultTabs,
   },
+  {
+    type: "bpmn:Transaction",
+    subType: null || undefined,
+    tabs: commonTabs,
+  },  
 ];
