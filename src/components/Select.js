@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import classnames from "classnames";
 import AutoComplete from "@material-ui/lab/Autocomplete";
-import { TextField } from "@material-ui/core";
+import { TextField, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { translate } from "../utils";
 
 function useDebounceEffect(handler, interval) {
-  const isMounted = React.useRef(false);
-  React.useEffect(() => {
+  const isMounted = useRef(false);
+  useEffect(() => {
     if (isMounted.current) {
       const timer = setTimeout(() => handler(), interval);
       return () => clearTimeout(timer);
@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
   endAdornment: {
     top: 0,
   },
+  circularProgress: {
+    color: "#0A73FA",
+  },
 }));
 
 export default function SelectComponent({
@@ -65,10 +68,12 @@ export default function SelectComponent({
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
   const [searchText, setsearchText] = useState(null);
+  const [loading, setLoading] = useState(false);
   const classes = useStyles();
 
   const fetchOptions = useCallback(
     (searchText = "") => {
+      setLoading(true);
       const criteria = [];
       if (searchText) {
         criteria.push({
@@ -77,10 +82,14 @@ export default function SelectComponent({
           value: searchText,
         });
       }
-      if (!fetchMethod || !open) return;
+      if (!fetchMethod || !open) {
+        setLoading(false);
+        return;
+      }
       return fetchMethod(criteria).then((res) => {
         if (res) {
           setOptions(res || []);
+          setLoading(false);
         }
       });
     },
@@ -113,9 +122,12 @@ export default function SelectComponent({
 
   useEffect(() => {
     if (propOptions) {
+      setLoading(true);
       setOptions(propOptions);
+      setLoading(false);
     }
   }, [propOptions]);
+
   return (
     <AutoComplete
       classes={{
@@ -139,6 +151,7 @@ export default function SelectComponent({
         e && e.stopPropagation();
         setOpen(true);
       }}
+      loading={loading}
       defaultValue={defaultValue}
       clearOnEscape
       autoComplete
@@ -190,6 +203,17 @@ export default function SelectComponent({
           {...params}
           InputProps={{
             ...(params.InputProps || {}),
+            endAdornment: (
+              <React.Fragment>
+                {loading ? (
+                  <CircularProgress
+                    className={classes.circularProgress}
+                    size={15}
+                  />
+                ) : null}
+                {params.InputProps.endAdornment}
+              </React.Fragment>
+            ),
             onClick: (e) => e && e.stopPropagation(),
             disableUnderline: true,
           }}
