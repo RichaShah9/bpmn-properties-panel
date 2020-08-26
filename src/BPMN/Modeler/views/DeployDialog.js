@@ -14,7 +14,7 @@ import {
   DialogTitle,
   Typography,
   Switch,
-  FormControlLabel
+  FormControlLabel,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -79,14 +79,17 @@ export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
     return elements || [];
   };
 
-  const getCurrentElement = (processId, elementId) => {
-    const currentProcess = currentElements[processId];
-    const element =
-      currentProcess &&
-      currentProcess.elements &&
-      currentProcess.elements.find((element) => element.id === elementId);
-    return element || {};
-  };
+  const getCurrentElement = React.useCallback(
+    (processId, elementId) => {
+      const currentProcess = currentElements[processId];
+      const element =
+        currentProcess &&
+        currentProcess.elements &&
+        currentProcess.elements.find((element) => element.id === elementId);
+      return element;
+    },
+    [currentElements]
+  );
 
   useEffect(() => {
     const wkfMigrationMap = {};
@@ -94,8 +97,9 @@ export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
     Object.entries(oldElements).forEach(([key, value]) => {
       let values = {};
       value.elements.forEach((element) => {
+        const value = getCurrentElement(key, element.id);
         if (element) {
-          values[element.id] = element.id;
+          values[element.id] = value && value.id;
         }
       });
       if (key) {
@@ -103,7 +107,7 @@ export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
       }
     });
     setWkfMigrationMap(wkfMigrationMap);
-  }, [oldElements]);
+  }, [oldElements, getCurrentElement]);
 
   return (
     <Dialog
@@ -174,7 +178,9 @@ export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
                               className={classes.select}
                               isLabel={false}
                               options={getCurrentElements(key, oldEle.type)}
-                              defaultValue={getCurrentElement(key, oldEle.id)}
+                              defaultValue={
+                                getCurrentElement(key, oldEle.id) || {}
+                              }
                               update={(value) => handleAdd(oldEle, value, key)}
                               isTranslated={false}
                             />
