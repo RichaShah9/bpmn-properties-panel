@@ -146,6 +146,16 @@ export default function TimeEmailPanel({ element }) {
     [getProperty]
   );
 
+  const removeProperty = React.useCallback(
+    (arr = []) => {
+      let bo = getBusinessObject(element);
+      arr.forEach((element) => {
+        delete bo.$attrs[`camunda:${element}`];
+      });
+    },
+    [element]
+  );
+
   useEffect(() => {
     async function fetchData() {
       if (newMenu || newUserMenu) {
@@ -242,6 +252,49 @@ export default function TimeEmailPanel({ element }) {
     }
   }, [getProperty, getSelectValue]);
 
+  useEffect(() => {
+    return () => {
+      const bo = getBusinessObject(element);
+      if (!bo || !bo.$attrs) return;
+      if (
+        bo.$attrs["camunda:newMenu"] === true &&
+        (!bo.$attrs["camunda:menuName"] || !bo.$attrs["camunda:menuParent"])
+      ) {
+        removeProperty([
+          "newMenu",
+          "menuName",
+          "menuParent",
+          "menuParentId",
+          "menuParentLabel",
+          "position",
+          "positionId",
+          "positionMenu",
+          "positionMenuId",
+          "positionMenuLabel",
+        ]);
+      }
+
+      if (
+        bo.$attrs["camunda:newUserMenu"] === true &&
+        (!bo.$attrs["camunda:userMenuName"] ||
+          !bo.$attrs["camunda:userParentMenu"])
+      ) {
+        removeProperty([
+          "newUserMenu",
+          "userMenuName",
+          "userParentMenu",
+          "userParentMenuId",
+          "userParentMenuLabel",
+          "userPosition",
+          "userPositionId",
+          "userPositionMenu",
+          "userPositionMenuId",
+          "userPositionMenuLabel",
+        ]);
+      }
+    };
+  }, [element, removeProperty]);
+
   return (
     <div className={classes.main}>
       <div className={classes.container}>
@@ -284,6 +337,11 @@ export default function TimeEmailPanel({ element }) {
               set: function (e, value) {
                 setActionEmailTitle(value.actionEmailTitle);
                 setProperty("actionEmailTitle", value.actionEmailTitle);
+              },
+              validate: function (e, values) {
+                if (!values.actionEmailTitle) {
+                  return { actionEmailTitle: "Must provide a value" };
+                }
               },
             }}
           />
@@ -394,6 +452,11 @@ export default function TimeEmailPanel({ element }) {
                   setMenuName(value.menuName);
                   setProperty("menuName", value.menuName);
                 },
+                validate: function (e, values) {
+                  if (!values.menuName) {
+                    return { menuName: "Must provide a value" };
+                  }
+                },
               }}
             />
             <label className={classes.label}>{translate("Menu parent")}</label>
@@ -409,6 +472,11 @@ export default function TimeEmailPanel({ element }) {
               optionLabel="title"
               isLabel={false}
               fetchMethod={() => getParentMenus()}
+              validate={(values) => {
+                if (!values.menuParent) {
+                  return { menuParent: "Must provide a value" };
+                }
+              }}
             />
             <label className={classes.label}>{translate("Position")}</label>
             <Select
@@ -493,6 +561,11 @@ export default function TimeEmailPanel({ element }) {
                   setUserMenuName(value.userMenuName);
                   setProperty("userMenuName", value.userMenuName);
                 },
+                validate: function (e, values) {
+                  if (!values.userMenuName) {
+                    return { userMenuName: "Must provide a value" };
+                  }
+                },
               }}
             />
             <label className={classes.label}>
@@ -511,6 +584,11 @@ export default function TimeEmailPanel({ element }) {
               optionLabel="title"
               label="User Parent menu"
               isLabel={false}
+              validate={(values) => {
+                if (!values.userParentMenu) {
+                  return { userParentMenu: "Must provide a value" };
+                }
+              }}
             />
             <label className={classes.label}>{translate("Position")}</label>
             <Select
