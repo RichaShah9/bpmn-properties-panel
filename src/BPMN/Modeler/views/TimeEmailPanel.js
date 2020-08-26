@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
-import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../components/Select";
 import { TextField, Checkbox } from "../properties/components";
 import {
-  getCustomModels,
   getAllModels,
   getParentMenus,
   getSubMenus,
-  getMetaModels,
 } from "../../../services/api";
 import { translate } from "../../../utils";
 
@@ -31,9 +28,6 @@ const useStyles = makeStyles({
   },
   select: {
     margin: 0,
-  },
-  metajsonModel: {
-    marginTop: 10,
   },
   allModels: {
     paddingBottom: 10,
@@ -58,14 +52,10 @@ export default function TimeEmailPanel({ element }) {
   const [userParentMenu, setUserParentMenu] = useState(null);
   const [userPosition, setUserPosition] = useState(null);
   const [userPositionMenu, setUserPositionMenu] = useState(null);
-  const [metaModel, setMetaModel] = useState(null);
-  const [metaJsonModel, setMetaJsonModel] = useState(null);
   const [statusTitle, setStatusTitle] = useState(null);
   const [models, setModels] = useState([]);
   const [userSubMenuOptions, setUserSubMenuOptions] = useState([]);
   const [subMenuOptions, setSubMenuOptions] = useState([]);
-  const [customModelOptions, setCustomModelOptions] = useState([]);
-  const [metaModelOptions, setMetaModelOptions] = useState([]);
   const [parentMenuOptions, setParentMenuOptions] = useState([]);
   const [allModelsOptions, setAllModelsOptions] = useState([]);
 
@@ -167,18 +157,6 @@ export default function TimeEmailPanel({ element }) {
   }, [newUserMenu, newMenu]);
 
   useEffect(() => {
-    async function fetchData() {
-      if (newUserMenu) {
-        const customModelOptions = await getCustomModels();
-        const metaModelOptions = await getMetaModels();
-        setCustomModelOptions(customModelOptions);
-        setMetaModelOptions(metaModelOptions);
-      }
-    }
-    fetchData();
-  }, [newUserMenu]);
-
-  useEffect(() => {
     async function fetchUserSubMenus() {
       if (newUserMenu && userParentMenu) {
         const userSubMenuOptions = await getSubMenus(userParentMenu);
@@ -224,8 +202,6 @@ export default function TimeEmailPanel({ element }) {
     const userParentMenu = getSelectValue("userParentMenu");
     const userPosition = getSelectValue("userPosition");
     const userPositionMenu = getSelectValue("userPositionMenu");
-    const metaModel = getSelectValue("metaModel");
-    const metaJsonModel = getSelectValue("metaJsonModel");
     const statusTitle = getProperty("statusTitle");
     const displayStatus = getProperty("displayStatus");
     const applyAllModels = getProperty("applyAllModels");
@@ -249,8 +225,6 @@ export default function TimeEmailPanel({ element }) {
     setUserParentMenu(userParentMenu);
     setUserPosition(userPosition);
     setUserPositionMenu(userPositionMenu);
-    setMetaModel(metaModel);
-    setMetaJsonModel(metaJsonModel);
     setStatusTitle(statusTitle);
     setDeadlineFieldPath(deadlineFieldPath);
 
@@ -496,10 +470,6 @@ export default function TimeEmailPanel({ element }) {
                 updateValue("userPosition", undefined);
                 setUserPositionMenu(undefined);
                 updateMenuValue("userPositionMenu", undefined);
-                setMetaModel(undefined);
-                updateValue("metaModel", undefined);
-                setMetaJsonModel(undefined);
-                updateValue("metaJsonModel", undefined);
               }
             },
           }}
@@ -572,33 +542,6 @@ export default function TimeEmailPanel({ element }) {
               name="userPositionMenu"
               value={userPositionMenu}
               optionLabel="title"
-              isLabel={false}
-            />
-            <label className={classes.label}>{translate("Model")}</label>
-            <Select
-              className={classes.select}
-              options={metaModelOptions}
-              update={(value) => {
-                setMetaModel(value);
-                updateValue("metaModel", value);
-              }}
-              name="metaModel"
-              value={metaModel}
-              optionLabel="name"
-              isLabel={false}
-              placeholder={translate("Model")}
-            />
-            <Select
-              className={classnames(classes.select, classes.metajsonModel)}
-              options={customModelOptions}
-              update={(value) => {
-                setMetaJsonModel(value);
-                updateValue("metaJsonModel", value);
-              }}
-              name="metaJsonModel"
-              value={metaJsonModel}
-              optionLabel="name"
-              placeholder={translate("Custom model")}
               isLabel={false}
             />
           </React.Fragment>
