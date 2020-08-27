@@ -59,12 +59,13 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Textbox({
+export default function TextField({
   entry,
   element,
   canRemove = false,
   rootClass,
   labelClass,
+  type = "text",
 }) {
   const classes = useStyles();
   const {
@@ -145,7 +146,7 @@ export default function Textbox({
       <div className={classes.fieldWrapper}>
         <input
           id={`camunda-${modelProperty}_${Date()}`}
-          type="text"
+          type={type}
           name={modelProperty}
           value={value || ""}
           onChange={(e) => setValue(e.target.value)}
