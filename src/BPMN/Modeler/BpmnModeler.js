@@ -554,7 +554,12 @@ function BpmnModelerComponent() {
             return;
           }
           if (model) {
-            addProperty("model", model.model);
+            addProperty(
+              "model",
+              model.type === "metaJsonModel"
+                ? "com.axelor.meta.db.MetaJsonRecord"
+                : model.fullName || model.model
+            );
             addProperty("modelName", model.name);
             addProperty("modelType", model.type);
           }

@@ -61,7 +61,7 @@ const useStyles = makeStyles({
     height: 23,
     border: "1px solid #ccc",
     color: "#727272",
-    width:"fit-content",
+    width: "fit-content",
     "&:hover": {
       border: "1px solid #727272",
     },
@@ -97,7 +97,7 @@ const useStyles = makeStyles({
     borderRadius: 0,
     border: "1px solid #ccc",
     padding: 2,
-    width:"fit-content"
+    width: "fit-content",
   },
   label: {
     fontWeight: "bolder",
@@ -132,10 +132,9 @@ export default function ViewAttributePanel({ handleAdd, element }) {
   const [row, setRow] = useState(null);
 
   const addModelView = () => {
-    if(!row) return
     setRow({
-      ...row,
-      values: [...row.values, { ...valueObj }],
+      ...(row || {}),
+      values: [...((row && (row.values || [])) || []), { ...valueObj }],
     });
   };
 
@@ -257,7 +256,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
             "itemLabel",
           ].includes(val.name)
       );
-      if(camundaProperty){
+      if (camundaProperty) {
         camundaProperty.values = [...elements];
       }
     }
