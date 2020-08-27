@@ -78,7 +78,9 @@ export default function ConditionalEventProps({
           set: setValue("variableName"),
         }}
       />
-      {!(is(element, 'bpmn:StartEvent') && !isEventSubProcess(element.parent)) && (
+      {!(
+        is(element, "bpmn:StartEvent") && !isEventSubProcess(element.parent)
+      ) && (
         <TextField
           element={element}
           entry={{
@@ -286,6 +288,11 @@ export default function ConditionalEventProps({
                     conditionalEventDefinition.condition.resource =
                       values.resource;
                     conditionalEventDefinition.condition.body = undefined;
+                  }
+                },
+                validate: function (e, values) {
+                  if (!values.resource && conditionType === "script") {
+                    return { resource: "Must provide a value" };
                   }
                 },
               }}

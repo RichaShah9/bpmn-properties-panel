@@ -193,6 +193,11 @@ export default function ConditionalProps({
                     values.expression;
                 }
               },
+              validate: function (e, values) {
+                if (!values.expression && conditionType === "expression") {
+                  return { expression: "Must provide a value" };
+                }
+              },
             }}
             canRemove={true}
           />
@@ -220,6 +225,11 @@ export default function ConditionalProps({
                     element.businessObject.conditionExpression
                   ) {
                     element.businessObject.conditionExpression.language = scriptFormat;
+                  }
+                },
+                validate: function (e, values) {
+                  if (!values.scriptFormat && conditionType === "script") {
+                    return { scriptFormat: "Must provide a value" };
                   }
                 },
               }}
@@ -288,6 +298,15 @@ export default function ConditionalProps({
                       element.businessObject.conditionExpression.body = undefined;
                     }
                   },
+                  validate: function (e, values) {
+                    if (
+                      !values.resource &&
+                      conditionType === "script" &&
+                      scriptType === "scriptResource"
+                    ) {
+                      return { resource: "Must provide a value" };
+                    }
+                  },
                 }}
                 canRemove={true}
               />
@@ -314,6 +333,15 @@ export default function ConditionalProps({
                       element.businessObject.conditionExpression.body =
                         values.script;
                       element.businessObject.conditionExpression.resource = undefined;
+                    }
+                  },
+                  validate: function (e, values) {
+                    if (
+                      !values.script &&
+                      conditionType === "script" &&
+                      scriptType === "script"
+                    ) {
+                      return { script: "Must provide a value" };
                     }
                   },
                 }}
