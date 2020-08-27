@@ -144,7 +144,7 @@ export default function Textbox({
       <label className={classnames(classes.label, labelClass)}>{label}</label>
       <div className={classes.fieldWrapper}>
         <input
-          id={`camunda-${modelProperty}`}
+          id={`camunda-${modelProperty}_${Date()}`}
           type="text"
           name={modelProperty}
           value={value || ""}
