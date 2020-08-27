@@ -1,57 +1,25 @@
 import Service from "./Service";
 import * as _ from "lodash";
 
-export async function getModels(id, criteria) {
-  const res = await Service.fetchId("com.axelor.apps.bpm.db.WkfModel", id, {
-    fields: ["wkfProcessList"],
-    related: {
-      wkfProcessList: ["name", "processId", "wkfProcessConfigList"],
-    },
-  });
-  const { data = [] } = res || {};
-  const { wkfProcessList } = data[0] || {};
-  let configIds = [];
-  wkfProcessList && wkfProcessList.forEach((list) => {
-    const { wkfProcessConfigList } = list;
-    const ids = wkfProcessConfigList.map((list) => list.id);
-    configIds = [...configIds, ...ids];
-  });
-  let ids = Array.from(new Set([...configIds]));
-  if (ids.length > 0) {
-    const resList = await Service.search(
-      "com.axelor.apps.bpm.db.WkfProcessConfig",
-      {
-        data: {
-          criteria: [{ fieldName: "id", operator: "IN", value: ids }],
-          ...criteria,
-        },
-        fields: ["metaJsonModel.name", "metaJsonModel", "metaModel", "model"],
-      }
-    );
-    const { data = [] } = resList || [];
-    const models = [];
+export async function getModels() {
+  const models = (await getMetaModels()) || [];
+  const metaJsonModels = (await getCustomModels()) || [];
+  const allModels = [];
 
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].metaModel) {
-        models.push({
-          ...data[i].metaModel,
-          model: data[i].model,
-          type: "metaModel",
-        });
-      }
-      if (data[i].metaJsonModel) {
-        models.push({
-          ...data[i].metaJsonModel,
-          name: data[i]["metaJsonModel.name"],
-          model: data[i].model,
-          type: "metaJsonModel",
-        });
-      }
-    }
-
-    return models;
+  for (let i = 0; i < models.length; i++) {
+    allModels.push({
+      ...models[i],
+      type: "metaModel",
+    });
   }
-  return [];
+  for (let i = 0; i < metaJsonModels.length; i++) {
+    allModels.push({
+      ...metaJsonModels[i],
+      type: "metaJsonModel",
+    });
+  }
+
+  return allModels || [];
 }
 
 export async function getViews(model, criteria) {
@@ -74,7 +42,7 @@ export async function getViews(model, criteria) {
     options.push({
       fieldName: "model",
       operator: "=",
-      value: model.model,
+      value: model.fullName,
     });
   }
 
@@ -105,9 +73,9 @@ export async function getViews(model, criteria) {
  *    fetch only custom fields
  */
 export async function getItems(formName, model, criteria) {
-  if (!model || !model.model) return [];
+  if (!model) return [];
   let res;
-  if (formName) {
+  if (formName && model.fullName) {
     res = await Service.post(`/ws/meta/view`, {
       data: {
         context: {
@@ -118,7 +86,7 @@ export async function getItems(formName, model, criteria) {
         type: "form",
         criteria,
       },
-      model: model.model,
+      model: model.fullName,
     });
     const { data = [] } = res || {};
     const { fields = [], jsonAttrs = [], view } = data;
@@ -151,7 +119,7 @@ export async function getItems(formName, model, criteria) {
       let metaFieldsRes =
         (await Service.search("com.axelor.meta.db.MetaField", {
           data: {
-            _domain: `self.metaModel.fullName = '${model.model}'`,
+            _domain: `self.metaModel.fullName = '${model.fullName}'`,
             _domainContext: {
               _model: "com.axelor.meta.db.MetaModel",
             },
