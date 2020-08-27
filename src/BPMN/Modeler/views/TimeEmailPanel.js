@@ -567,23 +567,21 @@ export default function TimeEmailPanel({ element }) {
               optionLabel="title"
               isLabel={false}
             />
-            <TextField
+            <Checkbox
               element={element}
-              canRemove={true}
-              type="number"
               entry={{
                 id: "tagCount",
-                name: "tagCount",
-                label: translate("Tag count"),
+                label: translate("Display tag count ?"),
                 modelProperty: "tagCount",
                 get: function () {
                   return {
-                    tagCount: tagCount || "",
+                    tagCount: tagCount,
                   };
                 },
                 set: function (e, value) {
-                  setTagCount(value.tagCount);
-                  setProperty("tagCount", value.tagCount);
+                  const tagCount = !value.tagCount;
+                  setTagCount(tagCount);
+                  setProperty("tagCount", tagCount);
                 },
               }}
             />
@@ -741,23 +739,21 @@ export default function TimeEmailPanel({ element }) {
               optionLabel="title"
               isLabel={false}
             />
-            <TextField
+            <Checkbox
               element={element}
-              canRemove={true}
-              type="number"
               entry={{
                 id: "userTagCount",
-                name: "userTagCount",
-                label: translate("Tag count"),
+                label: translate("Display tag count ?"),
                 modelProperty: "userTagCount",
                 get: function () {
                   return {
-                    userTagCount: userTagCount || "",
+                    userTagCount: userTagCount,
                   };
                 },
                 set: function (e, value) {
-                  setUserTagCount(value.userTagCount);
-                  setProperty("userTagCount", value.userTagCount);
+                  const userTagCount = !value.userTagCount;
+                  setUserTagCount(userTagCount);
+                  setProperty("userTagCount", userTagCount);
                 },
               }}
             />
