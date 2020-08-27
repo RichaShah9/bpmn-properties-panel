@@ -8,6 +8,7 @@ import {
   getAllModels,
   getParentMenus,
   getSubMenus,
+  getViews,
 } from "../../../services/api";
 import { translate } from "../../../utils";
 
@@ -58,6 +59,13 @@ export default function TimeEmailPanel({ element }) {
   const [subMenuOptions, setSubMenuOptions] = useState([]);
   const [parentMenuOptions, setParentMenuOptions] = useState([]);
   const [allModelsOptions, setAllModelsOptions] = useState([]);
+  const [tagCount, setTagCount] = useState(null);
+  const [userTagCount, setUserTagCount] = useState(null);
+  const [model, setModel] = useState(null);
+  const [formView, setFormView] = useState(null);
+  const [gridView, setGridView] = useState(null);
+  const [userFormView, setUserFormView] = useState(null);
+  const [userGridView, setUserGridView] = useState(null);
 
   const classes = useStyles();
 
@@ -132,11 +140,15 @@ export default function TimeEmailPanel({ element }) {
     (name) => {
       let id = getProperty(`${name}Id`);
       let label = getProperty(`${name}Label`);
+      let fullName = getProperty(`${name}Model`);
       let newName = getProperty(name);
       if (id) {
         let value = { id: id, name: newName };
         if (label) {
           value.title = label;
+        }
+        if (fullName) {
+          value.fullName = fullName;
         }
         return value;
       } else {
@@ -218,6 +230,13 @@ export default function TimeEmailPanel({ element }) {
     const modelIds = getProperty("modelIds");
     const modelNames = getProperty("modelNames");
     const deadlineFieldPath = getProperty("deadlineFieldPath");
+    const tagCount = getProperty("tagCount");
+    const userTagCount = getProperty("userTagCount");
+    const formView = getSelectValue("formView");
+    const gridView = getSelectValue("gridView");
+    const userFormView = getSelectValue("userFormView");
+    const userGridView = getSelectValue("userGridView");
+
     const models = [];
     setCreateUserAction(getBool(createUserAction));
     setEmailNotification(getBool(emailNotification));
@@ -237,6 +256,12 @@ export default function TimeEmailPanel({ element }) {
     setUserPositionMenu(userPositionMenu);
     setStatusTitle(statusTitle);
     setDeadlineFieldPath(deadlineFieldPath);
+    setTagCount(tagCount);
+    setUserTagCount(userTagCount);
+    setFormView(formView);
+    setGridView(gridView);
+    setUserFormView(userFormView);
+    setUserGridView(userGridView);
 
     if (modelIds && modelNames) {
       const ids = modelIds.split(",");
@@ -251,6 +276,22 @@ export default function TimeEmailPanel({ element }) {
       setModels(models);
     }
   }, [getProperty, getSelectValue]);
+
+  useEffect(() => {
+    const metaModel = getSelectValue("metaModel");
+    const metaJsonModel = getSelectValue("metaJsonModel");
+    if (metaModel) {
+      setModel({
+        ...metaModel,
+        type: "metaModel",
+      });
+    } else if (metaJsonModel) {
+      setModel({
+        ...metaJsonModel,
+        type: "metaJsonModel",
+      });
+    }
+  }, [getSelectValue]);
 
   useEffect(() => {
     return () => {
@@ -271,6 +312,11 @@ export default function TimeEmailPanel({ element }) {
           "positionMenu",
           "positionMenuId",
           "positionMenuLabel",
+          "tagCount",
+          "formView",
+          "formViewId",
+          "gridView",
+          "gridViewId",
         ]);
       }
 
@@ -290,6 +336,11 @@ export default function TimeEmailPanel({ element }) {
           "userPositionMenu",
           "userPositionMenuId",
           "userPositionMenuLabel",
+          "userTagCount",
+          "userFormView",
+          "userFormViewId",
+          "userGridView",
+          "userGridViewId",
         ]);
       }
     };
@@ -429,6 +480,12 @@ export default function TimeEmailPanel({ element }) {
                 updateValue("position", undefined);
                 setPositionMenu(undefined);
                 updateMenuValue("positionMenu", undefined);
+                setTagCount(undefined);
+                setProperty("tagCount", undefined);
+                setFormView(undefined);
+                updateMenuValue("formView", undefined);
+                setGridView(undefined);
+                updateMenuValue("gridView", undefined);
               }
             },
           }}
@@ -510,6 +567,62 @@ export default function TimeEmailPanel({ element }) {
               optionLabel="title"
               isLabel={false}
             />
+            <TextField
+              element={element}
+              canRemove={true}
+              type="number"
+              entry={{
+                id: "tagCount",
+                name: "tagCount",
+                label: translate("Tag count"),
+                modelProperty: "tagCount",
+                get: function () {
+                  return {
+                    tagCount: tagCount || "",
+                  };
+                },
+                set: function (e, value) {
+                  setTagCount(value.tagCount);
+                  setProperty("tagCount", value.tagCount);
+                },
+              }}
+            />
+            {model && (
+              <React.Fragment>
+                <label className={classes.label}>
+                  {translate("Grid view")}
+                </label>
+                <Select
+                  className={classes.select}
+                  update={(value, label) => {
+                    setGridView(value);
+                    updateMenuValue("gridView", value, label);
+                  }}
+                  fetchMethod={(criteria) => getViews(model, criteria, "grid")}
+                  name="gridView"
+                  value={gridView}
+                  optionLabel="name"
+                  label={translate("Grid view")}
+                  isLabel={false}
+                />
+                <label className={classes.label}>
+                  {translate("Form view")}
+                </label>
+                <Select
+                  className={classes.select}
+                  update={(value, label) => {
+                    setFormView(value);
+                    updateMenuValue("formView", value, label);
+                  }}
+                  fetchMethod={(criteria) => getViews(model, criteria)}
+                  name="formView"
+                  value={formView}
+                  optionLabel="name"
+                  label={translate("Form view")}
+                  isLabel={false}
+                />
+              </React.Fragment>
+            )}
           </React.Fragment>
         )}
       </div>
@@ -538,6 +651,12 @@ export default function TimeEmailPanel({ element }) {
                 updateValue("userPosition", undefined);
                 setUserPositionMenu(undefined);
                 updateMenuValue("userPositionMenu", undefined);
+                setUserTagCount(undefined);
+                setProperty("userTagCount", undefined);
+                setUserFormView(undefined);
+                updateMenuValue("userFormView", undefined);
+                setUserGridView(undefined);
+                updateMenuValue("userGridView", undefined);
               }
             },
           }}
@@ -622,6 +741,62 @@ export default function TimeEmailPanel({ element }) {
               optionLabel="title"
               isLabel={false}
             />
+            <TextField
+              element={element}
+              canRemove={true}
+              type="number"
+              entry={{
+                id: "userTagCount",
+                name: "userTagCount",
+                label: translate("Tag count"),
+                modelProperty: "userTagCount",
+                get: function () {
+                  return {
+                    userTagCount: userTagCount || "",
+                  };
+                },
+                set: function (e, value) {
+                  setUserTagCount(value.userTagCount);
+                  setProperty("userTagCount", value.userTagCount);
+                },
+              }}
+            />
+            {model && (
+              <React.Fragment>
+                <label className={classes.label}>
+                  {translate("Grid view")}
+                </label>
+                <Select
+                  className={classes.select}
+                  update={(value, label) => {
+                    setUserGridView(value);
+                    updateMenuValue("userGridView", value, label);
+                  }}
+                  fetchMethod={(criteria) => getViews(model, criteria, "grid")}
+                  name="userGridView"
+                  value={userGridView}
+                  optionLabel="name"
+                  label={translate("Grid view")}
+                  isLabel={false}
+                />
+                <label className={classes.label}>
+                  {translate("Form view")}
+                </label>
+                <Select
+                  className={classes.select}
+                  update={(value, label) => {
+                    setUserFormView(value);
+                    updateMenuValue("userFormView", value, label);
+                  }}
+                  fetchMethod={(criteria) => getViews(model, criteria)}
+                  name="userFormView"
+                  value={userFormView}
+                  optionLabel="name"
+                  label={translate("Form view")}
+                  isLabel={false}
+                />
+              </React.Fragment>
+            )}
           </React.Fragment>
         )}
       </div>
