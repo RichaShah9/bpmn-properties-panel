@@ -10,7 +10,7 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     marginTop: 5,
-    width: '100%'
+    width: "100%",
   },
   error: {
     borderColor: "#cc3333 !important",
@@ -59,7 +59,13 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Textbox({ entry, element, canRemove = false }) {
+export default function Textbox({
+  entry,
+  element,
+  canRemove = false,
+  rootClass,
+  labelClass,
+}) {
   const classes = useStyles();
   const {
     label,
@@ -134,8 +140,8 @@ export default function Textbox({ entry, element, canRemove = false }) {
   }, [element, modelProperty, get, getProperty]);
 
   return (
-    <div className={classes.root}>
-      <label className={classes.label}>{label}</label>
+    <div className={classnames(classes.root, rootClass)}>
+      <label className={classnames(classes.label, labelClass)}>{label}</label>
       <div className={classes.fieldWrapper}>
         <input
           id={`camunda-${modelProperty}`}
