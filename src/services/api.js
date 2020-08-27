@@ -11,7 +11,7 @@ export async function getModels(id, criteria) {
   const { data = [] } = res || {};
   const { wkfProcessList } = data[0] || {};
   let configIds = [];
-  wkfProcessList.forEach((list) => {
+  wkfProcessList && wkfProcessList.forEach((list) => {
     const { wkfProcessConfigList } = list;
     const ids = wkfProcessConfigList.map((list) => list.id);
     configIds = [...configIds, ...ids];

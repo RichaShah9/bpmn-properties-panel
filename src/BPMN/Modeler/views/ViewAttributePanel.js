@@ -238,7 +238,7 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
       camundaProperty.values = [...elements];
     }
     let isValid = true;
-    if (row.values.length > 0) {
+    if (row.values && row.values.length > 0) {
       row.values &&
         row.values.forEach((value, index) => {
           const { model, items = [] } = value;
@@ -359,7 +359,7 @@ export default function ViewAttributePanel({ id, handleAdd, element }) {
       {row && (
         <div>
           <div>
-            {row.values.map(
+            {row.values && row.values.map(
               (val, index) =>
                 val && (
                   <div key={`card_${index}`} className={classes.cardContainer}>

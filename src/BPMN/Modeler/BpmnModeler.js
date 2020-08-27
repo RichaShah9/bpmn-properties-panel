@@ -472,6 +472,7 @@ function BpmnModelerComponent() {
       bpmnFactory
     );
     selectedElement.businessObject.extensionElements &&
+      selectedElement.businessObject.extensionElements.values &&
       selectedElement.businessObject.extensionElements.values.push(
         camundaProperties
       );
@@ -540,7 +541,7 @@ function BpmnModelerComponent() {
     if (!row) return;
     const { values = [] } = row;
     let isValid = true;
-    if (values.length > 0) {
+    if (values && values.length > 0) {
       values &&
         values.forEach((value) => {
           const { model, view, roles = [], items = [] } = value;
