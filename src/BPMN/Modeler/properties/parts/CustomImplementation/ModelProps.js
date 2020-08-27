@@ -27,6 +27,7 @@ const TITLE_SOURCES = [
   "bpmn:SubProcess",
   "bpmn:AdHocSubProcess",
   "bpmn:Transaction",
+  "bpmn:Task"
 ];
 
 function isConditionalSource(element) {
