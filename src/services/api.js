@@ -22,13 +22,13 @@ export async function getModels() {
   return allModels || [];
 }
 
-export async function getViews(model, criteria) {
+export async function getViews(model, criteria, type = "form") {
   if (!model) return [];
   let options = [
     {
       fieldName: "type",
       operator: "=",
-      value: "form",
+      value: type,
     },
   ];
 
@@ -36,7 +36,7 @@ export async function getViews(model, criteria) {
     options.push({
       fieldName: "name",
       operator: "=",
-      value: `custom-model-${model.name}-form`,
+      value: `custom-model-${model.name}-${type}`,
     });
   } else {
     options.push({
