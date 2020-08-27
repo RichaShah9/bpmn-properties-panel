@@ -108,10 +108,12 @@ export default function ModelProps({ element, index, label }) {
     if (!value) {
       setProperty(name, undefined);
       setProperty(`${name}Id`, undefined);
+      setProperty(`${name}Model`, undefined);
       return;
     }
     setProperty(name, value[optionLabel]);
     setProperty(`${name}Id`, value.id);
+    setProperty(`${name}Model`, value["fullName"] || value["name"]);
   };
 
   const getSelectValue = React.useCallback(
