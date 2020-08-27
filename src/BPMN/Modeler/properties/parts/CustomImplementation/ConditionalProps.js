@@ -152,11 +152,12 @@ export default function ConditionalProps({
               } else {
                 element.businessObject.conditionExpression = conditionOrConditionExpression;
               }
-              if(!bpmnModeler) return
+              if (!bpmnModeler) return;
               let elementRegistry = bpmnModeler.get("elementRegistry");
               let modeling = bpmnModeler.get("modeling");
               let shape = elementRegistry.get(element.id);
-              if(!shape) return
+              if (!shape) return;
+              if (CONDITIONAL_SOURCES.includes(bo.sourceRef.$type)) return;
               modeling &&
                 modeling.updateProperties(shape, {
                   [conditionalEventDefinition
