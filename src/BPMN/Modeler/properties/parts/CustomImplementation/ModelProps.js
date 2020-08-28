@@ -5,8 +5,13 @@ import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 
 import Select from "../../../../../components/Select";
-import { getCustomModels, getMetaModels } from "../../../../../services/api";
-import { translate } from "../../../../../utils";
+import { Checkbox } from "../../components";
+import {
+  getCustomModels,
+  getMetaModels,
+  getAllModels,
+} from "../../../../../services/api";
+import { translate, getBool } from "../../../../../utils";
 
 const CONDITIONAL_SOURCES = [
   "bpmn:EventBasedGateway",
@@ -28,7 +33,7 @@ const TITLE_SOURCES = [
   "bpmn:AdHocSubProcess",
   "bpmn:Transaction",
   "bpmn:Task",
-  "bpmn:TextAnnotation"
+  "bpmn:TextAnnotation",
 ];
 
 function isConditionalSource(element) {
@@ -67,12 +72,18 @@ const useStyles = makeStyles({
   metajsonModel: {
     marginTop: 10,
   },
+  allModels: {
+    paddingBottom: 10,
+  },
 });
 
 export default function ModelProps({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
   const [metaModel, setMetaModel] = useState(null);
   const [metaJsonModel, setMetaJsonModel] = useState(null);
+  const [displayOnAllModels, setDisplayOnAllModels] = useState(false);
+  const [models, setModels] = useState([]);
+  const [displayStatus, setDisplayStatus] = useState(false);
   const classes = useStyles();
 
   const subType =
@@ -114,12 +125,29 @@ export default function ModelProps({ element, index, label }) {
     setProperty(`${name}ModelName`, value["fullName"] || value["name"]);
   };
 
+  const addModels = (values) => {
+    const displayOnModels = [];
+    if (Array.isArray(values)) {
+      values &&
+        values.forEach((value) => {
+          if (!value) {
+            setProperty("displayOnModels", undefined);
+            return;
+          }
+          displayOnModels.push(value.name);
+        });
+    }
+    if (displayOnModels.length > 0) {
+      setProperty("displayOnModels", displayOnModels.toString());
+    }
+  };
+
   const getSelectValue = React.useCallback(
     (name) => {
       let label = getProperty(`${name}Label`);
       let newName = getProperty(name);
       if (newName) {
-        let value = {  name: newName };
+        let value = { name: newName };
         if (label) {
           value.title = label;
         }
@@ -132,6 +160,16 @@ export default function ModelProps({ element, index, label }) {
   );
 
   useEffect(() => {
+    return () => {
+      const bo = getBusinessObject(element);
+      if (!bo || !bo.$attrs) return;
+      if (bo.$attrs["camunda:displayOnAllModels"] === true) {
+        delete bo.$attrs[`camunda:displayOnModels`];
+      }
+    };
+  }, [element]);
+
+  useEffect(() => {
     if (!isConditionalSource(element)) {
       setVisible(true);
     }
@@ -140,9 +178,26 @@ export default function ModelProps({ element, index, label }) {
   useEffect(() => {
     const metaModel = getSelectValue("metaModel");
     const metaJsonModel = getSelectValue("metaJsonModel");
+    const displayOnAllModels = getProperty("displayOnAllModels");
+    const displayOnModels = getProperty("displayOnModels");
+    const displayStatus = getProperty("displayStatus");
+    setDisplayOnAllModels(getBool(displayOnAllModels));
+    setDisplayStatus(getBool(displayStatus));
+
     setMetaModel(metaModel);
     setMetaJsonModel(metaJsonModel);
-  }, [getSelectValue]);
+    const models = [];
+    if (displayOnModels) {
+      const names = displayOnModels.split(",");
+      names &&
+        names.forEach((name) => {
+          models.push({
+            name: name,
+          });
+        });
+      setModels(models);
+    }
+  }, [getProperty, getSelectValue]);
 
   return (
     isVisible && (
@@ -188,6 +243,77 @@ export default function ModelProps({ element, index, label }) {
             isLabel={false}
           />
         )}
+        <div className={classes.container}>
+          <Checkbox
+            element={element}
+            entry={{
+              id: "displayStatus",
+              label: translate("Display status"),
+              modelProperty: "displayStatus",
+              get: function () {
+                return {
+                  displayStatus: displayStatus,
+                };
+              },
+              set: function (e, value) {
+                const displayStatus = !value.displayStatus;
+                setDisplayStatus(displayStatus);
+                setProperty("displayStatus", displayStatus);
+                if (displayStatus === false) {
+                  setProperty("statusTitle", undefined);
+                  setDisplayOnAllModels(false);
+                  setProperty("displayOnAllModels", false);
+                  setModels([]);
+                  addModels([]);
+                }
+              },
+            }}
+          />
+          {displayStatus && (
+            <React.Fragment>
+              <Checkbox
+                element={element}
+                entry={{
+                  id: "displayOnAllModels",
+                  label: translate("Display on all models"),
+                  modelProperty: "displayOnAllModels",
+                  get: function () {
+                    return {
+                      displayOnAllModels: displayOnAllModels || false,
+                    };
+                  },
+                  set: function (e, value) {
+                    setDisplayOnAllModels(!value.displayOnAllModels);
+                    setProperty(
+                      "displayOnAllModels",
+                      !value.displayOnAllModels
+                    );
+                  },
+                }}
+              />
+              {!displayOnAllModels && (
+                <div className={classes.allModels}>
+                  <label className={classes.label}>
+                    {translate("Display on models")}
+                  </label>
+                  <Select
+                    className={classes.select}
+                    update={(value) => {
+                      setModels(value);
+                      addModels(value);
+                    }}
+                    fetchMethod={() => getAllModels()}
+                    name="models"
+                    value={models || []}
+                    multiple={true}
+                    isLabel={false}
+                    optionLabel="name"
+                  />
+                </div>
+              )}
+            </React.Fragment>
+          )}
+        </div>
       </div>
     )
   );

@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
+import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../components/Select";
 import { TextField, Checkbox } from "../properties/components";
-import {
-  getAllModels,
-  getParentMenus,
-  getSubMenus,
-  getViews,
-} from "../../../services/api";
-import { translate } from "../../../utils";
+import { getParentMenus, getSubMenus, getViews } from "../../../services/api";
+import { translate, getBool } from "../../../utils";
 
 const useStyles = makeStyles({
   main: {
@@ -30,8 +26,8 @@ const useStyles = makeStyles({
   select: {
     margin: 0,
   },
-  allModels: {
-    paddingBottom: 10,
+  lastChild: {
+    marginBottom: 10,
   },
 });
 
@@ -41,8 +37,6 @@ export default function TimeEmailPanel({ element }) {
   const [emailNotification, setEmailNotification] = useState(false);
   const [newMenu, setNewMenu] = useState(false);
   const [newUserMenu, setNewUserMenu] = useState(false);
-  const [displayStatus, setDisplayStatus] = useState(false);
-  const [applyAllModels, setApplyAllModels] = useState(false);
   const [userFieldPath, setUserFieldPath] = useState(null);
   const [menuName, setMenuName] = useState(null);
   const [actionEmailTitle, setActionEmailTitle] = useState(null);
@@ -53,14 +47,11 @@ export default function TimeEmailPanel({ element }) {
   const [userParentMenu, setUserParentMenu] = useState(null);
   const [userPosition, setUserPosition] = useState(null);
   const [userPositionMenu, setUserPositionMenu] = useState(null);
-  const [statusTitle, setStatusTitle] = useState(null);
-  const [models, setModels] = useState([]);
   const [userSubMenuOptions, setUserSubMenuOptions] = useState([]);
   const [subMenuOptions, setSubMenuOptions] = useState([]);
   const [parentMenuOptions, setParentMenuOptions] = useState([]);
-  const [allModelsOptions, setAllModelsOptions] = useState([]);
-  const [tagCount, setTagCount] = useState(null);
-  const [userTagCount, setUserTagCount] = useState(null);
+  const [tagCount, setTagCount] = useState(false);
+  const [userTagCount, setUserTagCount] = useState(false);
   const [model, setModel] = useState(null);
   const [formView, setFormView] = useState(null);
   const [gridView, setGridView] = useState(null);
@@ -83,24 +74,6 @@ export default function TimeEmailPanel({ element }) {
     }
   };
 
-  const addModels = (values) => {
-    const 
-      modelNames = [];
-    if (Array.isArray(values)) {
-      values &&
-        values.forEach((value) => {
-          if (!value) {
-            setProperty("modelNames", undefined);
-            return;
-          }
-          modelNames.push(value.name);
-        });
-    }
-    if (modelNames.length > 0) {
-      setProperty("modelNames", modelNames.toString());
-    }
-  };
-
   const updateValue = (name, value, optionLabel = "name") => {
     if (!value) {
       setProperty(name, undefined);
@@ -115,11 +88,6 @@ export default function TimeEmailPanel({ element }) {
       setProperty(`${name}Label`, undefined);
     }
     setProperty(`${name}Label`, label);
-  };
-
-  const getBool = (val) => {
-    if (!val) return false;
-    return !!JSON.parse(String(val).toLowerCase());
   };
 
   const getProperty = React.useCallback(
@@ -193,17 +161,6 @@ export default function TimeEmailPanel({ element }) {
   }, [menuParent, newMenu]);
 
   useEffect(() => {
-    async function fetchSubMenus() {
-      if (!displayStatus) {
-        return;
-      }
-      const allModelsOptions = await getAllModels();
-      setAllModelsOptions(allModelsOptions);
-    }
-    fetchSubMenus();
-  }, [displayStatus]);
-
-  useEffect(() => {
     const createUserAction = getProperty("createUserAction");
     const actionEmailTitle = getProperty("actionEmailTitle");
     const userFieldPath = getProperty("userFieldPath");
@@ -218,10 +175,6 @@ export default function TimeEmailPanel({ element }) {
     const userParentMenu = getSelectValue("userParentMenu");
     const userPosition = getSelectValue("userPosition");
     const userPositionMenu = getSelectValue("userPositionMenu");
-    const statusTitle = getProperty("statusTitle");
-    const displayStatus = getProperty("displayStatus");
-    const applyAllModels = getProperty("applyAllModels");
-    const modelNames = getProperty("modelNames");
     const deadlineFieldPath = getProperty("deadlineFieldPath");
     const tagCount = getProperty("tagCount");
     const userTagCount = getProperty("userTagCount");
@@ -230,14 +183,11 @@ export default function TimeEmailPanel({ element }) {
     const userFormView = getSelectValue("userFormView");
     const userGridView = getSelectValue("userGridView");
 
-    const models = [];
     setCreateUserAction(getBool(createUserAction));
     setEmailNotification(getBool(emailNotification));
     setNewMenu(getBool(newMenu));
     setNewUserMenu(getBool(newUserMenu));
-    setDisplayStatus(getBool(displayStatus));
     setMenuName(menuName);
-    setApplyAllModels(getBool(applyAllModels));
     setActionEmailTitle(actionEmailTitle);
     setUserFieldPath(userFieldPath);
     setMenuParent(menuParent);
@@ -247,25 +197,13 @@ export default function TimeEmailPanel({ element }) {
     setUserParentMenu(userParentMenu);
     setUserPosition(userPosition);
     setUserPositionMenu(userPositionMenu);
-    setStatusTitle(statusTitle);
     setDeadlineFieldPath(deadlineFieldPath);
-    setTagCount(tagCount);
-    setUserTagCount(userTagCount);
+    setTagCount(getBool(tagCount));
+    setUserTagCount(getBool(userTagCount));
     setFormView(formView);
     setGridView(gridView);
     setUserFormView(userFormView);
     setUserGridView(userGridView);
-
-    if (modelNames) {
-      const names = modelNames.split(",");
-      names &&
-        names.forEach((name) => {
-          models.push({
-            name: name,
-          });
-        });
-      setModels(models);
-    }
   }, [getProperty, getSelectValue]);
 
   useEffect(() => {
@@ -573,7 +511,7 @@ export default function TimeEmailPanel({ element }) {
                 </label>
                 <Select
                   className={classes.select}
-                  update={(value, label) => {
+                  update={(value) => {
                     setGridView(value);
                     updateValue("gridView", value);
                   }}
@@ -589,7 +527,7 @@ export default function TimeEmailPanel({ element }) {
                 </label>
                 <Select
                   className={classes.select}
-                  update={(value, label) => {
+                  update={(value) => {
                     setFormView(value);
                     updateValue("formView", value);
                   }}
@@ -745,7 +683,7 @@ export default function TimeEmailPanel({ element }) {
                 </label>
                 <Select
                   className={classes.select}
-                  update={(value, label) => {
+                  update={(value) => {
                     setUserGridView(value);
                     updateValue("userGridView", value);
                   }}
@@ -760,8 +698,8 @@ export default function TimeEmailPanel({ element }) {
                   {translate("Form view")}
                 </label>
                 <Select
-                  className={classes.select}
-                  update={(value, label) => {
+                  className={classnames(classes.select, classes.lastChild)}
+                  update={(value) => {
                     setUserFormView(value);
                     updateValue("userFormView", value);
                   }}
@@ -774,94 +712,6 @@ export default function TimeEmailPanel({ element }) {
                 />
               </React.Fragment>
             )}
-          </React.Fragment>
-        )}
-      </div>
-
-      <div className={classes.container}>
-        <Checkbox
-          element={element}
-          entry={{
-            id: "displayStatus",
-            label: translate("Display status"),
-            modelProperty: "displayStatus",
-            get: function () {
-              return {
-                displayStatus: displayStatus,
-              };
-            },
-            set: function (e, value) {
-              const displayStatus = !value.displayStatus;
-              setDisplayStatus(displayStatus);
-              setProperty("displayStatus", displayStatus);
-              if (displayStatus === false) {
-                setStatusTitle(undefined);
-                setProperty("statusTitle", undefined);
-                setApplyAllModels(false);
-                setProperty("applyAllModels", false);
-                setModels([]);
-                addModels([]);
-              }
-            },
-          }}
-        />
-        {displayStatus && (
-          <React.Fragment>
-            <TextField
-              element={element}
-              canRemove={true}
-              entry={{
-                id: "statusTitle",
-                name: "statusTitle",
-                label: translate("Status title"),
-                modelProperty: "statusTitle",
-                get: function () {
-                  return {
-                    statusTitle: statusTitle || "",
-                  };
-                },
-                set: function (e, value) {
-                  setStatusTitle(value.statusTitle);
-                  setProperty("statusTitle", value.statusTitle);
-                },
-              }}
-            />
-            <Checkbox
-              element={element}
-              entry={{
-                id: "applyAllModels",
-                label: translate("Apply all models"),
-                modelProperty: "applyAllModels",
-                get: function () {
-                  return {
-                    applyAllModels: applyAllModels || false,
-                  };
-                },
-                set: function (e, value) {
-                  setApplyAllModels(!value.applyAllModels);
-                  setProperty("applyAllModels", !value.applyAllModels);
-                },
-              }}
-            />
-            <div className={classes.allModels}>
-              <label className={classes.label}>
-                {translate("Select model")}
-              </label>
-              <Select
-                className={classes.select}
-                update={(value) => {
-                  setModels(value);
-                  addModels(value);
-                }}
-                fetchMethod={() => getAllModels()}
-                name="models"
-                value={models || []}
-                multiple={true}
-                isLabel={false}
-                optionLabel="name"
-                options={allModelsOptions}
-              />
-            </div>
           </React.Fragment>
         )}
       </div>
