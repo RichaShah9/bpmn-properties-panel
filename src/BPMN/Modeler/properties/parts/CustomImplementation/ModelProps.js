@@ -260,7 +260,6 @@ export default function ModelProps({ element, index, label }) {
                 setDisplayStatus(displayStatus);
                 setProperty("displayStatus", displayStatus);
                 if (displayStatus === false) {
-                  setProperty("statusTitle", undefined);
                   setDisplayOnAllModels(false);
                   setProperty("displayOnAllModels", false);
                   setModels([]);

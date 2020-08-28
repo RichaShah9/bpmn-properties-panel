@@ -1,6 +1,6 @@
-const commonTabs = ["general", "time-email-tab", "listeners"];
-const defaultTabs = ["general", "time-email-tab"];
-const variableTabs = ["general", "variables", "time-email-tab", "listeners"];
+const commonTabs = ["general", "menu-action-tab", "listeners"];
+const defaultTabs = ["general", "menu-action-tab"];
+const variableTabs = ["general", "variables", "menu-action-tab", "listeners"];
 
 export const tabProperty = [
   {
@@ -198,7 +198,7 @@ export const tabProperty = [
   {
     type: "bpmn:UserTask",
     subType: null || undefined,
-    tabs: ["general", "listeners", "view-attributes", "time-email-tab"],
+    tabs: ["general", "listeners", "view-attributes", "menu-action-tab"],
   },
   {
     type: "bpmn:ManualTask",

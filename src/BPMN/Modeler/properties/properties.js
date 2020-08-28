@@ -324,8 +324,8 @@ function createTimeEmailGroups(
   translate
 ) {
   let timeEmailGroup = {
-    id: "time-email-tab",
-    label: translate("Time/Email"),
+    id: "menu-action-tab",
+    label: translate("Menu/Action"),
     entries: [],
     component: TimeEmailPanel,
   };
@@ -389,8 +389,8 @@ export default function getTabs(
   };
 
   let timeEmailTab = {
-    id: "time-email-tab",
-    label: translate("Time/Email"),
+    id: "menu-action-tab",
+    label: translate("Menu/Action"),
     groups: createTimeEmailGroups(
       element,
       bpmnFactory,
