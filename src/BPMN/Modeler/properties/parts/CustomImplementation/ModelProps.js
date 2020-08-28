@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
-import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 
 import Select from "../../../../../components/Select";
@@ -22,12 +22,14 @@ const CONDITIONAL_SOURCES = [
   "bpmn:SequenceFlow",
   "label",
   "bpmn:IntermediateThrowEvent",
+  "bpmn:Collaboration",
+  "bpmn:Lane",
+  "bpmn:TextAnnotation",
 ];
 
 const TITLE_SOURCES = [
   "bpmn:Process",
   "bpmn:Participant",
-  "bpmn:Collaboration",
   "bpmn:Group",
   "bpmn:SubProcess",
   "bpmn:AdHocSubProcess",
@@ -212,36 +214,40 @@ export default function ModelProps({ element, index, label }) {
             <div className={classes.groupLabel}>{label}</div>
           </React.Fragment>
         )}
-        <label className={classes.label}>{translate("Model")}</label>
-        {!metaJsonModel && (
-          <Select
-            className={classes.select}
-            fetchMethod={() => getMetaModels()}
-            update={(value) => {
-              setMetaModel(value);
-              updateValue("metaModel", value);
-            }}
-            name="metaModel"
-            value={metaModel}
-            optionLabel="name"
-            isLabel={false}
-            placeholder={translate("Model")}
-          />
-        )}
-        {!metaModel && (
-          <Select
-            className={classnames(classes.select, classes.metajsonModel)}
-            fetchMethod={() => getCustomModels()}
-            update={(value) => {
-              setMetaJsonModel(value);
-              updateValue("metaJsonModel", value);
-            }}
-            name="metaJsonModel"
-            value={metaJsonModel}
-            optionLabel="name"
-            placeholder={translate("Custom model")}
-            isLabel={false}
-          />
+        {!["bpmn:Process", "bpmn:Participant"].includes((element && element.type)) && (
+          <React.Fragment>
+            <label className={classes.label}>{translate("Model")}</label>
+            {!metaJsonModel && (
+              <Select
+                className={classes.select}
+                fetchMethod={() => getMetaModels()}
+                update={(value) => {
+                  setMetaModel(value);
+                  updateValue("metaModel", value);
+                }}
+                name="metaModel"
+                value={metaModel}
+                optionLabel="name"
+                isLabel={false}
+                placeholder={translate("Model")}
+              />
+            )}
+            {!metaModel && (
+              <Select
+                className={classnames(classes.select, classes.metajsonModel)}
+                fetchMethod={() => getCustomModels()}
+                update={(value) => {
+                  setMetaJsonModel(value);
+                  updateValue("metaJsonModel", value);
+                }}
+                name="metaJsonModel"
+                value={metaJsonModel}
+                optionLabel="name"
+                placeholder={translate("Custom model")}
+                isLabel={false}
+              />
+            )}
+          </React.Fragment>
         )}
         <div className={classes.container}>
           <Checkbox

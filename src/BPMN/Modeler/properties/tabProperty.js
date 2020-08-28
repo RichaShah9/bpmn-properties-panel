@@ -1,12 +1,15 @@
 const commonTabs = ["general", "menu-action-tab", "listeners"];
 const defaultTabs = ["general", "menu-action-tab"];
 const variableTabs = ["general", "variables", "menu-action-tab", "listeners"];
+const commonTabsWithoutMenuAction = ["general", "listeners"];
+const defaultTabsWithoutMenuAction = ["general"];
+const variableTabsWithoutMenuAction = ["general", "variables", "listeners"];
 
 export const tabProperty = [
   {
     type: "bpmn:Process",
     subType: null || undefined,
-    tabs: ["general", "listeners"],
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:StartEvent",
@@ -21,27 +24,27 @@ export const tabProperty = [
   {
     type: "bpmn:ExclusiveGateway",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:EventBasedGateway",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:InclusiveGateway",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:ComplexGateway",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:ParallelGateway",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:SubProcess",
@@ -91,13 +94,13 @@ export const tabProperty = [
   {
     type: "bpmn:IntermediateThrowEvent",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
 
   {
     type: "bpmn:IntermediateThrowEvent",
     subType: "bpmn:MessageEventDefinition",
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:IntermediateCatchEvent",
@@ -122,12 +125,12 @@ export const tabProperty = [
   {
     type: "bpmn:IntermediateThrowEvent",
     subType: "bpmn:LinkEventDefinition",
-    tabs: defaultTabs,
+    tabs: defaultTabsWithoutMenuAction,
   },
   {
     type: "bpmn:IntermediateThrowEvent",
     subType: "bpmn:CompensateEventDefinition",
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:EndEvent",
@@ -142,7 +145,7 @@ export const tabProperty = [
   {
     type: "bpmn:IntermediateThrowEvent",
     subType: "bpmn:SignalEventDefinition",
-    tabs: variableTabs,
+    tabs: variableTabsWithoutMenuAction,
   },
   {
     type: "bpmn:EndEvent",
@@ -157,7 +160,7 @@ export const tabProperty = [
   {
     type: "bpmn:Participant",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:Group",
@@ -167,17 +170,17 @@ export const tabProperty = [
   {
     type: "bpmn:Lane",
     subType: null || undefined,
-    tabs: defaultTabs,
+    tabs: defaultTabsWithoutMenuAction,
   },
   {
     type: "bpmn:Collaboration",
     subType: null || undefined,
-    tabs: ["general"],
+    tabs: defaultTabsWithoutMenuAction,
   },
   {
     type: "bpmn:SequenceFlow",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
 
   {
@@ -238,7 +241,7 @@ export const tabProperty = [
   {
     type: "bpmn:IntermediateThrowEvent",
     subType: "bpmn:EscalationEventDefinition",
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:EndEvent",
@@ -248,7 +251,7 @@ export const tabProperty = [
   {
     type: "bpmn:TextAnnotation",
     subType: null || undefined,
-    tabs: defaultTabs,
+    tabs: defaultTabsWithoutMenuAction,
   },
   {
     type: "bpmn:Association",
@@ -259,5 +262,5 @@ export const tabProperty = [
     type: "bpmn:Transaction",
     subType: null || undefined,
     tabs: commonTabs,
-  },  
+  },
 ];
