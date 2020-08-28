@@ -18,10 +18,10 @@ import {
 import { Add, Close, ReportProblem } from "@material-ui/icons";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
-import Select from "../../../components/Select";
-import { TextField } from "../properties/components";
-import { getModels, getViews, getItems, getRoles } from "../../../services/api";
-import { translate } from "../../../utils";
+import Select from "../../../../../components/Select";
+import { TextField } from "../../components";
+import { getModels, getViews, getItems, getRoles } from "../../../../../services/api";
+import { translate } from "../../../../../utils";
 
 const Ids = require("ids").default;
 

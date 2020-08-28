@@ -18,7 +18,7 @@ import Service from "../../services/Service";
 import AlertDialog from "../../components/AlertDialog";
 import Tooltip from "../../components/Tooltip";
 import { Tab, Tabs } from "../../components/Tabs";
-import { DeployDialog } from "./views";
+import DeployDialog from "./views/DeployDialog";
 import {
   Textbox,
   TextField,

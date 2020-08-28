@@ -3,10 +3,10 @@ import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
-import Select from "../../../components/Select";
-import { TextField, Checkbox } from "../properties/components";
-import { getParentMenus, getSubMenus, getViews } from "../../../services/api";
-import { translate, getBool } from "../../../utils";
+import Select from "../../../../../components/Select";
+import { TextField, Checkbox } from "../../components";
+import { getParentMenus, getSubMenus, getViews } from "../../../../../services/api";
+import { translate, getBool } from "../../../../../utils";
 
 const useStyles = makeStyles({
   main: {
@@ -31,7 +31,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function TimeEmailPanel({ element }) {
+export default function MenuActionPanel({ element }) {
   const [createUserAction, setCreateUserAction] = useState(false);
   const [deadlineFieldPath, setDeadlineFieldPath] = useState(null);
   const [emailNotification, setEmailNotification] = useState(false);

@@ -43,10 +43,10 @@ import {
   MultiInstanceProps,
   UserTaskProps,
   ModelProps,
+  ViewAttributePanel,
+  MenuActionPanel,
 } from "./parts/CustomImplementation";
 
-import ViewAttributePanel from "../views/ViewAttributePanel";
-import TimeEmailPanel from "../views/TimeEmailPanel";
 // helpers
 
 let isExternalTaskPriorityEnabled = function (element) {
@@ -317,19 +317,19 @@ function createViewAttributsGroups(
   return [viewAttributesGroup];
 }
 
-function createTimeEmailGroups(
+function createMenuActionGroups(
   element,
   bpmnFactory,
   elementRegistry,
   translate
 ) {
-  let timeEmailGroup = {
+  let menuActionGroup = {
     id: "menu-action-tab",
     label: translate("Menu/Action"),
     entries: [],
-    component: TimeEmailPanel,
+    component: MenuActionPanel,
   };
-  return [timeEmailGroup];
+  return [menuActionGroup];
 }
 
 export default function getTabs(
@@ -388,10 +388,10 @@ export default function getTabs(
     ),
   };
 
-  let timeEmailTab = {
+  let menuActionTab = {
     id: "menu-action-tab",
     label: translate("Menu/Action"),
-    groups: createTimeEmailGroups(
+    groups: createMenuActionGroups(
       element,
       bpmnFactory,
       elementRegistry,
@@ -403,7 +403,7 @@ export default function getTabs(
     generalTab,
     viewAttributesTab,
     variablesTab,
-    timeEmailTab,
+    menuActionTab,
     listenersTab,
   ];
   return tabs;

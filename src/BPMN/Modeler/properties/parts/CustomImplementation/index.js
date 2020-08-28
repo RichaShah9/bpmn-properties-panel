@@ -11,6 +11,8 @@ import VariableMapping from "./VariableMapping";
 import MultiInstanceProps from "./MultiInstanceProps.js";
 import UserTaskProps from "./UserTaskProps.js";
 import ModelProps from "./ModelProps.js";
+import ViewAttributePanel from "./ViewAttributePanel";
+import MenuActionPanel from "./MenuActionPanel";
 
 export {
   CallActivityProps,
@@ -26,4 +28,6 @@ export {
   MultiInstanceProps,
   UserTaskProps,
   ModelProps,
+  ViewAttributePanel,
+  MenuActionPanel,
 };
