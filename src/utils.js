@@ -26,4 +26,9 @@ function pascalToKebabCase(string) {
   );
 }
 
-export { download, translate, pascalToKebabCase };
+function getBool(val) {
+  if (!val) return false;
+  return !!JSON.parse(String(val).toLowerCase());
+}
+
+export { download, translate, pascalToKebabCase, getBool };
