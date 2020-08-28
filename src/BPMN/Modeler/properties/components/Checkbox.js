@@ -11,6 +11,9 @@ const useStyles = makeStyles({
     fontWeight: "bolder",
     color: "#666",
   },
+  checkbox:{
+    margin: "3px 3px 3px 0px"
+  }
 });
 
 export default function Checkbox({ entry, element }) {
@@ -38,6 +41,7 @@ export default function Checkbox({ entry, element }) {
         name={modelProperty}
         checked={value}
         onChange={updateValue}
+        className={classes.checkbox}
       />
       <label htmlFor={`camunda-${id}`} className={classes.label}>
         {label}
