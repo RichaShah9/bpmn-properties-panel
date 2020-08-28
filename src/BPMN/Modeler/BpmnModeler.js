@@ -24,11 +24,6 @@ import {
   TextField,
   SelectBox,
   Checkbox,
-  Label,
-  Link,
-  ExtensionElementTable,
-  Table,
-  CustomSelectBox,
 } from "./properties/components";
 import {
   fetchId,

@@ -20,7 +20,12 @@ import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../../../components/Select";
 import { TextField } from "../../components";
-import { getModels, getViews, getItems, getRoles } from "../../../../../services/api";
+import {
+  getModels,
+  getViews,
+  getItems,
+  getRoles,
+} from "../../../../../services/api";
 import { translate } from "../../../../../utils";
 
 const Ids = require("ids").default;
@@ -90,7 +95,14 @@ const useStyles = makeStyles({
   },
   tableHead: {
     padding: "6px !important",
-    fontWeight: 600,
+    fontWeight: "bolder",
+    color: "#666",
+    margin: "3px 0px",
+  },
+  attributes: {
+    fontWeight: "bolder",
+    color: "#666",
+    margin: "3px 0px",
   },
   iconButton: {
     margin: "5px 0px 5px 5px",
@@ -484,7 +496,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
                             )}
                             <Grid container alignItems="center">
                               <Grid item xs={6}>
-                                <Typography style={{ fontWeight: 600 }}>
+                                <Typography className={classes.attributes}>
                                   Attributes
                                 </Typography>
                               </Grid>
