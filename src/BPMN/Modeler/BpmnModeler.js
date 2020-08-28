@@ -628,23 +628,10 @@ function BpmnModelerComponent() {
         return (
           <Textbox isResizable={true} entry={entry} element={selectedElement} />
         );
-      case "comboBox":
       case "selectBox":
         return <SelectBox entry={entry} element={selectedElement} />;
       case "checkbox":
         return <Checkbox entry={entry} element={selectedElement} />;
-      case "label":
-        return <Label entry={entry} element={selectedElement} />;
-      case "link":
-        return <Link entry={entry} element={selectedElement} />;
-      case "extensionElementTable":
-        return (
-          <ExtensionElementTable entry={entry} element={selectedElement} />
-        );
-      case "table":
-        return <Table entry={entry} />;
-      case "customSelectBox":
-        return <CustomSelectBox entry={entry} element={selectedElement} />;
       default:
         return <Textbox entry={entry} element={selectedElement} />;
     }
