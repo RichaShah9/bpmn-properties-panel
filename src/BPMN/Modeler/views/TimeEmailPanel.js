@@ -84,22 +84,19 @@ export default function TimeEmailPanel({ element }) {
   };
 
   const addModels = (values) => {
-    const modelIds = [],
+    const 
       modelNames = [];
     if (Array.isArray(values)) {
       values &&
         values.forEach((value) => {
           if (!value) {
-            setProperty("modelIds", undefined);
             setProperty("modelNames", undefined);
             return;
           }
-          modelIds.push(value.id);
           modelNames.push(value.name);
         });
     }
-    if (modelIds.length > 0 && modelNames.length > 0) {
-      setProperty("modelIds", modelIds.toString());
+    if (modelNames.length > 0) {
       setProperty("modelNames", modelNames.toString());
     }
   };
@@ -107,11 +104,9 @@ export default function TimeEmailPanel({ element }) {
   const updateValue = (name, value, optionLabel = "name") => {
     if (!value) {
       setProperty(name, undefined);
-      setProperty(`${name}Id`, undefined);
       return;
     }
     setProperty(name, value[optionLabel]);
-    setProperty(`${name}Id`, value.id);
   };
 
   const updateMenuValue = (name, value, label, optionLabel = "name") => {
@@ -138,12 +133,11 @@ export default function TimeEmailPanel({ element }) {
 
   const getSelectValue = React.useCallback(
     (name) => {
-      let id = getProperty(`${name}Id`);
       let label = getProperty(`${name}Label`);
-      let fullName = getProperty(`${name}Model`);
+      let fullName = getProperty(`${name}ModelName`);
       let newName = getProperty(name);
-      if (id) {
-        let value = { id: id, name: newName };
+      if (newName) {
+        let value = { name: newName };
         if (label) {
           value.title = label;
         }
@@ -227,7 +221,6 @@ export default function TimeEmailPanel({ element }) {
     const statusTitle = getProperty("statusTitle");
     const displayStatus = getProperty("displayStatus");
     const applyAllModels = getProperty("applyAllModels");
-    const modelIds = getProperty("modelIds");
     const modelNames = getProperty("modelNames");
     const deadlineFieldPath = getProperty("deadlineFieldPath");
     const tagCount = getProperty("tagCount");
@@ -263,14 +256,12 @@ export default function TimeEmailPanel({ element }) {
     setUserFormView(userFormView);
     setUserGridView(userGridView);
 
-    if (modelIds && modelNames) {
-      const ids = modelIds.split(",");
+    if (modelNames) {
       const names = modelNames.split(",");
-      ids &&
-        ids.forEach((id, index) => {
+      names &&
+        names.forEach((name) => {
           models.push({
-            id: id,
-            name: names && names[index],
+            name: name,
           });
         });
       setModels(models);
@@ -305,18 +296,13 @@ export default function TimeEmailPanel({ element }) {
           "newMenu",
           "menuName",
           "menuParent",
-          "menuParentId",
           "menuParentLabel",
           "position",
-          "positionId",
           "positionMenu",
-          "positionMenuId",
           "positionMenuLabel",
           "tagCount",
           "formView",
-          "formViewId",
           "gridView",
-          "gridViewId",
         ]);
       }
 
@@ -329,18 +315,13 @@ export default function TimeEmailPanel({ element }) {
           "newUserMenu",
           "userMenuName",
           "userParentMenu",
-          "userParentMenuId",
           "userParentMenuLabel",
           "userPosition",
-          "userPositionId",
           "userPositionMenu",
-          "userPositionMenuId",
           "userPositionMenuLabel",
           "userTagCount",
           "userFormView",
-          "userFormViewId",
           "userGridView",
-          "userGridViewId",
         ]);
       }
     };
@@ -594,7 +575,7 @@ export default function TimeEmailPanel({ element }) {
                   className={classes.select}
                   update={(value, label) => {
                     setGridView(value);
-                    updateMenuValue("gridView", value, label);
+                    updateValue("gridView", value);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria, "grid")}
                   name="gridView"
@@ -610,7 +591,7 @@ export default function TimeEmailPanel({ element }) {
                   className={classes.select}
                   update={(value, label) => {
                     setFormView(value);
-                    updateMenuValue("formView", value, label);
+                    updateValue("formView", value);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria)}
                   name="formView"
@@ -766,7 +747,7 @@ export default function TimeEmailPanel({ element }) {
                   className={classes.select}
                   update={(value, label) => {
                     setUserGridView(value);
-                    updateMenuValue("userGridView", value, label);
+                    updateValue("userGridView", value);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria, "grid")}
                   name="userGridView"
@@ -782,7 +763,7 @@ export default function TimeEmailPanel({ element }) {
                   className={classes.select}
                   update={(value, label) => {
                     setUserFormView(value);
-                    updateMenuValue("userFormView", value, label);
+                    updateValue("userFormView", value);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria)}
                   name="userFormView"

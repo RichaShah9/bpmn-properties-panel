@@ -107,22 +107,19 @@ export default function ModelProps({ element, index, label }) {
   const updateValue = (name, value, optionLabel = "name") => {
     if (!value) {
       setProperty(name, undefined);
-      setProperty(`${name}Id`, undefined);
-      setProperty(`${name}Model`, undefined);
+      setProperty(`${name}ModelName`, undefined);
       return;
     }
     setProperty(name, value[optionLabel]);
-    setProperty(`${name}Id`, value.id);
-    setProperty(`${name}Model`, value["fullName"] || value["name"]);
+    setProperty(`${name}ModelName`, value["fullName"] || value["name"]);
   };
 
   const getSelectValue = React.useCallback(
     (name) => {
-      let id = getProperty(`${name}Id`);
       let label = getProperty(`${name}Label`);
       let newName = getProperty(name);
-      if (id) {
-        let value = { id: id, name: newName };
+      if (newName) {
+        let value = {  name: newName };
         if (label) {
           value.title = label;
         }
