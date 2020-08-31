@@ -214,13 +214,29 @@ export async function getWkfModel(processId) {
   });
   const { data = [] } = res || {};
   const model = data[0];
-  // if (!model) {
-  //   let resModel = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
-  //     name: "Model",
-  //   });
-  //   const { data = [] } = resModel || {};
-  //   const wkfModel = data[0] || {};
-  //   return wkfModel;
-  // }
+  return model;
+}
+
+export async function getDMNModel(decisionId) {
+  if(!decisionId) return
+  const res = await Service.search("com.axelor.apps.bpm.db.WkfDmnModel", {
+    data: {
+      _domain: null,
+      _domainContext: {
+        _id: null,
+        _model: "com.axelor.apps.bpm.db.WkfDmnModel",
+      },
+      operator: "and",
+      criteria: [
+        {
+          fieldName: "dmnTableList.decisionId",
+          operator: "=",
+          value: decisionId,
+        },
+      ],
+    },
+  });
+  const { data = [] } = res || {};
+  const model = data[0];
   return model;
 }
