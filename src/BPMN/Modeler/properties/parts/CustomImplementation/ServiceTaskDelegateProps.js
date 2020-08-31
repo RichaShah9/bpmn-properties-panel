@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import ImplementationTypeHelper from "bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import { makeStyles } from "@material-ui/core/styles";
 import { is } from "bpmn-js/lib/util/ModelUtil";
 
+import { getDMNModel } from "../../../../../services/api";
 import { SelectBox, TextField } from "../../components";
 import { translate } from "../../../../../utils";
 
@@ -70,6 +72,18 @@ const useStyles = makeStyles({
     marginTop: 15,
     borderTop: "1px dotted #ccc",
   },
+  linkIcon: {
+    color: "#58B423",
+    marginLeft: 5,
+  },
+  link: {
+    cursor: "pointer",
+  },
+  dmn: {
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+  },
 });
 
 const implementationOptions = [
@@ -88,6 +102,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
   const [implementationType, setImplementationType] = useState("");
   const [bindingType, setBindingType] = useState("latest");
   const [resultVariable, setResultVariable] = useState(null);
+  const [dmnModel, setDmnModel] = useState(null);
   const classes = useStyles();
 
   const getPropertyValue = (propertyName) => {
@@ -98,6 +113,11 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
   const setPropertyValue = (propertyName, value) => {
     const bo = getBusinessObject(element);
     bo[propertyName] = value;
+  };
+
+  const updateModel = async (decisionRef) => {
+    const dmnModel = await getDMNModel(decisionRef);
+    setDmnModel(dmnModel);
   };
 
   useEffect(() => {
@@ -120,6 +140,15 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
     }
     setImplementationType(type);
   }, [element]);
+
+  useEffect(() => {
+    if (implementationType === "dmn") {
+      const bo = getBusinessObject(element);
+      if (bo && bo.decisionRef) {
+        updateModel(bo.decisionRef);
+      }
+    }
+  }, [element, implementationType]);
 
   useEffect(() => {
     if (isServiceTaskLike(getBusinessObject(element))) {
@@ -308,32 +337,50 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
         )}
         {implementationType === "dmn" && (
           <React.Fragment>
-            <TextField
-              element={element}
-              entry={{
-                id: "decisionRef",
-                label: translate("Decision Ref"),
-                modelProperty: "decisionRef",
-                get: function () {
-                  const bo = getBusinessObject(element);
-                  return { decisionRef: bo.decisionRef };
-                },
-                set: function (e, values) {
-                  element.businessObject.decisionRef = values.decisionRef;
-                  element.businessObject.class = undefined;
-                  element.businessObject.expression = undefined;
-                  element.businessObject.resultVariable = undefined;
-                  element.businessObject.delegateExpression = undefined;
-                  element.businessObject.topic = undefined;
-                },
-                validate: function (e, values) {
-                  if (!values.decisionRef) {
-                    return { decisionRef: "Must provide a value" };
-                  }
-                },
-              }}
-              canRemove={true}
-            />
+            <div className={classes.dmn}>
+              <TextField
+                element={element}
+                entry={{
+                  id: "decisionRef",
+                  label: translate("Decision Ref"),
+                  modelProperty: "decisionRef",
+                  get: function () {
+                    const bo = getBusinessObject(element);
+                    return { decisionRef: bo.decisionRef };
+                  },
+                  set: function (e, values) {
+                    element.businessObject.decisionRef = values.decisionRef;
+                    element.businessObject.class = undefined;
+                    element.businessObject.expression = undefined;
+                    element.businessObject.resultVariable = undefined;
+                    element.businessObject.delegateExpression = undefined;
+                    element.businessObject.topic = undefined;
+                    updateModel(values.decisionRef);
+                  },
+                  validate: function (e, values) {
+                    if (!values.decisionRef) {
+                      return { decisionRef: "Must provide a value" };
+                    }
+                  },
+                }}
+                canRemove={true}
+              />
+              {dmnModel && (
+                <div
+                  onClick={() => {
+                    window.top.document
+                      .getElementsByTagName("iframe")[0]
+                      .contentWindow.parent.axelor.$openHtmlTab(
+                        `wkf-editor/?type=dmn&id=${dmnModel && dmnModel.id}`,
+                        translate("DMN editor")
+                      );
+                  }}
+                  className={classes.link}
+                >
+                  <OpenInNewIcon className={classes.linkIcon} />
+                </div>
+              )}
+            </div>
             <SelectBox
               element={element}
               entry={{

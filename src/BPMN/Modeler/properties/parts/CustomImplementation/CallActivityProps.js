@@ -278,7 +278,7 @@ export default function CallActivityProps({
                     .getElementsByTagName("iframe")[0]
                     .contentWindow.parent.axelor.$openHtmlTab(
                       `wkf-editor/?id=${wkfModel && wkfModel.id}`,
-                      "Wkf editor"
+                      translate("BPM editor")
                     );
                 }}
                 className={classes.link}
