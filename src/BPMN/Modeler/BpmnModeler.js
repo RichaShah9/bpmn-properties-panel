@@ -8,6 +8,7 @@ import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import Alert from "@material-ui/lab/Alert";
+import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -44,6 +45,21 @@ import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css";
 import "../css/bpmn.css";
 
 const drawerWidth = 380;
+
+const CONDITIONAL_SOURCES = [
+  "bpmn:EventBasedGateway",
+  "bpmn:ExclusiveGateway",
+  "bpmn:InclusiveGateway",
+  "bpmn:ComplexGateway",
+  "bpmn:ParallelGateway",
+  "bpmn:SequenceFlow",
+  "label",
+  "bpmn:IntermediateThrowEvent",
+  "bpmn:Collaboration",
+  "bpmn:Lane",
+  "bpmn:TextAnnotation",
+  "bpmn:MessageFlow",
+];
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -106,6 +122,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 let bpmnModeler = null;
+
+function isConditionalSource(element) {
+  return isAny(element, CONDITIONAL_SOURCES);
+}
 
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
@@ -178,6 +198,27 @@ function BpmnModelerComponent() {
       setSelectedElement(element);
       let tabs = getTabs(bpmnModeler, element);
       setTabs(tabs);
+      let elementRegistry = bpmnModeler.get("elementRegistry");
+      let nodes = elementRegistry && elementRegistry._elements;
+      if (!nodes) return;
+      Object.entries(nodes).forEach(([key, value]) => {
+        if (!value) return;
+        const { element } = value;
+        if (!element) return;
+        if (["Shape", "Root"].includes(element.constructor.name)) {
+          let bo = element.businessObject;
+          if (!bo) return;
+          if (isConditionalSource(element)) return;
+          if (bo.$attrs["camunda:displayStatus"] === "false") return;
+          if (
+            bo.$attrs &&
+            (bo.$attrs["camunda:displayStatus"] === undefined ||
+              bo.$attrs["camunda:displayStatus"] === null)
+          ) {
+            bo.$attrs["camunda:displayStatus"] = true;
+          }
+        }
+      });
     });
   },
   []);

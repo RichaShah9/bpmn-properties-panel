@@ -25,6 +25,7 @@ const CONDITIONAL_SOURCES = [
   "bpmn:Collaboration",
   "bpmn:Lane",
   "bpmn:TextAnnotation",
+  "bpmn:MessageFlow",
 ];
 
 const TITLE_SOURCES = [
@@ -102,7 +103,7 @@ export default function ModelProps({ element, index, label }) {
     } else {
       bo.$attrs = { [propertyName]: value };
     }
-    if (!value) {
+    if (value === undefined) {
       delete bo.$attrs[propertyName];
     }
   };
@@ -172,7 +173,6 @@ export default function ModelProps({ element, index, label }) {
     const displayOnModels = getProperty("displayOnModels");
     const displayStatus = getProperty("displayStatus");
     setDisplayStatus(getBool(displayStatus));
-
     setMetaModel(metaModel);
     setMetaJsonModel(metaJsonModel);
     const models = [];

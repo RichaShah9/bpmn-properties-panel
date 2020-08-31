@@ -255,11 +255,9 @@ function createGeneralTabGroups(
   groups.push(linkProps);
   groups.push(callActivityProps);
   groups.push(eventProps);
-  // groups.push(errorProps);
   groups.push(conditionalProps);
   groups.push(startEventInitiator);
   groups.push(modelProps);
-  // groups.push(detailsGroup);
   groups.push(multiInstanceGroup);
 
   if (element.type !== "bpmn:Process") {
