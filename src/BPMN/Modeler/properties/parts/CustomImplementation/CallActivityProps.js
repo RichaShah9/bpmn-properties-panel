@@ -9,11 +9,6 @@ import { TextField, SelectBox, Checkbox } from "../../components";
 import { translate } from "../../../../../utils";
 import { getWkfModel } from "../../../../../services/api";
 
-const baseURL =
-  process.env.NODE_ENV === "production"
-    ? ".."
-    : "http://vps818119.ovh.net:8081/aos-wip";
-
 const useStyles = makeStyles({
   groupLabel: {
     fontWeight: "bolder",
@@ -29,15 +24,18 @@ const useStyles = makeStyles({
     marginTop: 15,
     borderTop: "1px dotted #ccc",
   },
-  bpmn:{
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
+  bpmn: {
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
   },
-  linkIcon:{
+  linkIcon: {
     color: "#58B423",
-    marginLeft: 5
-  }
+    marginLeft: 5,
+  },
+  link: {
+    cursor: "pointer",
+  },
 });
 
 const bindingOptions = [
@@ -274,13 +272,19 @@ export default function CallActivityProps({
               canRemove={true}
             />
             {wkfModel && (
-              <a
-                href={`${baseURL}/wkf-editor/?id=${wkfModel && wkfModel.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <div
+                onClick={() => {
+                  window.top.document
+                    .getElementsByTagName("iframe")[0]
+                    .contentWindow.parent.axelor.$openHtmlTab(
+                      `wkf-editor/?id=${wkfModel && wkfModel.id}`,
+                      "Wkf editor"
+                    );
+                }}
+                className={classes.link}
               >
                 <OpenInNewIcon className={classes.linkIcon} />
-              </a>
+              </div>
             )}
           </div>
         )}
