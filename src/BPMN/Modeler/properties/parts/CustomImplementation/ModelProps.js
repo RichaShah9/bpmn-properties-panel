@@ -83,9 +83,8 @@ export default function ModelProps({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
   const [metaModel, setMetaModel] = useState(null);
   const [metaJsonModel, setMetaJsonModel] = useState(null);
-  const [displayOnAllModels, setDisplayOnAllModels] = useState(false);
   const [models, setModels] = useState([]);
-  const [displayStatus, setDisplayStatus] = useState(false);
+  const [displayStatus, setDisplayStatus] = useState(true);
   const classes = useStyles();
 
   const subType =
@@ -162,16 +161,6 @@ export default function ModelProps({ element, index, label }) {
   );
 
   useEffect(() => {
-    return () => {
-      const bo = getBusinessObject(element);
-      if (!bo || !bo.$attrs) return;
-      if (bo.$attrs["camunda:displayOnAllModels"] === true) {
-        delete bo.$attrs[`camunda:displayOnModels`];
-      }
-    };
-  }, [element]);
-
-  useEffect(() => {
     if (!isConditionalSource(element)) {
       setVisible(true);
     }
@@ -180,10 +169,8 @@ export default function ModelProps({ element, index, label }) {
   useEffect(() => {
     const metaModel = getSelectValue("metaModel");
     const metaJsonModel = getSelectValue("metaJsonModel");
-    const displayOnAllModels = getProperty("displayOnAllModels");
     const displayOnModels = getProperty("displayOnModels");
     const displayStatus = getProperty("displayStatus");
-    setDisplayOnAllModels(getBool(displayOnAllModels));
     setDisplayStatus(getBool(displayStatus));
 
     setMetaModel(metaModel);
@@ -214,7 +201,9 @@ export default function ModelProps({ element, index, label }) {
             <div className={classes.groupLabel}>{label}</div>
           </React.Fragment>
         )}
-        {!["bpmn:Process", "bpmn:Participant"].includes((element && element.type)) && (
+        {!["bpmn:Process", "bpmn:Participant"].includes(
+          element && element.type
+        ) && (
           <React.Fragment>
             <label className={classes.label}>{translate("Model")}</label>
             {!metaJsonModel && (
@@ -266,8 +255,6 @@ export default function ModelProps({ element, index, label }) {
                 setDisplayStatus(displayStatus);
                 setProperty("displayStatus", displayStatus);
                 if (displayStatus === false) {
-                  setDisplayOnAllModels(false);
-                  setProperty("displayOnAllModels", false);
                   setModels([]);
                   addModels([]);
                 }
@@ -276,46 +263,24 @@ export default function ModelProps({ element, index, label }) {
           />
           {displayStatus && (
             <React.Fragment>
-              <Checkbox
-                element={element}
-                entry={{
-                  id: "displayOnAllModels",
-                  label: translate("Display on all models"),
-                  modelProperty: "displayOnAllModels",
-                  get: function () {
-                    return {
-                      displayOnAllModels: displayOnAllModels || false,
-                    };
-                  },
-                  set: function (e, value) {
-                    setDisplayOnAllModels(!value.displayOnAllModels);
-                    setProperty(
-                      "displayOnAllModels",
-                      !value.displayOnAllModels
-                    );
-                  },
-                }}
-              />
-              {!displayOnAllModels && (
-                <div className={classes.allModels}>
-                  <label className={classes.label}>
-                    {translate("Display on models")}
-                  </label>
-                  <Select
-                    className={classes.select}
-                    update={(value) => {
-                      setModels(value);
-                      addModels(value);
-                    }}
-                    fetchMethod={() => getAllModels()}
-                    name="models"
-                    value={models || []}
-                    multiple={true}
-                    isLabel={false}
-                    optionLabel="name"
-                  />
-                </div>
-              )}
+              <div className={classes.allModels}>
+                <label className={classes.label}>
+                  {translate("Display on models")}
+                </label>
+                <Select
+                  className={classes.select}
+                  update={(value) => {
+                    setModels(value);
+                    addModels(value);
+                  }}
+                  fetchMethod={() => getAllModels()}
+                  name="models"
+                  value={models || []}
+                  multiple={true}
+                  isLabel={false}
+                  optionLabel="name"
+                />
+              </div>
             </React.Fragment>
           )}
         </div>
