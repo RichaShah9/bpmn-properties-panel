@@ -120,6 +120,8 @@ h1 {
   align-items: center;
   justify-content: left;
   padding: 20px 20px 0px 20px;
+  position: relative;
+  width: 50px;
 }
 
 .zoom-buttons {
@@ -133,26 +135,6 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-#resize-handler {
-  position: absolute;
-  width: 380px;
-  height: 100%;
-  right: 0;
-  background-color: #f8f8f8;
-  max-width: calc(100% - 29.5px);
-  overflow: hidden;
-}
-
-#resize-handler:after {
-  content: " ";
-  background-color: #ccc;
-  position: absolute;
-  left: 0;
-  width: 1px;
-  height: 100%;
-  cursor: w-resize;
 }
 
 .snackbarAlert {

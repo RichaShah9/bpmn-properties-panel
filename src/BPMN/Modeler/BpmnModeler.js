@@ -13,6 +13,7 @@ import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Drawer, Typography } from "@material-ui/core";
+import { Resizable } from "re-resizable";
 
 import propertiesCustomProviderModule from "./custom-provider";
 import Service from "../../services/Service";
@@ -43,6 +44,14 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
 import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css";
 import "../css/bpmn.css";
+
+const resizeStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderLeft: "solid 1px #ddd",
+  background: "#f0f0f0",
+};
 
 const drawerWidth = 380;
 
@@ -76,7 +85,7 @@ const useStyles = makeStyles((theme) => ({
   },
   drawerPaper: {
     background: "#F8F8F8",
-    width: "calc(100% - 1px)",
+    width: "100%",
     position: "absolute",
     borderLeft: "1px solid #ccc",
     overflow: "auto",
@@ -146,7 +155,8 @@ function BpmnModelerComponent() {
   const [selectedElement, setSelectedElement] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [tabs, setTabs] = useState([]);
-
+  const [width, setWidth] = useState(drawerWidth);
+  const [height, setHeight] = useState("100%");
   const classes = useStyles();
 
   const handleChange = (event, newValue) => {
@@ -650,7 +660,10 @@ function BpmnModelerComponent() {
   };
 
   const setCSSWidth = (width) => {
-    document.documentElement.style.setProperty("--bpmn-container-width", width);
+    document.documentElement.style.setProperty(
+      "--bpmn-container-width",
+      `${width}px`
+    );
     setDrawerOpen(width === "0px" ? false : true);
   };
 
@@ -755,39 +768,6 @@ function BpmnModelerComponent() {
   }, [fetchDiagram]);
 
   useEffect(() => {
-    const BORDER_SIZE = 4;
-    const panel = document.getElementById("resize-handler");
-    if (!panel) return;
-    let m_pos;
-    function resize(e) {
-      const dx = m_pos - e.x;
-      m_pos = e.x;
-      panel.style.width =
-        parseInt(getComputedStyle(panel, "").width) + dx + "px";
-      setCSSWidth(panel.style.width);
-    }
-
-    panel.addEventListener(
-      "mousedown",
-      function (e) {
-        if (e.offsetX < BORDER_SIZE) {
-          m_pos = e.x;
-          document.addEventListener("mousemove", resize, false);
-        }
-      },
-      false
-    );
-
-    document.addEventListener(
-      "mouseup",
-      function () {
-        document.removeEventListener("mousemove", resize, false);
-      },
-      false
-    );
-  });
-
-  useEffect(() => {
     if (!bpmnModeler) return;
     bpmnModeler.on("element.click", (event) => {
       updateTabs(event);
@@ -843,15 +823,22 @@ function BpmnModelerComponent() {
         <div
           className="bpmn-property-toggle"
           onClick={() => {
-            let element = document.getElementById("resize-handler");
-            element.style.width =
-              parseInt(element.style.width, 10) > 4 ? 0 : "380px";
-            setCSSWidth(element.style.width);
+            setWidth((width) => (width === 0 ? 380 : 0));
+            setCSSWidth(width === 0 ? 380 : 0);
           }}
         >
           Properties Panel
         </div>
-        <div id="resize-handler" style={{ width: 380 }}>
+        <Resizable
+          style={resizeStyle}
+          size={{ width, height }}
+          onResizeStop={(e, direction, ref, d) => {
+            setWidth((width) => width + d.width);
+            setHeight(height + d.height);
+            setCSSWidth(width + d.width);
+          }}
+          maxWidth={window.innerWidth - 150}
+        >
           <Drawer
             variant="persistent"
             anchor="right"
@@ -887,11 +874,8 @@ function BpmnModelerComponent() {
               </React.Fragment>
             </div>
           </Drawer>
-          <div
-            className="properties-panel-parent"
-            id="js-properties-panel"
-          ></div>
-        </div>
+        </Resizable>
+        <div className="properties-panel-parent" id="js-properties-panel"></div>
       </div>
       {openSnackbar.open && (
         <Snackbar
