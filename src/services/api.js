@@ -187,9 +187,12 @@ export async function getParentMenus() {
 }
 
 export async function getSubMenus(parentMenu) {
+  if (!parentMenu || !parentMenu.id) return;
   const res = await Service.search("com.axelor.meta.db.MetaMenu", {
     data: {
-      criteria: [{ fieldName: "parent", operator: "=", value: parentMenu }],
+      criteria: [
+        { fieldName: "parent.id", operator: "=", value: parentMenu.id },
+      ],
       operator: "and",
     },
   });
@@ -218,7 +221,7 @@ export async function getWkfModel(processId) {
 }
 
 export async function getDMNModel(decisionId) {
-  if(!decisionId) return
+  if (!decisionId) return;
   const res = await Service.search("com.axelor.apps.bpm.db.WkfDmnModel", {
     data: {
       _domain: null,
