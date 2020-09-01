@@ -182,7 +182,11 @@ export const tabProperty = [
     subType: null || undefined,
     tabs: commonTabsWithoutMenuAction,
   },
-
+  {
+    type: "bpmn:MessageFlow",
+    subType: null || undefined,
+    tabs: defaultTabsWithoutMenuAction,
+  },
   {
     type: "bpmn:Task",
     subType: null || undefined,
