@@ -59,6 +59,7 @@ const CONDITIONAL_SOURCES = [
   "bpmn:Lane",
   "bpmn:TextAnnotation",
   "bpmn:MessageFlow",
+  "bpmn:Participant",
 ];
 
 const useStyles = makeStyles((theme) => ({

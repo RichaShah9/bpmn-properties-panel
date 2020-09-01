@@ -80,7 +80,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ModelProps({ element, index, label }) {
+export default function ModelProps({ element, index, label, bpmnModeler }) {
   const [isVisible, setVisible] = useState(false);
   const [metaModel, setMetaModel] = useState(null);
   const [metaJsonModel, setMetaJsonModel] = useState(null);
@@ -95,7 +95,10 @@ export default function ModelProps({ element, index, label }) {
     element.businessObject.eventDefinitions[0].$type;
 
   const setProperty = (name, value) => {
-    const bo = getBusinessObject(element);
+    let bo = getBusinessObject(element);
+    if ((element && element.type) === "bpmn:Participant") {
+      bo = getBusinessObject(bo.processRef);
+    }
     let propertyName = `camunda:${name}`;
     if (!bo) return;
     if (bo.$attrs) {
@@ -111,7 +114,10 @@ export default function ModelProps({ element, index, label }) {
   const getProperty = React.useCallback(
     (name) => {
       let propertyName = `camunda:${name}`;
-      const bo = getBusinessObject(element);
+      let bo = getBusinessObject(element);
+      if ((element && element.type) === "bpmn:Participant") {
+        bo = getBusinessObject(bo.processRef);
+      }
       return (bo.$attrs && bo.$attrs[propertyName]) || "";
     },
     [element]
@@ -130,8 +136,12 @@ export default function ModelProps({ element, index, label }) {
   const addModels = (values) => {
     const displayOnModels = [];
     if (Array.isArray(values)) {
+      if(values && values.length === 0){
+        setProperty("displayOnModels", undefined);
+        return
+      }
       values &&
-        values.forEach((value) => {
+      values.forEach((value) => {
           if (!value) {
             setProperty("displayOnModels", undefined);
             return;
