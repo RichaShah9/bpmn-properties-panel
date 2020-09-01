@@ -10,6 +10,7 @@ import {
   getCustomModels,
   getMetaModels,
   getAllModels,
+  getViews,
 } from "../../../../../services/api";
 import { translate, getBool } from "../../../../../utils";
 
@@ -86,6 +87,9 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
   const [metaJsonModel, setMetaJsonModel] = useState(null);
   const [models, setModels] = useState([]);
   const [displayStatus, setDisplayStatus] = useState(true);
+  const [defaultForm, setDefaultForm] = useState(null);
+  const [formViews, setFormViews] = useState(null);
+  const [isDefaultFormVisible, setDefaultFormVisible] = useState(false);
   const classes = useStyles();
 
   const subType =
@@ -94,22 +98,25 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
     element.businessObject.eventDefinitions[0] &&
     element.businessObject.eventDefinitions[0].$type;
 
-  const setProperty = (name, value) => {
-    let bo = getBusinessObject(element);
-    if ((element && element.type) === "bpmn:Participant") {
-      bo = getBusinessObject(bo.processRef);
-    }
-    let propertyName = `camunda:${name}`;
-    if (!bo) return;
-    if (bo.$attrs) {
-      bo.$attrs[propertyName] = value;
-    } else {
-      bo.$attrs = { [propertyName]: value };
-    }
-    if (value === undefined) {
-      delete bo.$attrs[propertyName];
-    }
-  };
+  const setProperty = React.useCallback(
+    (name, value) => {
+      let bo = getBusinessObject(element);
+      if ((element && element.type) === "bpmn:Participant") {
+        bo = getBusinessObject(bo.processRef);
+      }
+      let propertyName = `camunda:${name}`;
+      if (!bo) return;
+      if (bo.$attrs) {
+        bo.$attrs[propertyName] = value;
+      } else {
+        bo.$attrs = { [propertyName]: value };
+      }
+      if (value === undefined) {
+        delete bo.$attrs[propertyName];
+      }
+    },
+    [element]
+  );
 
   const getProperty = React.useCallback(
     (name) => {
@@ -123,25 +130,52 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
     [element]
   );
 
+  const getFormViews = React.useCallback(
+    async (value, name) => {
+      if (!value) return;
+      const formViews = await getViews(
+        name === "metaModel"
+          ? { ...(value || {}), type: "metaModel" }
+          : {
+              ...(value || {}),
+              type: "metaJsonModel",
+            },
+        []
+      );
+      setFormViews(formViews);
+      if (formViews && (formViews.length === 1 || formViews.length === 0)) {
+        setDefaultFormVisible(false);
+        setProperty("defaultForm", formViews[0] && formViews[0]["name"]);
+        return;
+      }
+      setDefaultFormVisible(true);
+    },
+    [setProperty]
+  );
+
   const updateValue = (name, value, optionLabel = "name") => {
     if (!value) {
       setProperty(name, undefined);
       setProperty(`${name}ModelName`, undefined);
+      setProperty("defaultForm", undefined);
+      setDefaultForm(null);
+      setDefaultFormVisible(false);
       return;
     }
     setProperty(name, value[optionLabel]);
     setProperty(`${name}ModelName`, value["fullName"] || value["name"]);
+    getFormViews(value, name);
   };
 
   const addModels = (values) => {
     const displayOnModels = [];
     if (Array.isArray(values)) {
-      if(values && values.length === 0){
+      if (values && values.length === 0) {
         setProperty("displayOnModels", undefined);
-        return
+        return;
       }
       values &&
-      values.forEach((value) => {
+        values.forEach((value) => {
           if (!value) {
             setProperty("displayOnModels", undefined);
             return;
@@ -179,12 +213,20 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
 
   useEffect(() => {
     const metaModel = getSelectValue("metaModel");
+    const metaModelName = getSelectValue("metaModelModelName");
     const metaJsonModel = getSelectValue("metaJsonModel");
     const displayOnModels = getProperty("displayOnModels");
     const displayStatus = getProperty("displayStatus");
+    const defaultForm = getProperty("defaultForm");
     setDisplayStatus(getBool(displayStatus));
     setMetaModel(metaModel);
     setMetaJsonModel(metaJsonModel);
+    setDefaultForm(defaultForm);
+    const model = metaModel ? "metaModel" : "metaJsonModel";
+    const value = metaModel
+      ? { ...(metaModel || {}), fullName: metaModelName && metaModelName.name }
+      : { ...(metaJsonModel || {}) };
+    getFormViews(value, model);
     const models = [];
     if (displayOnModels) {
       const names = displayOnModels.split(",");
@@ -196,7 +238,7 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
         });
       setModels(models);
     }
-  }, [getProperty, getSelectValue]);
+  }, [getProperty, getSelectValue, getFormViews]);
 
   return (
     isVisible && (
@@ -245,6 +287,26 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
                 placeholder={translate("Custom model")}
                 isLabel={false}
               />
+            )}
+            {isDefaultFormVisible && (
+              <React.Fragment>
+                <label className={classes.label}>
+                  {translate("Default form")}
+                </label>
+                <Select
+                  className={classes.select}
+                  update={(value) => {
+                    setDefaultForm(value);
+                    setProperty("defaultForm", value ? value.name : undefined);
+                  }}
+                  options={formViews}
+                  name="defaultForm"
+                  value={defaultForm}
+                  optionLabel="name"
+                  label={translate("Default form")}
+                  isLabel={false}
+                />
+              </React.Fragment>
             )}
           </React.Fragment>
         )}
