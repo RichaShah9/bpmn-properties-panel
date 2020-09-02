@@ -8,6 +8,7 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     marginTop: 5,
+    marginBottom: 5
   },
   add: {
     backgroundColor: "#f8f8f8",
@@ -32,6 +33,7 @@ const useStyles = makeStyles({
     verticalAlign: "middle",
     color: "#666",
     marginBottom: 3,
+    marginRight: 10
   },
   tableHead: {
     display: "table-row",
@@ -76,13 +78,13 @@ export default function Table({ entry }) {
     setOptions([
       ...(options || []),
       {
-        name: "",
-        value: "",
+        key: undefined,
+        value: undefined,
       },
     ]);
     addElement({
-      name: "",
-      value: "",
+      key: undefined,
+      value: undefined,
     });
   };
 
@@ -90,14 +92,14 @@ export default function Table({ entry }) {
     const cloneOptions = [...(options || [])];
     cloneOptions.splice(optionIndex, 1);
     setOptions([...(cloneOptions || [])]);
-    removeElement(cloneOptions);
+    removeElement(optionIndex);
   };
 
   const update = (value, label, optionIndex) => {
     const cloneOptions = [...(options || [])];
     cloneOptions[optionIndex][label] = value;
     setOptions(cloneOptions);
-    updateElement(cloneOptions);
+    updateElement(value, label, optionIndex);
   };
 
   useEffect(() => {
