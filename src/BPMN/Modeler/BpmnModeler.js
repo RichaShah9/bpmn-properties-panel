@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import find from "lodash/find";
 import BpmnModeler from "bpmn-js/lib/Modeler";
-import camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
 import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
@@ -16,6 +15,7 @@ import { Drawer, Typography } from "@material-ui/core";
 import { Resizable } from "re-resizable";
 
 import propertiesCustomProviderModule from "./custom-provider";
+import camundaModdleDescriptor from "./resources/camunda.json";
 import Service from "../../services/Service";
 import AlertDialog from "../../components/AlertDialog";
 import Tooltip from "../../components/Tooltip";
