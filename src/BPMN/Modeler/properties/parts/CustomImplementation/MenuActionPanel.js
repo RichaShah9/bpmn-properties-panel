@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import classnames from "classnames";
+import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../../../components/Select";
-import { TextField, Checkbox } from "../../components";
+import { TextField, Checkbox, Table } from "../../components";
 import {
   getParentMenus,
   getSubMenus,
@@ -35,7 +36,76 @@ const useStyles = makeStyles({
   },
 });
 
-export default function MenuActionPanel({ element }) {
+function getContextMap(element) {
+  const bo = getBusinessObject(element);
+  const extensionElements = bo.extensionElements;
+  if (!extensionElements || !extensionElements.values) return null;
+  const contextMap = extensionElements.values.find(
+    (e) => e.$type === "camunda:ContextMap"
+  );
+  return contextMap;
+}
+
+function createContextMap(parent, bpmnFactory, properties) {
+  return createElement("camunda:ContextMap", parent, bpmnFactory, properties);
+}
+
+function createParameter(type, parent, bpmnFactory, properties) {
+  return createElement(type, parent, bpmnFactory, properties);
+}
+
+const addDefinition = (element, entryValue, bpmnFactory) => {
+  const bo = element.businessObject;
+  let newEntry = createElement(
+    "camunda:Entry",
+    bo.contextDefinition,
+    bpmnFactory,
+    entryValue
+  );
+  return newEntry;
+};
+
+const newElement = function (
+  type,
+  prop,
+  element,
+  extensionElements,
+  bpmnFactory
+) {
+  const bo = getBusinessObject(element);
+  if (!extensionElements) {
+    extensionElements = elementHelper.createElement(
+      "bpmn:ExtensionElements",
+      { values: [] },
+      bo,
+      bpmnFactory
+    );
+    element.businessObject.extensionElements = extensionElements;
+  }
+
+  const createParameterTypeElem = function (type) {
+    return createElement(type, bo, bpmnFactory, { entries: [] });
+  };
+
+  let contextMap = getContextMap(element);
+  if (!contextMap) {
+    let parent = element.businessObject.extensionElements;
+    contextMap = createContextMap(parent, bpmnFactory, {
+      contextMapParameters: [],
+      contextUserMapParameters: [],
+    });
+    let newElem = createParameter(prop, contextMap, bpmnFactory, {});
+    newElem.contextDefinition = createParameterTypeElem("camunda:Map");
+    contextMap[type] = [newElem];
+    element.businessObject.extensionElements.values.push(contextMap);
+  }
+};
+
+function createElement(type, parent, factory, properties) {
+  return elementHelper.createElement(type, properties, parent, factory);
+}
+
+export default function MenuActionPanel({ element, bpmnFactory }) {
   const [createUserAction, setCreateUserAction] = useState(false);
   const [deadlineFieldPath, setDeadlineFieldPath] = useState(null);
   const [emailNotification, setEmailNotification] = useState(false);
@@ -61,8 +131,18 @@ export default function MenuActionPanel({ element }) {
   const [gridView, setGridView] = useState(null);
   const [userFormView, setUserFormView] = useState(null);
   const [userGridView, setUserGridView] = useState(null);
-
   const classes = useStyles();
+
+  const getContextMapEntries = (field) => {
+    const contextMap = getContextMap(element);
+    const contextEntries =
+      contextMap &&
+      contextMap[field] &&
+      contextMap[field][0] &&
+      contextMap[field][0].contextDefinition &&
+      contextMap[field][0].contextDefinition.entries;
+    return contextEntries;
+  };
 
   const setProperty = (name, value) => {
     const bo = getBusinessObject(element);
@@ -133,6 +213,92 @@ export default function MenuActionPanel({ element }) {
     },
     [element]
   );
+
+  const getElements = (type) => {
+    const entries = getContextMapEntries(type);
+    if (entries) {
+      return entries;
+    }
+    return [];
+  };
+
+  const updateElement = (value, label, optionIndex, type) => {
+    let entries = getContextMapEntries(type);
+    if (!entries) return;
+    const entry = entries[optionIndex];
+    entry[label] = value;
+  };
+
+  const addElement = (entryValue, parameterType, type) => {
+    const bo = getBusinessObject(element);
+    const extensionElements = bo.extensionElements;
+    if (extensionElements && extensionElements.values) {
+      const contextMap = extensionElements.values.find(
+        (e) => e.$type === "camunda:ContextMap"
+      );
+      if (!contextMap) {
+        newElement(
+          parameterType,
+          type,
+          element,
+          bo.extensionElements,
+          bpmnFactory
+        );
+      } else {
+        if (
+          !contextMap[parameterType] ||
+          contextMap[parameterType].length === 0
+        ) {
+          let newElem = createParameter(type, contextMap, bpmnFactory, {});
+          newElem.contextDefinition = createElement(
+            "camunda:Map",
+            bo,
+            bpmnFactory,
+            { entries: [] }
+          );
+          contextMap[parameterType] = [newElem];
+        }
+      }
+    } else {
+      newElement(
+        parameterType,
+        type,
+        element,
+        bo.extensionElements,
+        bpmnFactory
+      );
+    }
+    let entry = addDefinition(element, entryValue, bpmnFactory);
+    const entries = getContextMapEntries(parameterType);
+    if (!entries) return;
+    entries.push(entry);
+  };
+
+  const removeElement = (optionIndex, entryType, userType) => {
+    let userEntries = getContextMapEntries(userType);
+    let entries = getContextMapEntries(entryType);
+    if (!entries || optionIndex < 0) return;
+    entries.splice(optionIndex, 1);
+    if (entries.length === 0) {
+      const contextMap = getContextMap(element);
+      contextMap[entryType] = [];
+    }
+    if (entries.length === 0 && userEntries && userEntries.length === 0) {
+      const bo = getBusinessObject(element);
+      const extensionElements = bo.extensionElements;
+      if (!extensionElements || !extensionElements.values) return null;
+      const contextMapIndex = extensionElements.values.findIndex(
+        (e) => e.$type === "camunda:ContextMap"
+      );
+      if (contextMapIndex < 0) return;
+      if (extensionElements && extensionElements.values) {
+        extensionElements.values.splice(contextMapIndex, 1);
+        if (extensionElements.values.length === 0) {
+          bo.extensionElements = undefined;
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -564,6 +730,39 @@ export default function MenuActionPanel({ element }) {
                 />
               </React.Fragment>
             )}
+            <Table
+              entry={{
+                id: "menu-context",
+                labels: [translate("Key"), translate("Value")],
+                modelProperties: ["key", "value"],
+                addLabel: "Add context menu",
+                getElements: function () {
+                  return getElements("contextMapParameters");
+                },
+                updateElement: function (value, label, optionIndex) {
+                  updateElement(
+                    value,
+                    label,
+                    optionIndex,
+                    "contextMapParameters"
+                  );
+                },
+                addElement: function (entryValue) {
+                  addElement(
+                    entryValue,
+                    "contextMapParameters",
+                    "camunda:ContextMapParameter"
+                  );
+                },
+                removeElement: function (optionIndex) {
+                  removeElement(
+                    optionIndex,
+                    "contextMapParameters",
+                    "contextUserMapParameters"
+                  );
+                },
+              }}
+            />
           </React.Fragment>
         )}
       </div>
@@ -740,6 +939,39 @@ export default function MenuActionPanel({ element }) {
                 />
               </React.Fragment>
             )}
+            <Table
+              entry={{
+                id: "menu-user-context",
+                labels: [translate("Key"), translate("Value")],
+                modelProperties: ["key", "value"],
+                addLabel: "Add context menu",
+                getElements: function () {
+                  return getElements("contextUserMapParameters");
+                },
+                updateElement: function (value, label, optionIndex) {
+                  updateElement(
+                    value,
+                    label,
+                    optionIndex,
+                    "contextUserMapParameters"
+                  );
+                },
+                addElement: function (entryValue) {
+                  addElement(
+                    entryValue,
+                    "contextUserMapParameters",
+                    "camunda:ContextUserMapParameter"
+                  );
+                },
+                removeElement: function (optionIndex) {
+                  removeElement(
+                    optionIndex,
+                    "contextUserMapParameters",
+                    "contextMapParameters"
+                  );
+                },
+              }}
+            />
           </React.Fragment>
         )}
       </div>
