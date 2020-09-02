@@ -5,7 +5,11 @@ import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../../../components/Select";
 import { TextField, Checkbox } from "../../components";
-import { getParentMenus, getSubMenus, getViews } from "../../../../../services/api";
+import {
+  getParentMenus,
+  getSubMenus,
+  getViews,
+} from "../../../../../services/api";
 import { translate, getBool } from "../../../../../utils";
 
 const useStyles = makeStyles({
@@ -284,13 +288,48 @@ export default function MenuActionPanel({ element }) {
               setCreateUserAction(createUserAction);
               setProperty("createUserAction", createUserAction);
               if (createUserAction === false) {
-                setActionEmailTitle(undefined);
-                setProperty("actionEmailTitle", undefined);
+                setDeadlineFieldPath(undefined);
+                setProperty("deadlineFieldPath", undefined);
+                if (emailNotification === false) {
+                  setActionEmailTitle(undefined);
+                  setProperty("actionEmailTitle", undefined);
+                  if (newUserMenu === false) {
+                    setUserFieldPath(undefined);
+                    setProperty("userFieldPath", undefined);
+                  }
+                }
               }
             },
           }}
         />
-        {createUserAction && (
+        <div className={classes.container}>
+          <Checkbox
+            element={element}
+            entry={{
+              id: "emailNotification",
+              label: translate("Email notification"),
+              modelProperty: "emailNotification",
+              get: function () {
+                return {
+                  emailNotification: emailNotification,
+                };
+              },
+              set: function (e, value) {
+                setEmailNotification(!value.emailNotification);
+                setProperty("emailNotification", !value.emailNotification);
+                if (createUserAction === false && emailNotification === false) {
+                  setActionEmailTitle(undefined);
+                  setProperty("actionEmailTitle", undefined);
+                  if (newUserMenu === false) {
+                    setUserFieldPath(undefined);
+                    setProperty("userFieldPath", undefined);
+                  }
+                }
+              },
+            }}
+          />
+        </div>
+        {(createUserAction || emailNotification) && (
           <TextField
             element={element}
             canRemove={true}
@@ -316,63 +355,48 @@ export default function MenuActionPanel({ element }) {
             }}
           />
         )}
-        <TextField
-          element={element}
-          canRemove={true}
-          entry={{
-            id: "userFieldPath",
-            name: "userFieldPath",
-            label: translate("User field path"),
-            modelProperty: "userFieldPath",
-            get: function () {
-              return {
-                userFieldPath: userFieldPath || "",
-              };
-            },
-            set: function (e, value) {
-              setUserFieldPath(value.userFieldPath);
-              setProperty("userFieldPath", value.userFieldPath);
-            },
-          }}
-        />
-        <TextField
-          element={element}
-          canRemove={true}
-          entry={{
-            id: "deadlineFieldPath",
-            name: "deadlineFieldPath",
-            label: translate("Deadline field path"),
-            modelProperty: "deadlineFieldPath",
-            get: function () {
-              return {
-                deadlineFieldPath: deadlineFieldPath || "",
-              };
-            },
-            set: function (e, value) {
-              setDeadlineFieldPath(value.deadlineFieldPath);
-              setProperty("deadlineFieldPath", value.deadlineFieldPath);
-            },
-          }}
-        />
-      </div>
-      <div className={classes.container}>
-        <Checkbox
-          element={element}
-          entry={{
-            id: "emailNotification",
-            label: translate("Email notification"),
-            modelProperty: "emailNotification",
-            get: function () {
-              return {
-                emailNotification: emailNotification,
-              };
-            },
-            set: function (e, value) {
-              setEmailNotification(!value.emailNotification);
-              setProperty("emailNotification", !value.emailNotification);
-            },
-          }}
-        />
+        {(createUserAction || emailNotification || newUserMenu) && (
+          <TextField
+            element={element}
+            canRemove={true}
+            entry={{
+              id: "userFieldPath",
+              name: "userFieldPath",
+              label: translate("User field path"),
+              modelProperty: "userFieldPath",
+              get: function () {
+                return {
+                  userFieldPath: userFieldPath || "",
+                };
+              },
+              set: function (e, value) {
+                setUserFieldPath(value.userFieldPath);
+                setProperty("userFieldPath", value.userFieldPath);
+              },
+            }}
+          />
+        )}
+        {createUserAction && (
+          <TextField
+            element={element}
+            canRemove={true}
+            entry={{
+              id: "deadlineFieldPath",
+              name: "deadlineFieldPath",
+              label: translate("Deadline field path"),
+              modelProperty: "deadlineFieldPath",
+              get: function () {
+                return {
+                  deadlineFieldPath: deadlineFieldPath || "",
+                };
+              },
+              set: function (e, value) {
+                setDeadlineFieldPath(value.deadlineFieldPath);
+                setProperty("deadlineFieldPath", value.deadlineFieldPath);
+              },
+            }}
+          />
+        )}
       </div>
       <div className={classes.container}>
         <Checkbox
@@ -560,6 +584,10 @@ export default function MenuActionPanel({ element }) {
               setNewUserMenu(newUserMenu);
               setProperty("newUserMenu", newUserMenu);
               if (newUserMenu === false) {
+                if (createUserAction === false && emailNotification === false) {
+                  setUserFieldPath(undefined);
+                  setProperty("userFieldPath", undefined);
+                }
                 setUserMenuName(undefined);
                 setProperty("userMenuName", undefined);
                 setUserParentMenu(undefined);
