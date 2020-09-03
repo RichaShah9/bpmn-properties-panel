@@ -735,7 +735,11 @@ function BpmnModelerComponent() {
   const updateTabs = (event) => {
     let { element } = event;
     if (element && element.type === "label") {
-      element = element.businessObject;
+      const elementRegistry = bpmnModeler.get("elementRegistry");
+      const newElement = elementRegistry.get(
+        element.businessObject && element.businessObject.id
+      );
+      element = newElement;
     }
     let tabs = getTabs(bpmnModeler, element);
     setTabValue(0);
