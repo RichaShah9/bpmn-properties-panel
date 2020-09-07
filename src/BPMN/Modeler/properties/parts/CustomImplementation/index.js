@@ -13,6 +13,7 @@ import UserTaskProps from "./UserTaskProps.js";
 import ModelProps from "./ModelProps.js";
 import ViewAttributePanel from "./ViewAttributePanel";
 import MenuActionPanel from "./MenuActionPanel";
+import ProcessConfiguration from "./ProcessConfiguration";
 
 export {
   CallActivityProps,
@@ -30,4 +31,5 @@ export {
   ModelProps,
   ViewAttributePanel,
   MenuActionPanel,
+  ProcessConfiguration,
 };
