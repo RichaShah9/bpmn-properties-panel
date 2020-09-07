@@ -1051,6 +1051,67 @@
           "type": "Entry"
         }
       ]
+    },
+    {
+      "name": "ProcessConfiguration",
+      "superClass": ["Element"],
+      "properties": [
+        {
+          "name": "processConfigurationParameters",
+          "isMany": true,
+          "type": "ProcessConfigurationParameter"
+        }
+      ]
+    },
+    {
+      "name": "ProcessConfigurationParameter",
+      "properties": [
+        {
+          "name": "metaModel",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "metaModelLabel",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "metaJsonModel",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "metaJsonModelLabel",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "processPath",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "pathCondition",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "isStartModel",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "userDefaultPath",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "model",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
     }
   ],
   "emumerations": []
