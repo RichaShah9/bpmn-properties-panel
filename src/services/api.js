@@ -154,6 +154,25 @@ export async function getRoles(criteria) {
   return data;
 }
 
+export async function getProcessConfigModel(data = {}) {
+  const res = await Service.action({
+    action: "action-wkf-process-config-attrs-set-model",
+    data: {
+      context: { ...data },
+    },
+    model: "com.axelor.apps.bpm.db.WkfProcessConfig",
+  });
+  if (
+    res &&
+    res.data &&
+    res.data[0] &&
+    res.data[0].attrs &&
+    res.data[0].attrs.model
+  ) {
+    const model = res.data[0].attrs.model.value;
+    return model;
+  }
+}
 export async function getMetaModels() {
   const res = await Service.search("com.axelor.meta.db.MetaModel");
   const { data = [] } = res || {};
