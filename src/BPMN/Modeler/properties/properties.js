@@ -45,6 +45,7 @@ import {
   ModelProps,
   ViewAttributePanel,
   MenuActionPanel,
+  ProcessConfiguration
 } from "./parts/CustomImplementation";
 
 // helpers
@@ -330,6 +331,21 @@ function createMenuActionGroups(
   return [menuActionGroup];
 }
 
+function createConfigurationGroups(
+  element,
+  bpmnFactory,
+  elementRegistry,
+  translate
+) {
+  let configurationGroup = {
+    id: "configuration",
+    label: translate("Process configs"),
+    entries: [],
+    component: ProcessConfiguration,
+  };
+  return [configurationGroup];
+}
+
 export default function getTabs(
   element,
   canvas,
@@ -397,11 +413,23 @@ export default function getTabs(
     ),
   };
 
+  let configurationTab = {
+    id: "configuration",
+    label: translate("Configuration"),
+    groups: createConfigurationGroups(
+      element,
+      bpmnFactory,
+      elementRegistry,
+      translate
+    ),
+  };
+
   let tabs = [
     generalTab,
     viewAttributesTab,
     variablesTab,
     menuActionTab,
+    configurationTab,
     listenersTab,
   ];
   return tabs;

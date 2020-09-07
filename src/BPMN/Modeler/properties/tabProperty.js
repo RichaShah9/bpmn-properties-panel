@@ -9,7 +9,7 @@ export const tabProperty = [
   {
     type: "bpmn:Process",
     subType: null || undefined,
-    tabs: commonTabsWithoutMenuAction,
+    tabs: ["general", "configuration", "listeners"],
   },
   {
     type: "bpmn:StartEvent",
@@ -160,7 +160,7 @@ export const tabProperty = [
   {
     type: "bpmn:Participant",
     subType: null || undefined,
-    tabs: commonTabsWithoutMenuAction,
+    tabs: ["general", "configuration", "listeners"],
   },
   {
     type: "bpmn:Group",
