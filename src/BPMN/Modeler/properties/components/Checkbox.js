@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import classnames from "classnames";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles({
@@ -11,12 +12,12 @@ const useStyles = makeStyles({
     fontWeight: "bolder",
     color: "#666",
   },
-  checkbox:{
-    margin: "3px 3px 3px 0px"
-  }
+  checkbox: {
+    margin: "3px 3px 3px 0px",
+  },
 });
 
-export default function Checkbox({ entry, element }) {
+export default function Checkbox({ entry, element, className }) {
   const classes = useStyles();
   const { id, label, modelProperty, get, set } = entry || {};
   const [value, setValue] = useState(false);
@@ -34,7 +35,7 @@ export default function Checkbox({ entry, element }) {
   }, [element, modelProperty, get]);
 
   return (
-    <div className={classes.root}>
+    <div className={classnames(classes.root, className)}>
       <input
         id={`camunda-${id}`}
         type="checkbox"
@@ -43,9 +44,11 @@ export default function Checkbox({ entry, element }) {
         onChange={updateValue}
         className={classes.checkbox}
       />
-      <label htmlFor={`camunda-${id}`} className={classes.label}>
-        {label}
-      </label>
+      {label && (
+        <label htmlFor={`camunda-${id}`} className={classes.label}>
+          {label}
+        </label>
+      )}
     </div>
   );
 }
