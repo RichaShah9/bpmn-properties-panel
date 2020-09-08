@@ -534,8 +534,8 @@ export default function ProcessConfiguration({
                         <IconButton
                           className={classes.iconButton}
                           onClick={() => {
-                            removeItem(index);
-                            removeElement(index);
+                            removeItem(key);
+                            removeElement(key);
                           }}
                         >
                           <Close fontSize="small" />
