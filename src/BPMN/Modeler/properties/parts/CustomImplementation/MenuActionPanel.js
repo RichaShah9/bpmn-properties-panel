@@ -10,6 +10,7 @@ import {
   getParentMenus,
   getSubMenus,
   getViews,
+  getTemplates,
 } from "../../../../../services/api";
 import { translate, getBool } from "../../../../../utils";
 
@@ -131,6 +132,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
   const [gridView, setGridView] = useState(null);
   const [userFormView, setUserFormView] = useState(null);
   const [userGridView, setUserGridView] = useState(null);
+  const [template, setTemplate] = useState(null);
   const classes = useStyles();
 
   const getContextMapEntries = (field) => {
@@ -352,6 +354,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     const gridView = getSelectValue("gridView");
     const userFormView = getSelectValue("userFormView");
     const userGridView = getSelectValue("userGridView");
+    const template = getSelectValue("template");
 
     setCreateUserAction(getBool(createUserAction));
     setEmailNotification(getBool(emailNotification));
@@ -374,6 +377,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     setGridView(gridView);
     setUserFormView(userFormView);
     setUserGridView(userGridView);
+    setTemplate(template);
   }, [getProperty, getSelectValue]);
 
   useEffect(() => {
@@ -483,18 +487,39 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               set: function (e, value) {
                 setEmailNotification(!value.emailNotification);
                 setProperty("emailNotification", !value.emailNotification);
-                if (createUserAction === false && emailNotification === false) {
-                  setActionEmailTitle(undefined);
-                  setProperty("actionEmailTitle", undefined);
-                  if (newUserMenu === false) {
-                    setUserFieldPath(undefined);
-                    setProperty("userFieldPath", undefined);
+                if (emailNotification === false) {
+                  setTemplate(undefined);
+                  setProperty("template", undefined);
+                  if (createUserAction === false) {
+                    setActionEmailTitle(undefined);
+                    setProperty("actionEmailTitle", undefined);
+                    if (newUserMenu === false) {
+                      setUserFieldPath(undefined);
+                      setProperty("userFieldPath", undefined);
+                    }
                   }
                 }
               },
             }}
           />
         </div>
+        {emailNotification && (
+          <React.Fragment>
+            <label className={classes.label}>{translate("Template")}</label>
+            <Select
+              className={classes.select}
+              update={(value) => {
+                setTemplate(value);
+                updateValue("template", value, "name");
+              }}
+              name="template"
+              value={template}
+              optionLabel="name"
+              isLabel={false}
+              fetchMethod={() => getTemplates()}
+            />
+          </React.Fragment>
+        )}
         {(createUserAction || emailNotification) && (
           <TextField
             element={element}
