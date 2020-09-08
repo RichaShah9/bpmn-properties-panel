@@ -302,6 +302,51 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     }
   };
 
+  function getProcessConfig() {
+    let bo =
+      element && element.businessObject && element.businessObject.$parent;
+    const extensionElements = bo && bo.extensionElements;
+    if (!extensionElements || !extensionElements.values) return null;
+    const processConfigurations = extensionElements.values.find(
+      (e) => e.$type === "camunda:ProcessConfiguration"
+    );
+    const metaModels = [],
+      metaJsonModels = [];
+    if (
+      !processConfigurations &&
+      !processConfigurations.processConfigurationParameters
+    )
+      return;
+    processConfigurations.processConfigurationParameters.forEach((config) => {
+      if (config.metaModel) {
+        metaModels.push(config.metaModel);
+      } else if (config.metaJsonModel) {
+        metaJsonModels.push(config.metaJsonModel);
+      }
+    });
+
+    const criteria = [];
+    if (metaModels.length > 0) {
+      criteria.push({
+        fieldName: "metaModel.name",
+        operator: "IN",
+        value: metaModels,
+      });
+    }
+    if (metaJsonModels.length > 0) {
+      criteria.push({
+        fieldName: "metaJsonModel.name",
+        operator: "IN",
+        value: metaJsonModels,
+      });
+    }
+    const data = {
+      criteria: criteria,
+      operator: "or",
+    };
+    return data;
+  }
+
   useEffect(() => {
     async function fetchData() {
       if (newMenu || newUserMenu) {
@@ -516,7 +561,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               value={template}
               optionLabel="name"
               isLabel={false}
-              fetchMethod={() => getTemplates()}
+              fetchMethod={() => getTemplates(getProcessConfig())}
             />
           </React.Fragment>
         )}

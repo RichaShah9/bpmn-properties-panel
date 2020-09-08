@@ -98,6 +98,50 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
     element.businessObject.eventDefinitions[0] &&
     element.businessObject.eventDefinitions[0].$type;
 
+  function getProcessConfig(type) {
+    let bo =
+      element && element.businessObject && element.businessObject.$parent;
+    const extensionElements = bo && bo.extensionElements;
+    if (!extensionElements || !extensionElements.values) return null;
+    const processConfigurations = extensionElements.values.find(
+      (e) => e.$type === "camunda:ProcessConfiguration"
+    );
+    const metaModels = [],
+      metaJsonModels = [];
+    if (
+      !processConfigurations &&
+      !processConfigurations.processConfigurationParameters
+    )
+      return;
+    processConfigurations.processConfigurationParameters.forEach((config) => {
+      if (config.metaModel) {
+        metaModels.push(config.metaModel);
+      } else if (config.metaJsonModel) {
+        metaJsonModels.push(config.metaJsonModel);
+      }
+    });
+
+    let value = [];
+    if (type === "metaModel") {
+      value = [...metaModels];
+    } else if (type === "metaJsonModel") {
+      value = [...metaJsonModels];
+    } else {
+      value = [...metaModels, ...metaJsonModels];
+    }
+    const data = {
+      criteria: [
+        {
+          fieldName: "name",
+          operator: "IN",
+          value: value,
+        },
+      ],
+      operator: "or",
+    };
+    return data;
+  }
+
   const setProperty = React.useCallback(
     (name, value) => {
       let bo = getBusinessObject(element);
@@ -261,7 +305,7 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
             {!metaJsonModel && (
               <Select
                 className={classes.select}
-                fetchMethod={() => getMetaModels()}
+                fetchMethod={() => getMetaModels(getProcessConfig("metaModel"))}
                 update={(value) => {
                   setMetaModel(value);
                   updateValue("metaModel", value);
@@ -276,7 +320,9 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
             {!metaModel && (
               <Select
                 className={classnames(classes.select, classes.metajsonModel)}
-                fetchMethod={() => getCustomModels()}
+                fetchMethod={() =>
+                  getCustomModels(getProcessConfig("metaJsonModel"))
+                }
                 update={(value) => {
                   setMetaJsonModel(value);
                   updateValue("metaJsonModel", value);
@@ -345,7 +391,7 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
                     setModels(value);
                     addModels(value);
                   }}
-                  fetchMethod={() => getAllModels()}
+                  fetchMethod={() => getAllModels(getProcessConfig())}
                   name="models"
                   value={models || []}
                   multiple={true}

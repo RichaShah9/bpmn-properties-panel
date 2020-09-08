@@ -237,6 +237,42 @@ export default function ViewAttributePanel({ handleAdd, element }) {
     setRow({ ...cloneRow });
   };
 
+  function getProcessConfig() {
+    let bo =
+      element && element.businessObject && element.businessObject.$parent;
+    const extensionElements = bo && bo.extensionElements;
+    if (!extensionElements || !extensionElements.values) return null;
+    const processConfigurations = extensionElements.values.find(
+      (e) => e.$type === "camunda:ProcessConfiguration"
+    );
+    const metaModels = [],
+      metaJsonModels = [];
+    if (
+      !processConfigurations &&
+      !processConfigurations.processConfigurationParameters
+    )
+      return;
+    processConfigurations.processConfigurationParameters.forEach((config) => {
+      if (config.metaModel) {
+        metaModels.push(config.metaModel);
+      } else if (config.metaJsonModel) {
+        metaJsonModels.push(config.metaJsonModel);
+      }
+    });
+    let value = [...metaModels, ...metaJsonModels];
+    const data = {
+      criteria: [
+        {
+          fieldName: "name",
+          operator: "IN",
+          value: value,
+        },
+      ],
+      operator: "or",
+    };
+    return data;
+  }
+
   const handlePropertyAdd = () => {
     const businessObject = getBusinessObject(element);
     const extensionElements = businessObject.extensionElements;
@@ -411,7 +447,9 @@ export default function ViewAttributePanel({ handleAdd, element }) {
                                   {translate("Model")}
                                 </label>
                                 <Select
-                                  fetchMethod={() => getModels()}
+                                  fetchMethod={() =>
+                                    getModels(getProcessConfig())
+                                  }
                                   update={(value) =>
                                     updateValue(
                                       value,

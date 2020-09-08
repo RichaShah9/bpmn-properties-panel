@@ -1,9 +1,9 @@
 import Service from "./Service";
 import * as _ from "lodash";
 
-export async function getModels() {
-  const models = (await getMetaModels()) || [];
-  const metaJsonModels = (await getCustomModels()) || [];
+export async function getModels(data = {}) {
+  const models = (await getMetaModels(data)) || [];
+  const metaJsonModels = (await getCustomModels(data)) || [];
   const allModels = [];
 
   for (let i = 0; i < models.length; i++) {
@@ -154,8 +154,11 @@ export async function getRoles(criteria) {
   return data;
 }
 
-export async function getTemplates() {
-  const res = await Service.search(`com.axelor.apps.message.db.Template`);
+export async function getTemplates(criteria) {
+  const res = await Service.search("com.axelor.apps.message.db.Template", {
+    data: criteria,
+  });
+  if (res.status === -1) return [];
   const { data = [] } = res || {};
   return data;
 }
@@ -179,21 +182,27 @@ export async function getProcessConfigModel(data = {}) {
     return model;
   }
 }
-export async function getMetaModels() {
-  const res = await Service.search("com.axelor.meta.db.MetaModel");
+export async function getMetaModels(criteria = {}) {
+  const res = await Service.search("com.axelor.meta.db.MetaModel", {
+    data: criteria,
+  });
+  if (res.status === -1) return [];
   const { data = [] } = res || {};
   return data;
 }
 
-export async function getCustomModels() {
-  const res = await Service.search("com.axelor.meta.db.MetaJsonModel");
+export async function getCustomModels(criteria = {}) {
+  const res = await Service.search("com.axelor.meta.db.MetaJsonModel", {
+    data: criteria,
+  });
+  if (res.status === -1) return [];
   const { data = [] } = res || {};
   return data;
 }
 
-export async function getAllModels() {
-  const models = (await getMetaModels()) || [];
-  const metaJsonModels = (await getCustomModels()) || [];
+export async function getAllModels(criteria = {}) {
+  const models = (await getMetaModels(criteria)) || [];
+  const metaJsonModels = (await getCustomModels(criteria)) || [];
   const data = [...models, ...metaJsonModels];
   return data;
 }
