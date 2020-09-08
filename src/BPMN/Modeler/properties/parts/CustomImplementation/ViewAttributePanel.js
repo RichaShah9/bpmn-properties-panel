@@ -241,7 +241,16 @@ export default function ViewAttributePanel({ handleAdd, element }) {
     let bo =
       element && element.businessObject && element.businessObject.$parent;
     const extensionElements = bo && bo.extensionElements;
-    if (!extensionElements || !extensionElements.values) return null;
+    const noOptions = {
+      criteria: [
+        {
+          fieldName: "name",
+          operator: "IN",
+          value: [],
+        },
+      ],
+    };
+    if (!extensionElements || !extensionElements.values) return noOptions;
     const processConfigurations = extensionElements.values.find(
       (e) => e.$type === "camunda:ProcessConfiguration"
     );
@@ -250,8 +259,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
     if (
       !processConfigurations &&
       !processConfigurations.processConfigurationParameters
-    )
-      return;
+    ) return noOptions
     processConfigurations.processConfigurationParameters.forEach((config) => {
       if (config.metaModel) {
         metaModels.push(config.metaModel);

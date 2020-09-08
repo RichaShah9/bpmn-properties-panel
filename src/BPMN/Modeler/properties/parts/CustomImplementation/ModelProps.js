@@ -111,8 +111,17 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
       bo =
         element && element.businessObject && element.businessObject.processRef;
     }
+    const noOptions = {
+      criteria: [
+        {
+          fieldName: "name",
+          operator: "IN",
+          value: [],
+        },
+      ],
+    };
     const extensionElements = bo && bo.extensionElements;
-    if (!extensionElements || !extensionElements.values) return null;
+    if (!extensionElements || !extensionElements.values) return noOptions;
     const processConfigurations = extensionElements.values.find(
       (e) => e.$type === "camunda:ProcessConfiguration"
     );
@@ -122,7 +131,7 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
       !processConfigurations &&
       !processConfigurations.processConfigurationParameters
     )
-      return;
+      return noOptions;
     processConfigurations.processConfigurationParameters.forEach((config) => {
       if (config.metaModel) {
         metaModels.push(config.metaModel);
