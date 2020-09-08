@@ -84,7 +84,7 @@ const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
     color: "#999",
-    margin: '10px 0px',
+    margin: "10px 0px",
   },
   icon: {
     marginRight: 10,
@@ -196,9 +196,7 @@ export default function ProcessConfiguration({
       );
       newElem.isStartModel = "false";
       processConfigurations[type] = [newElem];
-      bo.extensionElements.values.push(
-        processConfigurations
-      );
+      bo.extensionElements.values.push(processConfigurations);
     }
   };
 
@@ -302,12 +300,18 @@ export default function ProcessConfiguration({
     if (name === "metaModel" || name === "metaJsonModel") {
       model = await getProcessConfigModel({
         ...cloneProcessConfigList[index],
+        [name === "metaModel" ? "metaJsonModel" : "metaModel"]: null,
       });
       cloneProcessConfigList[index] = {
         ...(cloneProcessConfigList[index] || {}),
+        [name === "metaModel" ? "metaJsonModel" : "metaModel"]: null,
         model: model,
       };
-      updateElement(value && value["name"], `${name}Label`, index);
+      updateElement(
+        undefined,
+        `${name === "metaModel" ? "metaJsonModel" : "metaModel"}`,
+        index
+      );
       updateElement(model, "model", index);
     }
     updateElement((value && value[optionLabel]) || value, name, index);
