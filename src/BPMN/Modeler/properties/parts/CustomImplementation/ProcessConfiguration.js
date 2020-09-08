@@ -102,7 +102,10 @@ const initialProcessConfigList = {
 };
 
 function getProcessConfig(element) {
-  const bo = getBusinessObject(element);
+  let bo = getBusinessObject(element);
+  if ((element && element.type) === "bpmn:Participant") {
+    bo = getBusinessObject(bo.processRef);
+  }
   const extensionElements = bo.extensionElements;
   if (!extensionElements || !extensionElements.values) return null;
   const processConfigurations = extensionElements.values.find(
@@ -165,7 +168,10 @@ export default function ProcessConfiguration({
     extensionElements,
     bpmnFactory
   ) {
-    const bo = getBusinessObject(element);
+    let bo = getBusinessObject(element);
+    if ((element && element.type) === "bpmn:Participant") {
+      bo = getBusinessObject(bo.processRef);
+    }
     if (!extensionElements) {
       extensionElements = elementHelper.createElement(
         "bpmn:ExtensionElements",
@@ -173,12 +179,12 @@ export default function ProcessConfiguration({
         bo,
         bpmnFactory
       );
-      element.businessObject.extensionElements = extensionElements;
+      bo.extensionElements = extensionElements;
     }
 
     let processConfigurations = getProcessConfig(element);
     if (!processConfigurations) {
-      let parent = element.businessObject.extensionElements;
+      let parent = bo.extensionElements;
       processConfigurations = createProcessConfiguration(parent, bpmnFactory, {
         processConfigurationParameters: [],
       });
@@ -190,7 +196,7 @@ export default function ProcessConfiguration({
       );
       newElem.isStartModel = "false";
       processConfigurations[type] = [newElem];
-      element.businessObject.extensionElements.values.push(
+      bo.extensionElements.values.push(
         processConfigurations
       );
     }
@@ -201,7 +207,10 @@ export default function ProcessConfiguration({
   }
 
   const addElement = (parameterType, type) => {
-    const bo = getBusinessObject(element);
+    let bo = getBusinessObject(element);
+    if ((element && element.type) === "bpmn:Participant") {
+      bo = getBusinessObject(bo.processRef);
+    }
     const extensionElements = bo.extensionElements;
     if (extensionElements && extensionElements.values) {
       const processConfigurations = extensionElements.values.find(
@@ -248,7 +257,10 @@ export default function ProcessConfiguration({
     if (optionIndex < 0) return;
     processConfigList.splice(optionIndex, 1);
     if (processConfigList.length === 0) {
-      const bo = getBusinessObject(element);
+      let bo = getBusinessObject(element);
+      if ((element && element.type) === "bpmn:Participant") {
+        bo = getBusinessObject(bo.processRef);
+      }
       const extensionElements = bo.extensionElements;
       if (!extensionElements || !extensionElements.values) return null;
       const processConfigurationsIndex = extensionElements.values.findIndex(
@@ -295,10 +307,10 @@ export default function ProcessConfiguration({
         ...(cloneProcessConfigList[index] || {}),
         model: model,
       };
-      updateElement(value["name"], `${name}Label`, index);
+      updateElement(value && value["name"], `${name}Label`, index);
       updateElement(model, "model", index);
     }
-    updateElement(value[optionLabel] || value, name, index);
+    updateElement((value && value[optionLabel]) || value, name, index);
     setProcessConfigList(cloneProcessConfigList);
   };
 
@@ -338,13 +350,12 @@ export default function ProcessConfiguration({
             <TableContainer>
               <Table size="small" aria-label="a dense table">
                 <colgroup>
-                  <col width="20%" />
-                  <col width="20%" />
+                  <col width="23%" />
+                  <col width="22%" />
                   <col width="15%" />
                   <col width="15%" />
                   <col width="5%" />
                   <col width="15%" />
-                  <col width="5%" />
                   <col width="5%" />
                 </colgroup>
                 <TableHead>
@@ -366,9 +377,6 @@ export default function ProcessConfiguration({
                     </TableCell>
                     <TableCell className={classes.tableHead} align="center">
                       {translate("User default path")}
-                    </TableCell>
-                    <TableCell className={classes.tableHead} align="center">
-                      {translate("Model")}
                     </TableCell>
                     <TableCell
                       className={classes.tableHead}
@@ -517,11 +525,6 @@ export default function ProcessConfiguration({
                             },
                           }}
                         />
-                      </TableCell>
-                      <TableCell className={classes.tableHead} align="center">
-                        <Typography className={classes.typography}>
-                          {processConfig.model}
-                        </Typography>
                       </TableCell>
                       <TableCell align="center" className={classes.tableCell}>
                         <IconButton
