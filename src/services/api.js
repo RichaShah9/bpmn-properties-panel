@@ -154,6 +154,12 @@ export async function getRoles(criteria) {
   return data;
 }
 
+export async function getTemplates() {
+  const res = await Service.search(`com.axelor.apps.message.db.Template`);
+  const { data = [] } = res || {};
+  return data;
+}
+
 export async function getProcessConfigModel(data = {}) {
   const res = await Service.action({
     action: "action-wkf-process-config-attrs-set-model",
