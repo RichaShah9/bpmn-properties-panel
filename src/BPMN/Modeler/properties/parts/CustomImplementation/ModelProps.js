@@ -101,6 +101,16 @@ export default function ModelProps({ element, index, label, bpmnModeler }) {
   function getProcessConfig(type) {
     let bo =
       element && element.businessObject && element.businessObject.$parent;
+    if (element.type === "bpmn:Process") {
+      bo = element.businessObject;
+    }
+    if (
+      (element && element.businessObject && element.businessObject.$type) ===
+      "bpmn:Participant"
+    ) {
+      bo =
+        element && element.businessObject && element.businessObject.processRef;
+    }
     const extensionElements = bo && bo.extensionElements;
     if (!extensionElements || !extensionElements.values) return null;
     const processConfigurations = extensionElements.values.find(
