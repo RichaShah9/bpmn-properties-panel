@@ -267,4 +267,49 @@ export const tabProperty = [
     subType: null || undefined,
     tabs: commonTabs,
   },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: null || undefined,
+    tabs: commonTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: "bpmn:MessageEventDefinition",
+    tabs: commonTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: "bpmn:TimerEventDefinition",
+    tabs: commonTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: "bpmn:EscalationEventDefinition",
+    tabs: commonTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: "bpmn:ConditionalEventDefinition",
+    tabs: commonTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: "bpmn:ErrorEventDefinition",
+    tabs: commonTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: "bpmn:CancelEventDefinition",
+    tabs: commonTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: "bpmn:SignalEventDefinition",
+    tabs: commonTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:BoundaryEvent",
+    subType: "bpmn:CompensateEventDefinition",
+    tabs: commonTabsWithoutMenuAction,
+  },
 ];
