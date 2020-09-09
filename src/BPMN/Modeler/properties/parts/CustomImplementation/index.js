@@ -1,6 +1,5 @@
 import CallActivityProps from "./CallActivityProps";
 import ConditionalProps from "./ConditionalProps";
-import ErrorProps from "./ErrorProps";
 import EventProps from "./EventProps";
 import LinkProps from "./LinkProps";
 import ScriptProps from "./ScriptProps";
@@ -18,7 +17,6 @@ import ProcessConfiguration from "./ProcessConfiguration";
 export {
   CallActivityProps,
   ConditionalProps,
-  ErrorProps,
   EventProps,
   LinkProps,
   ScriptProps,
