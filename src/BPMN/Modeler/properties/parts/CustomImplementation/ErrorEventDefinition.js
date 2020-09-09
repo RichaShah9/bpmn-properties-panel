@@ -172,33 +172,33 @@ export default function ErrorEventProps({
               },
             }}
           />
-          {is(element, "bpmn:StartEvent") ||
-            (is(element, "bpmn:BoundaryEvent") && (
-              <React.Fragment>
-                <TextField
-                  element={element}
-                  entry={{
-                    id: "errorCodeVariable",
-                    label: translate("Error Code Variable"),
-                    modelProperty: "errorCodeVariable",
-                    get: getValue("errorCodeVariable"),
-                    set: setValue("errorCodeVariable"),
-                  }}
-                />
-                <TextField
-                  element={element}
-                  entry={{
-                    id: "errorMessageVariable",
-                    label: translate("Error Message Variable"),
-                    modelProperty: "errorMessageVariable",
-                    get: getValue("errorMessageVariable"),
-                    set: setValue("errorMessageVariable"),
-                  }}
-                />
-              </React.Fragment>
-            ))}
         </React.Fragment>
       )}
+      {is(element, "bpmn:StartEvent") ||
+        (is(element, "bpmn:BoundaryEvent") && (
+          <React.Fragment>
+            <TextField
+              element={element}
+              entry={{
+                id: "errorCodeVariable",
+                label: translate("Error Code Variable"),
+                modelProperty: "errorCodeVariable",
+                get: getValue("errorCodeVariable"),
+                set: setValue("errorCodeVariable"),
+              }}
+            />
+            <TextField
+              element={element}
+              entry={{
+                id: "errorMessageVariable",
+                label: translate("Error Message Variable"),
+                modelProperty: "errorMessageVariable",
+                get: getValue("errorMessageVariable"),
+                set: setValue("errorMessageVariable"),
+              }}
+            />
+          </React.Fragment>
+        ))}
     </div>
   );
 }
