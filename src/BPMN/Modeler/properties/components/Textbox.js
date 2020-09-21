@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import classnames from "classnames";
-import TextareaAutosize from '@material-ui/core/TextareaAutosize';
+import TextareaAutosize from "@material-ui/core/TextareaAutosize";
 import { makeStyles } from "@material-ui/styles";
 
 import Description from "./Description";
@@ -42,7 +42,6 @@ export default function Textbox({ entry, element, rows = 1 }) {
   const {
     label,
     description,
-    id,
     get,
     set,
     modelProperty,
@@ -109,8 +108,8 @@ export default function Textbox({ entry, element, rows = 1 }) {
     <div className={classes.root}>
       <label className={classes.label}>{label}</label>
       <TextareaAutosize
-        id={`camunda_name_${id}`}
-        defaultValue={value}
+        id={`camunda_${modelProperty}_${Date()}`}
+        value={value || ""}
         className={classnames(classes.textarea, isError && classes.error)}
         rowsMin={rows}
         onBlur={(e) => updateProperty(e.target.value)}
