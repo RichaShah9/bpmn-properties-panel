@@ -11,13 +11,15 @@ export default function ConditionalEventProps({
   conditionalEventDefinition,
   bpmnFactory,
 }) {
-  const [conditionType, setConditionType] = useState("script");
+  const [conditionType, setConditionType] = useState("expression");
+  const [scriptType, setScriptType] = useState("script");
+
   useEffect(() => {
     let bo = getBusinessObject(element);
     let conditionExpression = conditionalEventDefinition
       ? conditionalEventDefinition.condition
       : bo.conditionExpression;
-    let conditionType = "script";
+    let conditionType = "expression";
     if (conditionExpression) {
       let conditionLanguage = conditionExpression.language;
       if (conditionLanguage || conditionLanguage === "") {
@@ -27,6 +29,21 @@ export default function ConditionalEventProps({
       }
     }
     setConditionType(conditionType);
+  }, [element, conditionalEventDefinition]);
+
+  useEffect(() => {
+    let bo = getBusinessObject(element);
+    let conditionExpression = conditionalEventDefinition
+      ? conditionalEventDefinition.condition
+      : bo.conditionExpression;
+    let type = "script";
+    if (
+      conditionExpression &&
+      (conditionExpression.resource || conditionExpression.resource === "")
+    ) {
+      type = "scriptResource";
+    }
+    setScriptType(type);
   }, [element, conditionalEventDefinition]);
 
   const getValue = (modelProperty) => {
@@ -104,7 +121,7 @@ export default function ConditionalEventProps({
             if (conditionType === "script") {
               conditionProps = {
                 body: "",
-                language: "axelor",
+                language: "",
                 "camunda:resource": undefined,
               };
             }
@@ -189,10 +206,6 @@ export default function ConditionalEventProps({
                 ) {
                   let boScriptFormat =
                     conditionalEventDefinition.condition.language;
-                  if (!boScriptFormat) {
-                    conditionalEventDefinition.condition.language = "axelor";
-                    boScriptFormat = "axelor";
-                  }
                   return { scriptFormat: boScriptFormat };
                 }
               },
@@ -213,36 +226,111 @@ export default function ConditionalEventProps({
             }}
             canRemove={true}
           />
-          <Textbox
+          <SelectBox
             element={element}
-            rows={3}
             entry={{
-              id: "script",
-              label: translate("Script"),
-              modelProperty: "script",
+              id: "scriptType",
+              label: "Script Type",
+              modelProperty: "scriptType",
+              selectOptions: [
+                { name: "Inline Script", value: "script" },
+                { name: "External Resource", value: "scriptResource" },
+              ],
+              emptyParameter: false,
               get: function () {
-                if (
-                  conditionalEventDefinition &&
-                  conditionalEventDefinition.condition
-                ) {
-                  return {
-                    script: conditionalEventDefinition.condition.body,
-                  };
-                }
+                return { scriptType: scriptType };
               },
               set: function (e, values) {
-                if (conditionalEventDefinition) {
-                  conditionalEventDefinition.condition.body = values.script;
-                  conditionalEventDefinition.condition.resource = undefined;
-                }
-              },
-              validate: function (e, values) {
-                if (!values.script && conditionType === "script") {
-                  return { script: "Must provide a value" };
+                if (values && !values.scriptType) return;
+                setScriptType(values.scriptType);
+                if (values.scriptType === "script") {
+                  if (
+                    conditionalEventDefinition &&
+                    conditionalEventDefinition.condition
+                  ) {
+                    conditionalEventDefinition.condition.resource = undefined;
+                    conditionalEventDefinition.condition.body = "";
+                  }
+                } else {
+                  if (
+                    conditionalEventDefinition &&
+                    conditionalEventDefinition.condition
+                  ) {
+                    conditionalEventDefinition.condition.resource = "";
+                    conditionalEventDefinition.condition.body = undefined;
+                  }
                 }
               },
             }}
           />
+          {scriptType === "scriptResource" && (
+            <TextField
+              element={element}
+              entry={{
+                id: "resource",
+                label: translate("Resource"),
+                modelProperty: "resource",
+                get: function () {
+                  if (
+                    conditionalEventDefinition &&
+                    conditionalEventDefinition.condition
+                  ) {
+                    return {
+                      resource: conditionalEventDefinition.condition.resource,
+                    };
+                  }
+                },
+                set: function (e, values) {
+                  if (
+                    conditionalEventDefinition &&
+                    conditionalEventDefinition.condition
+                  ) {
+                    conditionalEventDefinition.condition.resource =
+                      values.resource;
+                    conditionalEventDefinition.condition.body = undefined;
+                  }
+                },
+                validate: function (e, values) {
+                  if (!values.resource && conditionType === "script") {
+                    return { resource: "Must provide a value" };
+                  }
+                },
+              }}
+              canRemove={true}
+            />
+          )}
+          {scriptType === "script" && (
+            <Textbox
+              element={element}
+              rows={3}
+              entry={{
+                id: "script",
+                label: translate("Script"),
+                modelProperty: "script",
+                get: function () {
+                  if (
+                    conditionalEventDefinition &&
+                    conditionalEventDefinition.condition
+                  ) {
+                    return {
+                      script: conditionalEventDefinition.condition.body,
+                    };
+                  }
+                },
+                set: function (e, values) {
+                  if (conditionalEventDefinition) {
+                    conditionalEventDefinition.condition.body = values.script;
+                    conditionalEventDefinition.condition.resource = undefined;
+                  }
+                },
+                validate: function (e, values) {
+                  if (!values.script && conditionType === "script") {
+                    return { script: "Must provide a value" };
+                  }
+                },
+              }}
+            />
+          )}
         </div>
       )}
     </div>

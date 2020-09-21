@@ -110,13 +110,14 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
   const [selectedTaskEntity, setSelectedTaskEntity] = useState(null);
   const [eventType, setEventType] = useState(null);
   const [timerDefinitionType, setTimerDefinitionType] = useState("");
-  const [listenerType, setListenerType] = useState(scriptProp);
+  const [listenerType, setListenerType] = useState(classProp);
   const [taskOptions, setTaskOptions] = useState(null);
   const [executionOptions, setExecutionOptions] = useState(null);
+  const [scriptType, setScriptType] = useState("script");
 
   const classes = useStyles();
   const isSequenceFlow = ImplementationTypeHelper.isSequenceFlow(element);
-
+  
   const getExecutionOptions = () => {
     const executionListenerEventTypeOptions = ImplementationTypeHelper.isSequenceFlow(
       element
@@ -133,7 +134,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
     return function (e, extensionEle, value) {
       let props = {
         event: initialEvent,
-        script: { value: "" },
+        class: "",
       };
 
       let newElem = elementHelper.createElement(
@@ -204,17 +205,14 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
   }, [element]);
 
   const getListener = React.useCallback(() => {
-    let type =
-      selectedExecutionEntity === 0 || selectedExecutionEntity
-        ? CAMUNDA_EXECUTION_LISTENER_ELEMENT
-        : CAMUNDA_TASK_LISTENER_ELEMENT;
+    let type = selectedExecutionEntity === 0 || selectedExecutionEntity
+      ? CAMUNDA_EXECUTION_LISTENER_ELEMENT
+      : CAMUNDA_TASK_LISTENER_ELEMENT;
     let bo = getBO();
     const listeners = getListeners(bo, type);
     const listener =
       listeners[
-        selectedExecutionEntity === 0 || selectedExecutionEntity
-          ? selectedExecutionEntity
-          : selectedTaskEntity
+        selectedExecutionEntity === 0 || selectedExecutionEntity ? selectedExecutionEntity : selectedTaskEntity
       ];
     return listener || (listeners && listeners[0]);
   }, [getBO, selectedExecutionEntity, selectedTaskEntity]);
@@ -248,9 +246,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
       let event = listener.get("event") ? listener.get("event") : "<empty>";
 
       let label =
-        (event || "*") +
-        " : " +
-        (LISTENER_TYPE_LABEL[listenerType] || "Script");
+        (event || "*") + " : " + (LISTENER_TYPE_LABEL[listenerType] || "");
       return label;
     };
   };
@@ -533,7 +529,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                       elementHelper.createElement(
                         "camunda:Script",
                         {
-                          scriptFormat: "axelor",
+                          scriptFormat: "",
                           value: "",
                         },
                         getBO(),
@@ -649,9 +645,6 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                       const listener = getListener();
                       if (!listener) return;
                       if (listener && listener.script) {
-                        if (!listener.script.scriptFormat) {
-                          listener.script.scriptFormat = "axelor";
-                        }
                         return { scriptFormat: listener.script.scriptFormat };
                       }
                     },
@@ -670,33 +663,103 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                   }}
                   canRemove={true}
                 />
-                <Textbox
+                <SelectBox
                   element={element}
-                  rows={3}
                   entry={{
-                    id: "script",
-                    label: translate("Script"),
-                    modelProperty: "script",
+                    id: "scriptType",
+                    label: "Script Type",
+                    modelProperty: "scriptType",
+                    selectOptions: [
+                      { name: "Inline Script", value: "script" },
+                      { name: "External Resource", value: "scriptResource" },
+                    ],
+                    emptyParameter: false,
                     get: function () {
-                      const listener = getListener();
-                      if (listener && listener.script) {
-                        return { script: listener.script.value };
-                      }
+                      return { scriptType: scriptType };
                     },
                     set: function (e, values) {
-                      const listener = getListener();
-                      if (listener && listener.script) {
-                        listener.script.value = values.script;
-                        listener.script.resource = undefined;
-                      }
-                    },
-                    validate: function (e, values) {
-                      if (!values.script && listenerType === scriptProp) {
-                        return { script: "Must provide a value" };
+                      if (values && !values.scriptType) return;
+                      setScriptType(values.scriptType);
+                      if (values.scriptType === "script") {
+                        if (element.businessObject) {
+                          element.businessObject.resource = undefined;
+                          element.businessObject.script = "";
+                        }
+                      } else {
+                        if (element.businessObject) {
+                          element.businessObject.resource = "";
+                          element.businessObject.script = undefined;
+                        }
                       }
                     },
                   }}
                 />
+                {scriptType === "scriptResource" && (
+                  <TextField
+                    element={element}
+                    entry={{
+                      id: "resource",
+                      label: translate("Resource"),
+                      modelProperty: "resource",
+                      get: function () {
+                        const listener = getListener();
+                        if (listener && listener.script) {
+                          return { resource: listener.script.resource };
+                        }
+                      },
+                      set: function (e, values) {
+                        const listener = getListener();
+                        if (listener && listener.script) {
+                          listener.script.resource = values.resource;
+                          listener.script.value = undefined;
+                        }
+                      },
+                      validate: function (e, values) {
+                        if (
+                          !values.resource &&
+                          listenerType === scriptProp &&
+                          scriptType === "scriptResource"
+                        ) {
+                          return { resource: "Must provide a value" };
+                        }
+                      },
+                    }}
+                    canRemove={true}
+                  />
+                )}
+                {scriptType === "script" && (
+                  <Textbox
+                    element={element}
+                    rows={3}
+                    entry={{
+                      id: "script",
+                      label: translate("Script"),
+                      modelProperty: "script",
+                      get: function () {
+                        const listener = getListener();
+                        if (listener && listener.script) {
+                          return { script: listener.script.value };
+                        }
+                      },
+                      set: function (e, values) {
+                        const listener = getListener();
+                        if (listener && listener.script) {
+                          listener.script.value = values.script;
+                          listener.script.resource = undefined;
+                        }
+                      },
+                      validate: function (e, values) {
+                        if (
+                          !values.script &&
+                          listenerType === scriptProp &&
+                          scriptType === "script"
+                        ) {
+                          return { script: "Must provide a value" };
+                        }
+                      },
+                    }}
+                  />
+                )}
               </div>
             )}
             {eventType === "timeout" && (
