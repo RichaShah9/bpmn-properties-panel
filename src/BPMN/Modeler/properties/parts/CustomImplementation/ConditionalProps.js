@@ -44,8 +44,7 @@ export default function ConditionalProps({
   bpmnModeler,
 }) {
   const [isVisible, setVisible] = useState(false);
-  const [conditionType, setConditionType] = useState("");
-  const [scriptType, setScriptType] = useState("script");
+  const [conditionType, setConditionType] = useState("script");
   const classes = useStyles();
 
   useEffect(() => {
@@ -56,7 +55,7 @@ export default function ConditionalProps({
     let conditionExpression = conditionalEventDefinition
       ? conditionalEventDefinition.condition
       : bo.conditionExpression;
-    let conditionType = "";
+    let conditionType = "script";
     if (conditionExpression) {
       let conditionLanguage = conditionExpression.language;
       if (conditionLanguage || conditionLanguage === "") {
@@ -64,22 +63,49 @@ export default function ConditionalProps({
       } else {
         conditionType = "expression";
       }
+    } else {
+      let bo = getBusinessObject(element);
+      let conditionType = "script";
+      let conditionProps = {
+        body: undefined,
+        language: undefined,
+      };
+      if (conditionType === "script") {
+        conditionProps = {
+          body: "",
+          language: "axelor",
+          "camunda:resource": undefined,
+        };
+      }
+
+      let conditionOrConditionExpression;
+      let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
+        element
+      );
+      if (conditionType) {
+        conditionOrConditionExpression = elementHelper.createElement(
+          "bpmn:FormalExpression",
+          conditionProps,
+          conditionalEventDefinition || bo,
+          bpmnFactory
+        );
+
+        let source = element.source;
+
+        // if default-flow, remove default-property from source
+        if (source && source.businessObject.default === bo) {
+          source.default = undefined;
+        }
+      }
+
+      if (conditionalEventDefinition) {
+        element.businessObject.condition = conditionOrConditionExpression;
+      } else {
+        element.businessObject.conditionExpression = conditionOrConditionExpression;
+      }
     }
     setConditionType(conditionType);
-  }, [element]);
-
-  useEffect(() => {
-    let bo = getBusinessObject(element);
-    let type = "script";
-    if (
-      bo.conditionExpression &&
-      (bo.conditionExpression.resource ||
-        bo.conditionExpression.resource === "")
-    ) {
-      type = "scriptResource";
-    }
-    setScriptType(type);
-  }, [element]);
+  }, [element, bpmnFactory, bpmnModeler]);
 
   useEffect(() => {
     if (
@@ -122,7 +148,7 @@ export default function ConditionalProps({
               if (conditionType === "script") {
                 conditionProps = {
                   body: "",
-                  language: "",
+                  language: "axelor",
                   "camunda:resource": undefined,
                 };
               }
@@ -214,10 +240,13 @@ export default function ConditionalProps({
                   const bo = getBusinessObject(element);
                   if (bo.conditionExpression) {
                     let boScriptFormat = bo.conditionExpression.language;
+                    if (!boScriptFormat) {
+                      bo.conditionExpression.language = "axelor";
+                      boScriptFormat = "axelor";
+                    }
                     return { scriptFormat: boScriptFormat };
                   }
                 },
-
                 set: function (element, values) {
                   let scriptFormat = values.scriptFormat;
                   if (
@@ -235,118 +264,36 @@ export default function ConditionalProps({
               }}
               canRemove={true}
             />
-            <SelectBox
+            <Textbox
               element={element}
+              rows={3}
               entry={{
-                id: "scriptType",
-                label: "Script Type",
-                modelProperty: "scriptType",
-                selectOptions: [
-                  { name: "Inline Script", value: "script" },
-                  { name: "External Resource", value: "scriptResource" },
-                ],
-                emptyParameter: false,
+                id: "script",
+                label: translate("Script"),
+                modelProperty: "script",
                 get: function () {
-                  return { scriptType: scriptType };
+                  let bo = getBusinessObject(element);
+                  if (bo.conditionExpression && bo.conditionExpression.body) {
+                    return { script: bo.conditionExpression.body };
+                  }
                 },
                 set: function (e, values) {
-                  if (values && !values.scriptType) return;
-                  setScriptType(values.scriptType);
-                  if (values.scriptType === "script") {
-                    if (
-                      element.businessObject &&
-                      element.businessObject.conditionExpression
-                    ) {
-                      element.businessObject.conditionExpression.resource = undefined;
-                      element.businessObject.conditionExpression.body = "";
-                    }
-                  } else {
-                    if (
-                      element.businessObject &&
-                      element.businessObject.conditionExpression
-                    ) {
-                      element.businessObject.conditionExpression.resource = "";
-                      element.businessObject.conditionExpression.body = undefined;
-                    }
+                  if (
+                    element.businessObject &&
+                    element.businessObject.conditionExpression
+                  ) {
+                    element.businessObject.conditionExpression.body =
+                      values.script;
+                    element.businessObject.conditionExpression.resource = undefined;
+                  }
+                },
+                validate: function (e, values) {
+                  if (!values.script && conditionType === "script") {
+                    return { script: "Must provide a value" };
                   }
                 },
               }}
             />
-            {scriptType === "scriptResource" && (
-              <TextField
-                element={element}
-                entry={{
-                  id: "resource",
-                  label: translate("Resource"),
-                  modelProperty: "resource",
-                  get: function () {
-                    let bo = getBusinessObject(element);
-                    if (
-                      bo.conditionExpression &&
-                      bo.conditionExpression.resource
-                    ) {
-                      return { resource: bo.conditionExpression.resource };
-                    }
-                  },
-                  set: function (e, values) {
-                    if (
-                      element.businessObject &&
-                      element.businessObject.conditionExpression
-                    ) {
-                      element.businessObject.conditionExpression.resource =
-                        values.resource;
-                      element.businessObject.conditionExpression.body = undefined;
-                    }
-                  },
-                  validate: function (e, values) {
-                    if (
-                      !values.resource &&
-                      conditionType === "script" &&
-                      scriptType === "scriptResource"
-                    ) {
-                      return { resource: "Must provide a value" };
-                    }
-                  },
-                }}
-                canRemove={true}
-              />
-            )}
-            {scriptType === "script" && (
-              <Textbox
-                element={element}
-                rows={3}
-                entry={{
-                  id: "script",
-                  label: translate("Script"),
-                  modelProperty: "script",
-                  get: function () {
-                    let bo = getBusinessObject(element);
-                    if (bo.conditionExpression && bo.conditionExpression.body) {
-                      return { script: bo.conditionExpression.body };
-                    }
-                  },
-                  set: function (e, values) {
-                    if (
-                      element.businessObject &&
-                      element.businessObject.conditionExpression
-                    ) {
-                      element.businessObject.conditionExpression.body =
-                        values.script;
-                      element.businessObject.conditionExpression.resource = undefined;
-                    }
-                  },
-                  validate: function (e, values) {
-                    if (
-                      !values.script &&
-                      conditionType === "script" &&
-                      scriptType === "script"
-                    ) {
-                      return { script: "Must provide a value" };
-                    }
-                  },
-                }}
-              />
-            )}
           </div>
         )}
       </div>
