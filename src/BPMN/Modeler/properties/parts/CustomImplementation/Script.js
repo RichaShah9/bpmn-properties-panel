@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
-import { TextField, SelectBox, Textbox } from "../../components";
+import { Textbox } from "../../components";
 import { translate } from "../../../../../utils";
 
 export default function Script({ element }) {
