@@ -66,6 +66,8 @@ export default function TextField({
   rootClass,
   labelClass,
   type = "text",
+  isLabel = true,
+  readOnly = false
 }) {
   const classes = useStyles();
   const {
@@ -142,11 +144,14 @@ export default function TextField({
 
   return (
     <div className={classnames(classes.root, rootClass)}>
-      <label className={classnames(classes.label, labelClass)}>{label}</label>
+      {isLabel && (
+        <label className={classnames(classes.label, labelClass)}>{label}</label>
+      )}
       <div className={classes.fieldWrapper}>
         <input
           id={`camunda-${modelProperty}_${Date()}`}
           type={type}
+          readOnly={readOnly}
           name={modelProperty}
           value={value || ""}
           onChange={(e) => setValue(e.target.value)}
