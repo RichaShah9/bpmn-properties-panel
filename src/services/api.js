@@ -23,7 +23,7 @@ export async function getModels(data = {}) {
 }
 
 export async function getViews(model, criteria, type = "form") {
-  if (!model) return [];
+  if (!model || !model.name || !model.fullName) return [];
   let options = [
     {
       fieldName: "type",
@@ -252,6 +252,39 @@ export async function getWkfModel(processId) {
   const { data = [] } = res || {};
   const model = data[0];
   return model;
+}
+
+export async function getTranslations(key) {
+  const res = await Service.search("com.axelor.meta.db.MetaTranslation", {
+    data: {
+      _domain: "self.key = :key",
+      _domainContext: {
+        key: `value:${key}`,
+      },
+    },
+    sortBy: ["id"],
+  });
+  const { data = [] } = res || {};
+  return data;
+}
+
+export async function removeAllTranslations(records) {
+  const url = `ws/rest/com.axelor.meta.db.MetaTranslation/removeAll`;
+  const res = await Service.post(url, {
+    records,
+  });
+  const { status } = res || {};
+  if (status === 0) return true;
+  return false;
+}
+
+export async function addTranslations(records) {
+  const url = `ws/rest/com.axelor.meta.db.MetaTranslation`;
+  const res = await Service.post(url, {
+    records,
+  });
+  const { data = [] } = res || {};
+  return data;
 }
 
 export async function getDMNModel(decisionId) {
