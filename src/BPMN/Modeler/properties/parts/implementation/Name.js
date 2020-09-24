@@ -13,16 +13,24 @@ import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
  */
 export default function Name(element, options, translate, bpmnModeler) {
   options = options || {};
-  var id = options.id || "name",
+  let id = options.id || "name",
     label = options.label || translate("Name"),
     modelProperty = options.modelProperty || "name";
 
   const get = function () {
-    var bo = getBusinessObject(element);
-    return { [modelProperty]: bo.get([modelProperty]) };
+    let bo = getBusinessObject(element);
+    let originalValue = `value:${bo.get([modelProperty])}`;
+    let key = element.businessObject.key || bo.get([modelProperty]);
+    let translatedValue = translate(`value:${key}`);
+    let value =
+      translatedValue === originalValue
+        ? bo.get([modelProperty])
+        : translatedValue;
+    // element.businessObject.key = key;
+    return { [modelProperty]: value };
   };
 
-  const set = function (element, values) {
+  const set = function (element, values, readOnly) {
     if (element.businessObject) {
       element.businessObject[modelProperty] = values[modelProperty];
     } else {
@@ -32,13 +40,21 @@ export default function Name(element, options, translate, bpmnModeler) {
     let elementRegistry = bpmnModeler.get("elementRegistry");
     let modeling = bpmnModeler.get("modeling");
     let shape = elementRegistry.get(element.id);
-    if(!shape) return
-    modeling && modeling.updateProperties(shape, {
-      [modelProperty]: values[modelProperty],
-    });
+    if (!shape) return;
+    let originalValue = `value:${values[modelProperty]}`;
+    let translatedValue = translate(`value:${values[modelProperty]}`);
+    let value = !readOnly
+      ? values[modelProperty]
+      : translatedValue === originalValue
+      ? values[modelProperty]
+      : translatedValue;
+    modeling &&
+      modeling.updateProperties(shape, {
+        [modelProperty]: value,
+      });
   };
 
-  var nameEntry = {
+  let nameEntry = {
     id: id,
     label: label,
     modelProperty: modelProperty,

@@ -21,6 +21,7 @@ import AlertDialog from "../../components/AlertDialog";
 import Tooltip from "../../components/Tooltip";
 import { Tab, Tabs } from "../../components/Tabs";
 import DeployDialog from "./views/DeployDialog";
+import TranslationDialog from "./views/TranslationDialog";
 import {
   Textbox,
   TextField,
@@ -39,6 +40,7 @@ import {
   hidePanelElements,
   addOldNodes,
 } from "./extra.js";
+import { translate } from "../../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -157,6 +159,7 @@ function BpmnModelerComponent() {
   const [tabs, setTabs] = useState([]);
   const [width, setWidth] = useState(drawerWidth);
   const [height, setHeight] = useState("100%");
+  const [openTranslation, setTranslationDialog] = useState(false);
   const classes = useStyles();
 
   const handleChange = (event, newValue) => {
@@ -229,6 +232,24 @@ function BpmnModelerComponent() {
             bo.$attrs["camunda:displayStatus"] = true;
           }
         }
+        if (!["h", "y"].includes(element.constructor.name)) return;
+        let bo = getBusinessObject(element);
+        let originalValue = `value:${bo.get(["name"])}`;
+        let nameKey = element.businessObject.key || bo.get(["name"]);
+        let translatedValue = translate(`value:${nameKey}`);
+        let newValue =
+          translatedValue === originalValue
+            ? bo.get(["name"])
+            : translatedValue;
+        element.businessObject.key = nameKey;
+        let elementRegistry = bpmnModeler.get("elementRegistry");
+        let modeling = bpmnModeler.get("modeling");
+        let shape = elementRegistry.get(element.id);
+        if (shape.businessObject.name === newValue) return;
+        modeling &&
+          modeling.updateProperties(shape, {
+            name: newValue,
+          });
       });
     });
   },
@@ -675,9 +696,7 @@ function BpmnModelerComponent() {
           <TextField entry={entry} element={selectedElement} canRemove={true} />
         );
       case "textBox":
-        return (
-          <Textbox isResizable={true} entry={entry} element={selectedElement} />
-        );
+        return <Textbox entry={entry} element={selectedElement} />;
       case "selectBox":
         return <SelectBox entry={entry} element={selectedElement} />;
       case "checkbox":
@@ -775,6 +794,12 @@ function BpmnModelerComponent() {
     if (!bpmnModeler) return;
     bpmnModeler.on("element.click", (event) => {
       updateTabs(event);
+    });
+    bpmnModeler.on("element.contextmenu", 500, (event) => {
+      event && event.preventDefault();
+      if (!["h", "y"].includes(event.element.constructor.name)) return;
+      updateTabs(event);
+      setTranslationDialog(true);
     });
     bpmnModeler.on("shape.changed", (event) => {
       updateTabs(event);
@@ -897,6 +922,14 @@ function BpmnModelerComponent() {
             {openSnackbar.message}
           </Alert>
         </Snackbar>
+      )}
+      {openTranslation && (
+        <TranslationDialog
+          open={openTranslation}
+          onClose={() => setTranslationDialog(false)}
+          element={selectedElement}
+          onSave={onSave}
+        />
       )}
       {openAlert && (
         <AlertDialog
