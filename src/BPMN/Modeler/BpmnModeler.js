@@ -232,7 +232,8 @@ function BpmnModelerComponent() {
             bo.$attrs["camunda:displayStatus"] = true;
           }
         }
-        if (!["h", "y"].includes(element.constructor.name)) return;
+        if (!["h", "v", "Shape", "Label"].includes(element.constructor.name))
+          return;
         let bo = getBusinessObject(element);
         let originalValue = `value:${bo.get(["name"])}`;
         let nameKey = element.businessObject.key || bo.get(["name"]);
@@ -696,13 +697,25 @@ function BpmnModelerComponent() {
           <TextField entry={entry} element={selectedElement} canRemove={true} />
         );
       case "textBox":
-        return <Textbox entry={entry} element={selectedElement} />;
+        return (
+          <Textbox
+            entry={entry}
+            bpmnModeler={bpmnModeler}
+            element={selectedElement}
+          />
+        );
       case "selectBox":
         return <SelectBox entry={entry} element={selectedElement} />;
       case "checkbox":
         return <Checkbox entry={entry} element={selectedElement} />;
       default:
-        return <Textbox entry={entry} element={selectedElement} />;
+        return (
+          <Textbox
+            entry={entry}
+            element={selectedElement}
+            bpmnModeler={bpmnModeler}
+          />
+        );
     }
   };
 
@@ -797,7 +810,10 @@ function BpmnModelerComponent() {
     });
     bpmnModeler.on("element.contextmenu", 500, (event) => {
       event && event.preventDefault();
-      if (!["h", "y"].includes(event.element.constructor.name)) return;
+      if (
+        !["h", "v", "Shape", "Label"].includes(event.element.constructor.name)
+      )
+        return;
       updateTabs(event);
       setTranslationDialog(true);
     });

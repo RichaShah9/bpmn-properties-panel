@@ -39,7 +39,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Textbox({ entry, element, rows = 1 }) {
+export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
   const classes = useStyles();
   const {
     label,
@@ -109,16 +109,18 @@ export default function Textbox({ entry, element, rows = 1 }) {
       if (translations.length > 0) {
         element.businessObject.key = value;
         setReadOnly(true);
-        // eventBus.on("create.end", 250, () => {
-        //   directEditing.cancel();
-        // });
+        if (!bpmnModeler) {
+          return;
+        }
+        const directEditing = bpmnModeler.get("directEditing");
+        directEditing && directEditing.cancel();
       } else {
-        element.businessObject.key = name;
-        setValue(bo.get(modelProperty));
+        element.businessObject.key = key;
+        setValue(name);
       }
     }
     getAllTranslations();
-  }, [element, modelProperty]);
+  }, [element, modelProperty, bpmnModeler]);
 
   useEffect(() => {
     const isError = getValidation();

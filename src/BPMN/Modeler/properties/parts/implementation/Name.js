@@ -26,7 +26,6 @@ export default function Name(element, options, translate, bpmnModeler) {
       translatedValue === originalValue
         ? bo.get([modelProperty])
         : translatedValue;
-    // element.businessObject.key = key;
     return { [modelProperty]: value };
   };
 
