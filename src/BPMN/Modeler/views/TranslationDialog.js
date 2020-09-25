@@ -79,6 +79,11 @@ export default function TranslationDialog({ open, onClose, element, onSave }) {
       const res = await removeAllTranslations(removeTranslations);
       if (res) {
         setRemoveTranslations(null);
+        const bo = element.businessObject;
+        const name = bo.name;
+        const key = bo.key;
+        const value = key || name;
+        element.businessObject.name = value
       }
     }
     onSave();
