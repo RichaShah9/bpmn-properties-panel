@@ -159,19 +159,20 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
       const extensionElements =
         bo.extensionElements && bo.extensionElements.values;
       let count;
-      extensionElements.forEach((element, ind) => {
-        if (element.$type === type) {
-          if (count > -1) {
-            count++;
-          } else {
-            count = 0;
+      extensionElements &&
+        extensionElements.forEach((element, ind) => {
+          if (element.$type === type) {
+            if (count > -1) {
+              count++;
+            } else {
+              count = 0;
+            }
           }
-        }
-        if (count === Number(index)) {
-          bo.extensionElements.values.splice(ind, 1);
-          return;
-        }
-      });
+          if (count === Number(index)) {
+            bo.extensionElements.values.splice(ind, 1);
+            return;
+          }
+        });
       addOptions(element);
       if (
         extensionElements &&

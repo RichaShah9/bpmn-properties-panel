@@ -37,7 +37,6 @@ function isConditionalSource(element) {
 }
 
 const conditionType = "script";
-const scriptType = "script";
 
 export default function ConditionalProps({
   element,
@@ -83,16 +82,47 @@ export default function ConditionalProps({
                 element.businessObject &&
                 element.businessObject.conditionExpression
               ) {
-                element.businessObject.conditionExpression.body = values.script;
+                element.businessObject.conditionExpression.body = values.script
+                  ? values.script
+                  : undefined;
                 element.businessObject.conditionExpression.resource = undefined;
                 element.businessObject.conditionExpression.language = "axelor";
+                let conditionOrConditionExpression;
+                let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
+                  element
+                );
+                if (conditionalEventDefinition) {
+                  element.businessObject.condition = conditionOrConditionExpression;
+                } else {
+                  element.businessObject.conditionExpression = conditionOrConditionExpression;
+                  if (conditionOrConditionExpression) {
+                    element.businessObject.conditionExpression.body =
+                      values.script;
+                    element.businessObject.conditionExpression.resource = undefined;
+                    element.businessObject.conditionExpression.language =
+                      "axelor";
+                  }
+                }
+                let bo = getBusinessObject(element);
+                if (!bpmnModeler) return;
+                let elementRegistry = bpmnModeler.get("elementRegistry");
+                let modeling = bpmnModeler.get("modeling");
+                let shape = elementRegistry.get(element.id);
+                if (!shape) return;
+                if (CONDITIONAL_SOURCES.includes(bo.sourceRef.$type)) return;
+                modeling &&
+                  modeling.updateProperties(shape, {
+                    [conditionalEventDefinition
+                      ? "condition"
+                      : "conditionExpression"]: conditionOrConditionExpression,
+                  });
               } else {
                 let conditionOrConditionExpression;
                 let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
                   element
                 );
                 let bo = getBusinessObject(element);
-                if (conditionType) {
+                if (values.script && values.script !== "" && conditionType) {
                   const conditionProps = {
                     body: "",
                     language: "",
@@ -138,15 +168,6 @@ export default function ConditionalProps({
                       ? "condition"
                       : "conditionExpression"]: conditionOrConditionExpression,
                   });
-              }
-            },
-            validate: function (e, values) {
-              if (
-                !values.script &&
-                conditionType === "script" &&
-                scriptType === "script"
-              ) {
-                return { script: "Must provide a value" };
               }
             },
           }}
