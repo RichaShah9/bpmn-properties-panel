@@ -15,6 +15,9 @@ export default function IdProps(group, element, translate, options) {
     },
     setProperty: function (element, properties) {
       element.id = properties["id"];
+      if (element.businessObject && element.businessObject.id) {
+        element.businessObject.id = properties["id"];
+      }
     },
     validate: function (element, values) {
       let idValue = values.id;
