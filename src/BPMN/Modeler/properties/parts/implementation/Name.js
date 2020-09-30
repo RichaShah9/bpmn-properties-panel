@@ -20,7 +20,7 @@ export default function Name(element, options, translate, bpmnModeler) {
   const get = function () {
     let bo = getBusinessObject(element);
     let originalValue = `value:${bo.get([modelProperty])}`;
-    let key = element.businessObject.key || bo.get([modelProperty]);
+    let key = element.businessObject.$attrs.key || bo.get([modelProperty]);
     let translatedValue = translate(`value:${key}`);
     let value =
       translatedValue === originalValue
@@ -29,11 +29,14 @@ export default function Name(element, options, translate, bpmnModeler) {
     return { [modelProperty]: value };
   };
 
-  const set = function (element, values, readOnly) {
+  const set = function (element, values, readOnly, translations) {
     if (element.businessObject) {
       element.businessObject[modelProperty] = values[modelProperty];
     } else {
       element[modelProperty] = values[modelProperty];
+    }
+    if (translations && translations.length === 0) {
+      element.businessObject.$attrs.key = values[modelProperty];
     }
     if (!bpmnModeler || !element) return;
     let elementRegistry = bpmnModeler.get("elementRegistry");
@@ -42,11 +45,14 @@ export default function Name(element, options, translate, bpmnModeler) {
     if (!shape) return;
     let originalValue = `value:${values[modelProperty]}`;
     let translatedValue = translate(`value:${values[modelProperty]}`);
-    let value = !readOnly
-      ? values[modelProperty]
-      : translatedValue === originalValue
-      ? values[modelProperty]
-      : translatedValue;
+    let value =
+      translations && translations.length === 0
+        ? values[modelProperty]
+        : !readOnly
+        ? values[modelProperty]
+        : translatedValue === originalValue
+        ? values[modelProperty]
+        : translatedValue;
     modeling &&
       modeling.updateProperties(shape, {
         [modelProperty]: value,

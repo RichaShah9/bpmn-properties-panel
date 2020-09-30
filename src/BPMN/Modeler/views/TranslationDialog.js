@@ -65,7 +65,13 @@ const useStyles = makeStyles({
   },
 });
 
-export default function TranslationDialog({ open, onClose, element, onSave }) {
+export default function TranslationDialog({
+  open,
+  onClose,
+  element,
+  onSave,
+  bpmnModeler,
+}) {
   const classes = useStyles();
   const [value, setValue] = useState(null);
   const [translations, setTranslations] = useState(null);
@@ -81,9 +87,19 @@ export default function TranslationDialog({ open, onClose, element, onSave }) {
         setRemoveTranslations(null);
         const bo = element.businessObject;
         const name = bo.name;
-        const key = bo.key;
-        const value = key || name;
-        element.businessObject.name = value
+        const key = bo.$attrs.key;
+        const value =
+          translations && translations.length === 0 ? key : key || name;
+        if (value) {
+          element.businessObject.name = value;
+          let elementRegistry = bpmnModeler.get("elementRegistry");
+          let modeling = bpmnModeler.get("modeling");
+          let shape = elementRegistry.get(element.id);
+          modeling &&
+            modeling.updateProperties(shape, {
+              name: value,
+            });
+        }
       }
     }
     onSave();
@@ -122,14 +138,14 @@ export default function TranslationDialog({ open, onClose, element, onSave }) {
     };
     setTranslations(cloneTranslations);
   };
-
+  
   useEffect(() => {
     async function getAllTranslations() {
       if (!element) return;
       setLoading(true);
       const bo = element.businessObject;
       const name = bo.name;
-      const key = bo.key;
+      const key = bo.$attrs.key;
       const value = key || name;
       setValue(value);
       const translations = await getTranslations(value);
@@ -181,7 +197,7 @@ export default function TranslationDialog({ open, onClose, element, onSave }) {
                     Translation
                   </TableCell>
                   <TableCell className={classes.tableHead} align="center">
-                    Language
+                    Language (Hint: en, fr)
                   </TableCell>
                   <TableCell
                     className={classes.tableHead}

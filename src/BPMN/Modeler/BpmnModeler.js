@@ -236,13 +236,15 @@ function BpmnModelerComponent() {
           return;
         let bo = getBusinessObject(element);
         let originalValue = `value:${bo.get(["name"])}`;
-        let nameKey = element.businessObject.key || bo.get(["name"]);
+        let nameKey = element.businessObject.$attrs.key || bo.get(["name"]);
         let translatedValue = translate(`value:${nameKey}`);
         let newValue =
           translatedValue === originalValue
             ? bo.get(["name"])
             : translatedValue;
-        element.businessObject.key = nameKey;
+        if (nameKey) {
+          element.businessObject.$attrs.key = nameKey;
+        }
         let elementRegistry = bpmnModeler.get("elementRegistry");
         let modeling = bpmnModeler.get("modeling");
         let shape = elementRegistry.get(element.id);
@@ -945,6 +947,7 @@ function BpmnModelerComponent() {
           onClose={() => setTranslationDialog(false)}
           element={selectedElement}
           onSave={onSave}
+          bpmnModeler={bpmnModeler}
         />
       )}
       {openAlert && (

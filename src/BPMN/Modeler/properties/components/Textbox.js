@@ -55,6 +55,7 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
   const [errorMessage, setErrorMessage] = useState(null);
   const [isError, setError] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
+  const [translations, setTranslations] = useState(null);
 
   const updateProperty = (value) => {
     if (!set && !setProperty) return;
@@ -64,7 +65,8 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
         {
           [modelProperty]: value,
         },
-        readOnly
+        readOnly,
+        translations
       );
       setValue(value);
     } else {
@@ -102,12 +104,15 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
       if (!element || modelProperty !== "name") return;
       const bo = element.businessObject;
       const name = bo.name;
-      const key = bo.key;
+      const key = bo.$attrs.key;
       const value = key || name;
       setValue(value);
       const translations = await getTranslations(value);
+      setTranslations(translations);
       if (translations.length > 0) {
-        element.businessObject.key = value;
+        if (value) {
+          element.businessObject.$attrs.key = value;
+        }
         setReadOnly(true);
         if (!bpmnModeler) {
           return;
@@ -115,7 +120,9 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
         const directEditing = bpmnModeler.get("directEditing");
         directEditing && directEditing.cancel();
       } else {
-        element.businessObject.key = key;
+        if (key) {
+          element.businessObject.$attrs.key = key;
+        }
         setValue(name);
       }
     }
