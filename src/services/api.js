@@ -186,7 +186,7 @@ export async function getMetaModels(criteria = {}) {
   const res = await Service.search("com.axelor.meta.db.MetaModel", {
     data: criteria,
   });
-  if (res.status === -1) return [];
+  if (res && res.status === -1) return [];
   const { data = [] } = res || {};
   return data;
 }
@@ -195,7 +195,7 @@ export async function getCustomModels(criteria = {}) {
   const res = await Service.search("com.axelor.meta.db.MetaJsonModel", {
     data: criteria,
   });
-  if (res.status === -1) return [];
+  if (res && res.status === -1) return [];
   const { data = [] } = res || {};
   return data;
 }
