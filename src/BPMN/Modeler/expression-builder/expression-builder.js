@@ -211,7 +211,7 @@ function ExpressionBuilder(props) {
   }
 
   return (
-    <div style={{ flex: 1 }}>
+    <div style={{ width: '100%' }}>
       <Paper variant="outlined" className={classes.paper}>
         <div
           style={{ display: "flex", width: "100%", flexDirection: "column" }}
