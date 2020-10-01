@@ -27,7 +27,6 @@ export default function FieldEditor({
   React.useEffect(() => {
     (async () => {
       const data = await getMetaFields();
-      console.log("data",data)
       setFields(data);
     })();
   }, [getMetaFields]);

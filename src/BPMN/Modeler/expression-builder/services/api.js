@@ -43,7 +43,7 @@ export async function getMetaFields(fields, model) {
 }
 
 export async function getMetaModal(data) {
-  const res = metaModalService.search({ data });
+  const res = await metaModalService.search({ data });
   return res && res.data && res.data[0];
 }
 
@@ -54,7 +54,7 @@ export async function getSubMetaField(model) {
   const metaModel = await getMetaModal(data);
   if (!metaModel) return [];
   const fields = metaModel && metaModel.metaFields.map((f) => f.name);
-  const res = metaFieldService.fields({ fields, model: metaModel.fullName });
+  const res = await metaFieldService.fields({ fields, model: metaModel.fullName });
   return res && res.data && res.data.fields;
 }
 
