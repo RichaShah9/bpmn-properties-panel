@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+import { Add } from "@material-ui/icons";
 
 import TextField from "../../components/TextField";
+import ExpressionBuilder from "../../../expression-builder";
 import { translate } from "../../../../../utils";
 
 const useStyles = makeStyles({
@@ -20,15 +22,36 @@ const useStyles = makeStyles({
     marginTop: 15,
     borderTop: "1px dotted #ccc",
   },
+  expressionBuilder: {
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+  },
+  newIcon: {
+    color: "#0075FF",
+    marginLeft: 5,
+  },
+  new: {
+    cursor: "pointer",
+  },
 });
 
 export default function UserTaskProps({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
+  const [open, setOpen] = React.useState(false);
   const classes = useStyles();
 
   const getProperty = (name) => {
     const bo = getBusinessObject(element);
     return (bo.$attrs && bo.$attrs[name]) || "";
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const setProperty = (name, value) => {
@@ -54,23 +77,36 @@ export default function UserTaskProps({ element, index, label }) {
           {index > 0 && <div className={classes.divider} />}
         </React.Fragment>
         <div className={classes.groupLabel}>{label}</div>
-        <TextField
-          element={element}
-          entry={{
-            id: "completedIf",
-            label: translate("Completed If"),
-            modelProperty: "completedIf",
-            get: function () {
-              return {
-                completedIf: getProperty("camunda:completedIf"),
-              };
-            },
-            set: function (e, values) {
-              setProperty("camunda:completedIf", values["completedIf"]);
-            },
-          }}
-          canRemove={true}
-        />
+        <div className={classes.expressionBuilder}>
+          <TextField
+            element={element}
+            entry={{
+              id: "completedIf",
+              label: translate("Completed If"),
+              modelProperty: "completedIf",
+              get: function () {
+                return {
+                  completedIf: getProperty("camunda:completedIf"),
+                };
+              },
+              set: function (e, values) {
+                setProperty("camunda:completedIf", values["completedIf"]);
+              },
+            }}
+            canRemove={true}
+          />
+          <div className={classes.new}>
+            <Add className={classes.newIcon} onClick={handleClickOpen} />
+            <ExpressionBuilder
+              open={open}
+              handleClose={() => handleClose()}
+              setProperty={(value) => {
+                setProperty("camunda:completedIf", value);
+              }}
+              element={element}
+            />
+          </div>
+        </div>
         <TextField
           element={element}
           entry={{
