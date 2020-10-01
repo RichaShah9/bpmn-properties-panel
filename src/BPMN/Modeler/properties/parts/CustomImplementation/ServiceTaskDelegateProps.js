@@ -8,6 +8,14 @@ import { getDMNModel } from "../../../../../services/api";
 import { SelectBox, TextField } from "../../components";
 import { translate } from "../../../../../utils";
 
+const eventTypes = [
+  "bpmn:StartEvent",
+  "bpmn:IntermediateCatchEvent",
+  "bpmn:IntermediateThrowEvent",
+  "bpmn:EndEvent",
+  "bpmn:BoundaryEvent",
+];
+
 function isServiceTaskLike(element) {
   return ImplementationTypeHelper.isServiceTaskLike(element);
 }
@@ -152,6 +160,9 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
 
   useEffect(() => {
     if (isServiceTaskLike(getBusinessObject(element))) {
+      if (eventTypes.includes(element && element.type)) {
+        return;
+      }
       setVisible(true);
     }
   }, [element]);
