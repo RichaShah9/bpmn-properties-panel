@@ -104,14 +104,14 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
       if (!element || modelProperty !== "name") return;
       const bo = element.businessObject;
       const name = bo.name;
-      const key = bo.$attrs.key;
+      const key = bo.$attrs["camunda:key"];
       const value = key || name;
       setValue(value);
       const translations = await getTranslations(value);
       setTranslations(translations);
       if (translations.length > 0) {
         if (value) {
-          element.businessObject.$attrs.key = value;
+          element.businessObject.$attrs["camunda:key"] = value;
         }
         setReadOnly(true);
         if (!bpmnModeler) {
@@ -121,7 +121,7 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
         directEditing && directEditing.cancel();
       } else {
         if (key) {
-          element.businessObject.$attrs.key = key;
+          element.businessObject.$attrs["camunda:key"] = key;
         }
         setValue(name);
       }

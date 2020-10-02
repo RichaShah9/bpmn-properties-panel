@@ -87,7 +87,7 @@ export default function TranslationDialog({
         setRemoveTranslations(null);
         const bo = element.businessObject;
         const name = bo.name;
-        const key = bo.$attrs.key;
+        const key = bo.$attrs["camunda:key"];
         const value =
           translations && translations.length === 0 ? key : key || name;
         if (value) {
@@ -138,14 +138,14 @@ export default function TranslationDialog({
     };
     setTranslations(cloneTranslations);
   };
-  
+
   useEffect(() => {
     async function getAllTranslations() {
       if (!element) return;
       setLoading(true);
       const bo = element.businessObject;
       const name = bo.name;
-      const key = bo.$attrs.key;
+      const key = bo.$attrs["camunda:key"];
       const value = key || name;
       setValue(value);
       const translations = await getTranslations(value);

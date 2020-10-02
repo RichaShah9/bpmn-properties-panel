@@ -236,14 +236,15 @@ function BpmnModelerComponent() {
           return;
         let bo = getBusinessObject(element);
         let originalValue = `value:${bo.get(["name"])}`;
-        let nameKey = element.businessObject.$attrs.key || bo.get(["name"]);
+        let nameKey =
+          element.businessObject.$attrs["camunda:key"] || bo.get(["name"]);
         let translatedValue = translate(`value:${nameKey}`);
         let newValue =
           translatedValue === originalValue
             ? bo.get(["name"])
             : translatedValue;
         if (nameKey) {
-          element.businessObject.$attrs.key = nameKey;
+          element.businessObject.$attrs["camunda:key"] = nameKey;
         }
         let elementRegistry = bpmnModeler.get("elementRegistry");
         let modeling = bpmnModeler.get("modeling");
