@@ -59,6 +59,13 @@ export class Service {
     );
   }
 
+  get(url) {
+    const config = {
+      method: "GET",
+    };
+    return this.request(url, config);
+  }
+
   post(url, data) {
     const config = {
       method: "POST",
