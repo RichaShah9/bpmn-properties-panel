@@ -7,11 +7,12 @@ import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import Alert from "@material-ui/lab/Alert";
+import PaletteIcon from "@material-ui/icons/Palette";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Snackbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Drawer, Typography } from "@material-ui/core";
+import { Drawer, Typography, Popover } from "@material-ui/core";
 import { Resizable } from "re-resizable";
 
 import propertiesCustomProviderModule from "./custom-provider";
@@ -40,6 +41,7 @@ import {
   hidePanelElements,
   addOldNodes,
 } from "./extra.js";
+import { COLORS } from "./constants.js";
 import { getTranslations, getInfo } from "../../services/api";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -131,6 +133,11 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 15,
     borderTop: "1px dotted #ccc",
   },
+  colorMenu: {
+    margin: 4,
+    width: 64,
+    height: 16,
+  },
 }));
 
 let bpmnModeler = null;
@@ -186,7 +193,17 @@ function BpmnModelerComponent() {
   const [width, setWidth] = useState(drawerWidth);
   const [height, setHeight] = useState("100%");
   const [openTranslation, setTranslationDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openPalette = Boolean(anchorEl);
   const classes = useStyles();
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
@@ -470,6 +487,16 @@ function BpmnModelerComponent() {
     setDelopyDialog(true);
   };
 
+  const changeColor = (index) => {
+    if (!selectedElement) return;
+    let modeling = bpmnModeler.get("modeling");
+    modeling.setColor(selectedElement, {
+      fill: COLORS[index].fill,
+      stroke: COLORS[index].stroke,
+    });
+    handleClose();
+  };
+
   const toolBarButtons = [
     {
       name: "Save",
@@ -501,7 +528,25 @@ function BpmnModelerComponent() {
       tooltipText: wkf && wkf.statusSelect === 1 ? "Start" : "Deploy",
       onClick: deployDiagram,
     },
+    {
+      name: "ChangeColor",
+      tooltipText: "Select Color",
+      onClick: handleClick,
+      icon: <PaletteIcon style={{ fontSize: 20 }} />,
+    },
   ];
+
+  function isPaletteDisable() {
+    if (!selectedElement) return true;
+    let canvas = bpmnModeler.get("canvas");
+    if (!canvas) return true;
+    let rootElement = canvas.getRootElement();
+    if (!rootElement) return true;
+    if (selectedElement.id === rootElement.id) {
+      return false;
+    }
+    return true;
+  }
 
   function isExtensionElements(element) {
     return is(element, "bpmn:ExtensionElements");
@@ -867,7 +912,18 @@ function BpmnModelerComponent() {
                 <Tooltip
                   title={btn.tooltipText}
                   children={
-                    <button onClick={btn.onClick} className="property-button">
+                    <button
+                      disabled={
+                        btn.name === "ChangeColor"
+                          ? isPaletteDisable()
+                            ? false
+                            : true
+                          : false
+                      }
+                      onClick={btn.onClick}
+                      style={{ padding: btn.name === "ChangeColor" ? 2.5 : 5 }}
+                      className="property-button"
+                    >
                       {btn.icon}
                     </button>
                   }
@@ -979,6 +1035,34 @@ function BpmnModelerComponent() {
           }
           wkf={wkf}
         />
+      )}
+      {openPalette && (
+        <Popover
+          id={openPalette ? "simple-popover" : undefined}
+          open={openPalette}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          {COLORS.map((color, i) => (
+            <div
+              className={classes.colorMenu}
+              key={i}
+              style={{
+                border: `solid 1px ${color.stroke}`,
+                background: color.fill,
+              }}
+              onClick={() => changeColor(i)}
+            ></div>
+          ))}
+        </Popover>
       )}
     </div>
   );
