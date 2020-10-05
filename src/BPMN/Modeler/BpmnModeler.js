@@ -40,7 +40,7 @@ import {
   hidePanelElements,
   addOldNodes,
 } from "./extra.js";
-import { translate } from "../../utils";
+import { getTranslations, getInfo } from "../../services/api";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -139,6 +139,32 @@ function isConditionalSource(element) {
   return isAny(element, CONDITIONAL_SOURCES);
 }
 
+const updateTranslations = async (element, bpmnModeler, key) => {
+  const translations = await getTranslations(key);
+  if (translations && translations.length > 0) {
+    const info = await getInfo();
+    const language = info && info["user.lang"];
+    if (!language) return;
+    const selectedTranslation = translations.find(
+      (t) => t.language === language
+    );
+    if (!element) return;
+    const value = selectedTranslation && selectedTranslation.message;
+    const bo = element && element.businessObject;
+    const name = bo.name;
+    const newKey = bo.$attrs["camunda:key"];
+    const diagramValue = value || newKey || name;
+    element.businessObject.name = diagramValue;
+    let elementRegistry = bpmnModeler.get("elementRegistry");
+    let modeling = bpmnModeler.get("modeling");
+    let shape = elementRegistry.get(element.id);
+    modeling &&
+      modeling.updateProperties(shape, {
+        name: diagramValue,
+      });
+  }
+};
+
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
   const [id, setId] = useState(null);
@@ -235,25 +261,9 @@ function BpmnModelerComponent() {
         if (!["h", "v", "Shape", "Label"].includes(element.constructor.name))
           return;
         let bo = getBusinessObject(element);
-        let originalValue = `value:${bo.get(["name"])}`;
         let nameKey =
           element.businessObject.$attrs["camunda:key"] || bo.get(["name"]);
-        let translatedValue = translate(`value:${nameKey}`);
-        let newValue =
-          translatedValue === originalValue
-            ? bo.get(["name"])
-            : translatedValue;
-        if (nameKey) {
-          element.businessObject.$attrs["camunda:key"] = nameKey;
-        }
-        let elementRegistry = bpmnModeler.get("elementRegistry");
-        let modeling = bpmnModeler.get("modeling");
-        let shape = elementRegistry.get(element.id);
-        if (shape.businessObject.name === newValue) return;
-        modeling &&
-          modeling.updateProperties(shape, {
-            name: newValue,
-          });
+        updateTranslations(element, bpmnModeler, nameKey);
       });
     });
   },

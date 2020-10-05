@@ -22,8 +22,9 @@ import {
   getTranslations,
   addTranslations,
   removeAllTranslations,
+  getInfo,
 } from "../../../services/api";
-import { TextField } from "../properties/components";
+import { TextField, Textbox } from "../properties/components";
 import { translate } from "../../../utils";
 
 const useStyles = makeStyles({
@@ -78,6 +79,19 @@ export default function TranslationDialog({
   const [removeTranslations, setRemoveTranslations] = useState(null);
   const [isLoading, setLoading] = useState(false);
 
+  const setDiagramValue = (val) => {
+    if (!element) return;
+    element.businessObject.name = val;
+    let elementRegistry = bpmnModeler.get("elementRegistry");
+    let modeling = bpmnModeler.get("modeling");
+    let shape = elementRegistry.get(element.id);
+    if (!shape) return;
+    modeling &&
+      modeling.updateProperties(shape, {
+        name: val,
+      });
+  };
+
   const onConfirm = async () => {
     const res = await addTranslations(translations);
     setTranslations(res);
@@ -85,20 +99,29 @@ export default function TranslationDialog({
       const res = await removeAllTranslations(removeTranslations);
       if (res) {
         setRemoveTranslations(null);
-        const bo = element.businessObject;
+        const bo = element && element.businessObject;
         const name = bo.name;
         const key = bo.$attrs["camunda:key"];
-        const value =
-          translations && translations.length === 0 ? key : key || name;
-        if (value) {
-          element.businessObject.name = value;
-          let elementRegistry = bpmnModeler.get("elementRegistry");
-          let modeling = bpmnModeler.get("modeling");
-          let shape = elementRegistry.get(element.id);
-          modeling &&
-            modeling.updateProperties(shape, {
-              name: value,
-            });
+        if (translations && translations.length === 0) {
+          setDiagramValue(key || name);
+        }
+      }
+    }
+    if (translations && translations.length > 0) {
+      const info = await getInfo();
+      const language = info && info["user.lang"];
+      if (language) {
+        const selectedTranslation = translations.find(
+          (t) => t.language === language
+        );
+        const value = selectedTranslation && selectedTranslation.message;
+        const bo = element && element.businessObject;
+        const name = bo.name;
+        const key = bo.$attrs["camunda:key"];
+        element.businessObject.$attrs["camunda:key"] = key || name;
+        const diagramValue = value || key || name;
+        if (diagramValue) {
+          setDiagramValue(diagramValue);
         }
       }
     }
@@ -169,9 +192,9 @@ export default function TranslationDialog({
         <strong>Translations</strong>
       </DialogTitle>
       <DialogContent>
-        <TextField
+        <Textbox
           element={element}
-          readOnly={translations && translations.length > 0 ? true : false}
+          readOnly={true}
           entry={{
             id: "value",
             label: translate("Value"),
