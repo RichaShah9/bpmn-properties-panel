@@ -310,3 +310,9 @@ export async function getDMNModel(decisionId) {
   const model = data[0];
   return model;
 }
+
+export async function getInfo() {
+  const url = `ws/app/info`;
+  const res = await Service.get(url);
+  return res;
+}
