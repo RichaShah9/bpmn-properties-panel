@@ -37,6 +37,14 @@ const useStyles = makeStyles({
       borderColor: "#cc3333 !important",
     },
   },
+  readOnly: {
+    borderColor: "#ccc !important",
+    "&:focus": {
+      boxShadow: "none !important",
+      outline: "none",
+      borderColor: "#ccc !important",
+    },
+  },
 });
 
 export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
@@ -109,8 +117,8 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
       setValue(value);
       const translations = await getTranslations(value);
       setTranslations(translations);
-      if (translations.length > 0) {
-        if (value) {
+      if (translations && translations.length > 0) {
+        if (value && element.businessObject && element.businessObject.$attrs) {
           element.businessObject.$attrs["camunda:key"] = value;
         }
         setReadOnly(true);
@@ -120,7 +128,7 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
         const directEditing = bpmnModeler.get("directEditing");
         directEditing && directEditing.cancel();
       } else {
-        if (key) {
+        if (key && element.businessObject && element.businessObject.$attrs) {
           element.businessObject.$attrs["camunda:key"] = key;
         }
         setValue(name);
@@ -149,7 +157,11 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
       <TextareaAutosize
         id={`camunda_${modelProperty}_${Date()}`}
         value={value || ""}
-        className={classnames(classes.textarea, isError && classes.error)}
+        className={classnames(
+          classes.textarea,
+          isError && classes.error,
+          readOnly && classes.readOnly
+        )}
         rowsMin={rows}
         onBlur={(e) => updateProperty(e.target.value)}
         onChange={(e) => {
