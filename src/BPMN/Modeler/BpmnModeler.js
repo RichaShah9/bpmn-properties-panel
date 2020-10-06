@@ -8,11 +8,17 @@ import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import Alert from "@material-ui/lab/Alert";
 import PaletteIcon from "@material-ui/icons/Palette";
+import { SketchPicker } from "react-color";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
-import { Snackbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Drawer, Typography, Popover } from "@material-ui/core";
+import {
+  Snackbar,
+  Button,
+  Drawer,
+  Typography,
+  Popover,
+} from "@material-ui/core";
 import { Resizable } from "re-resizable";
 
 import propertiesCustomProviderModule from "./custom-provider";
@@ -41,7 +47,6 @@ import {
   hidePanelElements,
   addOldNodes,
 } from "./extra.js";
-import { COLORS } from "./constants.js";
 import { getTranslations, getInfo } from "../../services/api";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -138,6 +143,13 @@ const useStyles = makeStyles((theme) => ({
     width: 64,
     height: 16,
   },
+  colorButton: {
+    textTransform: "none",
+    boxShadow: "0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)",
+    width: "95%",
+    margin: 5,
+    fontWeight: "bold",
+  },
 }));
 
 let bpmnModeler = null;
@@ -147,6 +159,7 @@ function isConditionalSource(element) {
 }
 
 const updateTranslations = async (element, bpmnModeler, key) => {
+  if (!key) return;
   const translations = await getTranslations(key);
   if (translations && translations.length > 0) {
     const info = await getInfo();
@@ -193,6 +206,7 @@ function BpmnModelerComponent() {
   const [width, setWidth] = useState(drawerWidth);
   const [height, setHeight] = useState("100%");
   const [openTranslation, setTranslationDialog] = useState(false);
+  const [color, setColor] = useState("#fff");
   const [anchorEl, setAnchorEl] = useState(null);
   const openPalette = Boolean(anchorEl);
   const classes = useStyles();
@@ -487,12 +501,15 @@ function BpmnModelerComponent() {
     setDelopyDialog(true);
   };
 
-  const changeColor = (index) => {
-    if (!selectedElement) return;
+  const handleChangeComplete = (color) => {
+    setColor(color.hex);
+  };
+
+  const changeColor = () => {
+    if (!selectedElement || !color) return;
     let modeling = bpmnModeler.get("modeling");
     modeling.setColor(selectedElement, {
-      fill: COLORS[index].fill,
-      stroke: COLORS[index].stroke,
+      fill: color,
     });
     handleClose();
   };
@@ -1051,17 +1068,21 @@ function BpmnModelerComponent() {
             horizontal: "center",
           }}
         >
-          {COLORS.map((color, i) => (
-            <div
-              className={classes.colorMenu}
-              key={i}
+          <div>
+            <SketchPicker
+              color={color}
+              onChangeComplete={handleChangeComplete}
+            />
+            <Button
+              onClick={changeColor}
+              className={classes.colorButton}
               style={{
-                border: `solid 1px ${color.stroke}`,
-                background: color.fill,
+                background: color,
               }}
-              onClick={() => changeColor(i)}
-            ></div>
-          ))}
+            >
+              Update color
+            </Button>
+          </div>
         </Popover>
       )}
     </div>
