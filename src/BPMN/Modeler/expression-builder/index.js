@@ -305,6 +305,10 @@ function ExpressionBuilder({ handleClose, open, element, setProperty }) {
     );
   }, []);
 
+  function lowerCaseFirstLetter(str) {
+    return str.charAt(0).toLowerCase() + str.slice(1);
+  }
+  
   function generateExpression() {
     const expressions =
       expressionComponents &&
@@ -313,7 +317,7 @@ function ExpressionBuilder({ handleClose, open, element, setProperty }) {
         const modalName = metaModals && metaModals.name;
         let str = "";
         const listOfTree = getListOfTree(rules);
-        const criteria = getCriteria(listOfTree, modalName);
+        const criteria = getCriteria(listOfTree, lowerCaseFirstLetter(modalName));
         if (metaModals) {
           str += criteria;
         } else {
