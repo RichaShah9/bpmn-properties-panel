@@ -24,6 +24,7 @@
     "min-dash": "^3.5.2",
     "re-resizable": "^6.5.5",
     "react": "^16.13.1",
+    "react-color": "^2.18.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "tiny-svg": "^2.2.2",
