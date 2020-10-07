@@ -81,7 +81,9 @@ export default function TranslationDialog({
 
   const setDiagramValue = (val) => {
     if (!element) return;
-    element.businessObject.name = val;
+    const modelProperty =
+      element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
+    element.businessObject[modelProperty] = val;
     let elementRegistry = bpmnModeler.get("elementRegistry");
     let modeling = bpmnModeler.get("modeling");
     let shape = elementRegistry.get(element.id);
@@ -100,7 +102,9 @@ export default function TranslationDialog({
       if (res) {
         setRemoveTranslations(null);
         const bo = element && element.businessObject;
-        const name = bo.name;
+        const modelProperty =
+          element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
+        const name = bo[modelProperty];
         const key = bo.$attrs["camunda:key"];
         if (translations && translations.length === 0) {
           setDiagramValue(key || name);
@@ -116,7 +120,9 @@ export default function TranslationDialog({
         );
         const value = selectedTranslation && selectedTranslation.message;
         const bo = element && element.businessObject;
-        const name = bo.name;
+        const modelProperty =
+          element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
+        const name = bo[modelProperty];
         const key = bo.$attrs["camunda:key"];
         element.businessObject.$attrs["camunda:key"] = key || name;
         const diagramValue = value || key || name;
@@ -167,7 +173,9 @@ export default function TranslationDialog({
       if (!element) return;
       setLoading(true);
       const bo = element.businessObject;
-      const name = bo.name;
+      const modelProperty =
+        element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
+      const name = bo[modelProperty];
       const key = bo.$attrs["camunda:key"];
       const value = key || name;
       setValue(value);

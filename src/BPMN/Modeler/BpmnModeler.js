@@ -171,16 +171,18 @@ const updateTranslations = async (element, bpmnModeler, key) => {
     if (!element) return;
     const value = selectedTranslation && selectedTranslation.message;
     const bo = element && element.businessObject;
-    const name = bo.name;
+    const modelProperty =
+      element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
+    const name = bo[modelProperty];
     const newKey = bo.$attrs["camunda:key"];
     const diagramValue = value || newKey || name;
-    element.businessObject.name = diagramValue;
+    element.businessObject[modelProperty] = diagramValue;
     let elementRegistry = bpmnModeler.get("elementRegistry");
     let modeling = bpmnModeler.get("modeling");
     let shape = elementRegistry.get(element.id);
     modeling &&
       modeling.updateProperties(shape, {
-        name: diagramValue,
+        [modelProperty]: diagramValue,
       });
   }
 };
@@ -292,8 +294,11 @@ function BpmnModelerComponent() {
         if (!["h", "v", "Shape", "Label"].includes(element.constructor.name))
           return;
         let bo = getBusinessObject(element);
+        const modelProperty =
+          element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
         let nameKey =
-          element.businessObject.$attrs["camunda:key"] || bo.get(["name"]);
+          element.businessObject.$attrs["camunda:key"] ||
+          bo.get([modelProperty]);
         updateTranslations(element, bpmnModeler, nameKey);
       });
     });

@@ -109,9 +109,11 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
 
   useEffect(() => {
     async function getAllTranslations() {
-      if (!element || modelProperty !== "name") return;
+      if (!element || !["name", "text"].includes(modelProperty)) return;
       const bo = element.businessObject;
-      const name = bo.name;
+      const propertyName =
+        element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
+      const name = bo[propertyName];
       const key = bo.$attrs["camunda:key"];
       const value = key || name;
       setValue(value);
