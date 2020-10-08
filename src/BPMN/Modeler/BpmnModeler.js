@@ -7,18 +7,10 @@ import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import Alert from "@material-ui/lab/Alert";
-import PaletteIcon from "@material-ui/icons/Palette";
-import { SketchPicker } from "react-color";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { makeStyles } from "@material-ui/core/styles";
-import {
-  Snackbar,
-  Button,
-  Drawer,
-  Typography,
-  Popover,
-} from "@material-ui/core";
+import { Snackbar, Drawer, Typography } from "@material-ui/core";
 import { Resizable } from "re-resizable";
 
 import propertiesCustomProviderModule from "./custom-provider";
@@ -34,6 +26,7 @@ import {
   TextField,
   SelectBox,
   Checkbox,
+  ColorPicker,
 } from "./properties/components";
 import {
   fetchId,
@@ -208,18 +201,7 @@ function BpmnModelerComponent() {
   const [width, setWidth] = useState(drawerWidth);
   const [height, setHeight] = useState("100%");
   const [openTranslation, setTranslationDialog] = useState(false);
-  const [color, setColor] = useState("#fff");
-  const [anchorEl, setAnchorEl] = useState(null);
-  const openPalette = Boolean(anchorEl);
   const classes = useStyles();
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
@@ -506,17 +488,12 @@ function BpmnModelerComponent() {
     setDelopyDialog(true);
   };
 
-  const handleChangeComplete = (color) => {
-    setColor(color.hex);
-  };
-
-  const changeColor = () => {
+  const changeColor = (color) => {
     if (!selectedElement || !color) return;
     let modeling = bpmnModeler.get("modeling");
     modeling.setColor(selectedElement, {
       fill: color,
     });
-    handleClose();
   };
 
   const toolBarButtons = [
@@ -550,25 +527,7 @@ function BpmnModelerComponent() {
       tooltipText: wkf && wkf.statusSelect === 1 ? "Start" : "Deploy",
       onClick: deployDiagram,
     },
-    {
-      name: "ChangeColor",
-      tooltipText: "Select Color",
-      onClick: handleClick,
-      icon: <PaletteIcon style={{ fontSize: 20 }} />,
-    },
   ];
-
-  function isPaletteDisable() {
-    if (!selectedElement) return true;
-    let canvas = bpmnModeler.get("canvas");
-    if (!canvas) return true;
-    let rootElement = canvas.getRootElement();
-    if (!rootElement) return true;
-    if (selectedElement.id === rootElement.id) {
-      return false;
-    }
-    return true;
-  }
 
   function isExtensionElements(element) {
     return is(element, "bpmn:ExtensionElements");
@@ -788,6 +747,14 @@ function BpmnModelerComponent() {
         return <SelectBox entry={entry} element={selectedElement} />;
       case "checkbox":
         return <Checkbox entry={entry} element={selectedElement} />;
+      case "colorPicker":
+        return (
+          <ColorPicker
+            changeColor={changeColor}
+            entry={entry}
+            element={selectedElement}
+          />
+        );
       default:
         return (
           <Textbox
@@ -934,18 +901,7 @@ function BpmnModelerComponent() {
                 <Tooltip
                   title={btn.tooltipText}
                   children={
-                    <button
-                      disabled={
-                        btn.name === "ChangeColor"
-                          ? isPaletteDisable()
-                            ? false
-                            : true
-                          : false
-                      }
-                      onClick={btn.onClick}
-                      style={{ padding: btn.name === "ChangeColor" ? 2.5 : 5 }}
-                      className="property-button"
-                    >
+                    <button onClick={btn.onClick} className="property-button">
                       {btn.icon}
                     </button>
                   }
@@ -1057,38 +1013,6 @@ function BpmnModelerComponent() {
           }
           wkf={wkf}
         />
-      )}
-      {openPalette && (
-        <Popover
-          id={openPalette ? "simple-popover" : undefined}
-          open={openPalette}
-          anchorEl={anchorEl}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-        >
-          <div>
-            <SketchPicker
-              color={color}
-              onChangeComplete={handleChangeComplete}
-            />
-            <Button
-              onClick={changeColor}
-              className={classes.colorButton}
-              style={{
-                background: color,
-              }}
-            >
-              Update color
-            </Button>
-          </div>
-        </Popover>
       )}
     </div>
   );
