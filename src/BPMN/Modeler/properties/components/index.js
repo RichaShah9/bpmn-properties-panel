@@ -6,6 +6,7 @@ import Checkbox from "./Checkbox";
 import Description from "./Description";
 import ExtensionElementTable from "./ExtensionElementTable";
 import Table from "./Table";
+import ColorPicker from "./ColorPicker";
 
 export {
   Textbox,
@@ -16,4 +17,5 @@ export {
   Description,
   ExtensionElementTable,
   Table,
+  ColorPicker
 };
