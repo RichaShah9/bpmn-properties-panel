@@ -9,6 +9,7 @@ import processProps from "./parts/ProcessProps";
 import idProps from "./parts/IdProps";
 import nameProps from "./parts/NameProps";
 import executableProps from "./parts/ExecutableProps";
+import colorProps from "./parts/CustomImplementation/ColorProps";
 
 // camunda properties
 import versionTag from "./parts/VersionTagProps";
@@ -45,7 +46,7 @@ import {
   ModelProps,
   ViewAttributePanel,
   MenuActionPanel,
-  ProcessConfiguration
+  ProcessConfiguration,
 } from "./parts/CustomImplementation";
 
 // helpers
@@ -141,6 +142,7 @@ function createGeneralTabGroups(
   processProps(generalGroup, element, translate, processOptions);
   versionTag(generalGroup, element, translate);
   executableProps(generalGroup, element, translate);
+  colorProps(generalGroup, element, translate)
 
   let userTaskProps = {
     id: "userTaskProps",
