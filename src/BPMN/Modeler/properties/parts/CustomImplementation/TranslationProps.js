@@ -112,7 +112,7 @@ export default function TranslationProps({
     if (!shape) return;
     modeling &&
       modeling.updateProperties(shape, {
-        name: val,
+        [modelProperty]: val,
       });
   };
 
