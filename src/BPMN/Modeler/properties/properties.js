@@ -47,6 +47,7 @@ import {
   ViewAttributePanel,
   MenuActionPanel,
   ProcessConfiguration,
+  TranslationProps
 } from "./parts/CustomImplementation";
 
 // helpers
@@ -213,6 +214,13 @@ function createGeneralTabGroups(
     component: MultiInstanceProps,
   };
 
+  let translationGroup = {
+    id: "translations",
+    label: translate("Translations"),
+    entries: [],
+    component: TranslationProps,
+  };
+
   let jobConfigurationGroup = {
     id: "jobConfiguration",
     label: translate("Job Configuration"),
@@ -262,6 +270,7 @@ function createGeneralTabGroups(
   groups.push(startEventInitiator);
   groups.push(modelProps);
   groups.push(multiInstanceGroup);
+  groups.push(translationGroup);
 
   if (element.type !== "bpmn:Process") {
     groups.push(externalTaskGroup);
