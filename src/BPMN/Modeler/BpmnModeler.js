@@ -20,7 +20,6 @@ import AlertDialog from "../../components/AlertDialog";
 import Tooltip from "../../components/Tooltip";
 import { Tab, Tabs } from "../../components/Tabs";
 import DeployDialog from "./views/DeployDialog";
-import TranslationDialog from "./views/TranslationDialog";
 import {
   Textbox,
   TextField,
@@ -41,6 +40,7 @@ import {
   addOldNodes,
 } from "./extra.js";
 import { getTranslations, getInfo } from "../../services/api";
+import { getBool } from "../../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -151,35 +151,6 @@ function isConditionalSource(element) {
   return isAny(element, CONDITIONAL_SOURCES);
 }
 
-const updateTranslations = async (element, bpmnModeler, key) => {
-  if (!key) return;
-  const translations = await getTranslations(key);
-  if (translations && translations.length > 0) {
-    const info = await getInfo();
-    const language = info && info["user.lang"];
-    if (!language) return;
-    const selectedTranslation = translations.find(
-      (t) => t.language === language
-    );
-    if (!element) return;
-    const value = selectedTranslation && selectedTranslation.message;
-    const bo = element && element.businessObject;
-    const modelProperty =
-      element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
-    const name = bo[modelProperty];
-    const newKey = bo.$attrs["camunda:key"];
-    const diagramValue = value || newKey || name;
-    element.businessObject[modelProperty] = diagramValue;
-    let elementRegistry = bpmnModeler.get("elementRegistry");
-    let modeling = bpmnModeler.get("modeling");
-    let shape = elementRegistry.get(element.id);
-    modeling &&
-      modeling.updateProperties(shape, {
-        [modelProperty]: diagramValue,
-      });
-  }
-};
-
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
   const [id, setId] = useState(null);
@@ -200,7 +171,6 @@ function BpmnModelerComponent() {
   const [tabs, setTabs] = useState([]);
   const [width, setWidth] = useState(drawerWidth);
   const [height, setHeight] = useState("100%");
-  const [openTranslation, setTranslationDialog] = useState(false);
   const classes = useStyles();
 
   const handleChange = (event, newValue) => {
@@ -231,6 +201,45 @@ function BpmnModelerComponent() {
       messageType: null,
       message: null,
     });
+  };
+
+  const updateTranslations = async (element, bpmnModeler, key) => {
+    if (!key) return;
+    const bo = getBusinessObject(element);
+    const isTranslation =
+      (bo.$attrs && bo.$attrs["camunda:isTranslations"]) || false;
+    if (!getBool(isTranslation)) return;
+    const translations = await getTranslations(key);
+    if (translations && translations.length > 0) {
+      const info = await getInfo();
+      const language = info && info["user.lang"];
+      if (!language) return;
+      const selectedTranslation = translations.find(
+        (t) => t.language === language
+      );
+      if (!element) return;
+      const value = selectedTranslation && selectedTranslation.message;
+      const bo = element && element.businessObject;
+      const elementType = element && element.type;
+      let modelProperty =
+        elementType === "bpmn:TextAnnotation"
+          ? "text"
+          : elementType === "bpmn:Group"
+          ? "categoryValue"
+          : "name";
+      const name = bo[modelProperty];
+      const newKey = bo.$attrs["camunda:key"];
+      const diagramValue = value || newKey || name;
+      element.businessObject[modelProperty] = diagramValue;
+      let elementRegistry = bpmnModeler.get("elementRegistry");
+      let modeling = bpmnModeler.get("modeling");
+      let shape = elementRegistry.get(element.id);
+      if (!shape) return;
+      modeling &&
+        modeling.updateProperties(shape, {
+          [modelProperty]: diagramValue,
+        });
+    }
   };
 
   const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
@@ -276,8 +285,13 @@ function BpmnModelerComponent() {
         if (!["h", "v", "Shape", "Label"].includes(element.constructor.name))
           return;
         let bo = getBusinessObject(element);
-        const modelProperty =
-          element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
+        const elementType = element && element.type;
+        let modelProperty =
+          elementType === "bpmn:TextAnnotation"
+            ? "text"
+            : elementType === "bpmn:Group"
+            ? "categoryValue"
+            : "name";
         let nameKey =
           element.businessObject.$attrs["camunda:key"] ||
           bo.get([modelProperty]);
@@ -791,6 +805,7 @@ function BpmnModelerComponent() {
             bpmnModdle={bpmnModeler && bpmnModeler.get("moddle")}
             id={id}
             handleAdd={handleAdd}
+            onSave={onSave}
           />
         ) : (
           group.entries.length > 0 && (
@@ -854,15 +869,6 @@ function BpmnModelerComponent() {
     if (!bpmnModeler) return;
     bpmnModeler.on("element.click", (event) => {
       updateTabs(event);
-    });
-    bpmnModeler.on("element.contextmenu", 500, (event) => {
-      event && event.preventDefault();
-      if (
-        !["h", "v", "Shape", "Label"].includes(event.element.constructor.name)
-      )
-        return;
-      updateTabs(event);
-      setTranslationDialog(true);
     });
     bpmnModeler.on("shape.changed", (event) => {
       updateTabs(event);
@@ -985,15 +991,6 @@ function BpmnModelerComponent() {
             {openSnackbar.message}
           </Alert>
         </Snackbar>
-      )}
-      {openTranslation && (
-        <TranslationDialog
-          open={openTranslation}
-          onClose={() => setTranslationDialog(false)}
-          element={selectedElement}
-          onSave={onSave}
-          bpmnModeler={bpmnModeler}
-        />
       )}
       {openAlert && (
         <AlertDialog

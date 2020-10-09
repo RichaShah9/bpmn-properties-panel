@@ -5,6 +5,7 @@ import { makeStyles } from "@material-ui/styles";
 
 import Description from "./Description";
 import { getTranslations } from "../../../../services/api";
+import { getBool } from "../../../../utils";
 
 const useStyles = makeStyles({
   root: {
@@ -111,8 +112,14 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
     async function getAllTranslations() {
       if (!element || !["name", "text"].includes(modelProperty)) return;
       const bo = element.businessObject;
-      const propertyName =
-        element && element.type === "bpmn:TextAnnotation" ? "text" : "name";
+      const elementType = element && element.type;
+      let propertyName =
+        elementType === "bpmn:TextAnnotation"
+          ? "text"
+          : elementType === "bpmn:Group"
+          ? "categoryValue"
+          : "name";
+
       const name = bo[propertyName];
       const key = bo.$attrs["camunda:key"];
       const value = key || name;
@@ -123,12 +130,19 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
         if (value && element.businessObject && element.businessObject.$attrs) {
           element.businessObject.$attrs["camunda:key"] = value;
         }
-        setReadOnly(true);
-        if (!bpmnModeler) {
-          return;
+        const isTranslation =
+          (bo.$attrs && bo.$attrs["camunda:isTranslations"]) || false;
+        const isTranslated = getBool(isTranslation);
+        if (isTranslated) {
+          const directEditing = bpmnModeler.get("directEditing");
+          setReadOnly(true);
+          if (!bpmnModeler) {
+            return;
+          }
+          directEditing && directEditing.cancel();
+        } else {
+          setReadOnly(false);
         }
-        const directEditing = bpmnModeler.get("directEditing");
-        directEditing && directEditing.cancel();
       } else {
         if (key && element.businessObject && element.businessObject.$attrs) {
           element.businessObject.$attrs["camunda:key"] = key;
@@ -165,7 +179,11 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
           readOnly && classes.readOnly
         )}
         rowsMin={rows}
-        onBlur={(e) => updateProperty(e.target.value)}
+        onBlur={(e) => {
+          if (!readOnly) {
+            updateProperty(e.target.value);
+          }
+        }}
         onChange={(e) => {
           setValue(e.target.value);
         }}

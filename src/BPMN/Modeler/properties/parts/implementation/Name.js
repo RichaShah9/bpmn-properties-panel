@@ -1,5 +1,7 @@
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
+import { getBool } from "../../../../../utils";
+
 /**
  * Create an entry to modify the name of an an element.
  *
@@ -35,8 +37,12 @@ export default function Name(element, options, translate, bpmnModeler) {
     if (!shape) return;
     let originalValue = `value:${values[modelProperty]}`;
     let translatedValue = translate(`value:${values[modelProperty]}`);
+    let bo = getBusinessObject(element);
+    const isTranslation =
+      (bo.$attrs && bo.$attrs["camunda:isTranslations"]) || false;
+    const isTranslated = getBool(isTranslation);
     let value =
-      translations && translations.length === 0
+      (translations && translations.length === 0) || !isTranslated
         ? values[modelProperty]
         : !readOnly
         ? values[modelProperty]
