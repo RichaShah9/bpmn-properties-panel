@@ -46,7 +46,7 @@ export default function ColorPickerComponent({ changeColor, entry, element }) {
 
   useEffect(() => {
     const bo = getBusinessObject(element);
-    const color = bo.di.fill;
+    const color = bo && bo.di && bo.di.fill;
     if (!color) return;
     setColor(color);
   }, [element]);
