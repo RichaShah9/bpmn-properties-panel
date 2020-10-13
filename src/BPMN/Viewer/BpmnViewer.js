@@ -1,11 +1,14 @@
 import React, { useEffect } from "react";
-import BpmnViewer from "bpmn-js/lib/NavigatedViewer";
+import BpmnModeler from "bpmn-js/lib/Modeler";
 import xml2js, { parseString } from "xml2js";
 import _ from "lodash";
+import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Service from "../../services/Service";
 import Tooltip from "../../components/Tooltip";
-import { download, translate } from "../../utils";
+import readOnlyModule from "./custom/readonly";
+import { download, getBool } from "../../utils";
+import { getInfo, getTranslations } from "../../services/api";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-font/dist/css/bpmn-embedded.css";
@@ -13,36 +16,46 @@ import "../css/bpmn.css";
 
 let bpmnViewer = null;
 
-function updateTranslation(xml) {
-  xml &&
-    Object.entries(xml).forEach(([key, value]) => {
-      if (key === "bpmn2:textAnnotation") {
-        if (value && value[0]) {
-          let name = value[0]["bpmn2:text"];
-          let originalValue = `value:${name}`;
-          let nameKey = (value[0].$ && value[0].$["camunda:key"]) || name;
-          let translatedValue = translate(`value:${nameKey}`);
-          let newValue =
-            translatedValue === originalValue ? name : translatedValue;
-          value[0]["bpmn2:text"] = newValue;
-        }
-      } else {
-        if (value && value.$) {
-          let name = value.$.name;
-          let originalValue = `value:${name}`;
-          let nameKey = value.$["camunda:key"] || name;
-          let translatedValue = translate(`value:${nameKey}`);
-          let newValue =
-            translatedValue === originalValue ? name : translatedValue;
-          value.$.name = newValue;
-        }
-        if (typeof value === "object") {
-          updateTranslation(value);
-        }
+const updateTranslations = async (nodes) => {
+  nodes &&
+    Object.entries(nodes).forEach(async ([id, value]) => {
+      let { element } = value;
+      const bo = getBusinessObject(element);
+      const key = bo.$attrs["camunda:key"];
+      if (!key || !element) return;
+      const isTranslation =
+        (bo.$attrs && bo.$attrs["camunda:isTranslations"]) || false;
+      if (!getBool(isTranslation)) return;
+      const translations = await getTranslations(key);
+      if (translations && translations.length > 0) {
+        const info = await getInfo();
+        const language = info && info["user.lang"];
+        if (!language) return;
+        const selectedTranslation = translations.find(
+          (t) => t.language === language
+        );
+        const value = selectedTranslation && selectedTranslation.message;
+        const elementType = element && element.type;
+        let modelProperty =
+          elementType === "bpmn:TextAnnotation"
+            ? "text"
+            : elementType === "bpmn:Group"
+            ? "categoryValue"
+            : "name";
+        const name = bo[modelProperty];
+        const newKey = bo.$attrs["camunda:key"];
+        const diagramValue = value || newKey || name;
+        element.businessObject[modelProperty] = diagramValue;
+        let elementRegistry = bpmnViewer.get("elementRegistry");
+        let modeling = bpmnViewer.get("modeling");
+        let shape = elementRegistry.get(element.id);
+        modeling &&
+          modeling.updateProperties(shape, {
+            [modelProperty]: diagramValue,
+          });
       }
     });
-  return xml;
-}
+};
 
 const fetchId = (isInstance) => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
@@ -134,51 +147,48 @@ function updateSVGStroke(obj, taskIds = []) {
 
 const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
   if (!diagramXml) return;
-  parseString(diagramXml, function (err, result) {
-    const updatedXml = updateTranslation(result);
-    let builder = new xml2js.Builder();
-    let xml = builder.buildObject(updatedXml);
-    bpmnViewer.importXML(xml, (err) => {
-      if (err) {
-        return console.error("could not import BPMN 2.0 diagram", err);
-      }
-      let canvas = bpmnViewer.get("canvas");
-      canvas.zoom("fit-viewport");
-      let elementRegistry = bpmnViewer.get("elementRegistry");
-      let nodes = elementRegistry && elementRegistry._elements;
-      if (!nodes) return;
-      let filteredElements = Object.keys(nodes).filter(
-        (element) => taskIds && taskIds.includes(element)
-      );
-      filteredElements.forEach((element) => {
-        canvas.addMarker(element, "highlight");
-      });
+  bpmnViewer.importXML(diagramXml, (err) => {
+    if (err) {
+      return console.error("could not import BPMN 2.0 diagram", err);
+    }
+    let canvas = bpmnViewer.get("canvas");
+    canvas.zoom("fit-viewport");
+    bpmnViewer.get("readOnly").readOnly(true);
+    let elementRegistry = bpmnViewer.get("elementRegistry");
+    let nodes = elementRegistry && elementRegistry._elements;
+    if (!nodes) return;
+    updateTranslations(nodes);
+    let filteredElements = Object.keys(nodes).filter(
+      (element) => taskIds && taskIds.includes(element)
+    );
+    filteredElements.forEach((element) => {
+      canvas.addMarker(element, "highlight");
+    });
 
-      const activities = (activityCounts && activityCounts.split(",")) || [];
-      const overlayActivies = [];
-      const nodeKeys = Object.keys(nodes) || [];
-      if (nodeKeys.length < 1) return;
-      if (activities.length <= 0) return;
-      activities.forEach((activity) => {
-        let taskActivity = activity.split(":");
-        if (nodeKeys.includes(taskActivity[0])) {
-          overlayActivies.push({
-            id: taskActivity[0],
-            count: taskActivity[1],
-          });
-        }
-      });
-
-      let overlays = bpmnViewer.get("overlays");
-      if (overlayActivies.length <= 0) return;
-      overlayActivies.forEach((overlayActivity) => {
-        overlays.add(overlayActivity.id, "note", {
-          position: {
-            bottom: 18,
-            right: 18,
-          },
-          html: `<div class="diagram-note">${overlayActivity.count}</div>`,
+    const activities = (activityCounts && activityCounts.split(",")) || [];
+    const overlayActivies = [];
+    const nodeKeys = Object.keys(nodes) || [];
+    if (nodeKeys.length < 1) return;
+    if (activities.length <= 0) return;
+    activities.forEach((activity) => {
+      let taskActivity = activity.split(":");
+      if (nodeKeys.includes(taskActivity[0])) {
+        overlayActivies.push({
+          id: taskActivity[0],
+          count: taskActivity[1],
         });
+      }
+    });
+
+    let overlays = bpmnViewer.get("overlays");
+    if (overlayActivies.length <= 0) return;
+    overlayActivies.forEach((overlayActivity) => {
+      overlays.add(overlayActivity.id, "note", {
+        position: {
+          bottom: 18,
+          right: 18,
+        },
+        html: `<div class="diagram-note">${overlayActivity.count}</div>`,
       });
     });
   });
@@ -242,8 +252,9 @@ function BpmnViewerComponent({ isInstance }) {
   ];
 
   useEffect(() => {
-    bpmnViewer = new BpmnViewer({
+    bpmnViewer = new BpmnModeler({
       container: "#canvas-task",
+      additionalModules: [readOnlyModule],
     });
     let { id, taskIds, activityCounts } = fetchId(isInstance) || {};
     setTaskIds(taskIds);
