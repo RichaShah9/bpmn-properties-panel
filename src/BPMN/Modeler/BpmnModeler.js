@@ -282,8 +282,6 @@ function BpmnModelerComponent() {
             bo.$attrs["camunda:displayStatus"] = true;
           }
         }
-        if (!["h", "v", "Shape", "Label"].includes(element.constructor.name))
-          return;
         let bo = getBusinessObject(element);
         const elementType = element && element.type;
         let modelProperty =

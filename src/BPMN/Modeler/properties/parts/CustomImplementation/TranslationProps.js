@@ -235,10 +235,13 @@ export default function TranslationProps({
   }, [element]);
 
   useEffect(() => {
-    if (["h", "v", "Shape", "Label"].includes(element.constructor.name)) {
+    let canvas = bpmnModeler.get("canvas");
+    if(!canvas) return
+    let rootElement = canvas.getRootElement();
+    if ((element && element.id) !== (rootElement && rootElement.id)) {
       setVisible(true);
     }
-  }, [element]);
+  }, [element, bpmnModeler]);
 
   return (
     isVisible && (
