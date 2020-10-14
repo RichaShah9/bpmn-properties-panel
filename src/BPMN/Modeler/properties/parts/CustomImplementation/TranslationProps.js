@@ -74,6 +74,7 @@ const useStyles = makeStyles({
     borderRadius: 0,
     textTransform: "none",
     marginBottom: 10,
+    padding: "0px 10px !important",
   },
 });
 
