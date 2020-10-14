@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Paper, Dialog, DialogTitle } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
@@ -31,7 +31,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ExpressionBuilder({ handleClose, open, element, setProperty }) {
+function ExpressionBuilder({
+  handleClose,
+  open,
+  element,
+  setProperty,
+  getExpression,
+}) {
   const expression = "GROOVY";
   const [combinator, setCombinator] = React.useState("and");
   const [expressionComponents, setExpressionComponents] = React.useState([
@@ -310,6 +316,7 @@ function ExpressionBuilder({ handleClose, open, element, setProperty }) {
   }
   
   function generateExpression() {
+    const expressionValues = [];
     const expressions =
       expressionComponents &&
       expressionComponents.map(({ value }, index) => {
@@ -323,15 +330,27 @@ function ExpressionBuilder({ handleClose, open, element, setProperty }) {
         } else {
           return "";
         }
+        expressionValues.push({
+          metaModalName: modalName,
+          rules,
+        });
         return `${str}`;
       });
     const str = expressions
       .filter((e) => e !== "")
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
       .join(" " + map_combinator[combinator] + " ");
-    setProperty(str);
+    setProperty({
+      expression: str,
+      value: JSON.stringify(expressionValues),
+    });
     handleClose();
   }
+
+  useEffect(() => {
+    const value = getExpression();
+    console.log("value", value);
+  }, [getExpression]);
 
   return (
     <Dialog

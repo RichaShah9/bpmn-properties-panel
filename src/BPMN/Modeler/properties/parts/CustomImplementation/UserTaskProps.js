@@ -91,6 +91,7 @@ export default function UserTaskProps({ element, index, label }) {
               },
               set: function (e, values) {
                 setProperty("camunda:completedIf", values["completedIf"]);
+                setProperty("camunda:completedIfValue", undefined);
               },
             }}
             canRemove={true}
@@ -100,8 +101,14 @@ export default function UserTaskProps({ element, index, label }) {
             <ExpressionBuilder
               open={open}
               handleClose={() => handleClose()}
-              setProperty={(value) => {
-                setProperty("camunda:completedIf", value);
+              getExpression={() => {
+                const value = getProperty("camunda:completedIfValue");
+                return value && JSON.parse(value);
+              }}
+              setProperty={(val) => {
+                const { expression, value } = val;
+                setProperty("camunda:completedIfValue", value);
+                setProperty("camunda:completedIf", expression);
               }}
               element={element}
             />
