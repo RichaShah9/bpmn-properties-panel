@@ -95,6 +95,10 @@ body,
   display: none;
 }
 
+.muicc-colorbox-sliders {
+  width: 95% !important;
+}
+
 h1 {
   position: absolute;
   top: 0;
