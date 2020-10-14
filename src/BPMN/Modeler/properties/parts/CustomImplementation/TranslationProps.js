@@ -69,11 +69,11 @@ const useStyles = makeStyles({
     width: "fit-content",
     border: "1px solid #ccc",
     height: 23,
-    padding: 10,
     fontSize: 12,
     marginLeft: 5,
     borderRadius: 0,
     textTransform: "none",
+    marginBottom: 10,
   },
 });
 
@@ -236,7 +236,7 @@ export default function TranslationProps({
 
   useEffect(() => {
     let canvas = bpmnModeler.get("canvas");
-    if(!canvas) return
+    if (!canvas) return;
     let rootElement = canvas.getRootElement();
     if ((element && element.id) !== (rootElement && rootElement.id)) {
       setVisible(true);
