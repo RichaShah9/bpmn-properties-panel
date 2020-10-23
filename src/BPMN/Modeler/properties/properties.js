@@ -47,7 +47,8 @@ import {
   ViewAttributePanel,
   MenuActionPanel,
   ProcessConfiguration,
-  TranslationProps
+  TranslationProps,
+  BusinessRuleProps,
 } from "./parts/CustomImplementation";
 
 // helpers
@@ -143,7 +144,7 @@ function createGeneralTabGroups(
   processProps(generalGroup, element, translate, processOptions);
   versionTag(generalGroup, element, translate);
   executableProps(generalGroup, element, translate);
-  colorProps(generalGroup, element, translate)
+  colorProps(generalGroup, element, translate);
 
   let userTaskProps = {
     id: "userTaskProps",
@@ -214,6 +215,14 @@ function createGeneralTabGroups(
     component: MultiInstanceProps,
   };
 
+  let businessRuleTaskGroup = {
+    id: "businessRuleTasks",
+    label: translate("Business rule tasks"),
+    entries: [],
+    component: BusinessRuleProps,
+    className: "businessRuleTask"
+  };
+
   let translationGroup = {
     id: "translations",
     label: translate("Translations"),
@@ -269,6 +278,7 @@ function createGeneralTabGroups(
   groups.push(conditionalProps);
   groups.push(startEventInitiator);
   groups.push(modelProps);
+  groups.push(businessRuleTaskGroup);
   groups.push(multiInstanceGroup);
   groups.push(translationGroup);
 

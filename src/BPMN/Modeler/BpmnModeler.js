@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import find from "lodash/find";
+import classnames from "classnames";
 import BpmnModeler from "bpmn-js/lib/Modeler";
 import propertiesPanelModule from "bpmn-js-properties-panel";
 import propertiesProviderModule from "bpmn-js-properties-panel/lib/provider/camunda";
@@ -142,6 +143,9 @@ const useStyles = makeStyles((theme) => ({
     width: "95%",
     margin: 5,
     fontWeight: "bold",
+  },
+  businessRuleTask: {
+    marginTop: 0,
   },
 }));
 
@@ -791,7 +795,7 @@ function BpmnModelerComponent() {
       <div
         key={group.id}
         data-group={group.id}
-        className={classes.groupContainer}
+        className={classnames(classes.groupContainer, classes[group.className])}
       >
         {group.component ? (
           <group.component

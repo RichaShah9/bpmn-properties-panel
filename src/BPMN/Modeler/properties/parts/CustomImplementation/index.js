@@ -14,6 +14,7 @@ import ViewAttributePanel from "./ViewAttributePanel";
 import MenuActionPanel from "./MenuActionPanel";
 import ProcessConfiguration from "./ProcessConfiguration";
 import TranslationProps from "./TranslationProps";
+import BusinessRuleProps from "./BusinessRuleProps";
 
 export {
   CallActivityProps,
@@ -31,5 +32,6 @@ export {
   ViewAttributePanel,
   MenuActionPanel,
   ProcessConfiguration,
-  TranslationProps
+  TranslationProps,
+  BusinessRuleProps,
 };
