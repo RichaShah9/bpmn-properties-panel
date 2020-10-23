@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from "react";
 import ImplementationTypeHelper from "bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import AddIcon from "@material-ui/icons/Add";
+import {
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  Button,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { is } from "bpmn-js/lib/util/ModelUtil";
 
-import { getDMNModel } from "../../../../../services/api";
+import Select from "../../../../../components/Select";
+import { getDMNModel, getDMNModels } from "../../../../../services/api";
 import { SelectBox, TextField } from "../../components";
 import { translate } from "../../../../../utils";
 
@@ -92,6 +101,11 @@ const useStyles = makeStyles({
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
+  dialogPaper: {
+    padding: 5,
+    minWidth: 450,
+    overflow: "auto",
+  },
 });
 
 const implementationOptions = [
@@ -111,7 +125,25 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
   const [bindingType, setBindingType] = useState("latest");
   const [resultVariable, setResultVariable] = useState(null);
   const [dmnModel, setDmnModel] = useState(null);
+  const [open, setOpen] = React.useState(false);
   const classes = useStyles();
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const onConfirm = () => {
+    if (dmnModel) {
+      if (element && element.businessObject) {
+        element.businessObject.decisionRef = `${dmnModel.name} (${dmnModel["decisionId"]})`;
+      }
+    }
+    handleClose();
+  };
 
   const getPropertyValue = (propertyName) => {
     const bo = getBusinessObject(element);
@@ -153,7 +185,8 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
     if (implementationType === "dmn") {
       const bo = getBusinessObject(element);
       if (bo && bo.decisionRef) {
-        updateModel(bo.decisionRef);
+        let decisionId = bo.decisionRef.match(/\((.*)\)/);
+        updateModel((decisionId && decisionId[1]) || bo.decisionRef);
       }
     }
   }, [element, implementationType]);
@@ -348,7 +381,17 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
         )}
         {implementationType === "dmn" && (
           <React.Fragment>
-            <div className={classes.dmn}>
+            <div
+              className={classes.dmn}
+              style={{
+                alignItems:
+                  element &&
+                  getBusinessObject(element) &&
+                  getBusinessObject(element).decisionRef
+                    ? "flex-end"
+                    : "center",
+              }}
+            >
               <TextField
                 element={element}
                 entry={{
@@ -360,13 +403,15 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     return { decisionRef: bo.decisionRef };
                   },
                   set: function (e, values) {
-                    element.businessObject.decisionRef = values.decisionRef;
+                    let value = values.decisionRef;
+                    element.businessObject.decisionRef = value;
                     element.businessObject.class = undefined;
                     element.businessObject.expression = undefined;
                     element.businessObject.resultVariable = undefined;
                     element.businessObject.delegateExpression = undefined;
                     element.businessObject.topic = undefined;
-                    updateModel(values.decisionRef);
+                    let decisionId = value && value.match(/\((.*)\)/);
+                    updateModel((decisionId && decisionId[1]) || value);
                   },
                   validate: function (e, values) {
                     if (!values.decisionRef) {
@@ -376,21 +421,27 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                 }}
                 canRemove={true}
               />
-              {dmnModel && (
-                <div
-                  onClick={() => {
-                    window.top.document
-                      .getElementsByTagName("iframe")[0]
-                      .contentWindow.parent.axelor.$openHtmlTab(
-                        `wkf-editor/?type=dmn&id=${dmnModel && dmnModel.id}`,
-                        translate("DMN editor")
-                      );
-                  }}
-                  className={classes.link}
-                >
-                  <OpenInNewIcon className={classes.linkIcon} />
-                </div>
-              )}
+              <div onClick={handleClickOpen} className={classes.link}>
+                <AddIcon className={classes.linkIcon} />
+              </div>
+              {dmnModel &&
+                element &&
+                getBusinessObject(element) &&
+                getBusinessObject(element).decisionRef && (
+                  <div
+                    onClick={() => {
+                      window.top.document
+                        .getElementsByTagName("iframe")[0]
+                        .contentWindow.parent.axelor.$openHtmlTab(
+                          `wkf-editor/?type=dmn&id=${dmnModel && dmnModel.id}`,
+                          translate("DMN editor")
+                        );
+                    }}
+                    className={classes.link}
+                  >
+                    <OpenInNewIcon className={classes.linkIcon} />
+                  </div>
+                )}
             </div>
             <SelectBox
               element={element}
@@ -614,6 +665,40 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
               canRemove={true}
             />
           </React.Fragment>
+        )}
+        {open && (
+          <Dialog
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="form-dialog-title"
+            maxWidth="sm"
+            classes={{
+              paper: classes.dialogPaper,
+            }}
+          >
+            <DialogTitle id="form-dialog-title">Select DMN</DialogTitle>
+            <DialogContent>
+              <label className={classes.label}>{translate("DMN")}</label>
+              <Select
+                className={classes.select}
+                update={(value) => {
+                  setDmnModel(value);
+                }}
+                name="dmnModel"
+                optionLabel="name"
+                isLabel={true}
+                fetchMethod={() => getDMNModels()}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={onConfirm} color="primary">
+                Ok
+              </Button>
+            </DialogActions>
+          </Dialog>
         )}
       </div>
     )
