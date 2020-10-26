@@ -94,54 +94,58 @@ export default function BusinessRuleTaskProps({ element, index, label }) {
             },
           }}
         />
-        <React.Fragment>
-          {index > 0 && <div className={classes.divider} />}
-        </React.Fragment>
-        <div className={classes.groupLabel}>
-          {translate("Relational search")}
-        </div>
-        <SelectBox
-          element={element}
-          entry={{
-            id: "searchWith",
-            label: "Search with",
-            modelProperty: "searchWith",
-            selectOptions: [
-              { name: "Equal", value: "Equal" },
-              { name: "Like", value: "Like" },
-            ],
-            emptyParameter: true,
-            get: function () {
-              return { searchWith: searchWith };
-            },
-            set: function (e, value) {
-                let searchWith = value.searchWith;
-                setSearchWith(searchWith);
-                setProperty("searchWith", searchWith);
-              },
-          }}
-        />
-        <SelectBox
-          element={element}
-          entry={{
-            id: "ifMultiple",
-            label: "If multiple",
-            modelProperty: "ifMultiple",
-            selectOptions: [
-              { name: "Keep empty", value: "Keep empty" },
-              { name: "Select first", value: "Select first" },
-            ],
-            emptyParameter: true,
-            get: function () {
-              return { ifMultiple: ifMultiple };
-            },
-            set: function (e, value) {
-                let ifMultiple = value.ifMultiple;
-                setIfMultiple(ifMultiple);
-                setProperty("ifMultiple", ifMultiple);
-              },
-          }}
-        />
+        {assignOutputToFields && (
+          <React.Fragment>
+            <React.Fragment>
+              {index > 0 && <div className={classes.divider} />}
+            </React.Fragment>
+            <div className={classes.groupLabel}>
+              {translate("Relational field search")}
+            </div>
+            <SelectBox
+              element={element}
+              entry={{
+                id: "searchWith",
+                label: "Search with",
+                modelProperty: "searchWith",
+                selectOptions: [
+                  { name: "Equal", value: "Equal" },
+                  { name: "Like", value: "Like" },
+                ],
+                emptyParameter: true,
+                get: function () {
+                  return { searchWith: searchWith };
+                },
+                set: function (e, value) {
+                  let searchWith = value.searchWith;
+                  setSearchWith(searchWith);
+                  setProperty("searchWith", searchWith);
+                },
+              }}
+            />
+            <SelectBox
+              element={element}
+              entry={{
+                id: "ifMultiple",
+                label: "If multiple",
+                modelProperty: "ifMultiple",
+                selectOptions: [
+                  { name: "Keep empty", value: "Keep empty" },
+                  { name: "Select first", value: "Select first" },
+                ],
+                emptyParameter: true,
+                get: function () {
+                  return { ifMultiple: ifMultiple };
+                },
+                set: function (e, value) {
+                  let ifMultiple = value.ifMultiple;
+                  setIfMultiple(ifMultiple);
+                  setProperty("ifMultiple", ifMultiple);
+                },
+              }}
+            />
+          </React.Fragment>
+        )}
       </div>
     )
   );
