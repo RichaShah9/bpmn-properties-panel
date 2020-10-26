@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
@@ -53,6 +54,35 @@ export default function BusinessRuleTaskProps({ element, index, label }) {
     [element]
   );
 
+  function getListeners(bo, type) {
+    return (bo && extensionElementsHelper.getExtensionElements(bo, type)) || [];
+  }
+
+  const getBO = () => {
+    let bo = getBusinessObject(element);
+    if (is(element, "bpmn:Participant")) {
+      bo = bo.get("processRef");
+    }
+    return bo;
+  };
+
+  const removeElement = () => {
+    let bo = getBO();
+    const listeners = getListeners(bo, "camunda:ExecutionListener");
+    if (!listeners || listeners.length < 0) return;
+    const listenerIndex = listeners.findIndex(
+      (l) => l && l.$attrs && l.$attrs["outId"] === "dmn_output_mapping"
+    );
+    let extensionElements = bo.extensionElements && bo.extensionElements.values;
+    if (extensionElements) {
+      extensionElements.splice(listenerIndex, 1);
+    }
+    if (extensionElements && extensionElements.length === 0) {
+      extensionElements = undefined;
+    }
+    bo.extensionElements = extensionElements;
+  };
+
   useEffect(() => {
     const assignOutputToFields = getProperty("assignOutputToFields");
     const searchWith = getProperty("searchWith");
@@ -91,6 +121,9 @@ export default function BusinessRuleTaskProps({ element, index, label }) {
               let assignOutputToFields = !value.assignOutputToFields;
               setAssignOutputToFields(assignOutputToFields);
               setProperty("assignOutputToFields", assignOutputToFields);
+              if (assignOutputToFields === false) {
+                removeElement();
+              }
             },
           }}
         />

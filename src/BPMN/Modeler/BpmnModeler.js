@@ -57,6 +57,7 @@ const resizeStyle = {
 };
 
 const drawerWidth = 380;
+const CAMUNDA_EXECUTION_LISTENER_ELEMENT = "camunda:ExecutionListener";
 
 const CONDITIONAL_SOURCES = [
   "bpmn:EventBasedGateway",
@@ -407,10 +408,147 @@ function BpmnModelerComponent() {
     });
   };
 
-  const deploy = async (wkfMigrationMap, isMigrateOld) => {
+  function getListeners(bo, type) {
+    return (bo && extensionElementsHelper.getExtensionElements(bo, type)) || [];
+  }
+
+  const getBO = (element) => {
+    let bo = getBusinessObject(element);
+    if (is(element, "bpmn:Participant")) {
+      bo = bo.get("processRef");
+    }
+    return bo;
+  };
+
+  const addNewExecutionElement = (element, type, initialEvent, script) => {
+    const bpmnFactory = bpmnModeler.get("bpmnFactory");
+    let props = {
+      event: initialEvent,
+      script: elementHelper.createElement(
+        "camunda:Script",
+        {
+          scriptFormat: "axelor",
+          value: script,
+        },
+        getBO(),
+        bpmnFactory
+      ),
+    };
+
+    let newElem = elementHelper.createElement(
+      type,
+      props,
+      undefined,
+      bpmnFactory
+    );
+
+    newElem.$attrs["outId"] = "dmn_output_mapping";
+    let bo = getBO(element);
+    let extensionElements = bo && bo.extensionElements;
+    if (!extensionElements) {
+      extensionElements = elementHelper.createElement(
+        "bpmn:ExtensionElements",
+        { values: [] },
+        bo,
+        bpmnFactory
+      );
+      element.businessObject.extensionElements = extensionElements;
+    }
+    element.businessObject.extensionElements.values.push(newElem);
+    return newElem;
+  };
+
+  const callOutoutMapping = async () => {
+    const elementRegistry = bpmnModeler.get("elementRegistry");
+    let businessRuleElements = elementRegistry.filter(function (element) {
+      return is(element, "bpmn:BusinessRuleTask");
+    });
+    if (!businessRuleElements || businessRuleElements.length < 0) {
+      return { status: -1 };
+    }
+    let elements =
+      businessRuleElements &&
+      businessRuleElements.filter(
+        (e) =>
+          e &&
+          e.businessObject &&
+          e.businessObject.$attrs &&
+          getBool(e.businessObject.$attrs["camunda:assignOutputToFields"])
+      );
+    if (!elements || elements.length < 0) {
+      return { status: -1 };
+    }
+    for (let i = 0; i < elements.length; i++) {
+      let element = elements[i];
+      if (element && element.businessObject) {
+        let ifMultiple =
+          element.businessObject.$attrs &&
+          element.businessObject.$attrs["camunda:ifMultiple"];
+
+        let searchWith =
+          element.businessObject.$attrs &&
+          element.businessObject.$attrs["camunda:searchWith"];
+
+        let resultVariable = element.businessObject.resultVariable;
+        let decisionRef = element.businessObject.decisionRef;
+        let decisionIdRef = decisionRef && decisionRef.match(/\((.*)\)/);
+        let decisionId = (decisionIdRef && decisionIdRef[1]) || decisionRef;
+
+        let ctxModel =
+          element.businessObject.$attrs &&
+          (element.businessObject.$attrs["camunda:metaModelModelName"] ||
+            element.businessObject.$attrs["camunda:metaJsonModelModelName"]);
+
+        let context = {
+          decisionId,
+          ctxModel,
+          searchWith,
+          ifMultiple,
+          resultVariable,
+        };
+
+        let actionResponse = await Service.action({
+          model: "com.axelor.apps.bpm.db.WkfModel",
+          action: "action-wkf-dmn-model-method-create-output-to-field-script",
+          data: {
+            context,
+          },
+        });
+
+        if (actionResponse && actionResponse.data && actionResponse.data[0]) {
+          const { values } = actionResponse.data[0];
+          const { script } = values;
+          if (script) {
+            let bo = getBO(element);
+            const listeners = getListeners(
+              bo,
+              CAMUNDA_EXECUTION_LISTENER_ELEMENT
+            );
+
+            const listener = listeners.find(
+              (l) => l && l.$attrs && l.$attrs["outId"] === "dmn_output_mapping"
+            );
+            if (listener && listener.script) {
+              listener.script.value = script;
+            } else {
+              addNewExecutionElement(
+                element,
+                CAMUNDA_EXECUTION_LISTENER_ELEMENT,
+                "end",
+                script
+              );
+            }
+          }
+        }
+      }
+    }
+    return { status: 0 };
+  };
+
+  const deploy = async (wkfMigrationMap, isMigrateOld, newWkf = wkf) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
-        ...wkf,
+        ...newWkf,
         diagramXml: xml,
       });
       if (res && res.data && res.data[0]) {
@@ -420,7 +558,7 @@ function BpmnModelerComponent() {
           ...res.data[0],
           wkfMigrationMap,
         };
-        if (wkf && wkf.statusSelect === 1 && wkf.oldNodes) {
+        if (newWkf && newWkf.statusSelect === 1 && newWkf.oldNodes) {
           context.isMigrateOld = isMigrateOld;
         }
         let actionRes = await Service.action({
@@ -438,10 +576,10 @@ function BpmnModelerComponent() {
           actionRes.data[0] &&
           actionRes.data[0].reload
         ) {
-          if (wkf && wkf.statusSelect !== 1) {
+          if (newWkf && newWkf.statusSelect !== 1) {
             handleSnackbarClick("success", "Deployed Successfully");
           }
-          fetchDiagram(wkf.id, true);
+          fetchDiagram(newWkf.id, true);
         } else {
           handleSnackbarClick(
             "error",
@@ -457,7 +595,7 @@ function BpmnModelerComponent() {
           (res && res.data && (res.data.message || res.data.title)) || "Error!"
         );
       }
-      if (wkf && wkf.statusSelect === 1) {
+      if (newWkf && newWkf.statusSelect === 1) {
         let actionStart = await Service.action({
           model: "com.axelor.apps.bpm.db.WkfModel",
           action: "action-wkf-model-method-start",
@@ -475,7 +613,7 @@ function BpmnModelerComponent() {
           actionStart.data[0].reload
         ) {
           handleSnackbarClick("success", "Started Successfully");
-          fetchDiagram(wkf.id, true);
+          fetchDiagram(newWkf.id, true);
         } else {
           handleSnackbarClick(
             "error",
@@ -489,9 +627,20 @@ function BpmnModelerComponent() {
     });
   };
 
-  const handleOk = (wkfMigrationMap, isMigrateOld) => {
+  const handleOk = async (wkfMigrationMap, isMigrateOld) => {
     setDelopyDialog(false);
-    deploy(wkfMigrationMap, isMigrateOld);
+    let res = await callOutoutMapping();
+    if (res.status === 0) {
+      bpmnModeler.saveXML({ format: true }, async function (err, xml) {
+        let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
+          ...wkf,
+          diagramXml: xml,
+        });
+        deploy(wkfMigrationMap, isMigrateOld, res && res.data && res.data[0]);
+      });
+    } else {
+      deploy(wkfMigrationMap, isMigrateOld);
+    }
   };
 
   const deployDiagram = async () => {
