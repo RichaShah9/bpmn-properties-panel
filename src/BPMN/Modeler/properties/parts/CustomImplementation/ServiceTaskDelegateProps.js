@@ -139,7 +139,8 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
   const onConfirm = () => {
     if (dmnModel) {
       if (element && element.businessObject) {
-        element.businessObject.decisionRef = `${dmnModel.name} (${dmnModel["decisionId"]})`;
+        element.businessObject.decisionRef = dmnModel.decisionId;
+        element.businessObject.$attrs["camunda:decisionName"] = dmnModel.name;
       }
     }
     handleClose();
@@ -155,10 +156,26 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
     bo[propertyName] = value;
   };
 
-  const updateModel = async (decisionRef) => {
-    const dmnModel = await getDMNModel(decisionRef);
-    setDmnModel(dmnModel);
-  };
+  const updateModel = React.useCallback(
+    async (decisionRef) => {
+      const dmnModel = await getDMNModel(decisionRef);
+      setDmnModel(dmnModel);
+      if (decisionRef) {
+        const dmnTable = await getDMNModels([
+          {
+            fieldName: "decisionId",
+            operator: "=",
+            value: decisionRef,
+          },
+        ]);
+        const dmnName = dmnTable && dmnTable[0] && dmnTable[0].name;
+        if (element && element.businessObject && dmnName) {
+          element.businessObject.$attrs["camunda:decisionName"] = dmnName;
+        }
+      }
+    },
+    [element]
+  );
 
   useEffect(() => {
     let bo = getBusinessObject(element);
@@ -185,11 +202,11 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
     if (implementationType === "dmn") {
       const bo = getBusinessObject(element);
       if (bo && bo.decisionRef) {
-        let decisionId = bo.decisionRef.match(/\((.*)\)/);
-        updateModel((decisionId && decisionId[1]) || bo.decisionRef);
+        let decisionId = bo.decisionRef;
+        updateModel(decisionId);
       }
     }
-  }, [element, implementationType]);
+  }, [element, implementationType, updateModel]);
 
   useEffect(() => {
     if (isServiceTaskLike(getBusinessObject(element))) {
@@ -238,6 +255,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                 element.businessObject.topic = undefined;
                 element.businessObject.taskPriority = undefined;
                 element.businessObject.decisionRef = undefined;
+                element.businessObject.$attrs["camunda:decisionName"] = undefined;
               } else {
                 values.implementationType !== "external"
                   ? (element.businessObject[values.implementationType] = "")
@@ -271,6 +289,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   element.businessObject.delegateExpression = undefined;
                   element.businessObject.topic = undefined;
                   element.businessObject.decisionRef = undefined;
+                  element.businessObject.$attrs["camunda:decisionName"] = undefined;
                 }
               },
               validate: function (e, values) {
@@ -306,6 +325,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     element.businessObject.delegateExpression = undefined;
                     element.businessObject.topic = undefined;
                     element.businessObject.decisionRef = undefined;
+                    element.businessObject.$attrs["camunda:decisionName"] = undefined;
                   }
                 },
                 validate: function (e, values) {
@@ -365,6 +385,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   element.businessObject.resultVariable = undefined;
                   element.businessObject.topic = undefined;
                   element.businessObject.decisionRef = undefined;
+                  element.businessObject.$attrs["camunda:decisionName"] = undefined;
                 }
               },
               validate: function (e, values) {
@@ -410,8 +431,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     element.businessObject.resultVariable = undefined;
                     element.businessObject.delegateExpression = undefined;
                     element.businessObject.topic = undefined;
-                    let decisionId = value && value.match(/\((.*)\)/);
-                    updateModel((decisionId && decisionId[1]) || value);
+                    updateModel(value);
                   },
                   validate: function (e, values) {
                     if (!values.decisionRef) {
@@ -443,6 +463,19 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   </div>
                 )}
             </div>
+            <TextField
+              element={element}
+              readOnly={true}
+              entry={{
+                id: "decisionName",
+                label: translate("Decision Name"),
+                modelProperty: "decisionName",
+                get: function () {
+                  const bo = getBusinessObject(element);
+                  return { decisionName: bo.$attrs["camunda:decisionName"] };
+                },
+              }}
+            />
             <SelectBox
               element={element}
               entry={{
@@ -625,6 +658,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     element.businessObject.resultVariable = undefined;
                     element.businessObject.delegateExpression = undefined;
                     element.businessObject.decisionRef = undefined;
+                    element.businessObject.$attrs["camunda:decisionName"] = undefined;
                   }
                 },
                 validate: function (e, values) {

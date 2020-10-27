@@ -490,9 +490,7 @@ function BpmnModelerComponent() {
           element.businessObject.$attrs["camunda:searchWith"];
 
         let resultVariable = element.businessObject.resultVariable;
-        let decisionRef = element.businessObject.decisionRef;
-        let decisionIdRef = decisionRef && decisionRef.match(/\((.*)\)/);
-        let decisionId = (decisionIdRef && decisionIdRef[1]) || decisionRef;
+        let decisionId = element.businessObject.decisionRef;
 
         let ctxModel =
           element.businessObject.$attrs &&
