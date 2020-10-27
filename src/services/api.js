@@ -317,8 +317,12 @@ export async function getInfo() {
   return res;
 }
 
-export async function getDMNModels() {
-  const res = await Service.search("com.axelor.apps.bpm.db.DmnTable");
+export async function getDMNModels(criteria = []) {
+  const res = await Service.search("com.axelor.apps.bpm.db.DmnTable", {
+    data: {
+      criteria,
+    },
+  });
   const { data = [] } = res || {};
   return data;
 }
