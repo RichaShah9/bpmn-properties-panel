@@ -106,6 +106,9 @@ const useStyles = makeStyles({
     minWidth: 450,
     overflow: "auto",
   },
+  button: {
+    textTransform: "none",
+  },
 });
 
 const implementationOptions = [
@@ -255,7 +258,9 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                 element.businessObject.topic = undefined;
                 element.businessObject.taskPriority = undefined;
                 element.businessObject.decisionRef = undefined;
-                element.businessObject.$attrs["camunda:decisionName"] = undefined;
+                element.businessObject.$attrs[
+                  "camunda:decisionName"
+                ] = undefined;
               } else {
                 values.implementationType !== "external"
                   ? (element.businessObject[values.implementationType] = "")
@@ -289,7 +294,9 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   element.businessObject.delegateExpression = undefined;
                   element.businessObject.topic = undefined;
                   element.businessObject.decisionRef = undefined;
-                  element.businessObject.$attrs["camunda:decisionName"] = undefined;
+                  element.businessObject.$attrs[
+                    "camunda:decisionName"
+                  ] = undefined;
                 }
               },
               validate: function (e, values) {
@@ -325,7 +332,9 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     element.businessObject.delegateExpression = undefined;
                     element.businessObject.topic = undefined;
                     element.businessObject.decisionRef = undefined;
-                    element.businessObject.$attrs["camunda:decisionName"] = undefined;
+                    element.businessObject.$attrs[
+                      "camunda:decisionName"
+                    ] = undefined;
                   }
                 },
                 validate: function (e, values) {
@@ -385,7 +394,9 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   element.businessObject.resultVariable = undefined;
                   element.businessObject.topic = undefined;
                   element.businessObject.decisionRef = undefined;
-                  element.businessObject.$attrs["camunda:decisionName"] = undefined;
+                  element.businessObject.$attrs[
+                    "camunda:decisionName"
+                  ] = undefined;
                 }
               },
               validate: function (e, values) {
@@ -658,7 +669,9 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     element.businessObject.resultVariable = undefined;
                     element.businessObject.delegateExpression = undefined;
                     element.businessObject.decisionRef = undefined;
-                    element.businessObject.$attrs["camunda:decisionName"] = undefined;
+                    element.businessObject.$attrs[
+                      "camunda:decisionName"
+                    ] = undefined;
                   }
                 },
                 validate: function (e, values) {
@@ -725,10 +738,20 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose} color="primary">
+              <Button
+                onClick={handleClose}
+                className={classes.button}
+                color="primary"
+                variant="outlined"
+              >
                 Cancel
               </Button>
-              <Button onClick={onConfirm} color="primary">
+              <Button
+                onClick={onConfirm}
+                className={classes.button}
+                color="primary"
+                variant="outlined"
+              >
                 Ok
               </Button>
             </DialogActions>
