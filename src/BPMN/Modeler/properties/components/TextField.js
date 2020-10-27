@@ -57,6 +57,15 @@ const useStyles = makeStyles({
   clear: {
     fontSize: "1rem",
   },
+  readOnly: {
+    borderColor: "#ccc !important",
+    background: "#E3E3E3",
+    "&:focus": {
+      boxShadow: "none !important",
+      outline: "none",
+      borderColor: "#ccc !important",
+    },
+  },
 });
 
 export default function TextField({
@@ -67,7 +76,7 @@ export default function TextField({
   labelClass,
   type = "text",
   isLabel = true,
-  readOnly = false
+  readOnly = false,
 }) {
   const classes = useStyles();
   const {
@@ -155,7 +164,11 @@ export default function TextField({
           name={modelProperty}
           value={value || ""}
           onChange={(e) => setValue(e.target.value)}
-          className={classnames(classes.input, isError && classes.error)}
+          className={classnames(
+            classes.input,
+            isError && classes.error,
+            readOnly && classes.readOnly
+          )}
           onBlur={(e) => updateProperty(e.target.value)}
         />
         {errorMessage && <Description desciption={errorMessage} type="error" />}
