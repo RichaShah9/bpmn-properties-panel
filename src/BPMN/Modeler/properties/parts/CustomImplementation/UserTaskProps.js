@@ -92,6 +92,7 @@ export default function UserTaskProps({ element, index, label }) {
               set: function (e, values) {
                 setProperty("camunda:completedIf", values["completedIf"]);
                 setProperty("camunda:completedIfValue", undefined);
+                setProperty("camunda:completedIfCombinator", undefined);
               },
             }}
             canRemove={true}
@@ -103,12 +104,14 @@ export default function UserTaskProps({ element, index, label }) {
               handleClose={() => handleClose()}
               getExpression={() => {
                 const value = getProperty("camunda:completedIfValue");
-                return value && JSON.parse(value);
+                const combinator = getProperty("camunda:completedIfCombinator");
+                return { values: value && JSON.parse(value), combinator };
               }}
               setProperty={(val) => {
-                const { expression, value } = val;
+                const { expression, value, combinator } = val;
                 setProperty("camunda:completedIfValue", value);
                 setProperty("camunda:completedIf", expression);
+                setProperty("camunda:completedIfCombinator", combinator);
               }}
               element={element}
             />

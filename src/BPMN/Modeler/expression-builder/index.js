@@ -16,6 +16,7 @@ import {
   dateFormat,
   map_combinator,
 } from "./data";
+import { getModels } from "../../../services/api";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -314,7 +315,7 @@ function ExpressionBuilder({
   function lowerCaseFirstLetter(str) {
     return str.charAt(0).toLowerCase() + str.slice(1);
   }
-  
+
   function generateExpression() {
     const expressionValues = [];
     const expressions =
@@ -324,7 +325,10 @@ function ExpressionBuilder({
         const modalName = metaModals && metaModals.name;
         let str = "";
         const listOfTree = getListOfTree(rules);
-        const criteria = getCriteria(listOfTree, lowerCaseFirstLetter(modalName));
+        const criteria = getCriteria(
+          listOfTree,
+          lowerCaseFirstLetter(modalName)
+        );
         if (metaModals) {
           str += criteria;
         } else {
@@ -336,6 +340,7 @@ function ExpressionBuilder({
         });
         return `${str}`;
       });
+    console.log(expressionComponents);
     const str = expressions
       .filter((e) => e !== "")
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
@@ -343,13 +348,49 @@ function ExpressionBuilder({
     setProperty({
       expression: str,
       value: JSON.stringify(expressionValues),
+      combinator: combinator,
     });
     handleClose();
   }
 
   useEffect(() => {
-    const value = getExpression();
-    console.log("value", value);
+    let isSubscribed = true;
+    async function fetchValue() {
+      const { values, combinator } = getExpression();
+      const expressionComponents = [];
+      if (!values || values.length === 0) return;
+      for (let i = 0; i < values.length; i++) {
+        const element = values[i];
+        const { metaModalName } = element;
+        if (!metaModalName) return;
+        const criteria = {
+          criteria: [
+            {
+              fieldName: "name",
+              operator: "=",
+              value: metaModalName,
+            },
+          ],
+          operator: "and",
+        };
+        const metaModels = await getModels(criteria);
+        if (!metaModels) return;
+        const value = {
+          metaModals: metaModels && metaModels[0],
+          rules: element.rules,
+        };
+        expressionComponents.push({
+          Component: ExpressionComponent,
+          value,
+        });
+      }
+      if (isSubscribed) {
+        setExpressionComponents(expressionComponents);
+        setCombinator(combinator || "and");
+      }
+    }
+    fetchValue();
+    return () => (isSubscribed = false);
   }, [getExpression]);
 
   return (
