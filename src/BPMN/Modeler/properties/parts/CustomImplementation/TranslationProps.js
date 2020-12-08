@@ -200,6 +200,7 @@ export default function TranslationProps({
   };
 
   useEffect(() => {
+    let isSubscribed = true;
     async function getAllTranslations() {
       if (!element) return;
       const bo = element.businessObject;
@@ -213,35 +214,50 @@ export default function TranslationProps({
       const name = bo[modelProperty];
       const key = bo.$attrs["camunda:key"];
       const value = key || name;
-      setValue(value);
       const translations = await getTranslations(value);
-      setTranslations(translations);
+      if (isSubscribed) {
+        setValue(value);
+        setTranslations(translations);
+      }
     }
     getAllTranslations();
+    return () => (isSubscribed = false);
   }, [element]);
 
   useEffect(() => {
+    let isSubscribed = true;
     async function getUserInfo() {
       const info = await getInfo();
-      setInfo(info);
+      if (isSubscribed) {
+        setInfo(info);
+      }
     }
     getUserInfo();
+    return () => (isSubscribed = false);
   }, []);
 
   useEffect(() => {
+    let isSubscribed = true;
     const bo = getBusinessObject(element);
     const isTranslation =
       (bo.$attrs && bo.$attrs["camunda:isTranslations"]) || false;
-    setIsTranslations(getBool(isTranslation));
+    if (isSubscribed) {
+      setIsTranslations(getBool(isTranslation));
+    }
+    return () => (isSubscribed = false);
   }, [element]);
 
   useEffect(() => {
     let canvas = bpmnModeler.get("canvas");
     if (!canvas) return;
+    let isSubscribed = true;
     let rootElement = canvas.getRootElement();
     if ((element && element.id) !== (rootElement && rootElement.id)) {
-      setVisible(true);
+      if (isSubscribed) {
+        setVisible(true);
+      }
     }
+    return () => (isSubscribed = false);
   }, [element, bpmnModeler]);
 
   return (

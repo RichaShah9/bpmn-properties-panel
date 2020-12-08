@@ -25,10 +25,16 @@ export default function FieldEditor({
   const classes = useStyles();
 
   React.useEffect(() => {
+    let isSubscribed = true;
     (async () => {
       const data = await getMetaFields();
-      setFields(data);
+      if (isSubscribed) {
+        setFields(data);
+      }
     })();
+    return () => {
+      isSubscribed = false;
+    };
   }, [getMetaFields]);
 
   const join_operator = {

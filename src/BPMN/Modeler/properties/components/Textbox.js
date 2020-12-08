@@ -109,6 +109,7 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
   }, [validate, element, value, modelProperty]);
 
   useEffect(() => {
+    let isSubscribed = true;
     async function getAllTranslations() {
       if (!element || !["name", "text"].includes(modelProperty)) return;
       const bo = element.businessObject;
@@ -123,9 +124,11 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
       const name = bo[propertyName];
       const key = bo.$attrs["camunda:key"];
       const value = key || name;
-      setValue(value);
       const translations = await getTranslations(value);
-      setTranslations(translations);
+      if (isSubscribed) {
+        setValue(value);
+        setTranslations(translations);
+      }
       if (translations && translations.length > 0) {
         if (value && element.businessObject && element.businessObject.$attrs) {
           element.businessObject.$attrs["camunda:key"] = value;
@@ -135,36 +138,49 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
         const isTranslated = getBool(isTranslation);
         if (isTranslated) {
           const directEditing = bpmnModeler.get("directEditing");
-          setReadOnly(true);
+          if (isSubscribed) {
+            setReadOnly(true);
+          }
           if (!bpmnModeler) {
             return;
           }
           directEditing && directEditing.cancel();
         } else {
-          setReadOnly(false);
+          if (isSubscribed) {
+            setReadOnly(false);
+          }
         }
       } else {
         if (key && element.businessObject && element.businessObject.$attrs) {
           element.businessObject.$attrs["camunda:key"] = key;
         }
-        setValue(name);
+        if (isSubscribed) {
+          setValue(name);
+        }
       }
     }
     getAllTranslations();
+    return () => (isSubscribed = false);
   }, [element, modelProperty, bpmnModeler]);
 
   useEffect(() => {
+    let isSubscribed = true;
     const isError = getValidation();
+    if (!isSubscribed) return;
     setError(isError);
+    return () => (isSubscribed = false);
   }, [getValidation]);
 
   useEffect(() => {
     if (!element) return;
+    let isSubscribed = true;
     const values = get && get(element);
     let value = getProperty
       ? getProperty(element)
       : values && values[modelProperty];
+    if (!isSubscribed) return;
     setValue(value);
+    return () => (isSubscribed = false);
   }, [element, modelProperty, get, getProperty]);
 
   return (
