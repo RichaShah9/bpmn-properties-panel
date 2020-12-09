@@ -318,7 +318,7 @@ function BpmnModelerComponent() {
         xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
         xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
         id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn">
-        <bpmn2:process id="Process_1" isExecutable="false">
+        <bpmn2:process id="Process_1" isExecutable="true">
           <bpmn2:startEvent id="StartEvent_1" />
         </bpmn2:process>
         <bpmndi:BPMNDiagram id="BPMNDiagram_1">
