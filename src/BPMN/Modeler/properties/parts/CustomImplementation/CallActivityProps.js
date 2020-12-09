@@ -2,12 +2,21 @@ import React, { useEffect, useState } from "react";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import AddIcon from "@material-ui/icons/Add";
+import {
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  Button,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
+import Select from "../../../../../components/Select";
 import { TextField, SelectBox, Checkbox } from "../../components";
 import { translate } from "../../../../../utils";
-import { getWkfModel } from "../../../../../services/api";
+import { getWkfModel, getBPMNModels } from "../../../../../services/api";
 
 const useStyles = makeStyles({
   groupLabel: {
@@ -35,6 +44,11 @@ const useStyles = makeStyles({
   },
   link: {
     cursor: "pointer",
+  },
+  dialogPaper: {
+    padding: 5,
+    minWidth: 450,
+    overflow: "auto",
   },
 });
 
@@ -170,7 +184,26 @@ export default function CallActivityProps({
   const [bindingType, setBindingType] = useState("latest");
   const [isBusinessKey, setBusinessKey] = useState(false);
   const [wkfModel, setWkfModel] = useState(null);
+  const [open, setOpen] = React.useState(false);
   const classes = useStyles();
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const onConfirm = () => {
+    if (wkfModel) {
+      if (element && element.businessObject) {
+        element.businessObject.calledElement = wkfModel.processId;
+        element.businessObject.$attrs["camunda:processName"] = wkfModel.name;
+      }
+    }
+    handleClose();
+  };
 
   const getPropertyValue = (propertyName, type = callActivityType) => {
     const bo = getBusinessObject(element);
@@ -183,10 +216,26 @@ export default function CallActivityProps({
     ] = value;
   };
 
-  const updateModel = async (calledElement) => {
-    const wkfModel = await getWkfModel(calledElement);
-    setWkfModel(wkfModel);
-  };
+  const updateModel = React.useCallback(
+    async (processId) => {
+      const wkfModel = await getWkfModel(processId);
+      setWkfModel(wkfModel);
+      if (processId) {
+        const process = await getBPMNModels([
+          {
+            fieldName: "processId",
+            operator: "=",
+            value: processId,
+          },
+        ]);
+        const processName = process && process[0] && process[0].name;
+        if (element && element.businessObject && processName) {
+          element.businessObject.$attrs["camunda:processName"] = processName;
+        }
+      }
+    },
+    [element]
+  );
 
   useEffect(() => {
     if (is(element, "camunda:CallActivity")) {
@@ -211,7 +260,7 @@ export default function CallActivityProps({
     if (bo && bo.calledElement) {
       updateModel(bo.calledElement);
     }
-  }, [element]);
+  }, [element, updateModel]);
 
   return (
     isVisible && (
@@ -246,7 +295,17 @@ export default function CallActivityProps({
           }}
         />
         {callActivityType === "bpmn" && (
-          <div className={classes.bpmn}>
+          <div
+            className={classes.bpmn}
+            style={{
+              alignItems:
+                element &&
+                getBusinessObject(element) &&
+                getBusinessObject(element).calledElement
+                  ? "flex-end"
+                  : "center",
+            }}
+          >
             <TextField
               element={element}
               entry={{
@@ -271,6 +330,9 @@ export default function CallActivityProps({
               }}
               canRemove={true}
             />
+            <div onClick={handleClickOpen} className={classes.link}>
+              <AddIcon className={classes.linkIcon} />
+            </div>
             {wkfModel && (
               <div
                 onClick={() => {
@@ -287,6 +349,21 @@ export default function CallActivityProps({
               </div>
             )}
           </div>
+        )}
+        {callActivityType === "bpmn" && wkfModel && (
+          <TextField
+            element={element}
+            readOnly={true}
+            entry={{
+              id: "processName",
+              label: translate("Process Name"),
+              modelProperty: "processName",
+              get: function () {
+                const bo = getBusinessObject(element);
+                return { processName: bo.$attrs["camunda:processName"] };
+              },
+            }}
+          />
         )}
         {callActivityType === "cmmn" && (
           <TextField
@@ -563,6 +640,50 @@ export default function CallActivityProps({
               canRemove={true}
             />
           )}
+        {open && (
+          <Dialog
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="form-dialog-title"
+            maxWidth="sm"
+            classes={{
+              paper: classes.dialogPaper,
+            }}
+          >
+            <DialogTitle id="form-dialog-title">Select BPMN</DialogTitle>
+            <DialogContent>
+              <label className={classes.label}>{translate("BPMN")}</label>
+              <Select
+                className={classes.select}
+                update={(value) => {
+                  setWkfModel(value);
+                }}
+                name="wkfModel"
+                optionLabel="name"
+                isLabel={true}
+                fetchMethod={() => getBPMNModels()}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={handleClose}
+                className={classes.button}
+                color="primary"
+                variant="outlined"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={onConfirm}
+                className={classes.button}
+                color="primary"
+                variant="outlined"
+              >
+                Ok
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
       </div>
     )
   );

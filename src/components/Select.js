@@ -300,9 +300,11 @@ export default function SelectComponent({
             name === "userPositionMenu"
           ) {
             optionName = `${option["title"]} (${option["name"]})`;
-          } else if(name === "dmnModel") {
+          } else if (name === "dmnModel") {
             optionName = `${option[optionLabel]} (${option["decisionId"]})`;
-          }else {
+          } else if (name === "wkfModel") {
+            optionName = `${option[optionLabel]} (${option["processId"]})`;
+          } else {
             optionName = option[optionLabel]
               ? option[optionLabel]
               : option["title"]

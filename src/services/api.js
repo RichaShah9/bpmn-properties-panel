@@ -326,3 +326,13 @@ export async function getDMNModels(criteria = []) {
   const { data = [] } = res || {};
   return data;
 }
+
+export async function getBPMNModels(criteria = []) {
+  const res = await Service.search("com.axelor.apps.bpm.db.WkfProcess", {
+    data: {
+      criteria,
+    },
+  });
+  const { data = [] } = res || {};
+  return data;
+}
