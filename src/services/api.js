@@ -237,23 +237,6 @@ export async function getSubMenus(parentMenu) {
   return _.uniqBy(data || [], "name") || [];
 }
 
-export async function getWkfModel(processId) {
-  const res = await Service.search("com.axelor.apps.bpm.db.WkfModel", {
-    data: {
-      criteria: [
-        {
-          fieldName: "wkfProcessList.processId",
-          operator: "=",
-          value: processId,
-        },
-      ],
-    },
-  });
-  const { data = [] } = res || {};
-  const model = data[0];
-  return model;
-}
-
 export async function getTranslations(key) {
   const res = await Service.search("com.axelor.meta.db.MetaTranslation", {
     data: {
@@ -327,10 +310,11 @@ export async function getDMNModels(criteria = []) {
   return data;
 }
 
-export async function getBPMNModels(criteria = []) {
+export async function getBPMNModels(criteria = [], operator) {
   const res = await Service.search("com.axelor.apps.bpm.db.WkfProcess", {
     data: {
       criteria,
+      operator
     },
   });
   const { data = [] } = res || {};

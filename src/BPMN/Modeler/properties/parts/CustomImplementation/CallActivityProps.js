@@ -16,7 +16,7 @@ import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import Select from "../../../../../components/Select";
 import { TextField, SelectBox, Checkbox } from "../../components";
 import { translate } from "../../../../../utils";
-import { getWkfModel, getBPMNModels } from "../../../../../services/api";
+import { getBPMNModels } from "../../../../../services/api";
 
 const useStyles = makeStyles({
   groupLabel: {
@@ -198,8 +198,8 @@ export default function CallActivityProps({
   const onConfirm = () => {
     if (wkfModel) {
       if (element && element.businessObject) {
-        element.businessObject.calledElement = wkfModel.processId;
-        element.businessObject.$attrs["camunda:processName"] = wkfModel.name;
+        element.businessObject.calledElement = wkfModel.name;
+        element.businessObject.$attrs["camunda:processId"] = wkfModel.processId;
       }
     }
     handleClose();
@@ -217,21 +217,27 @@ export default function CallActivityProps({
   };
 
   const updateModel = React.useCallback(
-    async (processId) => {
-      const wkfModel = await getWkfModel(processId);
-      setWkfModel(wkfModel);
-      if (processId) {
-        const process = await getBPMNModels([
+    async (userInput) => {
+      const wkfModelRes = await getBPMNModels(
+        [
           {
             fieldName: "processId",
             operator: "=",
-            value: processId,
+            value: userInput,
           },
-        ]);
-        const processName = process && process[0] && process[0].name;
-        if (element && element.businessObject && processName) {
-          element.businessObject.$attrs["camunda:processName"] = processName;
-        }
+          {
+            fieldName: "name",
+            operator: "=",
+            value: userInput,
+          },
+        ],
+        "or"
+      );
+      const wkfModel = wkfModelRes && wkfModelRes[0];
+      if (!wkfModel) return;
+      setWkfModel(wkfModel);
+      if (element) {
+        element.businessObject.$attrs["camunda:processId"] = wkfModel.processId;
       }
     },
     [element]
@@ -257,8 +263,8 @@ export default function CallActivityProps({
 
   useEffect(() => {
     const bo = getBusinessObject(element);
-    if (bo && bo.calledElement) {
-      updateModel(bo.calledElement);
+    if (bo && bo.$attrs && bo.$attrs["camunda:processId"]) {
+      updateModel(bo.$attrs["camunda:processId"] || bo.calledElement);
     }
   }, [element, updateModel]);
 
@@ -349,21 +355,6 @@ export default function CallActivityProps({
               </div>
             )}
           </div>
-        )}
-        {callActivityType === "bpmn" && wkfModel && (
-          <TextField
-            element={element}
-            readOnly={true}
-            entry={{
-              id: "processName",
-              label: translate("Process Name"),
-              modelProperty: "processName",
-              get: function () {
-                const bo = getBusinessObject(element);
-                return { processName: bo.$attrs["camunda:processName"] };
-              },
-            }}
-          />
         )}
         {callActivityType === "cmmn" && (
           <TextField
