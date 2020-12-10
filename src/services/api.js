@@ -300,6 +300,16 @@ export async function getInfo() {
   return res;
 }
 
+export async function getBamlModels(criteria = []) {
+  const res = await Service.search("com.axelor.apps.bpm.db.BamlModel", {
+    data: {
+      criteria,
+    },
+  });
+  const { data = [] } = res || {};
+  return data;
+}
+
 export async function getDMNModels(criteria = []) {
   const res = await Service.search("com.axelor.apps.bpm.db.DmnTable", {
     data: {
