@@ -220,7 +220,7 @@ export const tabProperty = [
   {
     type: "bpmn:ServiceTask",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:ReceiveTask",
