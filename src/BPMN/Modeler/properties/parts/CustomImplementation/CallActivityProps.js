@@ -218,7 +218,7 @@ export default function CallActivityProps({
 
   const updateModel = React.useCallback(
     async (userInput) => {
-      const wkfModelRes = await getBPMNModels(
+      const wkfProcessRes = await getBPMNModels(
         [
           {
             fieldName: "processId",
@@ -233,11 +233,15 @@ export default function CallActivityProps({
         ],
         "or"
       );
-      const wkfModel = wkfModelRes && wkfModelRes[0];
-      if (!wkfModel) return;
-      setWkfModel(wkfModel);
+      const wkfProcess = wkfProcessRes && wkfProcessRes[0];
+      if (!wkfProcess) return;
+      setWkfModel({
+        name: wkfProcess.name,
+        id: wkfProcess.wkfModel && wkfProcess.wkfModel.id,
+      });
       if (element) {
-        element.businessObject.$attrs["camunda:processId"] = wkfModel.processId;
+        element.businessObject.$attrs["camunda:processId"] =
+          wkfProcess.processId;
       }
     },
     [element]
@@ -647,7 +651,8 @@ export default function CallActivityProps({
               <Select
                 className={classes.select}
                 update={(value) => {
-                  setWkfModel(value);
+                  if(!value) return
+                  setWkfModel({ id: value.wkfModel.id, name: value.name });
                 }}
                 name="wkfModel"
                 optionLabel="name"
