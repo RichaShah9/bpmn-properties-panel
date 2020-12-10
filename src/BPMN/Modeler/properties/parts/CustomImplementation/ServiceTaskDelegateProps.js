@@ -162,16 +162,6 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
     setOpen(false);
   };
 
-  const onConfirm = () => {
-    if (dmnModel) {
-      if (element && element.businessObject) {
-        element.businessObject.decisionRef = dmnModel.decisionId;
-        element.businessObject.$attrs["camunda:decisionName"] = dmnModel.name;
-      }
-    }
-    handleClose();
-  };
-
   const getPropertyValue = (propertyName) => {
     const bo = getBusinessObject(element);
     return bo[propertyName];
@@ -214,6 +204,16 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
     [element]
   );
 
+  const onConfirm = () => {
+    if (dmnModel) {
+      if (element && element.businessObject) {
+        element.businessObject.decisionRef = dmnModel.decisionId;
+        setProperty("decisionName", dmnModel.name);
+      }
+    }
+    handleClose();
+  };
+
   const updateModel = React.useCallback(
     async (decisionRef) => {
       const dmnModel = await getDMNModel(decisionRef);
@@ -228,11 +228,11 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
         ]);
         const dmnName = dmnTable && dmnTable[0] && dmnTable[0].name;
         if (element && element.businessObject && dmnName) {
-          element.businessObject.$attrs["camunda:decisionName"] = dmnName;
+          setProperty("decisionName", dmnName);
         }
       }
     },
-    [element]
+    [element, setProperty]
   );
 
   useEffect(() => {
@@ -301,33 +301,37 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
           {index > 0 && <div className={classes.divider} />}
         </React.Fragment>
         <div className={classes.groupLabel}>{label}</div>
-        <Checkbox
-          element={element}
-          entry={{
-            id: "baml",
-            label: translate("BAML"),
-            modelProperty: "baml",
-            widget: "checkbox",
-            get: function () {
-              return {
-                baml: isBaml,
-              };
-            },
-            set: function (e, values) {
-              let baml = !values.baml;
-              if (baml) {
-                element.businessObject.class =
-                  "com.axelor.apps.bpm.service.WkfBamlService";
-                setImplementationType("class");
-              } else {
-                setImplementationType("");
-                element.businessObject.class = undefined;
-              }
-              setProperty("baml", baml);
-              setBaml(baml);
-            },
-          }}
-        />
+        {element && element.type === "bpmn:ServiceTask" && (
+          <Checkbox
+            element={element}
+            entry={{
+              id: "baml",
+              label: translate("BAML"),
+              modelProperty: "baml",
+              widget: "checkbox",
+              get: function () {
+                return {
+                  baml: isBaml,
+                };
+              },
+              set: function (e, values) {
+                let baml = !values.baml;
+                if (baml) {
+                  element.businessObject.class =
+                    "com.axelor.apps.bpm.service.WkfBamlService";
+                  setImplementationType("class");
+                } else {
+                  setImplementationType("");
+                  element.businessObject.class = undefined;
+                  setProperty("bamlModel", undefined);
+                  setProperty("bamlModelId", undefined);
+                }
+                setProperty("baml", baml);
+                setBaml(baml);
+              },
+            }}
+          />
+        )}
         {isBaml && (
           <React.Fragment>
             <label className={classes.label}>{translate("BAML model")}</label>
@@ -336,8 +340,13 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                 className={classes.select}
                 update={(value) => {
                   setBamlModel(value);
-                  setProperty("bamlModel", value && value["name"]);
-                  setProperty("bamlModelId", value && value["id"]);
+                  if (value) {
+                    setProperty("bamlModel", value && value["name"]);
+                    setProperty("bamlModelId", value && value["id"]);
+                  } else {
+                    setProperty("bamlModel", undefined);
+                    setProperty("bamlModelId", undefined);
+                  }
                 }}
                 name="bamlModel"
                 optionLabel="name"
@@ -363,7 +372,8 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
             </div>
           </React.Fragment>
         )}
-        {!isBaml && (
+        {((element && element.type === "bpmn:ServiceTask" && !isBaml) ||
+          (element && element.type !== "bpmn:ServiceTask")) && (
           <React.Fragment>
             <SelectBox
               element={element}
@@ -396,9 +406,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                     element.businessObject.topic = undefined;
                     element.businessObject.taskPriority = undefined;
                     element.businessObject.decisionRef = undefined;
-                    element.businessObject.$attrs[
-                      "camunda:decisionName"
-                    ] = undefined;
+                    setProperty("decisionName", undefined);
                   } else {
                     values.implementationType !== "external"
                       ? (element.businessObject[values.implementationType] = "")
@@ -432,9 +440,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                       element.businessObject.delegateExpression = undefined;
                       element.businessObject.topic = undefined;
                       element.businessObject.decisionRef = undefined;
-                      element.businessObject.$attrs[
-                        "camunda:decisionName"
-                      ] = undefined;
+                      setProperty("decisionName", undefined);
                     }
                   },
                   validate: function (e, values) {
@@ -470,9 +476,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                         element.businessObject.delegateExpression = undefined;
                         element.businessObject.topic = undefined;
                         element.businessObject.decisionRef = undefined;
-                        element.businessObject.$attrs[
-                          "camunda:decisionName"
-                        ] = undefined;
+                        setProperty("decisionName", undefined);
                       }
                     },
                     validate: function (e, values) {
@@ -532,9 +536,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                       element.businessObject.resultVariable = undefined;
                       element.businessObject.topic = undefined;
                       element.businessObject.decisionRef = undefined;
-                      element.businessObject.$attrs[
-                        "camunda:decisionName"
-                      ] = undefined;
+                      setProperty("decisionName", undefined);
                     }
                   },
                   validate: function (e, values) {
@@ -812,9 +814,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                         element.businessObject.resultVariable = undefined;
                         element.businessObject.delegateExpression = undefined;
                         element.businessObject.decisionRef = undefined;
-                        element.businessObject.$attrs[
-                          "camunda:decisionName"
-                        ] = undefined;
+                        setProperty("decisionName", undefined);
                       }
                     },
                     validate: function (e, values) {
