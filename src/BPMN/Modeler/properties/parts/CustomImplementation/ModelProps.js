@@ -27,7 +27,8 @@ const CONDITIONAL_SOURCES = [
   "bpmn:Lane",
   "bpmn:TextAnnotation",
   "bpmn:MessageFlow",
-  "bpmn:ServiceTask"
+  "bpmn:ServiceTask",
+  "bpmn:ScriptTask"
 ];
 
 const TITLE_SOURCES = [
@@ -82,7 +83,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ModelProps({ element, index, label, bpmnModeler }) {
+export default function ModelProps({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
   const [metaModel, setMetaModel] = useState(null);
   const [metaJsonModel, setMetaJsonModel] = useState(null);
