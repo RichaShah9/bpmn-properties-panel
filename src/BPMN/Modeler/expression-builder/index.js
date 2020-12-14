@@ -356,7 +356,7 @@ function ExpressionBuilder({
   useEffect(() => {
     let isSubscribed = true;
     async function fetchValue() {
-      const { values, combinator } = getExpression();
+      const { values, combinator } = getExpression() || {};
       const expressionComponents = [];
       if (!values || values.length === 0) return;
       for (let i = 0; i < values.length; i++) {

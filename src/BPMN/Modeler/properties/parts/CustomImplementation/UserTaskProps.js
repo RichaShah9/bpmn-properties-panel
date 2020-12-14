@@ -38,7 +38,7 @@ const useStyles = makeStyles({
 
 export default function UserTaskProps({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const classes = useStyles();
 
   const getProperty = (name) => {
