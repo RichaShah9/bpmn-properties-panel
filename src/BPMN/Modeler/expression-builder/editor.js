@@ -13,7 +13,13 @@ import {
   NumberField,
   InputField,
 } from "./component";
-import { combinator, operators, operators_by_type, dateFormat } from "./data";
+import {
+  combinator,
+  operators,
+  operators_by_type,
+  dateFormat,
+  compare_operators,
+} from "./data";
 import { getData } from "./services/api";
 import FieldEditor from "./field-editor";
 
@@ -261,6 +267,7 @@ function Rule(props) {
     editor,
     value,
     expression,
+    parentCombinator,
   } = props;
   const {
     fieldType = "",
@@ -299,17 +306,18 @@ function Rule(props) {
         value={value}
         expression={expression}
       />
-
-      <Select
-        name="operator"
-        title="Operator"
-        options={operatorsOptions}
-        onChange={(value) => {
-          onChange({ name: "operator", value }, editor);
-        }}
-        value={operator}
-      />
-      {operator && (
+      {!compare_operators.includes(parentCombinator) && (
+        <Select
+          name="operator"
+          title="Operator"
+          options={operatorsOptions}
+          onChange={(value) => {
+            onChange({ name: "operator", value }, editor);
+          }}
+          value={operator}
+        />
+      )}
+      {!compare_operators.includes(parentCombinator) && operator && (
         <RenderWidget
           type={type}
           operator={operator}
@@ -337,6 +345,7 @@ export default function Editor({
   getMetaFields,
   isDisable,
   expression,
+  parentCombinator,
 }) {
   const classes = useStyles();
   const { id, rules = [] } = editor;
@@ -346,24 +355,28 @@ export default function Editor({
       variant="outlined"
       className={classNames(classes.paper, isDisable && classes.disabled)}
     >
-      <div className={classNames(classes.rulesGroupHeader)}>
-        <Select
-          name="combinator"
-          title="Combinator"
-          options={combinator}
-          value={editor.combinator}
-          onChange={(value) => onChange({ name: "combinator", value }, editor)}
-        />
-        <Button title="Rules" Icon={AddIcon} onClick={() => onAddRule(id)} />
-        <Button title="Group" Icon={AddIcon} onClick={() => onAddGroup(id)} />
-        {isRemoveGroup && (
-          <Button
-            title="Group"
-            Icon={DeleteIcon}
-            onClick={() => onRemoveGroup(id)}
+      {!compare_operators.includes(parentCombinator) && (
+        <div className={classNames(classes.rulesGroupHeader)}>
+          <Select
+            name="combinator"
+            title="Combinator"
+            options={combinator}
+            value={editor.combinator}
+            onChange={(value) =>
+              onChange({ name: "combinator", value }, editor)
+            }
           />
-        )}
-      </div>
+          <Button title="Rules" Icon={AddIcon} onClick={() => onAddRule(id)} />
+          <Button title="Group" Icon={AddIcon} onClick={() => onAddGroup(id)} />
+          {isRemoveGroup && (
+            <Button
+              title="Group"
+              Icon={DeleteIcon}
+              onClick={() => onRemoveGroup(id)}
+            />
+          )}
+        </div>
+      )}
       {rules.map((rule, i) => (
         <React.Fragment key={i}>
           <Rule
@@ -373,6 +386,7 @@ export default function Editor({
             editor={editor}
             value={rule}
             expression={expression}
+            parentCombinator={parentCombinator}
           />
         </React.Fragment>
       ))}
@@ -388,6 +402,7 @@ export default function Editor({
             getMetaFields={getMetaFields}
             onChange={(e, editor, i) => onChange(e, editor, i)}
             editor={editor}
+            parentCombinator={parentCombinator}
           />
         </React.Fragment>
       ))}

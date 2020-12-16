@@ -10,11 +10,12 @@ import moment from "moment";
 import ExpressionComponent from "./expression-builder";
 import { Button, Select } from "./component";
 import {
-  combinator as combinators,
+  combinators,
   map_operator,
   join_operator,
   dateFormat,
   map_combinator,
+  compare_operators,
 } from "./data";
 import { getModels } from "../../../services/api";
 
@@ -200,7 +201,7 @@ function ExpressionBuilder({
     }
   }
 
-  function getCondition(rules) {
+  function getCondition(rules, parentCombinator) {
     const map_operators = map_operator[expression];
     return rules.map((rule) => {
       const { fieldName, field, operator, allField } = rule;
@@ -217,6 +218,9 @@ function ExpressionBuilder({
       if (isEmpty(fValue)) {
         if (["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)) {
         } else {
+          if (compare_operators.includes(parentCombinator)) {
+            return fieldName;
+          }
           return null;
         }
       }
@@ -266,13 +270,18 @@ function ExpressionBuilder({
     });
   }
 
-  function getCriteria(rule, modalName, isChildren) {
+  function getCriteria(rule, modalName, isChildren, parentCombinator) {
     const { rules, combinator, children } = rule[0];
-    const condition = getCondition(rules)
+    const condition = getCondition(rules, parentCombinator)
       .map((c) => (c === null ? "" : `${modalName}.${c}`))
       .filter((f) => f !== "");
     if (children.length > 0) {
-      const conditions = getCriteria(children, modalName, true);
+      const conditions = getCriteria(
+        children,
+        modalName,
+        true,
+        parentCombinator
+      );
       condition.push(conditions);
     }
 
@@ -316,7 +325,7 @@ function ExpressionBuilder({
     return str.charAt(0).toLowerCase() + str.slice(1);
   }
 
-  function generateExpression() {
+  function generateExpression(combinator) {
     const expressionValues = [];
     const expressions =
       expressionComponents &&
@@ -327,7 +336,9 @@ function ExpressionBuilder({
         const listOfTree = getListOfTree(rules);
         const criteria = getCriteria(
           listOfTree,
-          lowerCaseFirstLetter(modalName)
+          lowerCaseFirstLetter(modalName),
+          undefined,
+          combinator
         );
         if (metaModals) {
           str += criteria;
@@ -428,6 +439,7 @@ function ExpressionBuilder({
                   index={index}
                   setValue={onChange}
                   element={element}
+                  parentCombinator={combinator}
                 />
                 <Button
                   Icon={DeleteIcon}
@@ -437,7 +449,10 @@ function ExpressionBuilder({
             );
           })}
         </Paper>
-        <Button title="Generate" onClick={() => generateExpression()} />
+        <Button
+          title="Generate"
+          onClick={() => generateExpression(combinator)}
+        />
       </div>
     </Dialog>
   );

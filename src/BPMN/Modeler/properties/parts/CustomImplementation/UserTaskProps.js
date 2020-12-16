@@ -105,13 +105,23 @@ export default function UserTaskProps({ element, index, label }) {
               getExpression={() => {
                 const value = getProperty("camunda:completedIfValue");
                 const combinator = getProperty("camunda:completedIfCombinator");
-                return { values: value && JSON.parse(value), combinator };
+                let values;
+                if (value !== undefined) {
+                  try {
+                    values = JSON.parse(value);
+                  } catch (errror) {}
+                }
+                return { values: values, combinator };
               }}
               setProperty={(val) => {
                 const { expression, value, combinator } = val;
-                setProperty("camunda:completedIfValue", value);
                 setProperty("camunda:completedIf", expression);
-                setProperty("camunda:completedIfCombinator", combinator);
+                if (value) {
+                  setProperty("camunda:completedIfValue", value);
+                }
+                if (combinator) {
+                  setProperty("camunda:completedIfCombinator", combinator);
+                }
               }}
               element={element}
             />

@@ -64,7 +64,13 @@ const defaultState = {
 };
 
 function ExpressionBuilder(props) {
-  const { value = defaultState, setValue, index, element } = props;
+  const {
+    value = defaultState,
+    setValue,
+    index,
+    element,
+    parentCombinator,
+  } = props;
   const { metaModals: model, rules: r } = value;
   const [expression] = React.useState("GROOVY");
   const [metaModals, setMetaModals] = React.useState(model);
@@ -211,7 +217,7 @@ function ExpressionBuilder(props) {
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: "100%" }}>
       <Paper variant="outlined" className={classes.paper}>
         <div
           style={{ display: "flex", width: "100%", flexDirection: "column" }}
@@ -249,6 +255,7 @@ function ExpressionBuilder(props) {
                   editor={editor}
                   isDisable={!Boolean(metaModals)}
                   expression={expression}
+                  parentCombinator={parentCombinator}
                 />
                 <br />
               </React.Fragment>
