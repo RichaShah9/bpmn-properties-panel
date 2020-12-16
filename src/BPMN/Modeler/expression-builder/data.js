@@ -1,11 +1,37 @@
+const combinators = [
+  { name: "and", title: "AND" },
+  { name: "or", title: "OR" },
+  { name: "equal", title: "EQUAL" },
+  { name: "notEqual", title: "NOT EQUAL" },
+  { name: "greaterThan", title: "GREATER THAN" },
+  { name: "greaterOrEqual", title: "GREATER OR EQUAL" },
+  { name: "lessThan", title: "LESS THAN" },
+  { name: "lessOrEqual", title: "LESS OR EQUAL" },
+];
+
 const combinator = [
   { name: "and", title: "AND" },
   { name: "or", title: "OR" },
 ];
 
+const compare_operators = [
+  "equal",
+  "notEqual",
+  "greaterThan",
+  "greaterOrEqual",
+  "lessThan",
+  "lessOrEqual",
+];
+
 const map_combinator = {
   and: "&&",
   or: "||",
+  equal: "==",
+  notEqual: "!=",
+  greaterThan: ">",
+  greaterOrEqual: ">=",
+  lessThan: "<",
+  lessOrEqual: "<=",
 };
 
 const expressionType = [
@@ -108,4 +134,6 @@ export {
   map_combinator,
   dateFormat,
   join_operator,
+  compare_operators,
+  combinators,
 };
