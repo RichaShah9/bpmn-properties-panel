@@ -340,7 +340,6 @@ function ExpressionBuilder({
         });
         return `${str}`;
       });
-    console.log(expressionComponents);
     const str = expressions
       .filter((e) => e !== "")
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
