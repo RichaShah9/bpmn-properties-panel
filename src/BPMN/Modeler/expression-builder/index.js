@@ -1,6 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Paper, Dialog, DialogTitle } from "@material-ui/core";
+import {
+  Paper,
+  Dialog,
+  DialogTitle,
+  Checkbox,
+  FormControlLabel,
+} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import produce from "immer";
@@ -15,9 +21,11 @@ import {
   join_operator,
   dateFormat,
   map_combinator,
+  map_bpm_combinator,
   compare_operators,
 } from "./data";
 import { getModels } from "../../../services/api";
+import { isBPMQuery } from "./util";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -39,12 +47,14 @@ function ExpressionBuilder({
   element,
   setProperty,
   getExpression,
+  type: parentType = "expressionBuilder",
 }) {
-  const expression = "GROOVY";
-  const [combinator, setCombinator] = React.useState("and");
-  const [expressionComponents, setExpressionComponents] = React.useState([
+  const expression = isBPMQuery(parentType) ? "BPM" : "GROOVY";
+  const [combinator, setCombinator] = useState("and");
+  const [expressionComponents, setExpressionComponents] = useState([
     { Component: ExpressionComponent },
   ]);
+  const [singleResult, setSingleResult] = useState(false);
   const classes = useStyles();
 
   function onAddExpressionEditor() {
@@ -64,7 +74,8 @@ function ExpressionBuilder({
   }
 
   function getRelationalCondition(rule, initValue = "", isParent) {
-    const map_operators = map_operator[expression];
+    const map_operators =
+      map_operator[isBPMQuery(parentType) ? "BPM" : expression];
     const { fieldName, operator, allField } = rule;
     let { fieldValue, fieldValue2 } = rule;
 
@@ -202,7 +213,8 @@ function ExpressionBuilder({
   }
 
   function getCondition(rules, parentCombinator) {
-    const map_operators = map_operator[expression];
+    const map_operators =
+      map_operator[isBPMQuery(parentType) ? "BPM" : expression];
     return rules.map((rule) => {
       const { fieldName, field, operator, allField } = rule;
       const type = field && field.type.toLowerCase();
@@ -270,6 +282,31 @@ function ExpressionBuilder({
     });
   }
 
+  function getBPMCriteria(rule, modalName, isChildren, parentCombinator) {
+    const { rules, combinator, children } = rule[0];
+    const condition = getCondition(rules, parentCombinator)
+      .map((c) => (c === null ? "" : `self.${c}`))
+      .filter((f) => f !== "");
+    if (children.length > 0) {
+      const conditions = getBPMCriteria(
+        children,
+        modalName,
+        true,
+        parentCombinator
+      );
+      condition.push(conditions);
+    }
+
+    const map_type = isBPMQuery(parentType)
+      ? map_bpm_combinator
+      : map_combinator;
+    if (isChildren) {
+      return " (" + condition.join(" " + map_type[combinator] + " ") + ") ";
+    } else {
+      return condition.join(" " + map_type[combinator] + " ");
+    }
+  }
+
   function getCriteria(rule, modalName, isChildren, parentCombinator) {
     const { rules, combinator, children } = rule[0];
     const condition = getCondition(rules, parentCombinator)
@@ -284,13 +321,14 @@ function ExpressionBuilder({
       );
       condition.push(conditions);
     }
+    const map_type = isBPMQuery(parentType)
+      ? map_bpm_combinator
+      : map_combinator;
 
     if (isChildren) {
-      return (
-        " (" + condition.join(" " + map_combinator[combinator] + " ") + ") "
-      );
+      return " (" + condition.join(" " + map_type[combinator] + " ") + ") ";
     } else {
-      return condition.join(" " + map_combinator[combinator] + " ");
+      return condition.join(" " + map_type[combinator] + " ");
     }
   }
 
@@ -325,21 +363,30 @@ function ExpressionBuilder({
     return str.charAt(0).toLowerCase() + str.slice(1);
   }
 
-  function generateExpression(combinator) {
+  function generateExpression(combinator, type) {
     const expressionValues = [];
+    let model;
     const expressions =
       expressionComponents &&
       expressionComponents.map(({ value }, index) => {
         const { rules, metaModals } = value;
         const modalName = metaModals && metaModals.name;
+        model = modalName;
         let str = "";
         const listOfTree = getListOfTree(rules);
-        const criteria = getCriteria(
-          listOfTree,
-          lowerCaseFirstLetter(modalName),
-          undefined,
-          combinator
-        );
+        const criteria = isBPMQuery(type)
+          ? getBPMCriteria(
+              listOfTree,
+              lowerCaseFirstLetter(modalName),
+              undefined,
+              combinator
+            )
+          : getCriteria(
+              listOfTree,
+              lowerCaseFirstLetter(modalName),
+              undefined,
+              combinator
+            );
         if (metaModals) {
           str += criteria;
         } else {
@@ -351,14 +398,23 @@ function ExpressionBuilder({
         });
         return `${str}`;
       });
+
+    const map_type = isBPMQuery(parentType)
+      ? map_bpm_combinator
+      : map_combinator;
+
     const str = expressions
       .filter((e) => e !== "")
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
-      .join(" " + map_combinator[combinator] + " ");
+      .join(" " + map_type[combinator] + " ");
     setProperty({
-      expression: str,
+      expression: isBPMQuery(type)
+        ? `$ctx.createVariable($ctx.${
+            singleResult ? "filterOne" : "filter"
+          }('${model}','${str}')`
+        : str,
       value: JSON.stringify(expressionValues),
-      combinator: combinator,
+      combinator: isBPMQuery(type) ? singleResult : combinator,
     });
     handleClose();
   }
@@ -396,12 +452,16 @@ function ExpressionBuilder({
       }
       if (isSubscribed) {
         setExpressionComponents(expressionComponents);
-        setCombinator(combinator || "and");
+        if (isBPMQuery(parentType)) {
+          setSingleResult(combinator);
+        } else {
+          setCombinator(combinator || "and");
+        }
       }
     }
     fetchValue();
     return () => (isSubscribed = false);
-  }, [getExpression]);
+  }, [getExpression, parentType]);
 
   return (
     <Dialog
@@ -415,22 +475,37 @@ function ExpressionBuilder({
       <DialogTitle id="simple-dialog-title">Add Expression</DialogTitle>
       <div>
         <Paper variant="outlined" className={classes.paper}>
-          <div>
-            <Select
-              name="expression"
-              title="Expression"
-              options={combinators}
-              value={combinator}
-              onChange={(value) => {
-                setCombinator(value);
-              }}
+          {!isBPMQuery(parentType) && (
+            <div>
+              <Select
+                name="expression"
+                title="Expression"
+                options={combinators}
+                value={combinator}
+                onChange={(value) => {
+                  setCombinator(value);
+                }}
+              />
+              <Button
+                title="Expression"
+                Icon={AddIcon}
+                onClick={() => onAddExpressionEditor()}
+              />
+            </div>
+          )}
+          {isBPMQuery(parentType) && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={singleResult}
+                  onChange={(e) => setSingleResult(e.target.checked)}
+                  name="singleResult"
+                  color="primary"
+                />
+              }
+              label="Single Result"
             />
-            <Button
-              title="Expression"
-              Icon={AddIcon}
-              onClick={() => onAddExpressionEditor()}
-            />
-          </div>
+          )}
           {expressionComponents.map(({ Component, value }, index) => {
             return (
               <div className={classes.expressionContainer} key={index}>
@@ -440,18 +515,21 @@ function ExpressionBuilder({
                   setValue={onChange}
                   element={element}
                   parentCombinator={combinator}
+                  type={parentType}
                 />
-                <Button
-                  Icon={DeleteIcon}
-                  onClick={() => onRemoveExpressionEditor(index)}
-                />
+                {!isBPMQuery(parentType) && (
+                  <Button
+                    Icon={DeleteIcon}
+                    onClick={() => onRemoveExpressionEditor(index)}
+                  />
+                )}
               </div>
             );
           })}
         </Paper>
         <Button
           title="Generate"
-          onClick={() => generateExpression(combinator)}
+          onClick={() => generateExpression(combinator, parentType)}
         />
       </div>
     </Dialog>

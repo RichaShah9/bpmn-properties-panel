@@ -34,6 +34,11 @@ const map_combinator = {
   lessOrEqual: "<=",
 };
 
+const map_bpm_combinator = {
+  and: "and",
+  or: "or",
+};
+
 const expressionType = [
   // { name: "JS", title: "JS" },
   { name: "GROOVY", title: "GROOVY" },
@@ -42,6 +47,7 @@ const expressionType = [
 const join_operator = {
   JS: ".",
   GROOVY: "?.",
+  BPM: ".",
 };
 
 const dateFormat = {
@@ -84,6 +90,21 @@ const map_operator_groovy = {
   notIn: "in",
 };
 
+const map_operator_bpm = {
+  "=": "==",
+  "!=": "!=",
+  ">": ">",
+  ">=": ">=",
+  "<": "<",
+  "<=": "<=",
+  isNotNull: "is not null",
+  isNull: "is null",
+  isTrue: "is",
+  isFalse: "is",
+  in: "in",
+  notIn: "in",
+};
+
 const map_operator_js = {
   "=": "===",
   "!=": "!==",
@@ -104,6 +125,7 @@ const map_operator_js = {
 const map_operator = {
   JS: map_operator_js,
   GROOVY: map_operator_groovy,
+  BPM: map_operator_bpm,
 };
 
 const operators = [
@@ -136,4 +158,6 @@ export {
   join_operator,
   compare_operators,
   combinators,
+  map_operator_bpm,
+  map_bpm_combinator,
 };

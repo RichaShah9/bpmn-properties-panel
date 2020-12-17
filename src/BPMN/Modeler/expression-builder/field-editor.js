@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Selection } from "./component";
 import { getSubMetaField } from "./services/api";
 import classnames from "classnames";
+import { isBPMQuery } from "./util";
 
 const useStyles = makeStyles((theme) => ({
   MuiAutocompleteRoot: {
@@ -18,7 +19,8 @@ export default function FieldEditor({
   onChange,
   value,
   classNames,
-  expression = "GROOVY",
+  expression: parentExpression = "GROOVY",
+  type,
 }) {
   const { fieldName = "", allField = [] } = value;
   const [fields, setFields] = React.useState([]);
@@ -40,7 +42,10 @@ export default function FieldEditor({
   const join_operator = {
     JS: ".",
     GROOVY: "?.",
+    BPM: ".",
   };
+
+  const expression = isBPMQuery(type) ? "BPM" : parentExpression;
 
   const values = fieldName.split(join_operator[expression]);
   const [startValue] = values;
@@ -97,6 +102,7 @@ export default function FieldEditor({
           onChange={onChange}
           classNames={classNames}
           expression={expression}
+          type={type}
         />
       )}
     </React.Fragment>

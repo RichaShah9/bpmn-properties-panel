@@ -70,6 +70,7 @@ function ExpressionBuilder(props) {
     index,
     element,
     parentCombinator,
+    type
   } = props;
   const { metaModals: model, rules: r } = value;
   const [expression] = React.useState("GROOVY");
@@ -256,6 +257,7 @@ function ExpressionBuilder(props) {
                   isDisable={!Boolean(metaModals)}
                   expression={expression}
                   parentCombinator={parentCombinator}
+                  type={type}
                 />
                 <br />
               </React.Fragment>

@@ -15,3 +15,7 @@ export function useDebounce(cb, duration) {
     setTimer(() => cb(...args));
   };
 }
+
+export function isBPMQuery(type) {
+  return type === "bpmQuery" ? true : false;
+}

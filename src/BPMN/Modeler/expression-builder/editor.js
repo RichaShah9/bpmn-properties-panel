@@ -21,6 +21,7 @@ import {
   compare_operators,
 } from "./data";
 import { getData } from "./services/api";
+import { isBPMQuery } from "./util";
 import FieldEditor from "./field-editor";
 
 const useStyles = makeStyles((theme) => ({
@@ -268,6 +269,7 @@ function Rule(props) {
     value,
     expression,
     parentCombinator,
+    parentType,
   } = props;
   const {
     fieldType = "",
@@ -305,6 +307,7 @@ function Rule(props) {
         onChange={onChange}
         value={value}
         expression={expression}
+        type={parentType}
       />
       {!compare_operators.includes(parentCombinator) && (
         <Select
@@ -346,6 +349,7 @@ export default function Editor({
   isDisable,
   expression,
   parentCombinator,
+  type,
 }) {
   const classes = useStyles();
   const { id, rules = [] } = editor;
@@ -367,7 +371,13 @@ export default function Editor({
             }
           />
           <Button title="Rules" Icon={AddIcon} onClick={() => onAddRule(id)} />
-          <Button title="Group" Icon={AddIcon} onClick={() => onAddGroup(id)} />
+          {!isBPMQuery(type) && (
+            <Button
+              title="Group"
+              Icon={AddIcon}
+              onClick={() => onAddGroup(id)}
+            />
+          )}
           {isRemoveGroup && (
             <Button
               title="Group"
@@ -387,6 +397,7 @@ export default function Editor({
             value={rule}
             expression={expression}
             parentCombinator={parentCombinator}
+            parentType={type}
           />
         </React.Fragment>
       ))}
@@ -403,6 +414,7 @@ export default function Editor({
             onChange={(e, editor, i) => onChange(e, editor, i)}
             editor={editor}
             parentCombinator={parentCombinator}
+            type={type}
           />
         </React.Fragment>
       ))}

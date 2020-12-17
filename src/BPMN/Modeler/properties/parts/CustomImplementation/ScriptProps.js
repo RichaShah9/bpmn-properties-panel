@@ -373,12 +373,29 @@ export default function ScriptProps({ element, index, label }) {
             <ExpressionBuilder
               open={open}
               handleClose={() => handleClose()}
+              type="bpmQuery"
               getExpression={() => {
-                return null;
+                const value = getProperty("scriptValue");
+                const combinator = getBool(
+                  getProperty("scriptOperatorType") || false
+                );
+                let values;
+                if (value !== undefined) {
+                  try {
+                    values = JSON.parse(value);
+                  } catch (errror) {}
+                }
+                return { values: values, combinator };
               }}
               setProperty={(val) => {
-                const { expression } = val;
+                const { expression, value, combinator } = val;
                 element.businessObject.script = expression;
+                if (value) {
+                  setProperty("scriptValue", value);
+                }
+                if (combinator) {
+                  setProperty("scriptOperatorType", combinator);
+                }
               }}
               element={element}
             />
