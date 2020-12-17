@@ -330,6 +330,8 @@ export default function ScriptProps({ element, index, label }) {
                   element.businessObject.script = values.script;
                   element.businessObject.scriptFormat = "axelor";
                   element.businessObject.resource = undefined;
+                  setProperty("scriptOperatorType", undefined);
+                  setProperty("scriptValue", undefined);
                 }
               },
               validate: function (e, values) {
