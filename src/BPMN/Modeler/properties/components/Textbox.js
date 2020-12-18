@@ -40,6 +40,8 @@ const useStyles = makeStyles({
   },
   readOnly: {
     borderColor: "#ccc !important",
+    background: "#E3E3E3",
+    color: "#7E7E7E",
     "&:focus": {
       boxShadow: "none !important",
       outline: "none",
@@ -48,7 +50,14 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
+export default function Textbox({
+  entry,
+  element,
+  rows = 1,
+  bpmnModeler,
+  readOnly: parentReadOnly = false,
+  className,
+}) {
   const classes = useStyles();
   const {
     label,
@@ -63,7 +72,7 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
   const [value, setValue] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isError, setError] = useState(false);
-  const [readOnly, setReadOnly] = useState(false);
+  const [readOnly, setReadOnly] = useState(parentReadOnly);
   const [translations, setTranslations] = useState(null);
 
   const updateProperty = (value) => {
@@ -183,8 +192,15 @@ export default function Textbox({ entry, element, rows = 1, bpmnModeler }) {
     return () => (isSubscribed = false);
   }, [element, modelProperty, get, getProperty]);
 
+  useEffect(() => {
+    let isSubscribed = true;
+    if (!isSubscribed) return;
+    setReadOnly(parentReadOnly);
+    return () => (isSubscribed = false);
+  }, [parentReadOnly]);
+
   return (
-    <div className={classes.root}>
+    <div className={classnames(classes.root, className)}>
       <label className={classes.label}>{label}</label>
       <TextareaAutosize
         id={`camunda_${modelProperty}_${Date()}`}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -352,8 +352,15 @@ export default function Editor({
   type,
 }) {
   const classes = useStyles();
+  const [isBPM, setBPM] = useState(false);
   const { id, rules = [] } = editor;
   const childEditors = getChildEditors(editor.id);
+
+  useEffect(() => {
+    const isBPM = isBPMQuery(type);
+    setBPM(isBPM);
+  }, [type]);
+
   return (
     <Paper
       variant="outlined"
@@ -371,7 +378,7 @@ export default function Editor({
             }
           />
           <Button title="Rules" Icon={AddIcon} onClick={() => onAddRule(id)} />
-          {!isBPMQuery(type) && (
+          {!isBPM && (
             <Button
               title="Group"
               Icon={AddIcon}

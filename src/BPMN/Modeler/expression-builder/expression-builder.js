@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import produce from "immer";
 import { makeStyles } from "@material-ui/core/styles";
 import { Paper } from "@material-ui/core";
-import produce from "immer";
+
 import Editor from "./editor";
 import { Selection } from "./component";
 import { getMetaFields } from "./services/api";
 import { getModels } from "../../../services/api";
+import { isBPMQuery } from "./util";
 
 const useStyles = makeStyles((theme) => ({
   Container: {
@@ -70,15 +72,15 @@ function ExpressionBuilder(props) {
     index,
     element,
     parentCombinator,
-    type
+    type,
   } = props;
   const { metaModals: model, rules: r } = value;
-  const [expression] = React.useState("GROOVY");
-  const [metaModals, setMetaModals] = React.useState(model);
-  const [rules, setRules] = React.useState(r);
+  const [expression] = useState("GROOVY");
+  const [metaModals, setMetaModals] = useState(model);
+  const [rules, setRules] = useState(r);
   const classes = useStyles();
 
-  React.useEffect(() => {
+  useEffect(() => {
     setValue({ metaModals, rules }, index);
   }, [index, setValue, metaModals, rules]);
 
@@ -228,7 +230,9 @@ function ExpressionBuilder(props) {
               name="metaModal"
               title="Meta Modal"
               placeholder="meta modal"
-              fetchAPI={() => getModels(getProcessConfig())}
+              fetchAPI={() =>
+                getModels(isBPMQuery(type) ? null : getProcessConfig())
+              }
               optionLabelKey="name"
               onChange={(e) => {
                 setMetaModals(e);
@@ -239,7 +243,6 @@ function ExpressionBuilder(props) {
             />
           </div>
         </div>
-
         {rules
           .filter((e) => e.parentId === -1)
           .map((editor) => {

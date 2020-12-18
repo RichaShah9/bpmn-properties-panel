@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@material-ui/core";
+import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
-import classnames from "classnames";
+import { Add, Edit } from "@material-ui/icons";
 
 import Select from "../../../../../components/Select";
 import ExpressionBuilder from "../../../expression-builder";
@@ -30,18 +30,29 @@ const useStyles = makeStyles({
     marginTop: 15,
     borderTop: "1px dotted #ccc",
   },
-  button: {
-    textTransform: "none",
-    borderRadius: 0,
-    marginTop: 5,
-    padding: 0,
-    height: 23,
-    border: "1px solid #ccc",
-    color: "#727272",
-    width: "fit-content",
-    "&:hover": {
-      border: "1px solid #727272",
-    },
+  label: {
+    fontWeight: "bolder",
+    display: "inline-block",
+    verticalAlign: "middle",
+    color: "#666",
+    margin: "3px 0px",
+  },
+  expressionBuilder: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  newIcon: {
+    color: "#58B423",
+    marginLeft: 5,
+  },
+  new: {
+    cursor: "pointer",
+    marginTop: 18.6,
+    display: "flex",
+  },
+  textbox: {
+    width: "100%",
   },
 });
 
@@ -56,6 +67,7 @@ export default function ScriptProps({ element, index, label }) {
   const [defaultForm, setDefaultForm] = useState(null);
   const [formViews, setFormViews] = useState(null);
   const [isDefaultFormVisible, setDefaultFormVisible] = useState(false);
+  const [isReadOnly, setReadOnly] = useState(false);
   const classes = useStyles();
 
   const handleClickOpen = () => {
@@ -268,6 +280,7 @@ export default function ScriptProps({ element, index, label }) {
   useEffect(() => {
     const query = getProperty("query") || false;
     setQuery(getBool(query));
+    setReadOnly(getBool(query));
   }, [getProperty]);
 
   useEffect(() => {
@@ -310,13 +323,16 @@ export default function ScriptProps({ element, index, label }) {
               }
               setProperty("query", query);
               setQuery(query);
+              setReadOnly(query);
             },
           }}
         />
-        {!isQuery && (
+        <div className={classes.expressionBuilder}>
           <Textbox
             element={element}
+            className={classes.textbox}
             rows={3}
+            readOnly={isQuery && isReadOnly ? true : false}
             entry={{
               id: "script",
               label: translate("Script"),
@@ -341,7 +357,47 @@ export default function ScriptProps({ element, index, label }) {
               },
             }}
           />
-        )}
+          {isQuery && (
+            <div className={classes.new}>
+              <Add className={classes.newIcon} onClick={handleClickOpen} />
+              <Edit
+                className={classes.newIcon}
+                onClick={() => {
+                  setReadOnly((readOnly) => !readOnly);
+                }}
+              />
+              <ExpressionBuilder
+                open={open}
+                handleClose={() => handleClose()}
+                type="bpmQuery"
+                getExpression={() => {
+                  const value = getProperty("scriptValue");
+                  const combinator = getBool(
+                    getProperty("scriptOperatorType") || false
+                  );
+                  let values;
+                  if (value !== undefined) {
+                    try {
+                      values = JSON.parse(value);
+                    } catch (errror) {}
+                  }
+                  return { values: values, combinator };
+                }}
+                setProperty={(val) => {
+                  const { expression, value, combinator } = val;
+                  element.businessObject.script = expression;
+                  if (value) {
+                    setProperty("scriptValue", value);
+                  }
+                  if (combinator) {
+                    setProperty("scriptOperatorType", combinator);
+                  }
+                }}
+                element={element}
+              />
+            </div>
+          )}
+        </div>
         <TextField
           element={element}
           entry={{
@@ -359,50 +415,14 @@ export default function ScriptProps({ element, index, label }) {
                   values.scriptResultVariable || undefined;
               }
             },
+            validate: function (e, values) {
+              if (!values.scriptResultVariable) {
+                return { scriptResultVariable: "Must provide a value" };
+              }
+            },
           }}
           canRemove={true}
         />
-        {isQuery && (
-          <React.Fragment>
-            <Button
-              className={classes.button}
-              variant="outlined"
-              onClick={handleClickOpen}
-              color="primary"
-            >
-              Add query
-            </Button>
-            <ExpressionBuilder
-              open={open}
-              handleClose={() => handleClose()}
-              type="bpmQuery"
-              getExpression={() => {
-                const value = getProperty("scriptValue");
-                const combinator = getBool(
-                  getProperty("scriptOperatorType") || false
-                );
-                let values;
-                if (value !== undefined) {
-                  try {
-                    values = JSON.parse(value);
-                  } catch (errror) {}
-                }
-                return { values: values, combinator };
-              }}
-              setProperty={(val) => {
-                const { expression, value, combinator } = val;
-                element.businessObject.script = expression;
-                if (value) {
-                  setProperty("scriptValue", value);
-                }
-                if (combinator) {
-                  setProperty("scriptOperatorType", combinator);
-                }
-              }}
-              element={element}
-            />
-          </React.Fragment>
-        )}
         {!isQuery && (
           <React.Fragment>
             <label className={classes.label}>{translate("Model")}</label>

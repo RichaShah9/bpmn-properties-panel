@@ -28,7 +28,7 @@ const useStyles = makeStyles({
     justifyContent: "space-between",
   },
   newIcon: {
-    color: "#0075FF",
+    color: "#58B423",
     marginLeft: 5,
   },
   new: {

@@ -409,9 +409,9 @@ function ExpressionBuilder({
       .join(" " + map_type[combinator] + " ");
     setProperty({
       expression: isBPMQuery(type)
-        ? `$ctx.createVariable($ctx.${
+        ? `return $ctx.createVariable($ctx.${
             singleResult ? "filterOne" : "filter"
-          }('${model}','${str}')`
+          }("${model}","${str}")`
         : str,
       value: JSON.stringify(expressionValues),
       combinator: isBPMQuery(type) ? singleResult : combinator,
