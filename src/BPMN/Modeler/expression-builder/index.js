@@ -60,6 +60,18 @@ function ExpressionBuilder({
   function onAddExpressionEditor() {
     setExpressionComponents(
       produce((draft) => {
+        if (
+          [
+            "equal",
+            "notEqual",
+            "greaterThan",
+            "greaterOrEqual",
+            "lessThan",
+            "lessOrEqual",
+          ].includes(combinator) &&
+          expressionComponents.length === 2
+        )
+          return;
         draft.push({ Component: ExpressionComponent.bind({}) });
       })
     );
