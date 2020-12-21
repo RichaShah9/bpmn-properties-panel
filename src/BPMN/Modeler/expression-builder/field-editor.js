@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Selection } from "./component";
 import { getSubMetaField } from "./services/api";
@@ -21,23 +21,11 @@ export default function FieldEditor({
   classNames,
   expression: parentExpression = "GROOVY",
   type,
+  isParent = false,
 }) {
   const { fieldName = "", allField = [] } = value;
-  const [fields, setFields] = React.useState([]);
+  const [fields, setFields] = useState([]);
   const classes = useStyles();
-
-  React.useEffect(() => {
-    let isSubscribed = true;
-    (async () => {
-      const data = await getMetaFields();
-      if (isSubscribed) {
-        setFields(data);
-      }
-    })();
-    return () => {
-      isSubscribed = false;
-    };
-  }, [getMetaFields]);
 
   const join_operator = {
     JS: ".",
@@ -50,7 +38,7 @@ export default function FieldEditor({
   const values = fieldName.split(join_operator[expression]);
   const [startValue] = values;
   const hasManyValues =
-    fieldName && values.length > 1 && fields.some((x) => x.name === startValue);
+    fieldName && isParent && fields.some((x) => x.name === startValue);
   const relationModel =
     hasManyValues && (fields.find((x) => x.name === startValue) || {}).target;
 
@@ -60,9 +48,13 @@ export default function FieldEditor({
     onChange(
       {
         name: "fieldName",
-        value: `${initValue}${value && value.name}${
-          isRelationalField ? join_operator[expression] : ""
-        }`,
+        value: isParent
+          ? `${initValue}${value && value.name}`
+          : value && value.name
+          ? `${isRelationalField ? join_operator[expression] : ""}${initValue}${
+              value && value.name
+            }`
+          : "",
       },
       editor
     );
@@ -73,6 +65,20 @@ export default function FieldEditor({
     }
   }
   const transformValue = fields && fields.find((f) => f.name === startValue);
+
+  useEffect(() => {
+    let isSubscribed = true;
+    (async () => {
+      const data = await getMetaFields();
+      if (isSubscribed) {
+        setFields(data);
+      }
+    })();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [getMetaFields]);
+
   return (
     <React.Fragment>
       <Selection
@@ -103,6 +109,7 @@ export default function FieldEditor({
           classNames={classNames}
           expression={expression}
           type={type}
+          isParent={false}
         />
       )}
     </React.Fragment>

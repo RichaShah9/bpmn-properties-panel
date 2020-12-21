@@ -308,6 +308,7 @@ function Rule(props) {
         value={value}
         expression={expression}
         type={parentType}
+        isParent={true}
       />
       {!compare_operators.includes(parentCombinator) && (
         <Select
