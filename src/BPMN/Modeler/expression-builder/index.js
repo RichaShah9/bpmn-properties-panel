@@ -61,14 +61,7 @@ function ExpressionBuilder({
     setExpressionComponents(
       produce((draft) => {
         if (
-          [
-            "equal",
-            "notEqual",
-            "greaterThan",
-            "greaterOrEqual",
-            "lessThan",
-            "lessOrEqual",
-          ].includes(combinator) &&
+          compare_operators.includes(combinator) &&
           expressionComponents.length === 2
         )
           return;
