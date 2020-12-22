@@ -135,10 +135,23 @@ function ExpressionBuilder(props) {
               ...draft[editorIndex].rules[index],
               [name]: value,
               ...(name === "fieldName"
-                ? { operator: "", fieldValue: "", fieldValue2: "" }
+                ? {
+                    operator: "",
+                    fieldValue: "",
+                    fieldValue2: "",
+                    isRelationalValue: false,
+                    relatedValueFieldName: null,
+                    relatedValueModal: null,
+                  }
                 : {}),
               ...(name === "operator"
-                ? { fieldValue: "", fieldValue2: "" }
+                ? {
+                    fieldValue: "",
+                    fieldValue2: "",
+                    isRelationalValue: false,
+                    relatedValueFieldName: null,
+                    relatedValueModal: null,
+                  }
                 : {}),
             })
           );
@@ -261,6 +274,7 @@ function ExpressionBuilder(props) {
                   expression={expression}
                   parentCombinator={parentCombinator}
                   type={type}
+                  parentMetaModal={metaModals}
                 />
                 <br />
               </React.Fragment>

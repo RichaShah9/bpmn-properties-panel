@@ -22,8 +22,9 @@ export default function FieldEditor({
   expression: parentExpression = "GROOVY",
   type,
   isParent = false,
+  isBPM,
 }) {
-  const { fieldName = "", allField = [] } = value;
+  const { fieldName = "", allField = [] } = value || {};
   const [fields, setFields] = useState([]);
   const classes = useStyles();
 
@@ -35,8 +36,8 @@ export default function FieldEditor({
 
   const expression = isBPMQuery(type) ? "BPM" : parentExpression;
 
-  const values = fieldName.split(join_operator[expression]);
-  const [startValue] = values;
+  const values = fieldName && fieldName.split(join_operator[expression]);
+  const [startValue] = values || [];
   const hasManyValues =
     fieldName && isParent && fields.some((x) => x.name === startValue);
   const relationModel =
@@ -45,6 +46,28 @@ export default function FieldEditor({
   function handleChange(value) {
     const isRelationalField =
       value && fields.some((x) => x.name === value.name && x.target);
+    if (isBPM) {
+      let allField = [];
+      if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
+        allField = [...allField, value];
+      }
+      onChange(
+        {
+          name: "fieldName",
+          value,
+          fieldNameValue: isParent
+            ? `${initValue}${value && value.name}`
+            : value && value.name
+            ? `${
+                isRelationalField ? join_operator[expression] : ""
+              }${initValue}${value && value.name}`
+            : "",
+          allField: allField,
+        },
+        editor
+      );
+      return;
+    }
     onChange(
       {
         name: "fieldName",
@@ -110,6 +133,7 @@ export default function FieldEditor({
           expression={expression}
           type={type}
           isParent={false}
+          isBPM={isBPM}
         />
       )}
     </React.Fragment>

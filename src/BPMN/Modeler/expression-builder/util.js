@@ -19,3 +19,8 @@ export function useDebounce(cb, duration) {
 export function isBPMQuery(type) {
   return type === "bpmQuery" ? true : false;
 }
+
+export function lowerCaseFirstLetter(str) {
+  if(!str) return
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}

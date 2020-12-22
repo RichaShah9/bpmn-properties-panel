@@ -25,7 +25,7 @@ import {
   compare_operators,
 } from "./data";
 import { getModels } from "../../../services/api";
-import { isBPMQuery } from "./util";
+import { isBPMQuery, lowerCaseFirstLetter } from "./util";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -82,8 +82,13 @@ function ExpressionBuilder({
     const map_operators =
       map_operator[isBPMQuery(parentType) ? "BPM" : expression];
     const { fieldName, operator, allField } = rule;
-    let { fieldValue, fieldValue2 } = rule;
-
+    let {
+      fieldValue,
+      fieldValue2,
+      isRelationalValue,
+      relatedValueFieldName,
+      relatedValueModal,
+    } = rule;
     const values = fieldName
       .split(join_operator[expression])
       .filter((f) => f !== "");
@@ -115,6 +120,9 @@ function ExpressionBuilder({
           allField,
           fieldValue,
           fieldValue2,
+          isRelationalValue,
+          relatedValueFieldName,
+          relatedValueModal,
         },
         initValue,
         nestedFields.length >= 1
@@ -138,6 +146,9 @@ function ExpressionBuilder({
           allField,
           fieldValue,
           fieldValue2,
+          isRelationalValue,
+          relatedValueFieldName,
+          relatedValueModal,
         },
         initValue,
         nestedFields.length >= 1
@@ -146,9 +157,16 @@ function ExpressionBuilder({
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
 
-      if (!isNumber) {
-        fieldValue = `'${fieldValue}'`;
-        fieldValue2 = `'${fieldValue2}'`;
+      if (isBPMQuery(parentType)) {
+        if (!isRelationalValue && !isNumber) {
+          fieldValue = `'${fieldValue}'`;
+          fieldValue2 = `'${fieldValue2}'`;
+        }
+      } else {
+        if (!isNumber) {
+          fieldValue = `'${fieldValue}'`;
+          fieldValue2 = `'${fieldValue2}'`;
+        }
       }
 
       if (isDateTime) {
@@ -225,7 +243,7 @@ function ExpressionBuilder({
       const type = field && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
-      let { fieldValue, fieldValue2 } = rule;
+      let { fieldValue, fieldValue2, isRelationalValue } = rule;
       const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
 
       if (!fieldName) {
@@ -255,9 +273,16 @@ function ExpressionBuilder({
         return getRelationalCondition(rule);
       }
 
-      if (!isNumber) {
-        fieldValue = `'${fieldValue}'`;
-        fieldValue2 = `'${fieldValue2}'`;
+      if (isBPMQuery(parentType)) {
+        if (!isRelationalValue && !isNumber) {
+          fieldValue = `'${fieldValue}'`;
+          fieldValue2 = `'${fieldValue2}'`;
+        }
+      } else {
+        if (!isNumber) {
+          fieldValue = `'${fieldValue}'`;
+          fieldValue2 = `'${fieldValue2}'`;
+        }
       }
 
       if (isDateTime) {
@@ -363,10 +388,6 @@ function ExpressionBuilder({
       })
     );
   }, []);
-
-  function lowerCaseFirstLetter(str) {
-    return str.charAt(0).toLowerCase() + str.slice(1);
-  }
 
   function generateExpression(combinator, type) {
     const expressionValues = [];

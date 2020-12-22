@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Paper from "@material-ui/core/Paper";
 import classNames from "classnames";
 import moment from "moment";
+import { Checkbox, FormControlLabel } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { getModels } from "../../../services/api";
+
 import {
   Select,
   Button,
@@ -20,8 +23,8 @@ import {
   dateFormat,
   compare_operators,
 } from "./data";
-import { getData } from "./services/api";
-import { isBPMQuery } from "./util";
+import { getData, getMetaFields as getMetaFieldsAPI } from "./services/api";
+import { isBPMQuery, lowerCaseFirstLetter } from "./util";
 import FieldEditor from "./field-editor";
 
 const useStyles = makeStyles((theme) => ({
@@ -47,6 +50,17 @@ const useStyles = makeStyles((theme) => ({
     opacity: 0.5,
   },
 }));
+
+async function fetchField(metaModals) {
+  const fields =
+    metaModals &&
+    metaModals.metaFields &&
+    metaModals.metaFields.map((f) => f.name);
+  const allFields = (await getMetaFieldsAPI(fields, metaModals)) || [];
+  return allFields.filter(
+    (a) => !["button", "separator", "panel"].includes(a.type)
+  );
+}
 
 function RenderRelationalWidget(props) {
   const { operator, editor, internalProps } = props;
@@ -270,6 +284,8 @@ function Rule(props) {
     expression,
     parentCombinator,
     parentType,
+    isBPM,
+    parentMetaModal,
   } = props;
   const {
     fieldType = "",
@@ -277,9 +293,28 @@ function Rule(props) {
     operator,
     fieldValue,
     fieldValue2 = "",
+    isRelationalValue,
+    relatedValueModal,
+    relatedValueFieldName,
   } = value;
   const classes = useStyles();
   const type = fieldType.toLowerCase();
+  const [isField, setField] = useState(isRelationalValue || false);
+  const [metaModal, setMetaModal] = useState(relatedValueModal || null);
+  const [nameValue, setNameValue] = useState({
+    allField: [
+      ...((relatedValueFieldName && relatedValueFieldName.allField) || []),
+    ],
+    field: relatedValueFieldName,
+    fieldName: relatedValueFieldName && relatedValueFieldName.name,
+    fieldType: relatedValueFieldName && relatedValueFieldName.type,
+    fieldValue: "",
+    fieldValue2: "",
+    operator: "",
+    isRelationalValue: isField,
+    relatedValueFieldName: relatedValueFieldName,
+    relatedValueModal: relatedValueModal,
+  });
 
   const addOperatorByType = (keys, value) => {
     keys.map((key) => (operators_by_type[key] = value));
@@ -321,16 +356,128 @@ function Rule(props) {
           value={operator}
         />
       )}
-      {!compare_operators.includes(parentCombinator) && operator && (
-        <RenderWidget
-          type={type}
-          operator={operator}
-          onChange={onChange}
-          value={{ fieldValue, fieldValue2 }}
-          classes={classes}
-          editor={editor}
-          field={field}
+      {isBPM && (
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={isField}
+              onChange={(e) => setField(e.target.checked)}
+              name="isField"
+            />
+          }
+          label="Relational Field?"
         />
+      )}
+      {isField ? (
+        <React.Fragment>
+          <Selection
+            name="metaModal"
+            title="Meta Modal"
+            placeholder="meta modal"
+            fetchAPI={() => getModels()}
+            optionLabelKey="name"
+            onChange={(e) => {
+              setMetaModal(e);
+            }}
+            value={metaModal}
+            classes={{ root: classes.MuiAutocompleteRoot }}
+          />
+          <FieldEditor
+            getMetaFields={() => fetchField(metaModal)}
+            editor={editor}
+            isField={isField}
+            onChange={({ value, fieldNameValue, allField }, editor) => {
+              if (!value) return;
+              setNameValue({
+                allField: allField,
+                field: value,
+                fieldName: fieldNameValue,
+                fieldType: value.type,
+                fieldValue: "",
+                fieldValue2: "",
+                operator: "",
+                isRelationalValue: isField,
+                relatedValueFieldName: null,
+                relatedValueModal: null,
+              });
+              onChange(
+                {
+                  name: "isRelationalValue",
+                  value: isField,
+                },
+                editor
+              );
+              onChange(
+                {
+                  name: "relatedValueFieldName",
+                  value: value,
+                },
+                editor
+              );
+              onChange(
+                {
+                  name: "relatedValueModal",
+                  value: metaModal,
+                },
+                editor
+              );
+              onChange(
+                {
+                  name: "fieldValue",
+                  value:
+                    (parentMetaModal && parentMetaModal.id) ===
+                    (metaModal && metaModal.id)
+                      ? `self.${fieldNameValue}`
+                      : `${lowerCaseFirstLetter(
+                          metaModal && metaModal.name
+                        )}.${fieldNameValue}`,
+                },
+                editor
+              );
+            }}
+            value={nameValue}
+            expression={expression}
+            type={parentType}
+            isParent={true}
+            isBPM={true}
+          />
+        </React.Fragment>
+      ) : (
+        !compare_operators.includes(parentCombinator) &&
+        operator && (
+          <RenderWidget
+            type={type}
+            operator={operator}
+            onChange={(e, editor) => {
+              onChange(e, editor);
+              onChange(
+                {
+                  name: "isRelationalValue",
+                  value: false,
+                },
+                editor
+              );
+              onChange(
+                {
+                  name: "relatedValueFieldName",
+                  value: null,
+                },
+                editor
+              );
+              onChange(
+                {
+                  name: "relatedValueModal",
+                  value: null,
+                },
+                editor
+              );
+            }}
+            value={{ fieldValue, fieldValue2 }}
+            classes={classes}
+            editor={editor}
+            field={field}
+          />
+        )
       )}
       <Button Icon={DeleteIcon} onClick={onRemoveRule} />
     </div>
@@ -351,6 +498,7 @@ export default function Editor({
   expression,
   parentCombinator,
   type,
+  parentMetaModal,
 }) {
   const classes = useStyles();
   const [isBPM, setBPM] = useState(false);
@@ -406,6 +554,8 @@ export default function Editor({
             expression={expression}
             parentCombinator={parentCombinator}
             parentType={type}
+            isBPM={isBPM}
+            parentMetaModal={parentMetaModal}
           />
         </React.Fragment>
       ))}
