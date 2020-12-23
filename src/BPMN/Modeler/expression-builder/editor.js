@@ -363,9 +363,10 @@ function Rule(props) {
               checked={isField}
               onChange={(e) => setField(e.target.checked)}
               name="isField"
+              color="primary"
             />
           }
-          label="Relational Field?"
+          label="Value from context?"
         />
       )}
       {isField ? (
