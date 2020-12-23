@@ -21,6 +21,60 @@ export function isBPMQuery(type) {
 }
 
 export function lowerCaseFirstLetter(str) {
-  if(!str) return
+  if (!str) return;
   return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+export function getProcessConfig(element) {
+  if (!element) return null;
+  let bo = element && element.businessObject && element.businessObject.$parent;
+  if (element && element.type === "bpmn:Process") {
+    bo = element.businessObject;
+  }
+  if (
+    (element && element.businessObject && element.businessObject.$type) ===
+    "bpmn:Participant"
+  ) {
+    bo = element && element.businessObject && element.businessObject.processRef;
+  }
+  const extensionElements = bo && bo.extensionElements;
+  const noOptions = {
+    criteria: [
+      {
+        fieldName: "name",
+        operator: "IN",
+        value: [],
+      },
+    ],
+  };
+  if (!extensionElements || !extensionElements.values) return noOptions;
+  const processConfigurations = extensionElements.values.find(
+    (e) => e.$type === "camunda:ProcessConfiguration"
+  );
+  const metaModels = [],
+    metaJsonModels = [];
+  if (
+    !processConfigurations &&
+    !processConfigurations.processConfigurationParameters
+  )
+    return noOptions;
+  processConfigurations.processConfigurationParameters.forEach((config) => {
+    if (config.metaModel) {
+      metaModels.push(config.metaModel);
+    } else if (config.metaJsonModel) {
+      metaJsonModels.push(config.metaJsonModel);
+    }
+  });
+  let value = [...metaModels, ...metaJsonModels];
+  const data = {
+    criteria: [
+      {
+        fieldName: "name",
+        operator: "IN",
+        value: value,
+      },
+    ],
+    operator: "or",
+  };
+  return data;
 }
