@@ -171,8 +171,10 @@ function ExpressionBuilder({
       }
 
       if (isDateTime) {
-        fieldValue = getDateTimeValue(type, fieldValue);
-        fieldValue2 = getDateTimeValue(type, fieldValue2);
+        if (!isRelationalValue) {
+          fieldValue = getDateTimeValue(type, fieldValue);
+          fieldValue2 = getDateTimeValue(type, fieldValue2);
+        }
       }
 
       if (["in", "notIn"].includes(operator)) {
@@ -287,8 +289,10 @@ function ExpressionBuilder({
       }
 
       if (isDateTime) {
-        fieldValue = getDateTimeValue(type, fieldValue);
-        fieldValue2 = getDateTimeValue(type, fieldValue2);
+        if (!isRelationalValue) {
+          fieldValue = getDateTimeValue(type, fieldValue);
+          fieldValue2 = getDateTimeValue(type, fieldValue2);
+        }
       }
 
       if (["in", "notIn"].includes(operator)) {
