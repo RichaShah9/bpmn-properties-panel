@@ -99,11 +99,13 @@ export default function AutoComplete(props) {
 
   return (
     <Autocomplete
-      getOptionSelected={(option, value) =>
-        option[optionValueKey] === value[optionValueKey]
-      }
+      getOptionSelected={(option, value) => {
+        return option[optionValueKey] === value[optionValueKey];
+      }}
       getOptionLabel={(option) => {
-        return (option && option[optionLabelKey]) || "";
+        return (option && option.type) === "metaJsonModel"
+          ? `${option && option[optionLabelKey]} (Custom model)` || ""
+          : (option && option[optionLabelKey]) || "";
       }}
       id="select-widget"
       open={open}
