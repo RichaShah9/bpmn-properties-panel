@@ -335,6 +335,10 @@ function Rule(props) {
     (operators_by_type[type] || []).includes(item.name)
   );
 
+  const handleChange = (name, value) => {
+    onChange({ name, value }, editor);
+  };
+
   return (
     <div className={classes.rules}>
       <FieldEditor
@@ -362,7 +366,15 @@ function Rule(props) {
           control={
             <Checkbox
               checked={isField}
-              onChange={(e) => setField(e.target.checked)}
+              onChange={(e) => {
+                setField(e.target.checked);
+                handleChange("isRelationalValue", e.target.checked);
+                handleChange("fieldValue", null);
+                if (!e.target.checked) {
+                  handleChange("relatedValueFieldName", null);
+                  handleChange("relatedValueModal", null);
+                }
+              }}
               name="isField"
               color="primary"
             />
@@ -402,39 +414,17 @@ function Rule(props) {
                 relatedValueFieldName: null,
                 relatedValueModal: null,
               });
-              onChange(
-                {
-                  name: "isRelationalValue",
-                  value: isField,
-                },
-                editor
-              );
-              onChange(
-                {
-                  name: "relatedValueFieldName",
-                  value: value,
-                },
-                editor
-              );
-              onChange(
-                {
-                  name: "relatedValueModal",
-                  value: metaModal,
-                },
-                editor
-              );
-              onChange(
-                {
-                  name: "fieldValue",
-                  value:
-                    (parentMetaModal && parentMetaModal.id) ===
-                    (metaModal && metaModal.id)
-                      ? `self.${fieldNameValue}`
-                      : `${lowerCaseFirstLetter(
-                          metaModal && metaModal.name
-                        )}.${fieldNameValue}`,
-                },
-                editor
+              handleChange("isRelationalValue", isField);
+              handleChange("relatedValueFieldName", value);
+              handleChange("relatedValueModal", metaModal);
+              handleChange(
+                "fieldValue",
+                (parentMetaModal && parentMetaModal.id) ===
+                  (metaModal && metaModal.id)
+                  ? `self.${fieldNameValue}`
+                  : `${lowerCaseFirstLetter(
+                      metaModal && metaModal.name
+                    )}.${fieldNameValue}`
               );
             }}
             value={nameValue}
@@ -452,27 +442,9 @@ function Rule(props) {
             operator={operator}
             onChange={(e, editor) => {
               onChange(e, editor);
-              onChange(
-                {
-                  name: "isRelationalValue",
-                  value: false,
-                },
-                editor
-              );
-              onChange(
-                {
-                  name: "relatedValueFieldName",
-                  value: null,
-                },
-                editor
-              );
-              onChange(
-                {
-                  name: "relatedValueModal",
-                  value: null,
-                },
-                editor
-              );
+              handleChange("isRelationalValue", false);
+              handleChange("relatedValueFieldName", null);
+              handleChange("relatedValueModal", null);
             }}
             value={{ fieldValue, fieldValue2 }}
             classes={classes}
