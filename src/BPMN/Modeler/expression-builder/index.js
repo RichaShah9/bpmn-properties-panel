@@ -238,9 +238,9 @@ function ExpressionBuilder({
     }
   }
 
-  function getCondition(rules, parentCombinator) {
-    const map_operators =
-      map_operator[isBPMQuery(parentType) ? "BPM" : expression];
+  function getCondition(rules, parentCombinator, modalName) {
+    const isBPM = isBPMQuery(parentType);
+    const map_operators = map_operator[isBPM ? "BPM" : expression];
     return rules.map((rule) => {
       const { fieldName, field, operator, allField } = rule;
       const type = field && field.type.toLowerCase();
@@ -276,7 +276,7 @@ function ExpressionBuilder({
         return getRelationalCondition(rule);
       }
 
-      if (isBPMQuery(parentType)) {
+      if (isBPM) {
         if (!isRelationalValue && !isNumber) {
           fieldValue = `'${jsStringEscape(fieldValue)}'`;
           fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
@@ -295,33 +295,35 @@ function ExpressionBuilder({
         }
       }
 
+      const map_type = isBPM ? map_bpm_combinator : map_combinator;
+      const prefix = isBPM ? "self" : modalName;
       if (["in", "notIn"].includes(operator)) {
         const value = rule.fieldValue
           .map((f) => f.id)
           .filter((f) => f !== "")
           .join(",");
-        return `${fieldName}id ${map_operators[operator]} [${value}]`;
+        return `${prefix}.${fieldName}id ${map_operators[operator]} [${value}]`;
       } else if (["between", "notBetween"].includes(operator)) {
         if (operator === "notBetween") {
-          return `!(${fieldName} >= ${fieldValue} && ${fieldName} <= ${fieldValue2})`;
+          return `!(${prefix}.${fieldName} >= ${fieldValue} ${map_type["and"]} ${prefix}.${fieldName} <= ${fieldValue2})`;
         }
-        return `(${fieldName} >= ${fieldValue} && ${fieldName} <= ${fieldValue2})`;
+        return `(${prefix}.${fieldName} >= ${fieldValue} ${map_type["and"]} ${prefix}.${fieldName} <= ${fieldValue2})`;
       } else if (["isNotNull", "isNull"].includes(operator)) {
-        return `${fieldName} ${map_operators[operator]}`;
+        return `${prefix}.${fieldName} ${map_operators[operator]}`;
       } else if (["isTrue", "isFalse"].includes(operator)) {
         const value = operator === "isTrue" ? true : false;
-        return `${fieldName} ${map_operators[operator]} ${value}`;
+        return `${prefix}.${fieldName} ${map_operators[operator]} ${value}`;
       } else {
-        return `${fieldName} ${map_operators[operator]} ${fieldValue}`;
+        return `${prefix}.${fieldName} ${map_operators[operator]} ${fieldValue}`;
       }
     });
   }
 
   function getBPMCriteria(rule, modalName, isChildren, parentCombinator) {
     const { rules, combinator, children } = rule[0];
-    const condition = getCondition(rules, parentCombinator)
-      .map((c) => (c === null ? "" : `self.${c}`))
-      .filter((f) => f !== "");
+    const condition = getCondition(rules, parentCombinator).filter(
+      (f) => f !== ""
+    );
     if (children.length > 0) {
       const conditions = getBPMCriteria(
         children,
@@ -344,9 +346,9 @@ function ExpressionBuilder({
 
   function getCriteria(rule, modalName, isChildren, parentCombinator) {
     const { rules, combinator, children } = rule[0];
-    const condition = getCondition(rules, parentCombinator)
-      .map((c) => (c === null ? "" : `${modalName}.${c}`))
-      .filter((f) => f !== "");
+    const condition = getCondition(rules, parentCombinator, modalName).filter(
+      (f) => f !== ""
+    );
     if (children.length > 0) {
       const conditions = getCriteria(
         children,
@@ -443,7 +445,7 @@ function ExpressionBuilder({
         ? str
           ? `return $ctx.createVariable($ctx.${
               singleResult ? "filterOne" : "filter"
-            }("${model}","${str}")`
+            }("${model}"," ${str} ")`
           : ""
         : str,
       value: JSON.stringify(expressionValues),
