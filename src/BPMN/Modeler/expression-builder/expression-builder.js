@@ -7,7 +7,7 @@ import Editor from "./editor";
 import { Selection } from "./component";
 import { getMetaFields } from "./services/api";
 import { getModels } from "../../../services/api";
-import { isBPMQuery } from "./util";
+import { isBPMQuery, getProcessConfig } from "./util";
 
 const useStyles = makeStyles((theme) => ({
   Container: {
@@ -169,69 +169,6 @@ function ExpressionBuilder(props) {
     );
   }
 
-  function getProcessConfig(type) {
-    let bo =
-      element && element.businessObject && element.businessObject.$parent;
-    if (element && element.type === "bpmn:Process") {
-      bo = element.businessObject;
-    }
-    if (
-      (element && element.businessObject && element.businessObject.$type) ===
-      "bpmn:Participant"
-    ) {
-      bo =
-        element && element.businessObject && element.businessObject.processRef;
-    }
-    const noOptions = {
-      criteria: [
-        {
-          fieldName: "name",
-          operator: "IN",
-          value: [],
-        },
-      ],
-    };
-    const extensionElements = bo && bo.extensionElements;
-    if (!extensionElements || !extensionElements.values) return noOptions;
-    const processConfigurations = extensionElements.values.find(
-      (e) => e.$type === "camunda:ProcessConfiguration"
-    );
-    const metaModels = [],
-      metaJsonModels = [];
-    if (
-      !processConfigurations &&
-      !processConfigurations.processConfigurationParameters
-    )
-      return noOptions;
-    processConfigurations.processConfigurationParameters.forEach((config) => {
-      if (config.metaModel) {
-        metaModels.push(config.metaModel);
-      } else if (config.metaJsonModel) {
-        metaJsonModels.push(config.metaJsonModel);
-      }
-    });
-
-    let value = [];
-    if (type === "metaModel") {
-      value = [...metaModels];
-    } else if (type === "metaJsonModel") {
-      value = [...metaJsonModels];
-    } else {
-      value = [...metaModels, ...metaJsonModels];
-    }
-    const data = {
-      criteria: [
-        {
-          fieldName: "name",
-          operator: "IN",
-          value: value,
-        },
-      ],
-      operator: "or",
-    };
-    return data;
-  }
-
   return (
     <div style={{ width: "100%" }}>
       <Paper variant="outlined" className={classes.paper}>
@@ -244,7 +181,7 @@ function ExpressionBuilder(props) {
               title="Meta Modal"
               placeholder="meta modal"
               fetchAPI={() =>
-                getModels(isBPMQuery(type) ? null : getProcessConfig())
+                getModels(isBPMQuery(type) ? null : getProcessConfig(element))
               }
               optionLabelKey="name"
               onChange={(e) => {
@@ -275,6 +212,7 @@ function ExpressionBuilder(props) {
                   parentCombinator={parentCombinator}
                   type={type}
                   parentMetaModal={metaModals}
+                  element={element}
                 />
                 <br />
               </React.Fragment>

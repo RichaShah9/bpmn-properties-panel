@@ -24,7 +24,7 @@ import {
   compare_operators,
 } from "./data";
 import { getData, getMetaFields as getMetaFieldsAPI } from "./services/api";
-import { isBPMQuery, lowerCaseFirstLetter } from "./util";
+import { isBPMQuery, lowerCaseFirstLetter, getProcessConfig } from "./util";
 import FieldEditor from "./field-editor";
 
 const useStyles = makeStyles((theme) => ({
@@ -286,6 +286,7 @@ function Rule(props) {
     parentType,
     isBPM,
     parentMetaModal,
+    element,
   } = props;
   const {
     fieldType = "",
@@ -375,7 +376,7 @@ function Rule(props) {
             name="metaModal"
             title="Meta Modal"
             placeholder="meta modal"
-            fetchAPI={() => getModels()}
+            fetchAPI={() => getModels(getProcessConfig(element))}
             optionLabelKey="name"
             onChange={(e) => {
               setMetaModal(e);
@@ -500,6 +501,7 @@ export default function Editor({
   parentCombinator,
   type,
   parentMetaModal,
+  element,
 }) {
   const classes = useStyles();
   const [isBPM, setBPM] = useState(false);
@@ -557,6 +559,7 @@ export default function Editor({
             parentType={type}
             isBPM={isBPM}
             parentMetaModal={parentMetaModal}
+            element={element}
           />
         </React.Fragment>
       ))}
@@ -574,6 +577,7 @@ export default function Editor({
             editor={editor}
             parentCombinator={parentCombinator}
             type={type}
+            element={element}
           />
         </React.Fragment>
       ))}

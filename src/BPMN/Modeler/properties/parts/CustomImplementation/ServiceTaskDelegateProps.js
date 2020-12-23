@@ -199,7 +199,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
       if ((element && element.type) === "bpmn:Participant") {
         bo = getBusinessObject(bo.processRef);
       }
-      return (bo.$attrs && bo.$attrs[propertyName]) || "";
+      return (bo && bo.$attrs && bo.$attrs[propertyName]) || "";
     },
     [element]
   );
