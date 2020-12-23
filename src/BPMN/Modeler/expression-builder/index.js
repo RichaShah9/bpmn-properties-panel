@@ -89,6 +89,8 @@ function ExpressionBuilder({
       isRelationalValue,
       relatedValueFieldName,
       relatedValueModal,
+      relatedElseValueFieldName,
+      relatedElseValueModal,
     } = rule;
     const values = fieldName
       .split(join_operator[expression])
@@ -124,6 +126,8 @@ function ExpressionBuilder({
           isRelationalValue,
           relatedValueFieldName,
           relatedValueModal,
+          relatedElseValueFieldName,
+          relatedElseValueModal,
         },
         initValue,
         nestedFields.length >= 1
@@ -150,6 +154,8 @@ function ExpressionBuilder({
           isRelationalValue,
           relatedValueFieldName,
           relatedValueModal,
+          relatedElseValueFieldName,
+          relatedElseValueModal,
         },
         initValue,
         nestedFields.length >= 1

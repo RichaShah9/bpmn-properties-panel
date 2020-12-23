@@ -297,11 +297,33 @@ function Rule(props) {
     isRelationalValue,
     relatedValueModal,
     relatedValueFieldName,
+    relatedElseValueModal,
+    relatedElseValueFieldName,
   } = value;
   const classes = useStyles();
   const type = fieldType.toLowerCase();
   const [isField, setField] = useState(isRelationalValue || false);
   const [metaModal, setMetaModal] = useState(relatedValueModal || null);
+  const [elseMetaModal, setElseMetaModal] = useState(
+    relatedElseValueModal || null
+  );
+  const [elseNameValue, setElseNameValue] = useState({
+    allField: [
+      ...((relatedElseValueFieldName && relatedElseValueFieldName.allField) ||
+        []),
+    ],
+    field: relatedElseValueFieldName,
+    fieldName: relatedElseValueFieldName && relatedElseValueFieldName.name,
+    fieldType: relatedElseValueFieldName && relatedElseValueFieldName.type,
+    fieldValue: "",
+    fieldValue2: "",
+    operator: "",
+    isRelationalValue: isField,
+    relatedValueFieldName: relatedValueFieldName,
+    relatedValueModal: relatedValueModal,
+    relatedElseValueFieldName: relatedElseValueFieldName,
+    relatedElseValueModal: relatedElseValueModal,
+  });
   const [nameValue, setNameValue] = useState({
     allField: [
       ...((relatedValueFieldName && relatedValueFieldName.allField) || []),
@@ -433,6 +455,60 @@ function Rule(props) {
             isParent={true}
             isBPM={true}
           />
+          {["between", "notBetween"].includes(operator) && (
+            <React.Fragment>
+              <Selection
+                name="metaModal"
+                title="Meta Modal Else"
+                placeholder="meta modal"
+                fetchAPI={() => getModels(getProcessConfig(element))}
+                optionLabelKey="name"
+                onChange={(e) => {
+                  setElseMetaModal(e);
+                }}
+                value={elseMetaModal}
+                classes={{ root: classes.MuiAutocompleteRoot }}
+              />
+              <FieldEditor
+                getMetaFields={() => fetchField(elseMetaModal)}
+                editor={editor}
+                isField={isField}
+                onChange={({ value, fieldNameValue, allField }, editor) => {
+                  if (!value) return;
+                  setElseNameValue({
+                    allField: allField,
+                    field: value,
+                    fieldName: fieldNameValue,
+                    fieldType: value.type,
+                    fieldValue: "",
+                    fieldValue2: "",
+                    operator: "",
+                    isRelationalValue: isField,
+                    relatedValueFieldName: relatedValueFieldName,
+                    relatedValueModal: relatedElseValueModal,
+                    relatedElseValueFieldName: relatedElseValueFieldName,
+                    relatedElseValueModal: relatedElseValueModal,
+                  });
+                  handleChange("relatedElseValueFieldName", value);
+                  handleChange("relatedElseValueModal", elseMetaModal);
+                  handleChange(
+                    "fieldValue2",
+                    (parentMetaModal && parentMetaModal.id) ===
+                      (elseMetaModal && elseMetaModal.id)
+                      ? `self.${fieldNameValue}`
+                      : `${lowerCaseFirstLetter(
+                          elseMetaModal && elseMetaModal.name
+                        )}.${fieldNameValue}`
+                  );
+                }}
+                value={elseNameValue}
+                expression={expression}
+                type={parentType}
+                isParent={true}
+                isBPM={true}
+              />
+            </React.Fragment>
+          )}
         </React.Fragment>
       ) : (
         !compare_operators.includes(parentCombinator) &&
