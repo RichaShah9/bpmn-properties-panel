@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import _uniqueId from "lodash/uniqueId";
 
 import { useDebounce } from "../util";
 
@@ -107,7 +108,7 @@ export default function AutoComplete(props) {
           ? `${option && option[optionLabelKey]} (Custom model)` || ""
           : (option && option[optionLabelKey]) || "";
       }}
-      id="select-widget"
+      id={_uniqueId("select-widget")}
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
