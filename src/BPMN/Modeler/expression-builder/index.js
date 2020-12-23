@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import jsStringEscape from "js-string-escape";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Paper,
@@ -159,13 +160,13 @@ function ExpressionBuilder({
 
       if (isBPMQuery(parentType)) {
         if (!isRelationalValue && !isNumber) {
-          fieldValue = `'${fieldValue}'`;
-          fieldValue2 = `'${fieldValue2}'`;
+          fieldValue = `'${jsStringEscape(fieldValue)}'`;
+          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
         }
       } else {
         if (!isNumber) {
-          fieldValue = `'${fieldValue}'`;
-          fieldValue2 = `'${fieldValue2}'`;
+          fieldValue = `'${jsStringEscape(fieldValue)}'`;
+          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
         }
       }
 
@@ -275,13 +276,13 @@ function ExpressionBuilder({
 
       if (isBPMQuery(parentType)) {
         if (!isRelationalValue && !isNumber) {
-          fieldValue = `'${fieldValue}'`;
-          fieldValue2 = `'${fieldValue2}'`;
+          fieldValue = `'${jsStringEscape(fieldValue)}'`;
+          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
         }
       } else {
         if (!isNumber) {
-          fieldValue = `'${fieldValue}'`;
-          fieldValue2 = `'${fieldValue2}'`;
+          fieldValue = `'${jsStringEscape(fieldValue)}'`;
+          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
         }
       }
 
