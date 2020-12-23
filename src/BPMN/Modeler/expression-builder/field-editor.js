@@ -132,7 +132,7 @@ export default function FieldEditor({
           classNames={classNames}
           expression={expression}
           type={type}
-          isParent={false}
+          isParent={relationModel ? true : false}
           isBPM={isBPM}
         />
       )}
