@@ -91,7 +91,7 @@ const map_operator_groovy = {
 };
 
 const map_operator_bpm = {
-  "=": "==",
+  "=": "=",
   "!=": "!=",
   ">": ">",
   ">=": ">=",
