@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
-import { Add, Edit } from "@material-ui/icons";
+import { Edit } from "@material-ui/icons";
 
 import Select from "../../../../../components/Select";
 import ExpressionBuilder from "../../../expression-builder";
@@ -359,13 +359,7 @@ export default function ScriptProps({ element, index, label }) {
           />
           {isQuery && (
             <div className={classes.new}>
-              <Add className={classes.newIcon} onClick={handleClickOpen} />
-              <Edit
-                className={classes.newIcon}
-                onClick={() => {
-                  setReadOnly((readOnly) => !readOnly);
-                }}
-              />
+              <Edit className={classes.newIcon} onClick={handleClickOpen} />
               <ExpressionBuilder
                 open={open}
                 handleClose={() => handleClose()}
