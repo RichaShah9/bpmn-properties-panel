@@ -203,14 +203,14 @@ function ExpressionBuilder({
           }
           return initValue.replace(/it.\$\$/g, str);
         } else {
-          const remplace = (correspondance, p1) => {
+          const replace = (correspondance, p1) => {
             const field = p1.replace(/\$\$/g, fieldName);
             if ("notBetween" === operator) {
               return `{!(${field} >= ${fieldValue} && ${field} <= ${fieldValue})}`;
             }
             return `{(${field} >= ${fieldValue} && ${field} <= ${fieldValue})}`;
           };
-          const val = initValue.replace(/{(.*)}/g, remplace);
+          const val = initValue.replace(/{(.*)}/g, replace);
           return val;
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
@@ -246,6 +246,7 @@ function ExpressionBuilder({
 
   function getCondition(rules, parentCombinator, modalName) {
     const isBPM = isBPMQuery(parentType);
+    const prefix = isBPM ? "self" : modalName;
     const map_operators = map_operator[isBPM ? "BPM" : expression];
     return rules.map((rule) => {
       const { fieldName, field, operator, allField } = rule;
@@ -279,7 +280,8 @@ function ExpressionBuilder({
         "one_to_one",
       ].includes(f.type.toLowerCase());
       if (isRelational) {
-        return getRelationalCondition(rule);
+        const query = getRelationalCondition(rule);
+        return prefix && query ? `${prefix}.${query}` : query;
       }
 
       if (isBPM) {
@@ -302,7 +304,6 @@ function ExpressionBuilder({
       }
 
       const map_type = isBPM ? map_bpm_combinator : map_combinator;
-      const prefix = isBPM ? "self" : modalName;
       if (["in", "notIn"].includes(operator)) {
         const value = rule.fieldValue
           .map((f) => f.id)
@@ -446,12 +447,13 @@ function ExpressionBuilder({
       .filter((e) => e !== "")
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
       .join(" " + map_type[combinator] + " ");
+    console.log(expressionValues)
     setProperty({
       expression: isBPMQuery(type)
         ? str
           ? `return $ctx.createVariable($ctx.${
               singleResult ? "filterOne" : "filter"
-            }("${model}"," ${str} ")`
+            }("${model}"," ${str} "))`
           : ""
         : str,
       value: JSON.stringify(expressionValues),
