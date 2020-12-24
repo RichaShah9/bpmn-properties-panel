@@ -326,28 +326,159 @@ function ExpressionBuilder({
     });
   }
 
+  function getBPMCondition(rules, parentCombinator, modalName) {
+    const isBPM = isBPMQuery(parentType);
+    const prefix = isBPM ? "self" : modalName;
+    const map_operators = map_operator[isBPM ? "BPM" : expression];
+    let count = 0;
+    return rules.map((rule) => {
+      ++count;
+      const { fieldName, field, operator, allField } = rule;
+      const type = field && field.type.toLowerCase();
+      const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
+      const isDateTime = ["date", "time", "datetime"].includes(type);
+      let { fieldValue, fieldValue2, isRelationalValue } = rule;
+      const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
+
+      if (!fieldName) {
+        return null;
+      }
+
+      if (isEmpty(fValue)) {
+        if (["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)) {
+        } else {
+          if (compare_operators.includes(parentCombinator)) {
+            return fieldName;
+          }
+          return null;
+        }
+      }
+
+      //check relational field
+      const name = fieldName.split(join_operator[expression])[0];
+      const f = allField.find((f) => f.name === name);
+      const isRelational = [
+        "many_to_many",
+        "one_to_many",
+        "many_to_one",
+        "one_to_one",
+      ].includes(f.type.toLowerCase());
+      //TODO Generate query as per new format
+      if (isRelational && !isBPM) {
+        const query = getRelationalCondition(rule);
+        return prefix && query ? `${prefix}.${query}` : query;
+      }
+
+      if (isBPM) {
+        if (!isRelationalValue && !isNumber) {
+          fieldValue = `'${jsStringEscape(fieldValue)}'`;
+          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
+        }
+      } else {
+        if (!isNumber) {
+          fieldValue = `'${jsStringEscape(fieldValue)}'`;
+          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
+        }
+      }
+
+      if (isDateTime) {
+        if (!isRelationalValue) {
+          fieldValue = getDateTimeValue(type, fieldValue);
+          fieldValue2 = getDateTimeValue(type, fieldValue2);
+        }
+      }
+
+      const map_type = isBPM ? map_bpm_combinator : map_combinator;
+      if (["in", "notIn"].includes(operator)) {
+        const value = rule.fieldValue
+          .map((f) => f.id)
+          .filter((f) => f !== "")
+          .join(",");
+        return {
+          condition: `${prefix}.${fieldName}id ${map_operators[operator]} ?[${count}]`,
+          values: [value],
+        };
+      } else if (["between", "notBetween"].includes(operator)) {
+        if (isDateTime && isBPM) {
+          if (operator === "notBetween") {
+            return {
+              condition: `${prefix}.${fieldName} NOT BETWEEN ?${count} ${
+                map_type["and"]
+              } ?${++count}`,
+              values: [fieldValue, fieldValue2],
+            };
+          }
+          return {
+            condition: `${prefix}.${fieldName} BETWEEN ?${count} ${
+              map_type["and"]
+            } ?${++count}`,
+            values: [fieldValue, fieldValue2],
+          };
+        } else {
+          if (operator === "notBetween") {
+            return {
+              condition: `!(${prefix}.${fieldName} >= ?${count} ${
+                map_type["and"]
+              } ${prefix}.${fieldName} <= ?${++count})`,
+              values: [fieldValue, fieldValue2],
+            };
+          }
+          return {
+            condition: `(${prefix}.${fieldName} >= ?${count} ${
+              map_type["and"]
+            } ${prefix}.${fieldName} <= ?${++count})`,
+            values: [fieldValue, fieldValue2],
+          };
+        }
+      } else if (["isNotNull", "isNull"].includes(operator)) {
+        const value = operator === "isNotNull" ? "not null" : "null";
+        return {
+          condition: `${prefix}.${fieldName} ${map_operators[operator]} ?${count}`,
+          values: [value],
+        };
+      } else if (["isTrue", "isFalse"].includes(operator)) {
+        const value = operator === "isTrue" ? true : false;
+        return {
+          condition: `${prefix}.${fieldName} ${map_operators[operator]} ?${count}`,
+          values: [value],
+        };
+      } else {
+        return {
+          condition: `${prefix}.${fieldName} ${map_operators[operator]} ?${count}`,
+          values: [fieldValue],
+        };
+      }
+    });
+  }
+
   function getBPMCriteria(rule, modalName, isChildren, parentCombinator) {
     const { rules, combinator, children } = rule[0];
-    const condition = getCondition(rules, parentCombinator).filter(
+    const condition = getBPMCondition(rules, parentCombinator).filter(
       (f) => f !== ""
     );
     if (children.length > 0) {
-      const conditions = getBPMCriteria(
+      const { conditions, values } = getBPMCriteria(
         children,
         modalName,
         true,
         parentCombinator
       );
-      condition.push(conditions);
+      condition.push({ condition: conditions, values });
     }
-
     const map_type = isBPMQuery(parentType)
       ? map_bpm_combinator
       : map_combinator;
+    const c = condition.map((co) => co.condition);
     if (isChildren) {
-      return " (" + condition.join(" " + map_type[combinator] + " ") + ") ";
+      return {
+        condition: " (" + c.join(" " + map_type[combinator] + " ") + ") ",
+        values: condition && condition.map((co) => co.values),
+      };
     } else {
-      return condition.join(" " + map_type[combinator] + " ");
+      return {
+        condition: c.join(" " + map_type[combinator] + " "),
+        values: condition && condition.map((co) => co.values),
+      };
     }
   }
 
@@ -406,6 +537,7 @@ function ExpressionBuilder({
   function generateExpression(combinator, type) {
     const expressionValues = [];
     let model;
+    let vals = [];
     const expressions =
       expressionComponents &&
       expressionComponents.map(({ value }, index) => {
@@ -427,8 +559,9 @@ function ExpressionBuilder({
               undefined,
               combinator
             );
+        vals.push(...(criteria && (criteria.values || [])));
         if (metaModals) {
-          str += criteria;
+          str += isBPMQuery(type) ? criteria && criteria.condition : criteria;
         } else {
           return "";
         }
@@ -447,13 +580,13 @@ function ExpressionBuilder({
       .filter((e) => e !== "")
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
       .join(" " + map_type[combinator] + " ");
-    console.log(expressionValues)
-    setProperty({
+
+      setProperty({
       expression: isBPMQuery(type)
         ? str
           ? `return $ctx.createVariable($ctx.${
               singleResult ? "filterOne" : "filter"
-            }("${model}"," ${str} "))`
+            }("${model}"," ${str} ", ${vals && vals.toString()}))`
           : ""
         : str,
       value: JSON.stringify(expressionValues),
