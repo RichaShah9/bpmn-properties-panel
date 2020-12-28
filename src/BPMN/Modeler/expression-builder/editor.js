@@ -83,7 +83,7 @@ function RenderRelationalWidget(props) {
     const { field } = rest;
     const { targetName } = field;
     const fetchData = async ({ search }) => {
-      const data = getData(field.target);
+      const data = await getData(field.target);
       return data;
     };
     return (

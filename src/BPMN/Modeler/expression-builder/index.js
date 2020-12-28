@@ -453,7 +453,7 @@ function ExpressionBuilder({
     const map_type = isBPMQuery(parentType)
       ? map_bpm_combinator
       : map_combinator;
-    const c = condition.map((co) => co.condition);
+    const c = condition.map((co) => co && co.condition);
     if (isChildren) {
       return {
         condition: " (" + c.join(" " + map_type[combinator] + " ") + ") ",
@@ -462,7 +462,7 @@ function ExpressionBuilder({
     } else {
       return {
         condition: c.join(" " + map_type[combinator] + " "),
-        values: condition && condition.map((co) => co.values),
+        values: condition && condition.map((co) => co && co.values),
       };
     }
   }

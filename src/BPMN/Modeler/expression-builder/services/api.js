@@ -9,10 +9,6 @@ const metaFieldService = new AxelorService({
   model: "com.axelor.meta.db.MetaField",
 });
 
-const pivotReportService = new AxelorService({
-  model: "com.axelor.report.db.PivotReport",
-});
-
 export async function getMetaModals({ search = "" }) {
   const data = {
     ...(search ? { name: search } : {}),
@@ -54,16 +50,15 @@ export async function getSubMetaField(model) {
   const metaModel = await getMetaModal(data);
   if (!metaModel) return [];
   const fields = metaModel && metaModel.metaFields.map((f) => f.name);
-  const res = await metaFieldService.fields({ fields, model: metaModel.fullName });
+  const res = await metaFieldService.fields({
+    fields,
+    model: metaModel.fullName,
+  });
   return res && res.data && res.data.fields;
 }
 
 export async function getData(model) {
   const modelService = new AxelorService({ model });
-  const res = modelService.search({ limit: 10 });
+  const res = await modelService.search({ limit: 10 });
   return res && res.data;
-}
-
-export async function onSavePivotReport(data) {
-  return pivotReportService.save(data);
 }
