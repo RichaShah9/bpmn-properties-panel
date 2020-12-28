@@ -333,7 +333,7 @@ function ExpressionBuilder({
     let count = 0;
     return rules.map((rule) => {
       ++count;
-      const { fieldName, field, operator, allField } = rule;
+      const { fieldName, field, operator } = rule;
       const type = field && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
@@ -352,21 +352,6 @@ function ExpressionBuilder({
           }
           return null;
         }
-      }
-
-      //check relational field
-      const name = fieldName.split(join_operator[expression])[0];
-      const f = allField.find((f) => f.name === name);
-      const isRelational = [
-        "many_to_many",
-        "one_to_many",
-        "many_to_one",
-        "one_to_one",
-      ].includes(f.type.toLowerCase());
-      //TODO Generate query as per new format
-      if (isRelational && !isBPM) {
-        const query = getRelationalCondition(rule);
-        return prefix && query ? `${prefix}.${query}` : query;
       }
 
       if (isBPM) {
@@ -581,7 +566,7 @@ function ExpressionBuilder({
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
       .join(" " + map_type[combinator] + " ");
 
-      setProperty({
+    setProperty({
       expression: isBPMQuery(type)
         ? str
           ? `return $ctx.createVariable($ctx.${
