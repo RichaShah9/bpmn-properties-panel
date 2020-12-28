@@ -90,9 +90,16 @@ export default function UserTaskProps({ element, index, label }) {
                 };
               },
               set: function (e, values) {
-                setProperty("camunda:completedIf", values["completedIf"]);
-                setProperty("camunda:completedIfValue", undefined);
-                setProperty("camunda:completedIfCombinator", undefined);
+                let oldVal = getProperty("camunda:completedIf");
+                let currentVal = values["completedIf"];
+                setProperty("camunda:completedIf", currentVal);
+                if (
+                  (oldVal && oldVal.trim().toLowerCase()) !==
+                  (currentVal && currentVal.trim().toLowerCase())
+                ) {
+                  setProperty("camunda:completedIfValue", undefined);
+                  setProperty("camunda:completedIfCombinator", undefined);
+                }
               },
             }}
             canRemove={true}
