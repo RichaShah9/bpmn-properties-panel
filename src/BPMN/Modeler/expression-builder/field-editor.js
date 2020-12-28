@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Selection } from "./component";
 import { getSubMetaField } from "./services/api";
 import classnames from "classnames";
-import { isBPMQuery } from "./util";
+import { isBPMQuery, join_operator } from "./util";
 
 const useStyles = makeStyles((theme) => ({
   MuiAutocompleteRoot: {
@@ -28,12 +28,6 @@ export default function FieldEditor({
   const [fields, setFields] = useState([]);
   const classes = useStyles();
 
-  const join_operator = {
-    JS: ".",
-    GROOVY: "?.",
-    BPM: ".",
-  };
-
   const expression = isBPMQuery(type) ? "BPM" : parentExpression;
 
   const values = fieldName && fieldName.split(join_operator[expression]);
@@ -47,9 +41,9 @@ export default function FieldEditor({
     const isRelationalField =
       value && fields.some((x) => x.name === value.name && x.target);
     if (isBPM) {
-      let allField = [];
+      let allFields;
       if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
-        allField = [...allField, value];
+        allFields = [...allField, value];
       }
       onChange(
         {
@@ -62,7 +56,7 @@ export default function FieldEditor({
                 isRelationalField ? join_operator[expression] : ""
               }${initValue}${value && value.name}`
             : "",
-          allField: allField,
+          allField: allFields,
         },
         editor
       );
@@ -87,7 +81,9 @@ export default function FieldEditor({
       onChange({ name: "allField", value: [...allField, value] }, editor);
     }
   }
-  const transformValue = fields && fields.find((f) => f.name === startValue);
+  const transformValue =
+    (fields && fields.find((f) => f.name === startValue)) ||
+    (allField && allField.find((f) => f.name === startValue));
 
   useEffect(() => {
     let isSubscribed = true;

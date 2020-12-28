@@ -78,3 +78,9 @@ export function getProcessConfig(element) {
   };
   return data;
 }
+
+export const join_operator = {
+  JS: ".",
+  GROOVY: "?.",
+  BPM: ".",
+};

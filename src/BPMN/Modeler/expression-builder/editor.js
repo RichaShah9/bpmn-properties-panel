@@ -293,6 +293,7 @@ function Rule(props) {
     field,
     operator,
     fieldValue,
+    allField = [],
     fieldValue2 = "",
     isRelationalValue,
     relatedValueModal,
@@ -307,13 +308,22 @@ function Rule(props) {
   const [elseMetaModal, setElseMetaModal] = useState(
     relatedElseValueModal || null
   );
+
+  const getValue = (val) => {
+    if (val) {
+      let values = val.split(".");
+      if (values && values.length > 1) {
+        return values.slice(1).join(".");
+      } else {
+        return val;
+      }
+    }
+  };
+
   const [elseNameValue, setElseNameValue] = useState({
-    allField: [
-      ...((relatedElseValueFieldName && relatedElseValueFieldName.allField) ||
-        []),
-    ],
+    allField: allField,
     field: relatedElseValueFieldName,
-    fieldName: relatedElseValueFieldName && relatedElseValueFieldName.name,
+    fieldName: getValue(fieldValue2),
     fieldType: relatedElseValueFieldName && relatedElseValueFieldName.type,
     fieldValue: "",
     fieldValue2: "",
@@ -325,11 +335,9 @@ function Rule(props) {
     relatedElseValueModal: relatedElseValueModal,
   });
   const [nameValue, setNameValue] = useState({
-    allField: [
-      ...((relatedValueFieldName && relatedValueFieldName.allField) || []),
-    ],
+    allField: allField,
     field: relatedValueFieldName,
-    fieldName: relatedValueFieldName && relatedValueFieldName.name,
+    fieldName: getValue(fieldValue),
     fieldType: relatedValueFieldName && relatedValueFieldName.type,
     fieldValue: "",
     fieldValue2: "",
@@ -439,6 +447,7 @@ function Rule(props) {
               handleChange("isRelationalValue", isField);
               handleChange("relatedValueFieldName", value);
               handleChange("relatedValueModal", metaModal);
+              handleChange("allField", allField);
               handleChange(
                 "fieldValue",
                 (parentMetaModal && parentMetaModal.id) ===
