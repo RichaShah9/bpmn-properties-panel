@@ -310,6 +310,9 @@ function Rule(props) {
   );
 
   const getValue = (val) => {
+    if (!isBPMQuery(parentType)) {
+      return;
+    }
     if (val) {
       let values = val.split(".");
       if (values && values.length > 1) {
