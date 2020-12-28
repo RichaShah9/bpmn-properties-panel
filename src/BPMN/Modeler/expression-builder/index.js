@@ -79,7 +79,7 @@ function ExpressionBuilder({
     );
   }
 
-  function getRelationalCondition(rule, initValue = "", isParent) {
+  function getRelationalCondition(rule, initValue = "", isParent, prefix) {
     const map_operators =
       map_operator[isBPMQuery(parentType) ? "BPM" : expression];
     const { fieldName, operator, allField } = rule;
@@ -130,7 +130,8 @@ function ExpressionBuilder({
           relatedElseValueModal,
         },
         initValue,
-        nestedFields.length >= 1
+        nestedFields.length >= 1,
+        prefix
       );
     } else if (["many_to_one", "one_to_one"].includes(type)) {
       const nestedFieldName = nestedFields.join(join_operator[expression]);
@@ -158,7 +159,8 @@ function ExpressionBuilder({
           relatedElseValueModal,
         },
         initValue,
-        nestedFields.length >= 1
+        nestedFields.length >= 1,
+        prefix
       );
     } else {
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
@@ -191,38 +193,46 @@ function ExpressionBuilder({
             : fieldName + join_operator[expression] + "id";
         const str = `${name} ${map_operators[operator]} [${value}]`;
         if (operator === "notIn") {
-          return `!(${initValue.replace(/\$\$/g, `${str}`)})`;
+          return `!(${prefix}?.${initValue.replace(/\$\$/g, `${str}`)})`;
         }
         return initValue.replace(/\$\$/g, `${str}`);
       } else if (["between", "notBetween"].includes(operator)) {
         const temp = initValue.match(/it.\$\$/g);
         if (temp && temp.length) {
-          const str = `(it.${fieldName} >= ${fieldValue} && it.${fieldName} <= ${fieldValue2})`;
+          const str = `(it.${prefix}?.${fieldName} >= ${fieldValue} && it.${prefix}?.${fieldName} <= ${fieldValue2})`;
           if ("notBetween" === operator) {
             return `${initValue.replace(/it.\$\$/g, `!${str}`)}`;
           }
           return initValue.replace(/it.\$\$/g, str);
         } else {
-          const replace = (correspondance, p1) => {
-            const field = p1.replace(/\$\$/g, fieldName);
+          const replace = (p1) => {
+            const field = (p1 && p1.replace(/\$\$/g, fieldName)) || fieldName;
             if ("notBetween" === operator) {
-              return `{!(${field} >= ${fieldValue} && ${field} <= ${fieldValue})}`;
+              return `!(${prefix}?.${field} >= ${fieldValue} && ${prefix}?.${field} <= ${fieldValue2})`;
             }
-            return `{(${field} >= ${fieldValue} && ${field} <= ${fieldValue})}`;
+            return `(${prefix}?.${field} >= ${fieldValue} && ${prefix}?.${field} <= ${fieldValue2})`;
           };
-          const val = initValue.replace(/{(.*)}/g, replace);
-          return val;
+          return replace(initValue);
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
         const str = `${fieldName} ${map_operators[operator]}`;
-        return initValue.replace(/\$\$/g, isParent ? `${str}` : ` ${str}`);
+        return `${prefix}?.${initValue.replace(
+          /\$\$/g,
+          isParent ? `${str}` : ` ${str}`
+        )}`;
       } else if (["isTrue", "isFalse"].includes(operator)) {
         const value = operator === "isTrue" ? true : false;
         const str = `${fieldName} ${map_operators[operator]} ${value}`;
-        return initValue.replace(/\$\$/g, isParent ? `${str}` : ` ${str}`);
+        return `${prefix}?.${initValue.replace(
+          /\$\$/g,
+          isParent ? `${str}` : ` ${str}`
+        )}`;
       } else {
         const str = `${fieldName} ${map_operators[operator]} ${fieldValue}`;
-        return initValue.replace(/\$\$/g, isParent ? `${str}` : ` ${str}`);
+        return `${prefix}?.${initValue.replace(
+          /\$\$/g,
+          isParent ? `${str}` : ` ${str}`
+        )}`;
       }
     }
   }
@@ -280,8 +290,7 @@ function ExpressionBuilder({
         "one_to_one",
       ].includes(f.type.toLowerCase());
       if (isRelational) {
-        const query = getRelationalCondition(rule);
-        return prefix && query ? `${prefix}.${query}` : query;
+        return getRelationalCondition(rule, undefined, false, prefix);
       }
 
       if (isBPM) {
