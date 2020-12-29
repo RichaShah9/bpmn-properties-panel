@@ -357,7 +357,10 @@ function Rule(props) {
   );
   addOperatorByType(["one_to_many"], operators_by_type.text);
   addOperatorByType(["one_to_one", "many_to_many"], ["in", "notIn", "isNull"]);
-  addOperatorByType(["many_to_one"], ["in", "notIn", "isNull", "isNotNull"]);
+  addOperatorByType(
+    ["many_to_one"],
+    ["=", "!=", "in", "notIn", "isNull", "isNotNull"]
+  );
   let operatorsOptions = operators.filter((item) =>
     (operators_by_type[type] || []).includes(item.name)
   );
