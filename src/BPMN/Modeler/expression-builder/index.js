@@ -400,7 +400,7 @@ function ExpressionBuilder({
         } else {
           if (operator === "notBetween") {
             return {
-              condition: `!(${prefix}.${fieldName} >= ?${count} ${
+              condition: `NOT (${prefix}.${fieldName} >= ?${count} ${
                 map_type["and"]
               } ${prefix}.${fieldName} <= ?${++count})`,
               values: [fieldValue, fieldValue2],
@@ -565,7 +565,7 @@ function ExpressionBuilder({
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
       .join(" " + map_type[combinator] + " ");
 
-      setProperty({
+    setProperty({
       expression: isBPMQuery(type)
         ? str
           ? `return $ctx.createVariable($ctx.${
