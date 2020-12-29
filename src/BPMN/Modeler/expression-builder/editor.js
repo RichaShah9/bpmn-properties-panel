@@ -22,6 +22,7 @@ import {
   operators_by_type,
   dateFormat,
   compare_operators,
+  join_operator,
 } from "./data";
 import { getData, getMetaFields as getMetaFieldsAPI } from "./services/api";
 import { isBPMQuery, lowerCaseFirstLetter, getProcessConfig } from "./util";
@@ -452,9 +453,9 @@ function Rule(props) {
                 (parentMetaModal && parentMetaModal.id) ===
                   (metaModal && metaModal.id)
                   ? `self.${fieldNameValue}`
-                  : `${lowerCaseFirstLetter(
-                      metaModal && metaModal.name
-                    )}.${fieldNameValue}`
+                  : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
+                      join_operator[isBPMQuery(parentType) ? "BPM" : expression]
+                    }${fieldNameValue}`
               );
             }}
             value={nameValue}
