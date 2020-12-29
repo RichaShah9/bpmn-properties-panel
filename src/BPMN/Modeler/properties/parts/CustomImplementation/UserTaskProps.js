@@ -131,6 +131,7 @@ export default function UserTaskProps({ element, index, label }) {
                 }
               }}
               element={element}
+              title="Add Expression"
             />
           </div>
         </div>

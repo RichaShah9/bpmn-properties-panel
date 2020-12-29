@@ -49,6 +49,7 @@ function ExpressionBuilder({
   setProperty,
   getExpression,
   type: parentType = "expressionBuilder",
+  title = "Add Expression",
 }) {
   const expression = isBPMQuery(parentType) ? "BPM" : "GROOVY";
   const [combinator, setCombinator] = useState("and");
@@ -629,7 +630,7 @@ function ExpressionBuilder({
         paper: classes.dialogPaper,
       }}
     >
-      <DialogTitle id="simple-dialog-title">Add Expression</DialogTitle>
+      <DialogTitle id="simple-dialog-title">{title}</DialogTitle>
       <div>
         <Paper variant="outlined" className={classes.paper}>
           {!isBPMQuery(parentType) && (

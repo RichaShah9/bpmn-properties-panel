@@ -388,6 +388,7 @@ export default function ScriptProps({ element, index, label }) {
                   }
                 }}
                 element={element}
+                title="Add Query"
               />
             </div>
           )}
