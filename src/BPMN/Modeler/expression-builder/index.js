@@ -336,14 +336,15 @@ function ExpressionBuilder({
     const map_operators = map_operator[isBPM ? "BPM" : expression];
     let count = 0;
     return rules.map((rule) => {
-      ++count;
       const { fieldName, field, operator } = rule;
       const type = field && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
       let { fieldValue, fieldValue2, isRelationalValue } = rule;
       const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
-
+      if (!["isNotNull", "isNull"].includes(operator)) {
+        ++count;
+      }
       if (!fieldName) {
         return null;
       }
@@ -413,10 +414,8 @@ function ExpressionBuilder({
           };
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
-        const value = operator === "isNotNull" ? "not null" : "null";
         return {
-          condition: `${prefix}.${fieldName} ${map_operators[operator]} ?${count}`,
-          values: [value],
+          condition: `${prefix}.${fieldName} ${map_operators[operator]}`,
         };
       } else if (["isTrue", "isFalse"].includes(operator)) {
         const value = operator === "isTrue" ? true : false;
@@ -541,7 +540,10 @@ function ExpressionBuilder({
               undefined,
               combinator
             );
-        vals.push(...(criteria && (criteria.values || [])));
+        vals.push(
+          ...(criteria &&
+            ((criteria.values || []).filter((f) => Array.isArray(f)) || []))
+        );
         if (metaModals) {
           str += isBPMQuery(type) ? criteria && criteria.condition : criteria;
         } else {
@@ -563,12 +565,14 @@ function ExpressionBuilder({
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
       .join(" " + map_type[combinator] + " ");
 
-    setProperty({
+      setProperty({
       expression: isBPMQuery(type)
         ? str
           ? `return $ctx.createVariable($ctx.${
               singleResult ? "filterOne" : "filter"
-            }("${model}"," ${str} ", ${vals && vals.toString()}))`
+            }("${model}"," ${str} "${
+              vals && vals.length > 0 ? `, ${vals && vals.toString()}` : ``
+            }))`
           : ""
         : str,
       value: JSON.stringify(expressionValues),
