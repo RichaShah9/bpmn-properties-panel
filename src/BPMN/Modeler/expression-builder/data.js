@@ -59,7 +59,6 @@ const dateFormat = {
 const operators_by_type = {
   enum: ["=", "!=", "isNull", "isNotNull"],
   text: ["notLike", "isNull", "isNotNull"], //like
-  string: ["=", "!=", "isNull", "isNotNull"], //'like', 'notLike',
   integer: [
     "=",
     "!=",
@@ -97,12 +96,14 @@ const map_operator_bpm = {
   ">=": ">=",
   "<": "<",
   "<=": "<=",
-  isNotNull: "is not null",
-  isNull: "is null",
-  isTrue: "is",
-  isFalse: "is",
-  in: "in",
-  notIn: "in",
+  isNotNull: "IS NOT NULL",
+  isNull: "IS NULL",
+  isTrue: "IS",
+  isFalse: "IS",
+  in: "IN",
+  notIn: "IN",
+  like: "LIKE",
+  notLike: "NOT LIKE",
 };
 
 const map_operator_js = {

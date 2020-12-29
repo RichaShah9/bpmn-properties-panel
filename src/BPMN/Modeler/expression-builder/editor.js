@@ -361,6 +361,16 @@ function Rule(props) {
     ["many_to_one"],
     ["=", "!=", "in", "notIn", "isNull", "isNotNull"]
   );
+
+  if (isBPMQuery(parentType)) {
+    addOperatorByType(
+      ["string"],
+      ["=", "!=", "isNull", "isNotNull", "like", "notLike"]
+    );
+  } else {
+    addOperatorByType(["string"], ["=", "!=", "isNull", "isNotNull"]);
+  }
+
   let operatorsOptions = operators.filter((item) =>
     (operators_by_type[type] || []).includes(item.name)
   );
