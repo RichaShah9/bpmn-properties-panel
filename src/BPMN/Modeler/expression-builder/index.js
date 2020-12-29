@@ -353,7 +353,7 @@ function ExpressionBuilder({
         if (["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)) {
         } else {
           if (compare_operators.includes(parentCombinator)) {
-            return fieldName;
+            return `${prefix}${join_operator[expression]}${fieldName}`;
           }
           return null;
         }
@@ -373,13 +373,10 @@ function ExpressionBuilder({
 
       const map_type = isBPM ? map_bpm_combinator : map_combinator;
       if (["in", "notIn"].includes(operator)) {
-        const value = rule.fieldValue
-          .map((f) => f.id)
-          .filter((f) => f !== "")
-          .join(",");
+        const value = rule.fieldValue.map((f) => f.id).filter((f) => f !== "");
         return {
-          condition: `${prefix}.${fieldName}id ${map_operators[operator]} ?[${count}]`,
-          values: [value],
+          condition: `${prefix}.${fieldName}id ${map_operators[operator]} ?${count}`,
+          values: [[value]],
         };
       } else if (["between", "notBetween"].includes(operator)) {
         if (isDateTime && isBPM) {
@@ -453,7 +450,7 @@ function ExpressionBuilder({
     if (isChildren) {
       return {
         condition: " (" + c.join(" " + map_type[combinator] + " ") + ") ",
-        values: condition && condition.map((co) => co.values),
+        values: condition && condition.map((co) => co && co.values),
       };
     } else {
       return {
@@ -565,16 +562,25 @@ function ExpressionBuilder({
       .map((e) => (expressions.length > 1 ? `(${e})` : e))
       .join(" " + map_type[combinator] + " ");
 
+    let expr = str;
+    if (isBPMQuery(type)) {
+      let parametes = vals.reduce((a, b) => {
+        if (Array.isArray(b && b[0])) {
+          return `${a}, [${b}]`;
+        }
+        return a + "," + b;
+      });
+      expr = str
+        ? `return $ctx.createVariable($ctx.${
+            singleResult ? "filterOne" : "filter"
+          }("${model}"," ${str} "${
+            vals && vals.length > 0 ? `, ${parametes}` : ``
+          }))`
+        : "";
+    }
+
     setProperty({
-      expression: isBPMQuery(type)
-        ? str
-          ? `return $ctx.createVariable($ctx.${
-              singleResult ? "filterOne" : "filter"
-            }("${model}"," ${str} "${
-              vals && vals.length > 0 ? `, ${vals && vals.toString()}` : ``
-            }))`
-          : ""
-        : str,
+      expression: expr,
       value: JSON.stringify(expressionValues),
       combinator: isBPMQuery(type) ? singleResult : combinator,
     });

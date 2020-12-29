@@ -15,7 +15,7 @@ export async function getMetaModals({ search = "" }) {
   };
   const fields = ["name", "fullName", "metaFields"];
   return metaModalService
-    .search({ data, fields, limit: 10 })
+    .search({ data, fields })
     .then(({ data = [] }) => data);
 }
 
@@ -59,6 +59,6 @@ export async function getSubMetaField(model) {
 
 export async function getData(model) {
   const modelService = new AxelorService({ model });
-  const res = await modelService.search({ limit: 10 });
+  const res = await modelService.search({});
   return res && res.data;
 }
