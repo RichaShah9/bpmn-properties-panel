@@ -66,10 +66,16 @@ export default function FieldEditor({
       {
         name: "fieldName",
         value: isParent
-          ? `${initValue}${value && value.name}`
-          : value && value.name
+          ? `${
+              initValue && value && value.name
+                ? initValue
+                : initValue.replace(join_operator[expression], "")
+            }${value ? value.name : ""}`
+          : value
+          ? value.name
+          : ""
           ? `${isRelationalField ? join_operator[expression] : ""}${initValue}${
-              value && value.name
+              value ? value.name : ""
             }`
           : "",
       },

@@ -34,7 +34,7 @@ export default function Selection({
         {...rest}
       >
         {options &&
-          options.map(({ name, title }, index) => (
+          Array.isArray(options) && options.map(({ name, title }, index) => (
             <MenuItem value={name} key={index}>
               {title}
             </MenuItem>

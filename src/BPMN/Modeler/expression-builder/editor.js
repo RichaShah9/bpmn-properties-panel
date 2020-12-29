@@ -284,7 +284,6 @@ function Rule(props) {
     expression,
     parentCombinator,
     parentType,
-    isBPM,
     parentMetaModal,
     element,
   } = props;
@@ -310,11 +309,8 @@ function Rule(props) {
   );
 
   const getValue = (val) => {
-    if (!isBPMQuery(parentType)) {
-      return;
-    }
     if (val) {
-      let values = val.split(".");
+      let values = val.toString().split(".");
       if (values && values.length > 1) {
         return values.slice(1).join(".");
       } else {
@@ -384,36 +380,36 @@ function Rule(props) {
         isParent={true}
       />
       {!compare_operators.includes(parentCombinator) && (
-        <Select
-          name="operator"
-          title="Operator"
-          options={operatorsOptions}
-          onChange={(value) => {
-            onChange({ name: "operator", value }, editor);
-          }}
-          value={operator}
-        />
-      )}
-      {isBPM && (
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={isField}
-              onChange={(e) => {
-                setField(e.target.checked);
-                handleChange("isRelationalValue", e.target.checked);
-                handleChange("fieldValue", null);
-                if (!e.target.checked) {
-                  handleChange("relatedValueFieldName", null);
-                  handleChange("relatedValueModal", null);
-                }
-              }}
-              name="isField"
-              color="primary"
-            />
-          }
-          label="Value from context?"
-        />
+        <React.Fragment>
+          <Select
+            name="operator"
+            title="Operator"
+            options={operatorsOptions}
+            onChange={(value) => {
+              onChange({ name: "operator", value }, editor);
+            }}
+            value={operator}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isField}
+                onChange={(e) => {
+                  setField(e.target.checked);
+                  handleChange("isRelationalValue", e.target.checked);
+                  handleChange("fieldValue", null);
+                  if (!e.target.checked) {
+                    handleChange("relatedValueFieldName", null);
+                    handleChange("relatedValueModal", null);
+                  }
+                }}
+                name="isField"
+                color="primary"
+              />
+            }
+            label="Value from context?"
+          />
+        </React.Fragment>
       )}
       {isField ? (
         <React.Fragment>

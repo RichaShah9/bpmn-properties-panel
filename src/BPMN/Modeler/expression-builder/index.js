@@ -166,16 +166,9 @@ function ExpressionBuilder({
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
 
-      if (isBPMQuery(parentType)) {
-        if (!isRelationalValue && !isNumber) {
-          fieldValue = `'${jsStringEscape(fieldValue)}'`;
-          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
-        }
-      } else {
-        if (!isNumber) {
-          fieldValue = `'${jsStringEscape(fieldValue)}'`;
-          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
-        }
+      if (!isRelationalValue && !isNumber) {
+        fieldValue = `'${jsStringEscape(fieldValue)}'`;
+        fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
       }
 
       if (isDateTime) {
@@ -193,13 +186,16 @@ function ExpressionBuilder({
             : fieldName + join_operator[expression] + "id";
         const str = `${name} ${map_operators[operator]} [${value}]`;
         if (operator === "notIn") {
-          return `!(${prefix}?.${initValue.replace(/\$\$/g, `${str}`)})`;
+          return `!(${prefix}${join_operator[expression]}${initValue.replace(
+            /\$\$/g,
+            `${str}`
+          )})`;
         }
         return initValue.replace(/\$\$/g, `${str}`);
       } else if (["between", "notBetween"].includes(operator)) {
         const temp = initValue.match(/it.\$\$/g);
         if (temp && temp.length) {
-          const str = `(it.${prefix}?.${fieldName} >= ${fieldValue} && it.${prefix}?.${fieldName} <= ${fieldValue2})`;
+          const str = `(it.${prefix}${join_operator[expression]}${fieldName} >= ${fieldValue} && it.${prefix}${join_operator[expression]}${fieldName} <= ${fieldValue2})`;
           if ("notBetween" === operator) {
             return `${initValue.replace(/it.\$\$/g, `!${str}`)}`;
           }
@@ -208,28 +204,28 @@ function ExpressionBuilder({
           const replace = (p1) => {
             const field = (p1 && p1.replace(/\$\$/g, fieldName)) || fieldName;
             if ("notBetween" === operator) {
-              return `!(${prefix}?.${field} >= ${fieldValue} && ${prefix}?.${field} <= ${fieldValue2})`;
+              return `!(${prefix}${join_operator[expression]}${field} >= ${fieldValue} && ${prefix}${join_operator[expression]}${field} <= ${fieldValue2})`;
             }
-            return `(${prefix}?.${field} >= ${fieldValue} && ${prefix}?.${field} <= ${fieldValue2})`;
+            return `(${prefix}${join_operator[expression]}${field} >= ${fieldValue} && ${prefix}${join_operator[expression]}${field} <= ${fieldValue2})`;
           };
           return replace(initValue);
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
         const str = `${fieldName} ${map_operators[operator]}`;
-        return `${prefix}?.${initValue.replace(
+        return `${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
           isParent ? `${str}` : ` ${str}`
         )}`;
       } else if (["isTrue", "isFalse"].includes(operator)) {
         const value = operator === "isTrue" ? true : false;
         const str = `${fieldName} ${map_operators[operator]} ${value}`;
-        return `${prefix}?.${initValue.replace(
+        return `${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
           isParent ? `${str}` : ` ${str}`
         )}`;
       } else {
         const str = `${fieldName} ${map_operators[operator]} ${fieldValue}`;
-        return `${prefix}?.${initValue.replace(
+        return `${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
           isParent ? `${str}` : ` ${str}`
         )}`;
@@ -258,81 +254,79 @@ function ExpressionBuilder({
     const isBPM = isBPMQuery(parentType);
     const prefix = isBPM ? "self" : modalName;
     const map_operators = map_operator[isBPM ? "BPM" : expression];
-    return rules.map((rule) => {
-      const { fieldName, field, operator, allField } = rule;
-      const type = field && field.type.toLowerCase();
-      const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
-      const isDateTime = ["date", "time", "datetime"].includes(type);
-      let { fieldValue, fieldValue2, isRelationalValue } = rule;
-      const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
+    return (
+      rules &&
+      rules.map((rule) => {
+        const { fieldName, field, operator, allField } = rule;
+        const type = field && field.type && field.type.toLowerCase();
+        const isNumber = ["long", "integer", "decimal", "boolean"].includes(
+          type
+        );
+        const isDateTime = ["date", "time", "datetime"].includes(type);
+        let { fieldValue, fieldValue2, isRelationalValue } = rule;
+        const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
 
-      if (!fieldName) {
-        return null;
-      }
-
-      if (isEmpty(fValue)) {
-        if (["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)) {
-        } else {
-          if (compare_operators.includes(parentCombinator)) {
-            return fieldName;
-          }
+        if (!fieldName) {
           return null;
         }
-      }
 
-      //check relational field
-      const name = fieldName.split(join_operator[expression])[0];
-      const f = allField.find((f) => f.name === name);
-      const isRelational = [
-        "many_to_many",
-        "one_to_many",
-        "many_to_one",
-        "one_to_one",
-      ].includes(f.type.toLowerCase());
-      if (isRelational) {
-        return getRelationalCondition(rule, undefined, false, prefix);
-      }
+        if (isEmpty(fValue)) {
+          if (["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)) {
+          } else {
+            if (compare_operators.includes(parentCombinator)) {
+              return `${prefix}${join_operator[expression]}${fieldName}`;
+            }
+            return null;
+          }
+        }
 
-      if (isBPM) {
+        //check relational field
+        const name = fieldName.split(join_operator[expression])[0];
+        const f = allField && allField.find((f) => f.name === name);
+        const isRelational = [
+          "many_to_many",
+          "one_to_many",
+          "many_to_one",
+          "one_to_one",
+        ].includes(f && f.type && f.type.toLowerCase());
+        if (isRelational) {
+          return getRelationalCondition(rule, undefined, false, prefix);
+        }
+
         if (!isRelationalValue && !isNumber) {
           fieldValue = `'${jsStringEscape(fieldValue)}'`;
           fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
         }
-      } else {
-        if (!isNumber) {
-          fieldValue = `'${jsStringEscape(fieldValue)}'`;
-          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
-        }
-      }
 
-      if (isDateTime) {
-        if (!isRelationalValue) {
-          fieldValue = getDateTimeValue(type, fieldValue);
-          fieldValue2 = getDateTimeValue(type, fieldValue2);
+        if (isDateTime) {
+          if (!isRelationalValue) {
+            fieldValue = getDateTimeValue(type, fieldValue);
+            fieldValue2 = getDateTimeValue(type, fieldValue2);
+          }
         }
-      }
 
-      const map_type = isBPM ? map_bpm_combinator : map_combinator;
-      if (["in", "notIn"].includes(operator)) {
-        const value = rule.fieldValue
-          .map((f) => f.id)
-          .filter((f) => f !== "")
-          .join(",");
-        return `${prefix}.${fieldName}id ${map_operators[operator]} [${value}]`;
-      } else if (["between", "notBetween"].includes(operator)) {
-        if (operator === "notBetween") {
-          return `!(${prefix}.${fieldName} >= ${fieldValue} ${map_type["and"]} ${prefix}.${fieldName} <= ${fieldValue2})`;
+        const map_type = isBPM ? map_bpm_combinator : map_combinator;
+        if (["in", "notIn"].includes(operator)) {
+          const value = rule.fieldValue
+            .map((f) => f.id)
+            .filter((f) => f !== "")
+            .join(",");
+          return `${prefix}${join_operator[expression]}${fieldName}id ${map_operators[operator]} [${value}]`;
+        } else if (["between", "notBetween"].includes(operator)) {
+          if (operator === "notBetween") {
+            return `!(${prefix}${join_operator[expression]}${fieldName} >= ${fieldValue} ${map_type["and"]} ${prefix}${join_operator[expression]}${fieldName} <= ${fieldValue2})`;
+          }
+          return `(${prefix}${join_operator[expression]}${fieldName} >= ${fieldValue} ${map_type["and"]} ${prefix}${join_operator[expression]}${fieldName} <= ${fieldValue2})`;
+        } else if (["isNotNull", "isNull"].includes(operator)) {
+          return `${prefix}${join_operator[expression]}${fieldName} ${map_operators[operator]}`;
+        } else if (["isTrue", "isFalse"].includes(operator)) {
+          const value = operator === "isTrue" ? true : false;
+          return `${prefix}${join_operator[expression]}${fieldName} ${map_operators[operator]} ${value}`;
+        } else {
+          return `${prefix}${join_operator[expression]}${fieldName} ${map_operators[operator]} ${fieldValue}`;
         }
-        return `(${prefix}.${fieldName} >= ${fieldValue} ${map_type["and"]} ${prefix}.${fieldName} <= ${fieldValue2})`;
-      } else if (["isNotNull", "isNull"].includes(operator)) {
-        return `${prefix}.${fieldName} ${map_operators[operator]}`;
-      } else if (["isTrue", "isFalse"].includes(operator)) {
-        const value = operator === "isTrue" ? true : false;
-        return `${prefix}.${fieldName} ${map_operators[operator]} ${value}`;
-      } else {
-        return `${prefix}.${fieldName} ${map_operators[operator]} ${fieldValue}`;
-      }
-    });
+      })
+    );
   }
 
   function getBPMCondition(rules, parentCombinator, modalName) {
@@ -363,16 +357,9 @@ function ExpressionBuilder({
         }
       }
 
-      if (isBPM) {
-        if (!isRelationalValue && !isNumber) {
-          fieldValue = `'${jsStringEscape(fieldValue)}'`;
-          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
-        }
-      } else {
-        if (!isNumber) {
-          fieldValue = `'${jsStringEscape(fieldValue)}'`;
-          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
-        }
+      if (!isRelationalValue && !isNumber) {
+        fieldValue = `'${jsStringEscape(fieldValue)}'`;
+        fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
       }
 
       if (isDateTime) {
