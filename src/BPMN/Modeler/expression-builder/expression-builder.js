@@ -137,8 +137,8 @@ function ExpressionBuilder(props) {
               ...(name === "fieldName"
                 ? {
                     operator: "",
-                    fieldValue: "",
-                    fieldValue2: "",
+                    fieldValue: null,
+                    fieldValue2: null,
                     isRelationalValue: false,
                     relatedValueFieldName: null,
                     relatedValueModal: null,
@@ -146,8 +146,8 @@ function ExpressionBuilder(props) {
                 : {}),
               ...(name === "operator"
                 ? {
-                    fieldValue: "",
-                    fieldValue2: "",
+                    fieldValue: null,
+                    fieldValue2: null,
                     isRelationalValue: false,
                     relatedValueFieldName: null,
                     relatedValueModal: null,

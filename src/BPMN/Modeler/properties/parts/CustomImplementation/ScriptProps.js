@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
 import classnames from "classnames";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  Button,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { Edit } from "@material-ui/icons";
@@ -54,6 +62,13 @@ const useStyles = makeStyles({
   textbox: {
     width: "100%",
   },
+  dialog: {
+    minWidth: 300,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
 });
 
 export default function ScriptProps({ element, index, label }) {
@@ -68,7 +83,12 @@ export default function ScriptProps({ element, index, label }) {
   const [formViews, setFormViews] = useState(null);
   const [isDefaultFormVisible, setDefaultFormVisible] = useState(false);
   const [isReadOnly, setReadOnly] = useState(false);
+  const [openAlert, setAlert] = useState(false);
   const classes = useStyles();
+
+  const openAlertDialog = () => {
+    setAlert(true);
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -363,6 +383,7 @@ export default function ScriptProps({ element, index, label }) {
               <ExpressionBuilder
                 open={open}
                 handleClose={() => handleClose()}
+                openAlertDialog={openAlertDialog}
                 type="bpmQuery"
                 getExpression={() => {
                   const value = getProperty("scriptValue");
@@ -380,6 +401,15 @@ export default function ScriptProps({ element, index, label }) {
                 setProperty={(val) => {
                   const { expression, value, combinator } = val;
                   element.businessObject.script = expression;
+                  if (
+                    expression === "" ||
+                    expression === null ||
+                    expression === undefined
+                  ) {
+                    setProperty("scriptValue", undefined);
+                    setProperty("scriptOperatorType", undefined);
+                    return;
+                  }
                   if (value) {
                     setProperty("scriptValue", value);
                   }
@@ -390,6 +420,33 @@ export default function ScriptProps({ element, index, label }) {
                 element={element}
                 title="Add Query"
               />
+              <Dialog
+                open={openAlert}
+                onClose={() => setAlert(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                classes={{
+                  paper: classes.dialog,
+                }}
+              >
+                <DialogTitle id="alert-dialog-title">
+                  <label className={classes.title}>Error</label>
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    Add all values
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    onClick={() => setAlert(false)}
+                    color="primary"
+                    autoFocus
+                  >
+                    Ok
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </div>
           )}
         </div>

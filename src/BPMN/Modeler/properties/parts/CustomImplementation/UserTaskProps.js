@@ -2,6 +2,14 @@ import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { Edit } from "@material-ui/icons";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  Button,
+} from "@material-ui/core";
 
 import TextField from "../../components/TextField";
 import ExpressionBuilder from "../../../expression-builder";
@@ -39,7 +47,12 @@ const useStyles = makeStyles({
 export default function UserTaskProps({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
+  const [openAlert, setAlert] = useState(false);
   const classes = useStyles();
+
+  const openAlertDialog = () => {
+    setAlert(true);
+  };
 
   const getProperty = (name) => {
     const bo = getBusinessObject(element);
@@ -109,6 +122,7 @@ export default function UserTaskProps({ element, index, label }) {
             <ExpressionBuilder
               open={open}
               handleClose={() => handleClose()}
+              openAlertDialog={openAlertDialog}
               getExpression={() => {
                 const value = getProperty("camunda:completedIfValue");
                 const combinator = getProperty("camunda:completedIfCombinator");
@@ -134,6 +148,27 @@ export default function UserTaskProps({ element, index, label }) {
               title="Add Expression"
             />
           </div>
+          <Dialog
+            open={openAlert}
+            onClose={() => setAlert(false)}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+            classes={{
+              paper: classes.dialog,
+            }}
+          >
+            <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Add all values
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setAlert(false)} color="primary" autoFocus>
+                Ok
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
         <TextField
           element={element}

@@ -4,7 +4,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import Paper from "@material-ui/core/Paper";
 import classNames from "classnames";
 import moment from "moment";
-import { Checkbox, FormControlLabel } from "@material-ui/core";
+import { Radio, RadioGroup, FormControlLabel } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { getModels } from "../../../services/api";
 
@@ -49,6 +49,14 @@ const useStyles = makeStyles((theme) => ({
   disabled: {
     pointerEvents: "none",
     opacity: 0.5,
+  },
+  valueFrom: {
+    fontSize: 9,
+    color: "rgba(0, 0, 0, 0.54)",
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  radio: {
+    padding: "1px 9px",
   },
 }));
 
@@ -328,7 +336,7 @@ function Rule(props) {
   } = value;
   const classes = useStyles();
   const type = fieldType.toLowerCase();
-  const [isField, setField] = useState(isRelationalValue || false);
+  const [isField, setField] = useState(isRelationalValue || null);
   const [metaModal, setMetaModal] = useState(relatedValueModal || null);
   const [elseMetaModal, setElseMetaModal] = useState(
     relatedElseValueModal || null
@@ -354,9 +362,9 @@ function Rule(props) {
       getValue(fieldValue2) ||
       (relatedElseValueFieldName && relatedElseValueFieldName.name),
     fieldType: relatedElseValueFieldName && relatedElseValueFieldName.type,
-    fieldValue: "",
-    fieldValue2: "",
-    operator: "",
+    fieldValue: null,
+    fieldValue2: null,
+    operator: null,
     isRelationalValue: isField,
     relatedValueFieldName: relatedValueFieldName,
     relatedValueModal: relatedValueModal,
@@ -370,9 +378,9 @@ function Rule(props) {
       getValue(fieldValue) ||
       (relatedValueFieldName && relatedValueFieldName.fieldName),
     fieldType: relatedValueFieldName && relatedValueFieldName.type,
-    fieldValue: "",
-    fieldValue2: "",
-    operator: "",
+    fieldValue: null,
+    fieldValue2: null,
+    operator: null,
     isRelationalValue: isField,
     relatedValueFieldName: relatedValueFieldName,
     relatedValueModal: relatedValueModal,
@@ -445,51 +453,81 @@ function Rule(props) {
             }}
             value={operator}
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={isField}
-                onChange={(e) => {
-                  setField(e.target.checked);
-                  if (
-                    e.target.checked === true &&
-                    (operator === "in" || operator === "notIn")
-                  ) {
-                    onChange({ name: "operator", value: undefined }, editor);
-                  }
-                  handleChange("isRelationalValue", e.target.checked);
+          {!["isNull", "isNotNull"].includes(operator) && (
+            <RadioGroup
+              aria-label="radioType"
+              name="radioType"
+              value={isField}
+              onChange={(e) => {
+                setField(e.target.value);
+                if (
+                  e.target.value &&
+                  (operator === "in" || operator === "notIn")
+                ) {
+                  onChange({ name: "operator", value: undefined }, editor);
+                }
+                if (e.target.value) {
+                  handleChange("isRelationalValue", e.target.value);
                   handleChange("fieldValue", null);
-                  if (!e.target.checked) {
-                    handleChange("relatedValueFieldName", null);
-                    handleChange("relatedValueModal", null);
+                  if (e.target.value === "self") {
+                    setMetaModal(parentMetaModal);
+                  } else {
+                    setMetaModal(null);
                   }
-                }}
-                name="isField"
-                color="primary"
+                } else {
+                  handleChange("relatedValueFieldName", null);
+                  handleChange("relatedValueModal", null);
+                }
+              }}
+            >
+              <label className={classes.valueFrom}>Value from</label>
+              <FormControlLabel
+                value="self"
+                control={
+                  <Radio
+                    className={classes.radio}
+                    color="primary"
+                    size="small"
+                  />
+                }
+                label="Self"
               />
-            }
-            label="Value from context?"
-          />
+              <FormControlLabel
+                value="context"
+                control={
+                  <Radio
+                    className={classes.radio}
+                    color="primary"
+                    size="small"
+                  />
+                }
+                label="Context"
+              />
+            </RadioGroup>
+          )}
         </React.Fragment>
       )}
       {isField ? (
         <React.Fragment>
-          <Selection
-            name="metaModal"
-            title="Meta Modal"
-            placeholder="meta modal"
-            fetchAPI={() => getModels(getProcessConfig(element))}
-            optionLabelKey="name"
-            onChange={(e) => {
-              setMetaModal(e);
-            }}
-            value={metaModal}
-            classes={{ root: classes.MuiAutocompleteRoot }}
-          />
+          {isField === "context" && (
+            <Selection
+              name="metaModal"
+              title="Meta Modal"
+              placeholder="meta modal"
+              fetchAPI={() => getModels(getProcessConfig(element))}
+              optionLabelKey="name"
+              onChange={(e) => {
+                setMetaModal(e);
+              }}
+              value={metaModal}
+              classes={{ root: classes.MuiAutocompleteRoot }}
+            />
+          )}
           <FieldEditor
-            getMetaFields={() => fetchField(metaModal)}
+            getMetaFields={() =>
+              isField === "context" ? fetchField(metaModal) : getMetaFields()
+            }
             editor={editor}
-            isField={isField}
             onChange={({ value, fieldNameValue, allField }, editor) => {
               if (!value) return;
               setNameValue({
@@ -497,9 +535,9 @@ function Rule(props) {
                 field: value,
                 fieldName: fieldNameValue,
                 fieldType: value.type,
-                fieldValue: "",
-                fieldValue2: "",
-                operator: "",
+                fieldValue: null,
+                fieldValue2: null,
+                operator: null,
                 isRelationalValue: isField,
                 relatedValueFieldName: null,
                 relatedValueModal: null,
@@ -541,7 +579,6 @@ function Rule(props) {
               <FieldEditor
                 getMetaFields={() => fetchField(elseMetaModal)}
                 editor={editor}
-                isField={isField}
                 onChange={({ value, fieldNameValue, allField }, editor) => {
                   if (!value) return;
                   setElseNameValue({
@@ -549,9 +586,9 @@ function Rule(props) {
                     field: value,
                     fieldName: fieldNameValue,
                     fieldType: value.type,
-                    fieldValue: "",
-                    fieldValue2: "",
-                    operator: "",
+                    fieldValue: null,
+                    fieldValue2: null,
+                    operator: null,
                     isRelationalValue: isField,
                     relatedValueFieldName: relatedValueFieldName,
                     relatedValueModal: relatedElseValueModal,

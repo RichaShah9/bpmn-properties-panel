@@ -35,7 +35,7 @@ export default function FieldEditor({
     fieldName.split(join_operator[expression]);
   const [startValue] = values || [];
   const hasManyValues =
-    fieldName && isParent && fields.some((x) => x.name === startValue);
+    fieldName && isParent && fields && fields.some((x) => x.name === startValue);
   const relationModel =
     hasManyValues && (fields.find((x) => x.name === startValue) || {}).target;
 

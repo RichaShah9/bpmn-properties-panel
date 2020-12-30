@@ -50,6 +50,7 @@ function ExpressionBuilder({
   getExpression,
   type: parentType = "expressionBuilder",
   title = "Add Expression",
+  openAlertDialog,
 }) {
   const expression = isBPMQuery(parentType) ? "BPM" : "GROOVY";
   const [combinator, setCombinator] = useState("and");
@@ -280,7 +281,10 @@ function ExpressionBuilder({
         const isDateTime = ["date", "time", "datetime"].includes(type);
         let { fieldValue, fieldValue2, isRelationalValue } = rule;
         const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
-
+        if (!fieldValue) {
+          openAlertDialog();
+          return null;
+        }
         if (!fieldName) {
           return null;
         }
@@ -354,9 +358,22 @@ function ExpressionBuilder({
       const type = field && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
-      let { fieldValue, fieldValue2, isRelationalValue } = rule;
+      let {
+        fieldValue,
+        fieldValue2,
+        isRelationalValue,
+        relatedValueModal = {},
+      } = rule || {};
+      const relatedValueModalName = lowerCaseFirstLetter(
+        relatedValueModal && relatedValueModal.name
+      );
       const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
-      if (!["isNotNull", "isNull"].includes(operator)) {
+      if (!fieldValue) {
+        openAlertDialog();
+        return null;
+      }
+      const isRelatedModalSame = relatedValueModalName === modalName;
+      if (!["isNotNull", "isNull"].includes(operator) && !isRelatedModalSame) {
         ++count;
       }
       if (!fieldName) {
@@ -391,39 +408,49 @@ function ExpressionBuilder({
           .map((f) => f.id || f.name)
           .filter((f) => f !== "");
         return {
-          condition: `${prefix}.${fieldName}id ${map_operators[operator]} ?${count}`,
-          values: [[value]],
+          condition: `${prefix}.${fieldName}id ${map_operators[operator]} ${
+            isRelatedModalSame ? fieldValue : `?${count}`
+          }`,
+          values: isRelatedModalSame ? undefined : [[value]],
         };
       } else if (["between", "notBetween"].includes(operator)) {
         if (isDateTime && isBPM) {
           if (operator === "notBetween") {
             return {
-              condition: `${prefix}.${fieldName} NOT BETWEEN ?${count} ${
-                map_type["and"]
-              } ?${++count}`,
+              condition: `${prefix}.${fieldName} NOT BETWEEN ${
+                isRelatedModalSame ? fieldValue : `?${count}`
+              } ${map_type["and"]} ${
+                isRelatedModalSame ? fieldValue2 : `?${++count}`
+              }`,
               values: [fieldValue, fieldValue2],
             };
           }
           return {
-            condition: `${prefix}.${fieldName} BETWEEN ?${count} ${
-              map_type["and"]
-            } ?${++count}`,
-            values: [fieldValue, fieldValue2],
+            condition: `${prefix}.${fieldName} BETWEEN ${
+              isRelatedModalSame ? fieldValue : `?${count}`
+            } ${map_type["and"]} ${
+              isRelatedModalSame ? fieldValue2 : `?${++count}`
+            }`,
+            values: isRelatedModalSame ? undefined : [fieldValue, fieldValue2],
           };
         } else {
           if (operator === "notBetween") {
             return {
-              condition: `NOT (${prefix}.${fieldName} >= ?${count} ${
-                map_type["and"]
-              } ${prefix}.${fieldName} <= ?${++count})`,
+              condition: `NOT (${prefix}.${fieldName} >= ${
+                isRelatedModalSame ? fieldValue : `?${count}`
+              } ${map_type["and"]} ${prefix}.${fieldName} <= ${
+                isRelatedModalSame ? fieldValue2 : `?${++count}`
+              })`,
               values: [fieldValue, fieldValue2],
             };
           }
           return {
-            condition: `(${prefix}.${fieldName} >= ?${count} ${
-              map_type["and"]
-            } ${prefix}.${fieldName} <= ?${++count})`,
-            values: [fieldValue, fieldValue2],
+            condition: `(${prefix}.${fieldName} >= ${
+              isRelatedModalSame ? fieldValue : `?${count}`
+            } ${map_type["and"]} ${prefix}.${fieldName} <= ${
+              isRelatedModalSame ? fieldValue2 : `?${++count}`
+            })`,
+            values: isRelatedModalSame ? undefined : [fieldValue, fieldValue2],
           };
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
@@ -433,13 +460,17 @@ function ExpressionBuilder({
       } else if (["isTrue", "isFalse"].includes(operator)) {
         const value = operator === "isTrue" ? true : false;
         return {
-          condition: `${prefix}.${fieldName} ${map_operators[operator]} ?${count}`,
-          values: [value],
+          condition: `${prefix}.${fieldName} ${map_operators[operator]} ${
+            isRelatedModalSame ? fieldValue : `?${count}`
+          }`,
+          values: isRelatedModalSame ? undefined : [value],
         };
       } else {
         return {
-          condition: `${prefix}.${fieldName} ${map_operators[operator]} ?${count}`,
-          values: [fieldValue],
+          condition: `${prefix}.${fieldName} ${map_operators[operator]} ${
+            isRelatedModalSame ? fieldValue : `?${count}`
+          }`,
+          values: isRelatedModalSame ? undefined : [fieldValue],
         };
       }
     });
@@ -447,9 +478,11 @@ function ExpressionBuilder({
 
   function getBPMCriteria(rule, modalName, isChildren, parentCombinator) {
     const { rules, combinator, children } = rule[0];
-    const condition = getBPMCondition(rules, parentCombinator).filter(
-      (f) => f !== ""
-    );
+    const condition = getBPMCondition(
+      rules,
+      parentCombinator,
+      modalName
+    ).filter((f) => f !== "");
     if (children.length > 0) {
       const { conditions, values } = getBPMCriteria(
         children,
@@ -532,11 +565,18 @@ function ExpressionBuilder({
     const expressionValues = [];
     let model;
     let vals = [];
+    let isValid = true;
     const expressions =
       expressionComponents &&
       expressionComponents.map(({ value }, index) => {
         const { rules, metaModals } = value;
         const modalName = metaModals && metaModals.name;
+        const rule = rules.find(
+          (r) => r.fieldValue === undefined || r.fieldValue === null
+        );
+        if (rule) {
+          isValid = false;
+        }
         model = modalName;
         let str = "";
         const listOfTree = getListOfTree(rules);
@@ -596,9 +636,12 @@ function ExpressionBuilder({
           }("${model}"," ${str} "${
             vals && vals.length > 0 ? `${parametes}` : ``
           }))`
-        : "";
+        : undefined;
     }
 
+    if (!isValid) {
+      return;
+    }
     setProperty({
       expression: expr,
       value: JSON.stringify(expressionValues),
