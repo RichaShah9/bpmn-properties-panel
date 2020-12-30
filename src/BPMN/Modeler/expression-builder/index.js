@@ -235,19 +235,33 @@ function ExpressionBuilder({
   }
 
   function getDateTimeValue(type, fieldValue) {
-    if (type === "date") {
-      return `LocalDate.parse('${moment(fieldValue, dateFormat["date"]).format(
-        "YYYY-MM-DD"
-      )}')`;
-    } else if (type === "datetime") {
-      return `LocalDateTime.parse('${moment(
-        fieldValue,
-        dateFormat["datetime"]
-      ).toISOString()} ')`;
+    if (isBPMQuery(parentType)) {
+      if (type === "date") {
+        return `LocalDate.parse('${moment(
+          fieldValue,
+          dateFormat["date"]
+        ).format("YYYY-MM-DD")}')`;
+      } else if (type === "datetime") {
+        return `LocalDateTime.parse('${moment(
+          fieldValue,
+          dateFormat["datetime"]
+        ).toISOString()} ')`;
+      } else {
+        return `LocalTime.parse('${moment(
+          fieldValue,
+          dateFormat["time"]
+        ).format("hh:mm:ss")}')`;
+      }
     } else {
-      return `LocalTime.parse('${moment(fieldValue, dateFormat["time"]).format(
-        "hh:mm:ss"
-      )}')`;
+      if (type === "date") {
+        return `'${moment(fieldValue, dateFormat["datetime"]).format(
+          "YYYY-MM-DD"
+        )}'`;
+      } else if (type === "datetime") {
+        return `'${moment(fieldValue, dateFormat["datetime"]).toISOString()}'`;
+      } else {
+        return `'${moment(fieldValue, dateFormat["time"]).format("hh:mm:ss")}'`;
+      }
     }
   }
 
