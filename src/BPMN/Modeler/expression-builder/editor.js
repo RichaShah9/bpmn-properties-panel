@@ -109,7 +109,15 @@ function RenderRelationalWidget(props) {
 
 function RenderSimpleWidget(props) {
   const { Component, operator, editor, internalProps } = props;
-  const { onChange, value, value2, classes, style, ...rest } = internalProps;
+  const {
+    onChange,
+    value,
+    value2,
+    classes,
+    style,
+    targetName,
+    ...rest
+  } = internalProps;
   if (["=", "!=", ">", ">=", "<", "<=", "like", "notLike"].includes(operator)) {
     return (
       <Component
@@ -143,6 +151,23 @@ function RenderSimpleWidget(props) {
           {...rest}
         />
       </React.Fragment>
+    );
+  } else if (["in", "notIn"].includes(operator)) {
+    return (
+      <Selection
+        name="fieldValue"
+        title="Value"
+        placeholder="Value"
+        isMulti={true}
+        optionLabelKey={targetName}
+        onChange={(val) => {
+          onChange({ name: "fieldValue", value: val }, editor);
+        }}
+        value={value || []}
+        classes={{ root: classes.MuiAutocompleteRoot }}
+        optionValueKey="name"
+        {...rest}
+      />
     );
   } else {
     return null;
@@ -310,20 +335,24 @@ function Rule(props) {
   );
 
   const getValue = (val) => {
-    if (val) {
+    if (val && typeof val === "string") {
       let values = val.toString().split(".");
       if (values && values.length > 1) {
         return values.slice(1).join(".");
       } else {
         return val;
       }
+    } else {
+      return;
     }
   };
 
   const [elseNameValue, setElseNameValue] = useState({
     allField: allField,
     field: relatedElseValueFieldName,
-    fieldName: getValue(fieldValue2),
+    fieldName:
+      getValue(fieldValue2) ||
+      (relatedElseValueFieldName && relatedElseValueFieldName.name),
     fieldType: relatedElseValueFieldName && relatedElseValueFieldName.type,
     fieldValue: "",
     fieldValue2: "",
@@ -337,7 +366,9 @@ function Rule(props) {
   const [nameValue, setNameValue] = useState({
     allField: allField,
     field: relatedValueFieldName,
-    fieldName: getValue(fieldValue),
+    fieldName:
+      getValue(fieldValue) ||
+      (relatedValueFieldName && relatedValueFieldName.fieldName),
     fieldType: relatedValueFieldName && relatedValueFieldName.type,
     fieldValue: "",
     fieldValue2: "",
@@ -395,7 +426,20 @@ function Rule(props) {
           <Select
             name="operator"
             title="Operator"
-            options={operatorsOptions}
+            options={
+              field && field.selectionList && isBPMQuery(parentType)
+                ? operators.filter((o) =>
+                    (isField
+                      ? ["=", "!=", "isNull", "isNotNull"]
+                      : ["=", "!=", "isNull", "isNotNull", "in", "notIn"]
+                    ).includes(o.name)
+                  )
+                : isField
+                ? operatorsOptions.filter(
+                    (o) => o.name !== "in" && o.name !== "notIn"
+                  )
+                : operatorsOptions
+            }
             onChange={(value) => {
               onChange({ name: "operator", value }, editor);
             }}
@@ -407,6 +451,12 @@ function Rule(props) {
                 checked={isField}
                 onChange={(e) => {
                   setField(e.target.checked);
+                  if (
+                    e.target.checked === true &&
+                    (operator === "in" || operator === "notIn")
+                  ) {
+                    onChange({ name: "operator", value: undefined }, editor);
+                  }
                   handleChange("isRelationalValue", e.target.checked);
                   handleChange("fieldValue", null);
                   if (!e.target.checked) {

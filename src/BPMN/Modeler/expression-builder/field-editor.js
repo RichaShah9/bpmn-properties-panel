@@ -29,8 +29,10 @@ export default function FieldEditor({
   const classes = useStyles();
 
   const expression = isBPMQuery(type) ? "BPM" : parentExpression;
-
-  const values = fieldName && fieldName.split(join_operator[expression]);
+  const values =
+    fieldName &&
+    join_operator[expression] &&
+    fieldName.split(join_operator[expression]);
   const [startValue] = values || [];
   const hasManyValues =
     fieldName && isParent && fields.some((x) => x.name === startValue);

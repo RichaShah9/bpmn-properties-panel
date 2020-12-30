@@ -323,7 +323,7 @@ function ExpressionBuilder({
         const map_type = isBPM ? map_bpm_combinator : map_combinator;
         if (["in", "notIn"].includes(operator)) {
           const value = rule.fieldValue
-            .map((f) => f.id)
+            .map((f) => f.id || f.name)
             .filter((f) => f !== "")
             .join(",");
           return `${prefix}${join_operator[expression]}${fieldName}id ${map_operators[operator]} [${value}]`;
@@ -387,7 +387,9 @@ function ExpressionBuilder({
 
       const map_type = isBPM ? map_bpm_combinator : map_combinator;
       if (["in", "notIn"].includes(operator)) {
-        const value = rule.fieldValue.map((f) => f.id).filter((f) => f !== "");
+        const value = rule.fieldValue
+          .map((f) => f.id || f.name)
+          .filter((f) => f !== "");
         return {
           condition: `${prefix}.${fieldName}id ${map_operators[operator]} ?${count}`,
           values: [[value]],
