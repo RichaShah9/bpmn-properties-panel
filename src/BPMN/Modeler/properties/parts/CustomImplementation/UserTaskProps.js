@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
-import { Add } from "@material-ui/icons";
+import { Edit } from "@material-ui/icons";
 
 import TextField from "../../components/TextField";
 import ExpressionBuilder from "../../../expression-builder";
@@ -105,7 +105,7 @@ export default function UserTaskProps({ element, index, label }) {
             canRemove={true}
           />
           <div className={classes.new}>
-            <Add className={classes.newIcon} onClick={handleClickOpen} />
+            <Edit className={classes.newIcon} onClick={handleClickOpen} />
             <ExpressionBuilder
               open={open}
               handleClose={() => handleClose()}
