@@ -564,17 +564,21 @@ function ExpressionBuilder({
 
     let expr = str;
     if (isBPMQuery(type)) {
-      let parametes = vals.reduce((a, b) => {
-        if (Array.isArray(b && b[0])) {
-          return `${a}, [${b}]`;
-        }
-        return a + "," + b;
-      });
+      let parametes = "";
+      vals &&
+        vals.forEach((v) => {
+          if (v && Array.isArray(v[0])) {
+            parametes = parametes + `, [${v[0]}]`;
+          } else {
+            parametes = parametes + ", " + v;
+          }
+        });
+
       expr = str
         ? `return $ctx.createVariable($ctx.${
             singleResult ? "filterOne" : "filter"
           }("${model}"," ${str} "${
-            vals && vals.length > 0 ? `, ${parametes}` : ``
+            vals && vals.length > 0 ? `${parametes}` : ``
           }))`
         : "";
     }
