@@ -193,7 +193,10 @@ function ExpressionBuilder({
             `${str}`
           )})`;
         }
-        return initValue.replace(/\$\$/g, `${str}`);
+        return `${prefix}${join_operator[expression]}${initValue.replace(
+          /\$\$/g,
+          `${str}`
+        )}`;
       } else if (["between", "notBetween"].includes(operator)) {
         const temp = initValue.match(/it.\$\$/g);
         if (temp && temp.length) {
@@ -572,7 +575,10 @@ function ExpressionBuilder({
         const { rules, metaModals } = value;
         const modalName = metaModals && metaModals.name;
         const rule = rules.find(
-          (r) => r.fieldValue === undefined || r.fieldValue === null
+          (r) =>
+            r.fieldValue === undefined &&
+            r.fieldValue === null &&
+            r.fieldValue <= 0
         );
         if (rule) {
           isValid = false;

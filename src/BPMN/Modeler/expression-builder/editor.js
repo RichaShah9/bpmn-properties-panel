@@ -453,7 +453,7 @@ function Rule(props) {
             }}
             value={operator}
           />
-          {!["isNull", "isNotNull"].includes(operator) && (
+          {!["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) && (
             <RadioGroup
               aria-label="radioType"
               name="radioType"
