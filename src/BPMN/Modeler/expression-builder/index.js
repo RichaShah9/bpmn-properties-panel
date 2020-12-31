@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-let isValid = true;
+let isValid = false;
 function ExpressionBuilder({
   handleClose,
   open,
@@ -284,7 +284,13 @@ function ExpressionBuilder({
         const isDateTime = ["date", "time", "datetime"].includes(type);
         let { fieldValue, fieldValue2, isRelationalValue } = rule;
         const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
-        if (!fieldValue) {
+        if (
+          (fieldValue === null ||
+            fieldValue === undefined ||
+            fieldValue === "" ||
+            fieldValue.length <= 0) &&
+          !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)
+        ) {
           isValid = false;
           openAlertDialog();
           return null;
@@ -373,7 +379,13 @@ function ExpressionBuilder({
         relatedValueModal && relatedValueModal.name
       );
       const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
-      if (!fieldValue) {
+      if (
+        (fieldValue === null ||
+          fieldValue === undefined ||
+          fieldValue === "" ||
+          fieldValue.length <= 0) &&
+        !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)
+      ) {
         isValid = false;
         openAlertDialog();
         return null;

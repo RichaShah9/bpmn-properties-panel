@@ -453,59 +453,62 @@ function Rule(props) {
             }}
             value={operator}
           />
-          {!["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) && (
-            <RadioGroup
-              aria-label="radioType"
-              name="radioType"
-              value={isField}
-              onChange={(e) => {
-                setField(e.target.value);
-                if (
-                  e.target.value &&
-                  (operator === "in" || operator === "notIn")
-                ) {
-                  onChange({ name: "operator", value: undefined }, editor);
-                }
-                if (e.target.value) {
-                  handleChange("isRelationalValue", e.target.value);
-                  handleChange("fieldValue", null);
-                  if (e.target.value === "self") {
-                    setMetaModal(parentMetaModal);
-                    setElseMetaModal(parentMetaModal);
-                  } else {
-                    setMetaModal(null);
+          {operator &&
+            !["isNull", "isNotNull", "isTrue", "isFalse"].includes(
+              operator
+            ) && (
+              <RadioGroup
+                aria-label="radioType"
+                name="radioType"
+                value={isField}
+                onChange={(e) => {
+                  setField(e.target.value);
+                  if (
+                    e.target.value &&
+                    (operator === "in" || operator === "notIn")
+                  ) {
+                    onChange({ name: "operator", value: undefined }, editor);
                   }
-                } else {
-                  handleChange("relatedValueFieldName", null);
-                  handleChange("relatedValueModal", null);
-                }
-              }}
-            >
-              <label className={classes.valueFrom}>Value from</label>
-              <FormControlLabel
-                value="self"
-                control={
-                  <Radio
-                    className={classes.radio}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label="Self"
-              />
-              <FormControlLabel
-                value="context"
-                control={
-                  <Radio
-                    className={classes.radio}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label="Context"
-              />
-            </RadioGroup>
-          )}
+                  if (e.target.value) {
+                    handleChange("isRelationalValue", e.target.value);
+                    handleChange("fieldValue", null);
+                    if (e.target.value === "self") {
+                      setMetaModal(parentMetaModal);
+                      setElseMetaModal(parentMetaModal);
+                    } else {
+                      setMetaModal(null);
+                    }
+                  } else {
+                    handleChange("relatedValueFieldName", null);
+                    handleChange("relatedValueModal", null);
+                  }
+                }}
+              >
+                <label className={classes.valueFrom}>Value from</label>
+                <FormControlLabel
+                  value="self"
+                  control={
+                    <Radio
+                      className={classes.radio}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label="Self"
+                />
+                <FormControlLabel
+                  value="context"
+                  control={
+                    <Radio
+                      className={classes.radio}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label="Context"
+                />
+              </RadioGroup>
+            )}
         </React.Fragment>
       )}
       {isField &&
