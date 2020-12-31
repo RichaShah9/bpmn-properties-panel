@@ -507,7 +507,7 @@ function Rule(props) {
           )}
         </React.Fragment>
       )}
-      {isField ? (
+      {isField && !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) ? (
         <React.Fragment>
           {isField === "context" && (
             <Selection
@@ -546,13 +546,18 @@ function Rule(props) {
               handleChange("relatedValueFieldName", value);
               handleChange("relatedValueModal", metaModal);
               handleChange("allField", allField);
+              let isBPM = isBPMQuery(parentType);
               handleChange(
                 "fieldValue",
                 (parentMetaModal && parentMetaModal.id) ===
                   (metaModal && metaModal.id)
-                  ? `self.${fieldNameValue}`
+                  ? isBPM
+                    ? `self.${fieldNameValue}`
+                    : `${metaModal.name}${
+                        join_operator[isBPM ? "BPM" : expression]
+                      }${fieldNameValue}`
                   : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
-                      join_operator[isBPMQuery(parentType) ? "BPM" : expression]
+                      join_operator[isBPM ? "BPM" : expression]
                     }${fieldNameValue}`
               );
             }}

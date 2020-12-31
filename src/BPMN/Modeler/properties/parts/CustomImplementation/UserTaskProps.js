@@ -42,6 +42,9 @@ const useStyles = makeStyles({
   new: {
     cursor: "pointer",
   },
+  dialog:{
+    minWidth: 300
+  }
 });
 
 export default function UserTaskProps({ element, index, label }) {
