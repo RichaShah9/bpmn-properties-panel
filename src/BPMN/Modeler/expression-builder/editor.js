@@ -558,7 +558,7 @@ function Rule(props) {
                   (metaModal && metaModal.id)
                   ? isBPM
                     ? `self.${fieldNameValue}`
-                    : `${metaModal.name}${
+                    : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
                         join_operator[isBPM ? "BPM" : expression]
                       }${fieldNameValue}`
                   : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
@@ -616,7 +616,9 @@ function Rule(props) {
                       (elseMetaModal && elseMetaModal.id)
                       ? isBPM
                         ? `self.${fieldNameValue}`
-                        : `${metaModal.name}${
+                        : `${lowerCaseFirstLetter(
+                            metaModal && metaModal.name
+                          )}${
                             join_operator[isBPM ? "BPM" : expression]
                           }${fieldNameValue}`
                       : `${lowerCaseFirstLetter(
