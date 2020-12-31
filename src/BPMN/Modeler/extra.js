@@ -1,16 +1,24 @@
 import propertiesTabs from "./properties/properties";
-import { download, translate } from "../../utils";
+import { download, getBool, translate } from "../../utils";
 import { tabProperty } from "./properties/tabProperty";
 import Service from "../../services/Service";
 
 export const fetchId = () => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
+  const regexTimeEvent = /[?&]timerTask=([^&#]*)/g; // ?id=1&timerTask=false
   const url = window.location.href;
-  let matchBPMNId, id;
+  let matchBPMNId,
+    id,
+    matchTimeEvent,
+    timerTask = true;
   while ((matchBPMNId = regexBPMN.exec(url))) {
     id = matchBPMNId[1];
-    return id;
   }
+
+  while ((matchTimeEvent = regexTimeEvent.exec(url))) {
+    timerTask = getBool(matchTimeEvent[1]);
+  }
+  return { id, timerTask };
 };
 
 export const uploadXml = () => {

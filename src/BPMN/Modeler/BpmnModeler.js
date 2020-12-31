@@ -56,6 +56,8 @@ const resizeStyle = {
   background: "#f0f0f0",
 };
 
+const TimerEvents = React.lazy(() => import("./TimerEvent"));
+
 const drawerWidth = 380;
 const CAMUNDA_EXECUTION_LISTENER_ELEMENT = "camunda:ExecutionListener";
 
@@ -161,7 +163,8 @@ function BpmnModelerComponent() {
   const [id, setId] = useState(null);
   const [openAlert, setAlert] = useState(false);
   const [openDelopyDialog, setDelopyDialog] = useState(false);
-  const [drawerOpen, setDrawerOpen] = React.useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [isTimerTask, setIsTimerTask] = useState(true);
   const [ids, setIds] = useState({
     oldIds: null,
     currentIds: null,
@@ -1008,8 +1011,9 @@ function BpmnModelerComponent() {
       },
     };
     bpmnModeler = new BpmnModeler({ ...modeler });
-    let id = fetchId();
+    let { id, timerTask } = fetchId();
     setId(id);
+    setIsTimerTask(timerTask);
     fetchDiagram(id);
     hidePanelElements();
   }, [fetchDiagram]);
@@ -1038,6 +1042,9 @@ function BpmnModelerComponent() {
 
   return (
     <div id="container">
+      <React.Suspense fallback={<></>}>
+        {!isTimerTask && <TimerEvents />}
+      </React.Suspense>
       <div id="bpmncontainer">
         <div id="propview"></div>
         <div id="bpmnview">
