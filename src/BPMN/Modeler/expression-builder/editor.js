@@ -471,6 +471,7 @@ function Rule(props) {
                   handleChange("fieldValue", null);
                   if (e.target.value === "self") {
                     setMetaModal(parentMetaModal);
+                    setElseMetaModal(parentMetaModal);
                   } else {
                     setMetaModal(null);
                   }
@@ -507,7 +508,8 @@ function Rule(props) {
           )}
         </React.Fragment>
       )}
-      {isField && !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) ? (
+      {isField &&
+      !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) ? (
         <React.Fragment>
           {isField === "context" && (
             <Selection
@@ -569,18 +571,20 @@ function Rule(props) {
           />
           {["between", "notBetween"].includes(operator) && (
             <React.Fragment>
-              <Selection
-                name="metaModal"
-                title="Meta Modal Else"
-                placeholder="meta modal"
-                fetchAPI={() => getModels(getProcessConfig(element))}
-                optionLabelKey="name"
-                onChange={(e) => {
-                  setElseMetaModal(e);
-                }}
-                value={elseMetaModal}
-                classes={{ root: classes.MuiAutocompleteRoot }}
-              />
+              {isField === "context" && (
+                <Selection
+                  name="metaModal"
+                  title="Meta Modal Else"
+                  placeholder="meta modal"
+                  fetchAPI={() => getModels(getProcessConfig(element))}
+                  optionLabelKey="name"
+                  onChange={(e) => {
+                    setElseMetaModal(e);
+                  }}
+                  value={elseMetaModal}
+                  classes={{ root: classes.MuiAutocompleteRoot }}
+                />
+              )}
               <FieldEditor
                 getMetaFields={() => fetchField(elseMetaModal)}
                 editor={editor}
@@ -602,14 +606,21 @@ function Rule(props) {
                   });
                   handleChange("relatedElseValueFieldName", value);
                   handleChange("relatedElseValueModal", elseMetaModal);
+                  let isBPM = isBPMQuery(parentType);
                   handleChange(
                     "fieldValue2",
                     (parentMetaModal && parentMetaModal.id) ===
                       (elseMetaModal && elseMetaModal.id)
-                      ? `self.${fieldNameValue}`
+                      ? isBPM
+                        ? `self.${fieldNameValue}`
+                        : `${metaModal.name}${
+                            join_operator[isBPM ? "BPM" : expression]
+                          }${fieldNameValue}`
                       : `${lowerCaseFirstLetter(
                           elseMetaModal && elseMetaModal.name
-                        )}.${fieldNameValue}`
+                        )}${
+                          join_operator[isBPM ? "BPM" : expression]
+                        }${fieldNameValue}`
                   );
                 }}
                 value={elseNameValue}
