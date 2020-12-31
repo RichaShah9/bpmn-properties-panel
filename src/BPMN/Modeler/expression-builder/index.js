@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+let isValid = true;
 function ExpressionBuilder({
   handleClose,
   open,
@@ -59,7 +60,6 @@ function ExpressionBuilder({
   ]);
   const [singleResult, setSingleResult] = useState(false);
   const classes = useStyles();
-
   function onAddExpressionEditor() {
     setExpressionComponents(
       produce((draft) => {
@@ -285,9 +285,11 @@ function ExpressionBuilder({
         let { fieldValue, fieldValue2, isRelationalValue } = rule;
         const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
         if (!fieldValue) {
+          isValid = false;
           openAlertDialog();
           return null;
         }
+        isValid = true;
         if (!fieldName) {
           return null;
         }
@@ -372,9 +374,11 @@ function ExpressionBuilder({
       );
       const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
       if (!fieldValue) {
+        isValid = false;
         openAlertDialog();
         return null;
       }
+      isValid = true;
       const isRelatedModalSame = relatedValueModalName === modalName;
       if (!["isNotNull", "isNull"].includes(operator) && !isRelatedModalSame) {
         ++count;
@@ -568,21 +572,11 @@ function ExpressionBuilder({
     const expressionValues = [];
     let model;
     let vals = [];
-    let isValid = true;
     const expressions =
       expressionComponents &&
       expressionComponents.map(({ value }, index) => {
         const { rules, metaModals } = value;
         const modalName = metaModals && metaModals.name;
-        const rule = rules.find(
-          (r) =>
-            r.fieldValue === undefined &&
-            r.fieldValue === null &&
-            r.fieldValue <= 0
-        );
-        if (rule) {
-          isValid = false;
-        }
         model = modalName;
         let str = "";
         const listOfTree = getListOfTree(rules);
@@ -645,15 +639,14 @@ function ExpressionBuilder({
         : undefined;
     }
 
-    if (!isValid) {
-      return;
+    if (isValid) {
+      setProperty({
+        expression: expr,
+        value: JSON.stringify(expressionValues),
+        combinator: isBPMQuery(type) ? singleResult : combinator,
+      });
+      handleClose();
     }
-    setProperty({
-      expression: expr,
-      value: JSON.stringify(expressionValues),
-      combinator: isBPMQuery(type) ? singleResult : combinator,
-    });
-    handleClose();
   }
 
   useEffect(() => {
