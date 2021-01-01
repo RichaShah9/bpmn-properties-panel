@@ -450,6 +450,7 @@ function Rule(props) {
             }
             onChange={(value) => {
               onChange({ name: "operator", value }, editor);
+              setField(null);
             }}
             value={operator}
           />
@@ -463,6 +464,7 @@ function Rule(props) {
                 value={isField}
                 onChange={(e) => {
                   setField(e.target.value);
+                  setNameValue({});
                   if (
                     e.target.value &&
                     (operator === "in" || operator === "notIn")
@@ -523,6 +525,7 @@ function Rule(props) {
               optionLabelKey="name"
               onChange={(e) => {
                 setMetaModal(e);
+                setNameValue({});
               }}
               value={metaModal}
               classes={{ root: classes.MuiAutocompleteRoot }}
@@ -534,12 +537,11 @@ function Rule(props) {
             }
             editor={editor}
             onChange={({ value, fieldNameValue, allField }, editor) => {
-              if (!value) return;
               setNameValue({
                 allField: allField,
                 field: value,
                 fieldName: fieldNameValue,
-                fieldType: value.type,
+                fieldType: value && value.type,
                 fieldValue: null,
                 fieldValue2: null,
                 operator: null,
@@ -592,12 +594,11 @@ function Rule(props) {
                 getMetaFields={() => fetchField(elseMetaModal)}
                 editor={editor}
                 onChange={({ value, fieldNameValue, allField }, editor) => {
-                  if (!value) return;
                   setElseNameValue({
                     allField: allField,
                     field: value,
                     fieldName: fieldNameValue,
-                    fieldType: value.type,
+                    fieldType: value && value.type,
                     fieldValue: null,
                     fieldValue2: null,
                     operator: null,
