@@ -169,8 +169,12 @@ function ExpressionBuilder({
       const isDateTime = ["date", "time", "datetime"].includes(type);
 
       if (!isRelationalValue && !isNumber) {
-        fieldValue = `'${jsStringEscape(fieldValue)}'`;
-        fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
+        fieldValue = ["like", "notLike"].includes(operator)
+          ? `'%${jsStringEscape(fieldValue)}%'`
+          : `'${jsStringEscape(fieldValue)}'`;
+        fieldValue2 = ["like", "notLike"].includes(operator)
+          ? `'%${jsStringEscape(fieldValue2)}%'`
+          : `'${jsStringEscape(fieldValue2)}'`;
       }
 
       if (isDateTime) {
@@ -324,10 +328,13 @@ function ExpressionBuilder({
         }
 
         if (!isRelationalValue && !isNumber) {
-          fieldValue = `'${jsStringEscape(fieldValue)}'`;
-          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
+          fieldValue = ["like", "notLike"].includes(operator)
+            ? `'%${jsStringEscape(fieldValue)}%'`
+            : `'${jsStringEscape(fieldValue)}'`;
+          fieldValue2 = ["like", "notLike"].includes(operator)
+            ? `'%${jsStringEscape(fieldValue2)}%'`
+            : `'${jsStringEscape(fieldValue2)}'`;
         }
-
         if (isDateTime) {
           if (!isRelationalValue) {
             fieldValue = getDateTimeValue(type, fieldValue);
@@ -410,8 +417,12 @@ function ExpressionBuilder({
       }
 
       if (!isRelationalValue && !isNumber) {
-        fieldValue = `'${jsStringEscape(fieldValue)}'`;
-        fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
+        fieldValue = ["like", "notLike"].includes(operator)
+          ? `'%${jsStringEscape(fieldValue)}%'`
+          : `'${jsStringEscape(fieldValue)}'`;
+        fieldValue2 = ["like", "notLike"].includes(operator)
+          ? `'%${jsStringEscape(fieldValue2)}%'`
+          : `'${jsStringEscape(fieldValue2)}'`;
       }
 
       if (isDateTime) {
