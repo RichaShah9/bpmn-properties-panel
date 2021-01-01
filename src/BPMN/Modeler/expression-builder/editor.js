@@ -410,9 +410,14 @@ function Rule(props) {
     addOperatorByType(["string"], ["=", "!=", "isNull", "isNotNull"]);
   }
 
-  let operatorsOptions = operators.filter((item) =>
-    (operators_by_type[type] || []).includes(item.name)
-  );
+  let operatorsOptions = operators.filter((item) => {
+    let operatorType = type;
+    if (operatorType === "" && value.fieldName && value.allField.length > 0) {
+      let parentField = value.allField.find((f) => f.name === value.fieldName);
+      operatorType = ((parentField && parentField.type) || "").toLowerCase();
+    }
+    return (operators_by_type[operatorType] || []).includes(item.name);
+  });
 
   const handleChange = (name, value) => {
     onChange({ name, value }, editor);
@@ -567,6 +572,10 @@ function Rule(props) {
                       join_operator[isBPM ? "BPM" : expression]
                     }${fieldNameValue}`
               );
+              if (!value) {
+                setField(null);
+                handleChange("fieldValue", null);
+              }
             }}
             value={nameValue}
             expression={expression}
@@ -628,6 +637,10 @@ function Rule(props) {
                           join_operator[isBPM ? "BPM" : expression]
                         }${fieldNameValue}`
                   );
+                  if (!value) {
+                    setField(null);
+                    handleChange("fieldValue", null);
+                  }
                 }}
                 value={elseNameValue}
                 expression={expression}
