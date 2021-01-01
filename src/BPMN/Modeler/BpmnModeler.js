@@ -394,6 +394,25 @@ function BpmnModelerComponent() {
   };
 
   const onSave = () => {
+    if (!isTimerTask) {
+      const elementRegistry = bpmnModeler.get("elementRegistry");
+      const timerEvent = elementRegistry.filter((element) => {
+        const bo = getBusinessObject(element);
+        if (bo && bo.eventDefinitions) {
+          let timerDef = bo.eventDefinitions.find(
+            (e) => e.$type === "bpmn:TimerEventDefinition"
+          );
+          if (timerDef) {
+            return element;
+          }
+        }
+        return null;
+      });
+      if (timerEvent && timerEvent.length > 0) {
+        handleSnackbarClick("error", "Timer events are not supported.");
+        return;
+      }
+    }
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
