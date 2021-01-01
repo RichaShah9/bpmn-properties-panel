@@ -440,7 +440,7 @@ function Rule(props) {
             name="operator"
             title="Operator"
             options={
-              field && field.selectionList && isBPMQuery(parentType)
+              field && field.selectionList
                 ? operators.filter((o) =>
                     (isField
                       ? ["=", "!=", "isNull", "isNotNull"]
