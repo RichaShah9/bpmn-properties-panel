@@ -85,8 +85,8 @@ const map_operator_groovy = {
   isNull: "== null",
   isTrue: "==",
   isFalse: "==",
-  in: "in",
-  notIn: "in",
+  in: "contains",
+  notIn: "contains",
 };
 
 const map_operator_bpm = {
