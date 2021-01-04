@@ -243,33 +243,21 @@ function ExpressionBuilder({
   }
 
   function getDateTimeValue(type, fieldValue) {
-    if (isBPMQuery(parentType)) {
-      if (type === "date") {
-        return `LocalDate.parse('${moment(
-          fieldValue,
-          dateFormat["date"]
-        ).format("YYYY-MM-DD")}')`;
-      } else if (type === "datetime") {
-        return `LocalDateTime.parse('${moment(
-          fieldValue,
-          dateFormat["datetime"]
-        ).toISOString()} ')`;
-      } else {
-        return `LocalTime.parse('${moment(
-          fieldValue,
-          dateFormat["time"]
-        ).format("hh:mm:ss")}')`;
-      }
+    if (type === "date") {
+      return `LocalDate.parse('yyyy-MM-dd','${moment(
+        fieldValue,
+        dateFormat["date"]
+      ).format("YYYY-MM-DD")}')`;
+    } else if (type === "datetime") {
+      return `LocalDateTime.parse('yyyy-MM-dd HH:mm:SS','${moment(
+        fieldValue,
+        dateFormat["datetime"]
+      ).format("YYYY-MM-DD HH:mm:ss.SSS")} ')`;
     } else {
-      if (type === "date") {
-        return `'${moment(fieldValue, dateFormat["datetime"]).format(
-          "YYYY-MM-DD"
-        )}'`;
-      } else if (type === "datetime") {
-        return `'${moment(fieldValue, dateFormat["datetime"]).toISOString()}'`;
-      } else {
-        return `'${moment(fieldValue, dateFormat["time"]).format("hh:mm:ss")}'`;
-      }
+      return `LocalTime.parse('HH:mm:SS',${moment(
+        fieldValue,
+        dateFormat["time"]
+      ).format("HH:mm:ss.SSS")}')`;
     }
   }
 
