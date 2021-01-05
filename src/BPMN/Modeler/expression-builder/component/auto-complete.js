@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -12,19 +12,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 export default function AutoComplete(props) {
-  const [open, setOpen] = React.useState(false);
-  const [options, setOptions] = React.useState([]);
-  const [selectedValue, setSelectedValue] = React.useState(
-    props.isMulti ? [] : null
-  );
-  const [inputValue, setInputValue] = React.useState("");
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState([]);
+  const [selectedValue, setSelectedValue] = useState(props.isMulti ? [] : null);
+  const [inputValue, setInputValue] = useState("");
   const {
     value,
     onChange,
     options: flatOptions,
     optionLabelKey = "title",
     optionValueKey = "id",
-    isMulti,
+    isMulti = false,
     title,
     fetchAPI,
     inline,
@@ -39,7 +37,10 @@ export default function AutoComplete(props) {
 
   const findOption = React.useCallback(
     (option) => {
-      return flatOptions.find((i) => i && i[optionValueKey] === option.trim());
+      return (
+        flatOptions &&
+        flatOptions.find((i) => i && i[optionValueKey] === option.trim())
+      );
     },
     [flatOptions, optionValueKey]
   );
@@ -112,7 +113,17 @@ export default function AutoComplete(props) {
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
-      value={selectedValue}
+      value={
+        selectedValue
+          ? isMulti
+            ? Array.isArray(selectedValue)
+              ? selectedValue
+              : []
+            : selectedValue
+          : isMulti
+          ? []
+          : null
+      }
       onChange={(event, newValue) => handleChange(newValue)}
       options={options || []}
       multiple={isMulti}
