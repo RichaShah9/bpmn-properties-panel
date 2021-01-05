@@ -110,6 +110,28 @@ function RenderRelationalWidget(props) {
         classes={{ root: classes.MuiAutocompleteRoot }}
       />
     );
+  } else if (["=", "!="].includes(operator)) {
+    const { field } = rest;
+    const { targetName } = field;
+    const fetchData = async ({ search }) => {
+      const data = await getData(field.target);
+      return data;
+    };
+    return (
+      <Selection
+        name="fieldValue"
+        title="Value"
+        placeholder="Value"
+        fetchAPI={fetchData}
+        isMulti={false}
+        optionLabelKey={targetName}
+        onChange={(value) =>
+          onChange({ name: "fieldValue", value: value }, editor)
+        }
+        value={value}
+        classes={{ root: classes.MuiAutocompleteRoot }}
+      />
+    );
   } else {
     return null;
   }
@@ -284,6 +306,7 @@ function RenderWidget({
       );
     default:
       options =
+        rest.field &&
         rest.field.selectionList &&
         rest.field.selectionList.map(({ title, value, data }) => ({
           name: (data && data.value) || value,
