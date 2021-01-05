@@ -101,7 +101,7 @@ const map_operator_bpm = {
   isTrue: "is",
   isFalse: "is",
   in: "IN",
-  notIn: "IN",
+  notIn: "NOT IN",
   like: "LIKE",
   notLike: "NOT LIKE",
 };

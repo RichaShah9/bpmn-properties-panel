@@ -493,6 +493,7 @@ function Rule(props) {
                 onChange={(e) => {
                   setField(e.target.value);
                   setNameValue({});
+                  setElseNameValue({});
                   if (
                     e.target.value &&
                     (operator === "in" || operator === "notIn")
@@ -507,10 +508,13 @@ function Rule(props) {
                       setElseMetaModal(parentMetaModal);
                     } else {
                       setMetaModal(null);
+                      setElseMetaModal(null);
                     }
                   } else {
                     handleChange("relatedValueFieldName", null);
                     handleChange("relatedValueModal", null);
+                    handleChange("relatedElseValueFieldName", null);
+                    handleChange("relatedElseValueModal", null);
                   }
                 }}
               >
