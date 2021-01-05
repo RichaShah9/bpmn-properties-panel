@@ -95,12 +95,13 @@ function ExpressionBuilder({
       relatedElseValueModal,
     } = rule;
     const values = fieldName
-      .split(join_operator[expression])
+      .split(join_operator[isBPMQuery(parentType) ? "BPM" : expression])
       .filter((f) => f !== "");
 
     const fName = values[0];
-    const field = allField.find((f) => f.name === fName);
-    const type = field && field.type.toLowerCase();
+    const field = allField.find((f) => f.name === fName) || {};
+    const { targetName, selectionList } = field || {};
+    const type = field && field.type && field.type.toLowerCase();
     const nestedFields = values.splice(1);
     if (["many_to_many", "one_to_many"].includes(type)) {
       const findRelational = initValue.match(/\$\$/g);
@@ -168,7 +169,10 @@ function ExpressionBuilder({
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
 
-      if (!isRelationalValue && !isNumber) {
+      if (
+        (!isRelationalValue && !isNumber && typeof fieldValue !== "object") ||
+        (selectionList && !isRelationalValue)
+      ) {
         fieldValue = ["like", "notLike"].includes(operator)
           ? `'%${jsStringEscape(fieldValue)}%'`
           : `'${jsStringEscape(fieldValue)}'`;
@@ -185,12 +189,19 @@ function ExpressionBuilder({
       }
 
       if (["in", "notIn"].includes(operator)) {
-        const value = rule.fieldValue.map((i) => i.id).join(",");
+        const value = rule.fieldValue
+          .map((i) => `'${i[targetName] || i["fullName"] || i["name"]}'`)
+          .join(",");
         const name =
           isParent || nestedFields.length >= 1
             ? ""
-            : fieldName + join_operator[expression] + "id";
-        const str = `${name} ${map_operators[operator]} [${value}]`;
+            : fieldName +
+              (selectionList
+                ? ""
+                : join_operator[expression] + (targetName || "fullName"));
+        const str = `${name} ${
+          rule.fieldValue.length > 1 ? "containsAll" : "contains"
+        }(${rule.fieldValue.length > 1 ? `[${value}]` : value})`;
         if (operator === "notIn") {
           return `!(${prefix}${join_operator[expression]}${initValue.replace(
             /\$\$/g,
@@ -233,10 +244,34 @@ function ExpressionBuilder({
           isParent ? `${str}` : ` ${str}`
         )}`;
       } else {
-        const str = `${fieldName} ${map_operators[operator]} ${fieldValue}`;
+        let value =
+          typeof fieldValue === "object" && fieldValue
+            ? `'${jsStringEscape(
+                fieldValue[targetName] ||
+                  fieldValue["fullName"] ||
+                  fieldValue["name"] ||
+                  ""
+              )}'`
+              ? `'${jsStringEscape(
+                  fieldValue[targetName] ||
+                    fieldValue["fullName"] ||
+                    fieldValue["name"] ||
+                    ""
+                )}'`
+              : fieldValue["name"]
+            : fieldValue;
+        const str = `${
+          typeof fieldValue === "object" && fieldValue
+            ? `${fieldName}${join_operator[expression]}${
+                field.targetName || "fullName"
+              }`
+            : fieldName
+        } ${map_operators[operator]} ${value}`;
         return `${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
-          isParent ? `${str}` : ` ${str}`
+          isParent || (typeof fieldValue === "object" && fieldValue)
+            ? `${str}`
+            : ` ${str}`
         )}`;
       }
     }
@@ -268,7 +303,8 @@ function ExpressionBuilder({
     return (
       rules &&
       rules.map((rule) => {
-        const { fieldName, field, operator, allField } = rule;
+        const { fieldName, field = {}, operator, allField } = rule;
+        const { targetName, selectionList } = field || {};
         const type = field && field.type && field.type.toLowerCase();
         const isNumber = ["long", "integer", "decimal", "boolean"].includes(
           type
@@ -315,7 +351,10 @@ function ExpressionBuilder({
           return getRelationalCondition(rule, undefined, false, prefix);
         }
 
-        if (!isRelationalValue && !isNumber) {
+        if (
+          (!isRelationalValue && !isNumber && typeof fieldValue !== "object") ||
+          (selectionList && !isRelationalValue)
+        ) {
           fieldValue = ["like", "notLike"].includes(operator)
             ? `'%${jsStringEscape(fieldValue)}%'`
             : `'${jsStringEscape(fieldValue)}'`;
@@ -329,14 +368,19 @@ function ExpressionBuilder({
             fieldValue2 = getDateTimeValue(type, fieldValue2);
           }
         }
-
         const map_type = isBPM ? map_bpm_combinator : map_combinator;
         if (["in", "notIn"].includes(operator)) {
           const value = rule.fieldValue
-            .map((f) => f.id || f.name)
+            .map((f) => `'${f[targetName] || f["fullName"] || f["name"]}'`)
             .filter((f) => f !== "")
             .join(",");
-          return `${prefix}${join_operator[expression]}${fieldName}id ${map_operators[operator]} [${value}]`;
+          return `${prefix}${join_operator[expression]}${fieldName}${
+            selectionList
+              ? " "
+              : `${join_operator[expression]} ${targetName || "fullName"} `
+          }${rule.fieldValue.length > 1 ? "containsAll" : "contains"}(${
+            rule.fieldValue.length > 1 ? `[${value}]` : value
+          })`;
         } else if (["between", "notBetween"].includes(operator)) {
           if (operator === "notBetween") {
             return `!(${prefix}${join_operator[expression]}${fieldName} >= ${fieldValue} ${map_type["and"]} ${prefix}${join_operator[expression]}${fieldName} <= ${fieldValue2})`;
@@ -348,7 +392,29 @@ function ExpressionBuilder({
           const value = operator === "isTrue" ? true : false;
           return `${prefix}${join_operator[expression]}${fieldName} ${map_operators[operator]} ${value}`;
         } else {
-          return `${prefix}${join_operator[expression]}${fieldName} ${map_operators[operator]} ${fieldValue}`;
+          let value =
+            typeof fieldValue === "object" && fieldValue
+              ? `'${jsStringEscape(
+                  fieldValue[targetName] ||
+                    fieldValue["fullName"] ||
+                    fieldValue["name"] ||
+                    ""
+                )}'`
+                ? `'${jsStringEscape(
+                    fieldValue[targetName] ||
+                      fieldValue["fullName"] ||
+                      fieldValue["name"] ||
+                      ""
+                  )}'`
+                : fieldValue["name"]
+              : fieldValue;
+          return `${prefix}${join_operator[expression]}${
+            type === "many_to_one"
+              ? `${fieldName}${join_operator[expression]}${
+                  field.targetName || "fullName"
+                }`
+              : fieldName
+          } ${map_operators[operator]} ${value}`;
         }
       })
     );
@@ -360,7 +426,8 @@ function ExpressionBuilder({
     const map_operators = map_operator[isBPM ? "BPM" : expression];
     let count = 0;
     return rules.map((rule) => {
-      const { fieldName, field, operator } = rule;
+      const { fieldName, field = {}, operator } = rule;
+      const { targetName, selectionList } = field || {};
       const type = field && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
@@ -404,7 +471,10 @@ function ExpressionBuilder({
         }
       }
 
-      if (!isRelationalValue && !isNumber) {
+      if (
+        (!isRelationalValue && !isNumber && typeof fieldValue !== "object") ||
+        (selectionList && !isRelationalValue)
+      ) {
         fieldValue = ["like", "notLike"].includes(operator)
           ? `'%${jsStringEscape(fieldValue)}%'`
           : `'${jsStringEscape(fieldValue)}'`;
@@ -423,10 +493,12 @@ function ExpressionBuilder({
       const map_type = isBPM ? map_bpm_combinator : map_combinator;
       if (["in", "notIn"].includes(operator)) {
         const value = rule.fieldValue
-          .map((f) => f.id || f.name)
+          .map((f) => `'${f["targetName"] || f["fullName"] || f["name"]}'`)
           .filter((f) => f !== "");
         return {
-          condition: `${prefix}.${fieldName}id ${map_operators[operator]} ${
+          condition: `${prefix}.${fieldName}${
+            selectionList ? "" : `.${targetName || "fullName"}`
+          } ${map_operators[operator]} ${
             isRelatedModalSame ? fieldValue : `?${count}`
           }`,
           values: isRelatedModalSame ? undefined : [[value]],
@@ -484,11 +556,22 @@ function ExpressionBuilder({
           values: isRelatedModalSame ? undefined : [value],
         };
       } else {
+        let value =
+          typeof fieldValue === "object" && fieldValue
+            ? `'${jsStringEscape(fieldValue[field.targetName] || "")}'`
+              ? `'${jsStringEscape(fieldValue[field.targetName] || "")}'`
+              : fieldValue["name"]
+            : fieldValue;
+
         return {
-          condition: `${prefix}.${fieldName} ${map_operators[operator]} ${
+          condition: `${prefix}.${
+            type === "many_to_one"
+              ? `${fieldName}.${field.targetName || "fullName"}`
+              : fieldName
+          } ${map_operators[operator]} ${
             isRelatedModalSame ? fieldValue : `?${count}`
           }`,
-          values: isRelatedModalSame ? undefined : [fieldValue],
+          values: isRelatedModalSame ? undefined : [value],
         };
       }
     });
