@@ -279,20 +279,18 @@ function ExpressionBuilder({
 
   function getDateTimeValue(type, fieldValue) {
     if (type === "date") {
-      return `LocalDate.parse('yyyy-MM-dd','${moment(
-        fieldValue,
-        dateFormat["date"]
-      ).format("YYYY-MM-DD")}')`;
+      return `LocalDate.parse('${moment(fieldValue, dateFormat["date"]).format(
+        "YYYY-MM-DD"
+      )}')`;
     } else if (type === "datetime") {
-      return `LocalDateTime.parse('yyyy-MM-dd HH:mm:SS','${moment(
+      return `LocalDateTime.parse('${moment(
         fieldValue,
         dateFormat["datetime"]
-      ).format("YYYY-MM-DD HH:mm:ss.SSS")} ')`;
+      ).format("YYYY-MM-DDTHH:​mm:ss")}')`;
     } else {
-      return `LocalTime.parse('HH:mm:SS',${moment(
-        fieldValue,
-        dateFormat["time"]
-      ).format("HH:mm:ss.SSS")}')`;
+      return `LocalTime.parse('${moment(fieldValue, dateFormat["time"]).format(
+        "HH:mm:ss"
+      )}')`;
     }
   }
 
