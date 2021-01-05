@@ -165,7 +165,7 @@ function ExpressionBuilder(props) {
   async function fetchField() {
     const allFields = (await getMetaFields(fields, metaModals)) || [];
     return allFields.filter(
-      (a) => !["button", "separator", "panel"].includes(a.type)
+      (a) => !["button", "separator", "panel", "one_to_many"].includes(a.type)
     );
   }
 

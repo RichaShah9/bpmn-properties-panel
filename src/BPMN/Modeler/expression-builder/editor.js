@@ -67,7 +67,7 @@ async function fetchField(metaModals) {
     metaModals.metaFields.map((f) => f.name);
   const allFields = (await getMetaFieldsAPI(fields, metaModals)) || [];
   return allFields.filter(
-    (a) => !["button", "separator", "panel"].includes(a.type)
+    (a) => !["button", "separator", "panel", "one_to_many"].includes(a.type)
   );
 }
 
@@ -418,9 +418,9 @@ function Rule(props) {
     operators_by_type.integer
   );
   addOperatorByType(["one_to_many"], operators_by_type.text);
-  addOperatorByType(["one_to_one", "many_to_many"], ["in", "notIn", "isNull"]);
+  addOperatorByType(["many_to_many"], ["in", "notIn", "isNull"]);
   addOperatorByType(
-    ["many_to_one"],
+    ["many_to_one", "one_to_one"],
     ["=", "!=", "in", "notIn", "isNull", "isNotNull"]
   );
 
