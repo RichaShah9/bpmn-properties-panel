@@ -413,9 +413,7 @@ export default function ScriptProps({ element, index, label }) {
                   if (value) {
                     setProperty("scriptValue", value);
                   }
-                  if (combinator) {
-                    setProperty("scriptOperatorType", combinator);
-                  }
+                  setProperty("scriptOperatorType", combinator);
                 }}
                 element={element}
                 title="Add Query"
