@@ -139,7 +139,7 @@ function ExpressionBuilder(props) {
                     operator: "",
                     fieldValue: null,
                     fieldValue2: null,
-                    isRelationalValue: false,
+                    isRelationalValue: null,
                     relatedValueFieldName: null,
                     relatedValueModal: null,
                   }
@@ -148,7 +148,7 @@ function ExpressionBuilder(props) {
                 ? {
                     fieldValue: null,
                     fieldValue2: null,
-                    isRelationalValue: false,
+                    isRelationalValue: null,
                     relatedValueFieldName: null,
                     relatedValueModal: null,
                   }

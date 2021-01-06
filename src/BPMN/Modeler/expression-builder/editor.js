@@ -359,7 +359,9 @@ function Rule(props) {
   } = value;
   const classes = useStyles();
   const type = fieldType.toLowerCase();
-  const [isField, setField] = useState(isRelationalValue || null);
+  const [isField, setField] = useState(
+    isRelationalValue ? isRelationalValue : "none"
+  );
   const [metaModal, setMetaModal] = useState(relatedValueModal || null);
   const [elseMetaModal, setElseMetaModal] = useState(
     relatedElseValueModal || null
@@ -388,7 +390,7 @@ function Rule(props) {
     fieldValue: null,
     fieldValue2: null,
     operator: null,
-    isRelationalValue: isField,
+    isRelationalValue: isField === "none" ? null : isField,
     relatedValueFieldName: relatedValueFieldName,
     relatedValueModal: relatedValueModal,
     relatedElseValueFieldName: relatedElseValueFieldName,
@@ -404,7 +406,7 @@ function Rule(props) {
     fieldValue: null,
     fieldValue2: null,
     operator: null,
-    isRelationalValue: isField,
+    isRelationalValue: isField === "none" ? null : isField,
     relatedValueFieldName: relatedValueFieldName,
     relatedValueModal: relatedValueModal,
   });
@@ -465,12 +467,12 @@ function Rule(props) {
             options={
               field && field.selectionList
                 ? operators.filter((o) =>
-                    (isField
+                    (isField && isField !== "none"
                       ? ["=", "!=", "isNull", "isNotNull"]
                       : ["=", "!=", "isNull", "isNotNull", "in", "notIn"]
                     ).includes(o.name)
                   )
-                : isField
+                : isField && isField !== "none"
                 ? operatorsOptions.filter(
                     (o) => o.name !== "in" && o.name !== "notIn"
                   )
@@ -489,7 +491,7 @@ function Rule(props) {
               <RadioGroup
                 aria-label="radioType"
                 name="radioType"
-                value={isField}
+                value={isField || "none"}
                 onChange={(e) => {
                   setField(e.target.value);
                   setNameValue({});
@@ -499,9 +501,13 @@ function Rule(props) {
                     (operator === "in" || operator === "notIn")
                   ) {
                     onChange({ name: "operator", value: undefined }, editor);
+                    setField(null);
                   }
                   if (e.target.value) {
-                    handleChange("isRelationalValue", e.target.value);
+                    handleChange(
+                      "isRelationalValue",
+                      e.target.value === "none" ? null : e.target.value
+                    );
                     handleChange("fieldValue", null);
                     if (e.target.value === "self") {
                       setMetaModal(parentMetaModal);
@@ -541,11 +547,24 @@ function Rule(props) {
                   }
                   label="Context"
                 />
+                <FormControlLabel
+                  value="none"
+                  control={
+                    <Radio
+                      className={classes.radio}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label="None"
+                />
               </RadioGroup>
             )}
         </React.Fragment>
       )}
       {isField &&
+      isField !== "none" &&
+      operator &&
       !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) ? (
         <React.Fragment>
           {isField === "context" && (
@@ -577,11 +596,14 @@ function Rule(props) {
                 fieldValue: null,
                 fieldValue2: null,
                 operator: null,
-                isRelationalValue: isField,
+                isRelationalValue: isField === "none" ? null : isField,
                 relatedValueFieldName: null,
                 relatedValueModal: null,
               });
-              handleChange("isRelationalValue", isField);
+              handleChange(
+                "isRelationalValue",
+                isField === "none" ? null : isField
+              );
               handleChange("relatedValueFieldName", value);
               handleChange("relatedValueModal", metaModal);
               handleChange("allField", allField);
@@ -638,7 +660,7 @@ function Rule(props) {
                     fieldValue: null,
                     fieldValue2: null,
                     operator: null,
-                    isRelationalValue: isField,
+                    isRelationalValue: isField === "none" ? null : isField,
                     relatedValueFieldName: relatedValueFieldName,
                     relatedValueModal: relatedElseValueModal,
                     relatedElseValueFieldName: relatedElseValueFieldName,
@@ -686,7 +708,7 @@ function Rule(props) {
             operator={operator}
             onChange={(e, editor) => {
               onChange(e, editor);
-              handleChange("isRelationalValue", false);
+              handleChange("isRelationalValue", null);
               handleChange("relatedValueFieldName", null);
               handleChange("relatedValueModal", null);
             }}
