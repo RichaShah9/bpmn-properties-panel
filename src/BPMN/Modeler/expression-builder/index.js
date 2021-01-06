@@ -174,7 +174,6 @@ function ExpressionBuilder({
           fieldValue2 = getDateTimeValue(type, fieldValue2);
         }
       }
-
       if (["in", "notIn"].includes(operator)) {
         const value = rule.fieldValue
           .map((i) =>
@@ -186,23 +185,18 @@ function ExpressionBuilder({
         const name =
           isParent || nestedFields.length >= 1
             ? ""
-            : fieldName +
-              (selectionList
-                ? ""
-                : join_operator[expression] + (targetName || "fullName"));
-        const str = `${name} ${
-          rule.fieldValue.length > 1 ? "containsAll" : "contains"
-        }(${rule.fieldValue.length > 1 ? `[${value}]` : value})`;
-        if (operator === "notIn") {
-          return `!(${prefix}${join_operator[expression]}${initValue.replace(
-            /\$\$/g,
-            `${str}`
-          )})`;
-        }
-        return `${prefix}${join_operator[expression]}${initValue.replace(
+            : `${fieldName}${
+                selectionList
+                  ? ""
+                  : `${join_operator[expression]}${targetName || "fullName"}`
+              }`;
+        const str = `${operator === "notIn" ? "!" : ""}${`[${value}]`}.${
+          map_operators[operator]
+        }(${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
-          `${str}`
-        )}`;
+          name
+        )})`;
+        return str;
       } else if (["between", "notBetween"].includes(operator)) {
         const temp = initValue.match(/it.\$\$/g);
         if (temp && temp.length) {
@@ -357,12 +351,12 @@ function ExpressionBuilder({
             )
             .filter((f) => f !== "")
             .join(",");
-          return `${prefix}${join_operator[expression]}${fieldName}${
+          return `${operator === "notIn" ? "!" : ""}${`[${value}]`}.${
+            map_operators[operator]
+          }(${prefix}${join_operator[expression]}${fieldName}${
             selectionList
               ? " "
-              : `${join_operator[expression]} ${targetName || "fullName"} `
-          }${rule.fieldValue.length > 1 ? "containsAll" : "contains"}(${
-            rule.fieldValue.length > 1 ? `[${value}]` : value
+              : `${join_operator[expression]} ${targetName || "fullName"}`
           })`;
         } else if (["between", "notBetween"].includes(operator)) {
           if (operator === "notBetween") {
