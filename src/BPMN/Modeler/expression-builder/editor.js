@@ -21,7 +21,6 @@ import {
   operators,
   operators_by_type,
   dateFormat,
-  compare_operators,
   join_operator,
 } from "./data";
 import { getData, getMetaFields as getMetaFieldsAPI } from "./services/api";
@@ -339,7 +338,6 @@ function Rule(props) {
     editor,
     value,
     expression,
-    parentCombinator,
     parentType,
     parentMetaModal,
     element,
@@ -459,109 +457,105 @@ function Rule(props) {
         type={parentType}
         isParent={true}
       />
-      {!compare_operators.includes(parentCombinator) && (
-        <React.Fragment>
-          <Select
-            name="operator"
-            title="Operator"
-            options={
-              field && field.selectionList
-                ? operators.filter((o) =>
-                    (isField && isField !== "none"
-                      ? ["=", "!=", "isNull", "isNotNull"]
-                      : ["=", "!=", "isNull", "isNotNull", "in", "notIn"]
-                    ).includes(o.name)
-                  )
-                : isField && isField !== "none"
-                ? operatorsOptions.filter(
-                    (o) => o.name !== "in" && o.name !== "notIn"
-                  )
-                : operatorsOptions
-            }
-            onChange={(value) => {
-              onChange({ name: "operator", value }, editor);
-              setField(null);
-            }}
-            value={operator}
-          />
-          {operator &&
-            !["isNull", "isNotNull", "isTrue", "isFalse"].includes(
-              operator
-            ) && (
-              <RadioGroup
-                aria-label="radioType"
-                name="radioType"
-                value={isField || "none"}
-                onChange={(e) => {
-                  setField(e.target.value);
-                  setNameValue({});
-                  setElseNameValue({});
-                  if (
-                    e.target.value &&
-                    (operator === "in" || operator === "notIn")
-                  ) {
-                    onChange({ name: "operator", value: undefined }, editor);
-                    setField(null);
-                  }
-                  if (e.target.value) {
-                    handleChange(
-                      "isRelationalValue",
-                      e.target.value === "none" ? null : e.target.value
-                    );
-                    handleChange("fieldValue", null);
-                    if (e.target.value === "self") {
-                      setMetaModal(parentMetaModal);
-                      setElseMetaModal(parentMetaModal);
-                    } else {
-                      setMetaModal(null);
-                      setElseMetaModal(null);
-                    }
+      <React.Fragment>
+        <Select
+          name="operator"
+          title="Operator"
+          options={
+            field && field.selectionList
+              ? operators.filter((o) =>
+                  (isField && isField !== "none"
+                    ? ["=", "!=", "isNull", "isNotNull"]
+                    : ["=", "!=", "isNull", "isNotNull", "in", "notIn"]
+                  ).includes(o.name)
+                )
+              : isField && isField !== "none"
+              ? operatorsOptions.filter(
+                  (o) => o.name !== "in" && o.name !== "notIn"
+                )
+              : operatorsOptions
+          }
+          onChange={(value) => {
+            onChange({ name: "operator", value }, editor);
+            setField(null);
+          }}
+          value={operator}
+        />
+        {operator &&
+          !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) && (
+            <RadioGroup
+              aria-label="radioType"
+              name="radioType"
+              value={isField || "none"}
+              onChange={(e) => {
+                setField(e.target.value);
+                setNameValue({});
+                setElseNameValue({});
+                if (
+                  e.target.value &&
+                  (operator === "in" || operator === "notIn")
+                ) {
+                  onChange({ name: "operator", value: undefined }, editor);
+                  setField(null);
+                }
+                if (e.target.value) {
+                  handleChange(
+                    "isRelationalValue",
+                    e.target.value === "none" ? null : e.target.value
+                  );
+                  handleChange("fieldValue", null);
+                  if (e.target.value === "self") {
+                    setMetaModal(parentMetaModal);
+                    setElseMetaModal(parentMetaModal);
                   } else {
-                    handleChange("relatedValueFieldName", null);
-                    handleChange("relatedValueModal", null);
-                    handleChange("relatedElseValueFieldName", null);
-                    handleChange("relatedElseValueModal", null);
+                    setMetaModal(null);
+                    setElseMetaModal(null);
                   }
-                }}
-              >
-                <label className={classes.valueFrom}>Value from</label>
-                <FormControlLabel
-                  value="self"
-                  control={
-                    <Radio
-                      className={classes.radio}
-                      color="primary"
-                      size="small"
-                    />
-                  }
-                  label="Self"
-                />
-                <FormControlLabel
-                  value="context"
-                  control={
-                    <Radio
-                      className={classes.radio}
-                      color="primary"
-                      size="small"
-                    />
-                  }
-                  label="Context"
-                />
-                <FormControlLabel
-                  value="none"
-                  control={
-                    <Radio
-                      className={classes.radio}
-                      color="primary"
-                      size="small"
-                    />
-                  }
-                  label="None"
-                />
-              </RadioGroup>
-            )}
-        </React.Fragment>
-      )}
+                } else {
+                  handleChange("relatedValueFieldName", null);
+                  handleChange("relatedValueModal", null);
+                  handleChange("relatedElseValueFieldName", null);
+                  handleChange("relatedElseValueModal", null);
+                }
+              }}
+            >
+              <label className={classes.valueFrom}>Value from</label>
+              <FormControlLabel
+                value="self"
+                control={
+                  <Radio
+                    className={classes.radio}
+                    color="primary"
+                    size="small"
+                  />
+                }
+                label="Self"
+              />
+              <FormControlLabel
+                value="context"
+                control={
+                  <Radio
+                    className={classes.radio}
+                    color="primary"
+                    size="small"
+                  />
+                }
+                label="Context"
+              />
+              <FormControlLabel
+                value="none"
+                control={
+                  <Radio
+                    className={classes.radio}
+                    color="primary"
+                    size="small"
+                  />
+                }
+                label="None"
+              />
+            </RadioGroup>
+          )}
+      </React.Fragment>
       {isField &&
       isField !== "none" &&
       operator &&
@@ -701,7 +695,6 @@ function Rule(props) {
           )}
         </React.Fragment>
       ) : (
-        !compare_operators.includes(parentCombinator) &&
         operator && (
           <RenderWidget
             type={type}
@@ -736,7 +729,6 @@ export default function Editor({
   getMetaFields,
   isDisable,
   expression,
-  parentCombinator,
   type,
   parentMetaModal,
   element,
@@ -756,34 +748,26 @@ export default function Editor({
       variant="outlined"
       className={classNames(classes.paper, isDisable && classes.disabled)}
     >
-      {!compare_operators.includes(parentCombinator) && (
-        <div className={classNames(classes.rulesGroupHeader)}>
-          <Select
-            name="combinator"
-            title="Combinator"
-            options={combinator}
-            value={editor.combinator}
-            onChange={(value) =>
-              onChange({ name: "combinator", value }, editor)
-            }
+      <div className={classNames(classes.rulesGroupHeader)}>
+        <Select
+          name="combinator"
+          title="Combinator"
+          options={combinator}
+          value={editor.combinator}
+          onChange={(value) => onChange({ name: "combinator", value }, editor)}
+        />
+        <Button title="Rules" Icon={AddIcon} onClick={() => onAddRule(id)} />
+        {!isBPM && (
+          <Button title="Group" Icon={AddIcon} onClick={() => onAddGroup(id)} />
+        )}
+        {isRemoveGroup && (
+          <Button
+            title="Group"
+            Icon={DeleteIcon}
+            onClick={() => onRemoveGroup(id)}
           />
-          <Button title="Rules" Icon={AddIcon} onClick={() => onAddRule(id)} />
-          {!isBPM && (
-            <Button
-              title="Group"
-              Icon={AddIcon}
-              onClick={() => onAddGroup(id)}
-            />
-          )}
-          {isRemoveGroup && (
-            <Button
-              title="Group"
-              Icon={DeleteIcon}
-              onClick={() => onRemoveGroup(id)}
-            />
-          )}
-        </div>
-      )}
+        )}
+      </div>
       {rules.map((rule, i) => (
         <React.Fragment key={i}>
           <Rule
@@ -793,7 +777,6 @@ export default function Editor({
             editor={editor}
             value={rule}
             expression={expression}
-            parentCombinator={parentCombinator}
             parentType={type}
             isBPM={isBPM}
             parentMetaModal={parentMetaModal}
@@ -813,7 +796,6 @@ export default function Editor({
             getMetaFields={getMetaFields}
             onChange={(e, editor, i) => onChange(e, editor, i)}
             editor={editor}
-            parentCombinator={parentCombinator}
             type={type}
             element={element}
           />

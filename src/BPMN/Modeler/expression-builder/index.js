@@ -17,13 +17,12 @@ import moment from "moment";
 import ExpressionComponent from "./expression-builder";
 import { Button, Select } from "./component";
 import {
-  combinators,
+  combinator as combinators,
   map_operator,
   join_operator,
   dateFormat,
   map_combinator,
   map_bpm_combinator,
-  compare_operators,
 } from "./data";
 import { getModels } from "../../../services/api";
 import { isBPMQuery, lowerCaseFirstLetter } from "./util";
@@ -63,11 +62,6 @@ function ExpressionBuilder({
   function onAddExpressionEditor() {
     setExpressionComponents(
       produce((draft) => {
-        if (
-          compare_operators.includes(combinator) &&
-          expressionComponents.length === 2
-        )
-          return;
         draft.push({ Component: ExpressionComponent.bind({}) });
       })
     );
@@ -291,7 +285,7 @@ function ExpressionBuilder({
     }
   }
 
-  function getCondition(rules, parentCombinator, modalName) {
+  function getCondition(rules, modalName) {
     const isBPM = isBPMQuery(parentType);
     const prefix = isBPM ? "self" : modalName;
     const map_operators = map_operator[isBPM ? "BPM" : expression];
@@ -326,9 +320,6 @@ function ExpressionBuilder({
         if (isEmpty(fValue)) {
           if (["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)) {
           } else {
-            if (compare_operators.includes(parentCombinator)) {
-              return `${prefix}${join_operator[expression]}${fieldName}`;
-            }
             return null;
           }
         }
@@ -412,7 +403,7 @@ function ExpressionBuilder({
     );
   }
 
-  function getBPMCondition(rules, parentCombinator, modalName) {
+  function getBPMCondition(rules, modalName) {
     const isBPM = isBPMQuery(parentType);
     const prefix = isBPM ? "self" : modalName;
     const map_operators = map_operator[isBPM ? "BPM" : expression];
@@ -456,9 +447,6 @@ function ExpressionBuilder({
       if (isEmpty(fValue)) {
         if (["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)) {
         } else {
-          if (compare_operators.includes(parentCombinator)) {
-            return `${prefix}${join_operator[expression]}${fieldName}`;
-          }
           return null;
         }
       }
@@ -572,20 +560,11 @@ function ExpressionBuilder({
     });
   }
 
-  function getBPMCriteria(rule, modalName, isChildren, parentCombinator) {
+  function getBPMCriteria(rule, modalName, isChildren) {
     const { rules, combinator, children } = rule[0];
-    const condition = getBPMCondition(
-      rules,
-      parentCombinator,
-      modalName
-    ).filter((f) => f !== "");
+    const condition = getBPMCondition(rules, modalName).filter((f) => f !== "");
     if (children.length > 0) {
-      const { conditions, values } = getBPMCriteria(
-        children,
-        modalName,
-        true,
-        parentCombinator
-      );
+      const { conditions, values } = getBPMCriteria(children, modalName, true);
       condition.push({ condition: conditions, values });
     }
     const map_type = isBPMQuery(parentType)
@@ -605,18 +584,11 @@ function ExpressionBuilder({
     }
   }
 
-  function getCriteria(rule, modalName, isChildren, parentCombinator) {
+  function getCriteria(rule, modalName, isChildren) {
     const { rules, combinator, children } = rule[0];
-    const condition = getCondition(rules, parentCombinator, modalName).filter(
-      (f) => f !== ""
-    );
+    const condition = getCondition(rules, modalName).filter((f) => f !== "");
     if (children.length > 0) {
-      const conditions = getCriteria(
-        children,
-        modalName,
-        true,
-        parentCombinator
-      );
+      const conditions = getCriteria(children, modalName, true);
       condition.push(conditions);
     }
     const map_type = isBPMQuery(parentType)
@@ -833,7 +805,6 @@ function ExpressionBuilder({
                   index={index}
                   setValue={onChange}
                   element={element}
-                  parentCombinator={combinator}
                   type={parentType}
                 />
                 {!isBPMQuery(parentType) && (

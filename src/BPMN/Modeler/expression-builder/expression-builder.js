@@ -71,7 +71,6 @@ function ExpressionBuilder(props) {
     setValue,
     index,
     element,
-    parentCombinator,
     type,
   } = props;
   const { metaModals: model, rules: r } = value;
@@ -209,7 +208,6 @@ function ExpressionBuilder(props) {
                   editor={editor}
                   isDisable={!Boolean(metaModals)}
                   expression={expression}
-                  parentCombinator={parentCombinator}
                   type={type}
                   parentMetaModal={metaModals}
                   element={element}
