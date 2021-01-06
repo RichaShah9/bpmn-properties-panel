@@ -170,12 +170,8 @@ function ExpressionBuilder({
       const isDateTime = ["date", "time", "datetime"].includes(type);
 
       if (!isRelationalValue && !isNumber && typeof fieldValue !== "object") {
-        fieldValue = ["like", "notLike"].includes(operator)
-          ? `'%${jsStringEscape(fieldValue)}%'`
-          : `'${jsStringEscape(fieldValue)}'`;
-        fieldValue2 = ["like", "notLike"].includes(operator)
-          ? `'%${jsStringEscape(fieldValue2)}%'`
-          : `'${jsStringEscape(fieldValue2)}'`;
+        fieldValue = `'${jsStringEscape(fieldValue)}'`;
+        fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
       }
 
       if (isDateTime) {
@@ -351,12 +347,8 @@ function ExpressionBuilder({
         }
 
         if (!isRelationalValue && !isNumber && typeof fieldValue !== "object") {
-          fieldValue = ["like", "notLike"].includes(operator)
-            ? `'%${jsStringEscape(fieldValue)}%'`
-            : `'${jsStringEscape(fieldValue)}'`;
-          fieldValue2 = ["like", "notLike"].includes(operator)
-            ? `'%${jsStringEscape(fieldValue2)}%'`
-            : `'${jsStringEscape(fieldValue2)}'`;
+          fieldValue = `'${jsStringEscape(fieldValue)}'`;
+          fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
         }
         if (isDateTime) {
           if (!isRelationalValue) {
@@ -472,12 +464,8 @@ function ExpressionBuilder({
       }
 
       if (!isRelationalValue && !isNumber && typeof fieldValue !== "object") {
-        fieldValue = ["like", "notLike"].includes(operator)
-          ? `'%${jsStringEscape(fieldValue)}%'`
-          : `'${jsStringEscape(fieldValue)}'`;
-        fieldValue2 = ["like", "notLike"].includes(operator)
-          ? `'%${jsStringEscape(fieldValue2)}%'`
-          : `'${jsStringEscape(fieldValue2)}'`;
+        fieldValue = `'${jsStringEscape(fieldValue)}'`;
+        fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
       }
 
       if (isDateTime) {
@@ -570,7 +558,13 @@ function ExpressionBuilder({
               ? `${fieldName}.${field.targetName || "fullName"}`
               : fieldName
           } ${map_operators[operator]} ${
-            isRelatedModalSame ? fieldValue : `?${count}`
+            isRelatedModalSame
+              ? ["like", "notLike"].includes(operator)
+                ? `'%',${fieldValue},'%'`
+                : fieldValue
+              : ["like", "notLike"].includes(operator)
+              ? `'%',?${count},'%'`
+              : `?${count}`
           }`,
           values: isRelatedModalSame ? undefined : [value],
         };
