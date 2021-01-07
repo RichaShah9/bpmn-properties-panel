@@ -36,6 +36,7 @@ function DateTimePicker({ inline, type = "date", ...props }) {
         open={open}
         onChange={(value) => {
           valueRef.current = value;
+          onChange(value);
         }}
         PopoverProps={{
           anchorOrigin: { vertical: "bottom", horizontal: "left" },
