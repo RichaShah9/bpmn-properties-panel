@@ -75,7 +75,12 @@ function ExpressionBuilder({
     );
   }
 
-  function getRelationalCondition(rule, initValue = "", isParent, prefix) {
+  function getRelationalCondition(
+    rule,
+    initValue = "",
+    isParent = false,
+    prefix
+  ) {
     const map_operators =
       map_operator[isBPMQuery(parentType) ? "BPM" : expression];
     const { fieldName, operator, allField } = rule;
@@ -127,7 +132,7 @@ function ExpressionBuilder({
           relatedElseValueModal,
         },
         initValue,
-        nestedFields.length >= 1,
+        nestedFields.length > 1,
         prefix
       );
     } else if (["many_to_one", "one_to_one"].includes(type)) {
@@ -156,7 +161,7 @@ function ExpressionBuilder({
           relatedElseValueModal,
         },
         initValue,
-        nestedFields.length >= 1,
+        nestedFields.length > 1,
         prefix
       );
     } else {
