@@ -542,10 +542,10 @@ function ExpressionBuilder({
           } ${map_operators[operator]} ${
             isRelatedModalSame
               ? ["like", "notLike"].includes(operator)
-                ? `'%',${fieldValue},'%'`
+                ? `CONCAT('%',${fieldValue},'%')`
                 : fieldValue
               : ["like", "notLike"].includes(operator)
-              ? `'%',?${count},'%'`
+              ? `CONCAT('%',?${count},'%')`
               : `?${count}`
           }`,
           values: isRelatedModalSame ? undefined : [value],
