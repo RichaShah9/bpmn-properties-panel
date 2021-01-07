@@ -102,14 +102,14 @@ function ExpressionBuilder({
       if (findRelational && findRelational.length > 0) {
         const str =
           nestedFields.length >= 1
-            ? `${fName}.find{it.$$$$} != null`
-            : `${fName}.find{it$$$$} != null`;
+            ? `${fName}.collect{it->it.$$$$}`
+            : `${fName}.collect{it->it$$$$}`;
         initValue = initValue.replace(/\$\$/g, str);
       } else {
         const str =
           nestedFields.length >= 1
-            ? `${fName}.find{it.$$} != null`
-            : `${fName}.find{it$$} != null`;
+            ? `${fName}.collect{it->it.$$}`
+            : `${fName}.collect{it->it$$}`;
         initValue += str;
       }
       const nestedFieldName = nestedFields.join(join_operator[expression]);
@@ -175,6 +175,7 @@ function ExpressionBuilder({
         }
       }
       if (["in", "notIn"].includes(operator)) {
+        const isManyToManyField = initValue && initValue.includes("{it->it$$}");
         const value = rule.fieldValue
           .map((i) =>
             isNumber
@@ -192,10 +193,9 @@ function ExpressionBuilder({
               }`;
         const str = `${operator === "notIn" ? "!" : ""}${`[${value}]`}.${
           map_operators[operator]
-        }(${prefix}${join_operator[expression]}${initValue.replace(
-          /\$\$/g,
-          name
-        )})`;
+        }${isManyToManyField ? "All" : ""}(${prefix}${
+          join_operator[expression]
+        }${initValue.replace(/\$\$/g, name)})`;
         return str;
       } else if (["between", "notBetween"].includes(operator)) {
         const temp = initValue.match(/it.\$\$/g);
