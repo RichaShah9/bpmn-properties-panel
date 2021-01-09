@@ -359,7 +359,12 @@ export default function ScriptProps({ element, index, label }) {
               modelProperty: "script",
               get: function () {
                 let bo = getBusinessObject(element);
-                return { script: bo.get("script") };
+                return {
+                  script: (bo.get("script") || "").replace(
+                    /[\u200B-\u200D\uFEFF]/g,
+                    ""
+                  ),
+                };
               },
               set: function (e, values) {
                 if (element.businessObject) {
@@ -411,6 +416,7 @@ export default function ScriptProps({ element, index, label }) {
                     return;
                   }
                   if (value) {
+                    (value || "").replace(/[\u200B-\u200D\uFEFF]/g, "");
                     setProperty("scriptValue", value);
                   }
                   setProperty("scriptOperatorType", combinator);
