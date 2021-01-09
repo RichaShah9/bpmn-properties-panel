@@ -32,7 +32,7 @@ const dateFormat = {
 
 const operators_by_type = {
   enum: ["=", "!=", "isNull", "isNotNull"],
-  text: ["notLike", "isNull", "isNotNull"], //like
+  text: ["like", "notLike", "isNull", "isNotNull"],
   integer: [
     "=",
     "!=",
@@ -61,6 +61,8 @@ const map_operator_groovy = {
   isFalse: "==",
   in: "contains",
   notIn: "contains",
+  contains: "contains",
+  notContains: "contains",
 };
 
 const map_operator_bpm = {
@@ -78,6 +80,8 @@ const map_operator_bpm = {
   notIn: "NOT IN",
   like: "LIKE",
   notLike: "NOT LIKE",
+  contains: "MEMBER OF",
+  notContains: "NOT MEMBER OF",
 };
 
 const map_operator_js = {
@@ -120,6 +124,8 @@ const operators = [
   { name: "notLike", title: "doesn't contain" },
   { name: "isTrue", title: "is true" },
   { name: "isFalse", title: "is false" },
+  { name: "contains", title: "contains" },
+  { name: "notContains", title: "not contains" },
 ];
 
 export {
