@@ -75,7 +75,7 @@ async function fetchField(metaModals) {
 }
 
 function RenderRelationalWidget(props) {
-  const { operator, editor, internalProps } = props;
+  const { operator, editor, internalProps, parentType } = props;
   const { onChange, value, ...rest } = internalProps;
   const classes = useStyles();
   if (["like", "notLike"].includes(operator)) {
@@ -89,6 +89,28 @@ function RenderRelationalWidget(props) {
         style={{ marginTop: "15px", width: "250px !important" }}
         value={value}
         {...rest}
+      />
+    );
+  } else if (["contains", "notContains"].includes(operator)) {
+    const { field } = rest;
+    const { targetName } = field;
+    const fetchData = async ({ search }) => {
+      const data = await getData(field.target);
+      return data;
+    };
+    return (
+      <Selection
+        name="fieldValue"
+        title="Value"
+        placeholder="Value"
+        fetchAPI={fetchData}
+        isMulti={isBPMQuery(parentType) ? false : true}
+        optionLabelKey={targetName}
+        onChange={(value) =>
+          onChange({ name: "fieldValue", value: value }, editor)
+        }
+        value={value || []}
+        classes={{ root: classes.MuiAutocompleteRoot }}
       />
     );
   } else if (["in", "notIn"].includes(operator)) {
@@ -213,6 +235,7 @@ function RenderWidget({
   onChange,
   value,
   classes,
+  parentType,
   editor,
   ...rest
 }) {
@@ -235,6 +258,7 @@ function RenderWidget({
           operator={operator}
           editor={editor}
           internalProps={{ ...props }}
+          parentType={parentType}
         />
       );
     case "date":
@@ -422,7 +446,10 @@ function Rule(props) {
     operators_by_type.integer
   );
   addOperatorByType(["one_to_many"], operators_by_type.text);
-  addOperatorByType(["many_to_many"], ["in", "notIn", "isNull"]);
+  addOperatorByType(
+    ["many_to_many"],
+    ["in", "notIn", "isNull", "contains", "notContains"]
+  );
   addOperatorByType(
     ["many_to_one", "one_to_one"],
     ["=", "!=", "in", "notIn", "isNull", "isNotNull"]
@@ -703,6 +730,7 @@ function Rule(props) {
         operator && (
           <RenderWidget
             type={type}
+            parentType={parentType}
             operator={operator}
             onChange={(e, editor) => {
               onChange(e, editor);
