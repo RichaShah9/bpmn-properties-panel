@@ -37,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     margin: theme.spacing(1, 0),
     padding: theme.spacing(3, 2),
+    overflow: "auto",
   },
   rules: {
     display: "flex",
@@ -56,6 +57,9 @@ const useStyles = makeStyles((theme) => ({
   },
   radio: {
     padding: "1px 9px",
+  },
+  operators: {
+    minWidth: 75,
   },
 }));
 
@@ -480,6 +484,7 @@ function Rule(props) {
             setField(null);
           }}
           value={operator}
+          className={classes.operators}
         />
         {operator &&
           !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) && (

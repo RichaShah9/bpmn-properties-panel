@@ -1,7 +1,9 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import classnames from "classnames";
 import MenuItem from "@material-ui/core/MenuItem";
 import { Select, FormControl, InputLabel } from "@material-ui/core";
+
+import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,11 +21,12 @@ export default function Selection({
   onChange,
   options,
   title,
+  className,
   ...rest
 }) {
   const classes = useStyles();
   return (
-    <FormControl className={classes.formControl}>
+    <FormControl className={classnames(classes.formControl, className)}>
       <InputLabel>{title}</InputLabel>
       <Select
         value={value}
@@ -34,7 +37,8 @@ export default function Selection({
         {...rest}
       >
         {options &&
-          Array.isArray(options) && options.map(({ name, title }, index) => (
+          Array.isArray(options) &&
+          options.map(({ name, title }, index) => (
             <MenuItem value={name} key={index}>
               {title}
             </MenuItem>
