@@ -78,6 +78,12 @@ function RenderRelationalWidget(props) {
   const { operator, editor, internalProps, parentType } = props;
   const { onChange, value, ...rest } = internalProps;
   const classes = useStyles();
+  const { field } = rest;
+  const { targetName } = field;
+  const fetchData = async () => {
+    const data = await getData(field.target);
+    return data;
+  };
   if (["like", "notLike"].includes(operator)) {
     return (
       <InputField
@@ -91,69 +97,27 @@ function RenderRelationalWidget(props) {
         {...rest}
       />
     );
-  } else if (["contains", "notContains"].includes(operator)) {
-    const { field } = rest;
-    const { targetName } = field;
-    const fetchData = async ({ search }) => {
-      const data = await getData(field.target);
-      return data;
-    };
+  } else if (
+    ["contains", "notContains", "in", "notIn", "=", "!="].includes(operator)
+  ) {
     return (
       <Selection
         name="fieldValue"
         title="Value"
         placeholder="Value"
         fetchAPI={fetchData}
-        isMulti={isBPMQuery(parentType) ? false : true}
+        isMulti={
+          (isBPMQuery(parentType) &&
+            ["contains", "notContains"].includes(operator)) ||
+          ["=", "!="].includes(operator)
+            ? false
+            : true
+        }
         optionLabelKey={targetName}
         onChange={(value) =>
           onChange({ name: "fieldValue", value: value }, editor)
         }
         value={value || []}
-        classes={{ root: classes.MuiAutocompleteRoot }}
-      />
-    );
-  } else if (["in", "notIn"].includes(operator)) {
-    const { field } = rest;
-    const { targetName } = field;
-    const fetchData = async ({ search }) => {
-      const data = await getData(field.target);
-      return data;
-    };
-    return (
-      <Selection
-        name="fieldValue"
-        title="Value"
-        placeholder="Value"
-        fetchAPI={fetchData}
-        isMulti={true}
-        optionLabelKey={targetName}
-        onChange={(value) =>
-          onChange({ name: "fieldValue", value: value }, editor)
-        }
-        value={value || []}
-        classes={{ root: classes.MuiAutocompleteRoot }}
-      />
-    );
-  } else if (["=", "!="].includes(operator)) {
-    const { field } = rest;
-    const { targetName } = field;
-    const fetchData = async ({ search }) => {
-      const data = await getData(field.target);
-      return data;
-    };
-    return (
-      <Selection
-        name="fieldValue"
-        title="Value"
-        placeholder="Value"
-        fetchAPI={fetchData}
-        isMulti={false}
-        optionLabelKey={targetName}
-        onChange={(value) =>
-          onChange({ name: "fieldValue", value: value }, editor)
-        }
-        value={value}
         classes={{ root: classes.MuiAutocompleteRoot }}
       />
     );
