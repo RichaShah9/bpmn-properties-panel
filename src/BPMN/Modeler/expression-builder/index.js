@@ -531,6 +531,20 @@ function ExpressionBuilder({
           }`,
           values: isRelatedModalSame ? undefined : [value],
         };
+      } else if (["contains", "notContains"].includes(operator)) {
+        let value =
+          typeof fieldValue === "object" && fieldValue
+            ? `'${jsStringEscape(fieldValue[field.targetName] || "")}'`
+              ? `'${jsStringEscape(fieldValue[field.targetName] || "")}'`
+              : fieldValue["name"]
+            : fieldValue;
+
+        return {
+          condition: `${isRelatedModalSame ? fieldValue : `?${count}`} ${
+            map_operators[operator]
+          } ${prefix}.${fieldName}`,
+          values: isRelatedModalSame ? undefined : [value],
+        };
       } else {
         let value =
           typeof fieldValue === "object" && fieldValue
