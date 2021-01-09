@@ -35,7 +35,10 @@ export default function FieldEditor({
     fieldName.split(join_operator[expression]);
   const [startValue] = values || [];
   const hasManyValues =
-    fieldName && isParent && fields && fields.some((x) => x.name === startValue);
+    fieldName &&
+    isParent &&
+    fields &&
+    fields.some((x) => x.name === startValue);
   const relationModel =
     hasManyValues && (fields.find((x) => x.name === startValue) || {}).target;
 
@@ -46,6 +49,21 @@ export default function FieldEditor({
       let allFields;
       if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
         allFields = [...allField, value];
+      }
+      if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
+        allFields = [...allField, value];
+      } else {
+        let fields = [...(allField || [])];
+        let fieldNames = (fieldName || "").split(join_operator[expression]);
+        fieldNames &&
+          fieldNames.length > 0 &&
+          fieldNames.forEach((fName) => {
+            let index = fields.findIndex((f) => f.name === fName);
+            if (index > -1) {
+              fields.splice(index, 1);
+            }
+          });
+        allFields = fields;
       }
       onChange(
         {
@@ -87,6 +105,23 @@ export default function FieldEditor({
     onChange({ name: "field", value }, editor);
     if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
       onChange({ name: "allField", value: [...allField, value] }, editor);
+    } else {
+      let fields = [...(allField || [])];
+      let fieldNames = (fieldName || "").split(join_operator[expression]);
+      fieldNames &&
+        fieldNames.length > 0 &&
+        fieldNames.forEach((fName) => {
+          let index = fields.findIndex((f) => f.name === fName);
+          if (index > -1) {
+            fields.splice(index, 1);
+          }
+        });
+      onChange({ name: "allField", value: fields }, editor);
+      if (fields && fields.length === 1) {
+        const val = fields[0];
+        onChange({ name: "fieldType", value: (val && val.type) || "" }, editor);
+        onChange({ name: "field", value: val }, editor);
+      }
     }
   }
   const transformValue =
