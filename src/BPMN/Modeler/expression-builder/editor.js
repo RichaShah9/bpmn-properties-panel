@@ -455,14 +455,10 @@ function Rule(props) {
     ["=", "!=", "in", "notIn", "isNull", "isNotNull"]
   );
 
-  if (isBPMQuery(parentType)) {
-    addOperatorByType(
-      ["string"],
-      ["=", "!=", "isNull", "isNotNull", "like", "notLike"]
-    );
-  } else {
-    addOperatorByType(["string"], ["=", "!=", "isNull", "isNotNull"]);
-  }
+  addOperatorByType(
+    ["string"],
+    ["=", "!=", "isNull", "isNotNull", "like", "notLike"]
+  );
 
   let operatorsOptions = operators.filter((item) => {
     let operatorType = type;

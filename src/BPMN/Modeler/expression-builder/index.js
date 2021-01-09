@@ -256,6 +256,16 @@ function ExpressionBuilder({
           /\$\$/g,
           isParent ? `${str}` : ` ${str}`
         )}`;
+      } else if (["like", "notLike"].includes(operator)) {
+        const str = `${fieldName}.${map_operators[operator]}(${fieldValue})`;
+        return `${operator === "notLike" ? "!" : ""}${prefix}${
+          join_operator[expression]
+        }${initValue.replace(
+          /\$\$/g,
+          isParent || (typeof fieldValue === "object" && fieldValue)
+            ? `${str}`
+            : ` ${str}`
+        )}`;
       } else {
         let value =
           typeof fieldValue === "object" && fieldValue
@@ -396,6 +406,10 @@ function ExpressionBuilder({
         } else if (["isTrue", "isFalse"].includes(operator)) {
           const value = operator === "isTrue" ? true : false;
           return `${prefix}${join_operator[expression]}${fieldName} ${map_operators[operator]} ${value}`;
+        } else if (["like", "notLike"].includes(operator)) {
+          return `${operator === "notLike" ? "!" : ""}${prefix}${
+            join_operator[expression]
+          }${fieldName}.${map_operators[operator]}(${fieldValue})`;
         } else {
           let value =
             typeof fieldValue === "object" && fieldValue

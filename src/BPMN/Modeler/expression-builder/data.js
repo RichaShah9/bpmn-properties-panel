@@ -61,6 +61,8 @@ const map_operator_groovy = {
   isFalse: "==",
   in: "contains",
   notIn: "contains",
+  like: "contains",
+  notLike: "contains",
   contains: "contains",
   notContains: "contains",
 };
