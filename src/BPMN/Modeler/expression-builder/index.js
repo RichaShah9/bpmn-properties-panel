@@ -202,6 +202,29 @@ function ExpressionBuilder({
           join_operator[expression]
         }${initValue.replace(/\$\$/g, name)})`;
         return str;
+      } else if (["contains", "notContains"].includes(operator)) {
+        const isManyToManyField = initValue && initValue.includes("{it->it$$}");
+        const value = rule.fieldValue
+          .map((i) =>
+            isNumber
+              ? `${i["targetName"] || i["fullName"] || i["name"]}`
+              : `'${i["targetName"] || i["fullName"] || i["name"]}'`
+          )
+          .join(",");
+        const name =
+          isParent || nestedFields.length >= 1
+            ? ""
+            : `${fieldName}${
+                selectionList
+                  ? ""
+                  : `${join_operator[expression]}${targetName || "fullName"}`
+              }`;
+        const str = `${operator === "notContains" ? "!" : ""}(${prefix}${
+          join_operator[expression]
+        }${initValue.replace(/\$\$/g, name)}).${map_operators[operator]}${
+          isManyToManyField ? "All" : ""
+        }(${`[${value}]`})`;
+        return str;
       } else if (["between", "notBetween"].includes(operator)) {
         const temp = initValue.match(/it.\$\$/g);
         if (temp && temp.length) {
