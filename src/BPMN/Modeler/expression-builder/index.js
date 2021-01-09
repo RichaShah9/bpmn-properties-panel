@@ -541,7 +541,7 @@ function ExpressionBuilder({
 
         return {
           condition: `${prefix}.${
-            type === "many_to_one"
+            type === "many_to_one" && !isRelationalValue
               ? `${fieldName}.${field.targetName || "fullName"}`
               : fieldName
           } ${map_operators[operator]} ${
