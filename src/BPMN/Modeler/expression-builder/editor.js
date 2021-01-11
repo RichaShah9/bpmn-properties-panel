@@ -595,7 +595,6 @@ function Rule(props) {
               );
               handleChange("relatedValueFieldName", value);
               handleChange("relatedValueModal", metaModal);
-              handleChange("allField", allField);
               let isBPM = isBPMQuery(parentType);
               handleChange(
                 "fieldValue",

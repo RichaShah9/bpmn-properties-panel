@@ -48,8 +48,20 @@ export default function FieldEditor({
       value && fields.some((x) => x.name === value.name && x.target);
     if (isBPM) {
       let allFields;
+      let newFieldName = isParent
+        ? `${initValue}${value && value.name}`
+        : value && value.name
+        ? `${isRelationalField ? join_operator[expression] : ""}${initValue}${
+            value && value.name
+          }`
+        : "";
       if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
-        allFields = [...allField, value];
+        let fieldNames =
+          (newFieldName || "").split(join_operator[expression]) || [];
+        let filterFields =
+          (allField && allField.filter((f) => fieldNames.includes(f.name))) ||
+          [];
+        allFields = [...filterFields, value];
       } else {
         let fields = [...(allField || [])];
         let fieldNames = (fieldName || "").split(join_operator[expression]);
@@ -67,42 +79,41 @@ export default function FieldEditor({
         {
           name: "fieldName",
           value,
-          fieldNameValue: isParent
-            ? `${initValue}${value && value.name}`
-            : value && value.name
-            ? `${
-                isRelationalField ? join_operator[expression] : ""
-              }${initValue}${value && value.name}`
-            : "",
+          fieldNameValue: newFieldName,
           allField: allFields,
         },
         editor
       );
       return;
     }
+    let newFieldName = isParent
+      ? `${
+          initValue && value && value.name
+            ? initValue
+            : initValue.replace(join_operator[expression], "")
+        }${value ? value.name : ""}`
+      : value
+      ? value.name
+      : ""
+      ? `${isRelationalField ? join_operator[expression] : ""}${initValue}${
+          value ? value.name : ""
+        }`
+      : "";
     onChange(
       {
         name: "fieldName",
-        value: isParent
-          ? `${
-              initValue && value && value.name
-                ? initValue
-                : initValue.replace(join_operator[expression], "")
-            }${value ? value.name : ""}`
-          : value
-          ? value.name
-          : ""
-          ? `${isRelationalField ? join_operator[expression] : ""}${initValue}${
-              value ? value.name : ""
-            }`
-          : "",
+        value: newFieldName,
       },
       editor
     );
     onChange({ name: "fieldType", value: (value && value.type) || "" }, editor);
     onChange({ name: "field", value }, editor);
     if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
-      onChange({ name: "allField", value: [...allField, value] }, editor);
+      let fieldNames =
+        (newFieldName || "").split(join_operator[expression]) || [];
+      let allFields =
+        (allField && allField.filter((f) => fieldNames.includes(f.name))) || [];
+      onChange({ name: "allField", value: [...allFields, value] }, editor);
     } else {
       let fields = [...(allField || [])];
       let fieldNames = (fieldName || "").split(join_operator[expression]);
