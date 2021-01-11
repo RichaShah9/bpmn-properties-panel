@@ -181,13 +181,16 @@ function ExpressionBuilder({
       }
       if (["in", "notIn"].includes(operator)) {
         const isManyToManyField = initValue && initValue.includes("{it->it$$}");
-        const value = rule.fieldValue
-          .map((i) =>
-            isNumber
-              ? `${i["targetName"] || i["fullName"] || i["name"]}`
-              : `'${i["targetName"] || i["fullName"] || i["name"]}'`
-          )
-          .join(",");
+        const value =
+          typeof rule.fieldValue === "string"
+            ? rule.fieldValue
+            : rule.fieldValue
+                .map((i) =>
+                  isNumber
+                    ? `${i["targetName"] || i["fullName"] || i["name"]}`
+                    : `'${i["targetName"] || i["fullName"] || i["name"]}'`
+                )
+                .join(",");
         const name =
           isParent || nestedFields.length >= 1
             ? ""
@@ -204,13 +207,16 @@ function ExpressionBuilder({
         return str;
       } else if (["contains", "notContains"].includes(operator)) {
         const isManyToManyField = initValue && initValue.includes("{it->it$$}");
-        const value = rule.fieldValue
-          .map((i) =>
-            isNumber
-              ? `${i["targetName"] || i["fullName"] || i["name"]}`
-              : `'${i["targetName"] || i["fullName"] || i["name"]}'`
-          )
-          .join(",");
+        const value =
+          typeof rule.fieldValue === "string"
+            ? rule.fieldValue
+            : rule.fieldValue
+                .map((i) =>
+                  isNumber
+                    ? `${i["targetName"] || i["fullName"] || i["name"]}`
+                    : `'${i["targetName"] || i["fullName"] || i["name"]}'`
+                )
+                .join(",");
         const name =
           isParent || nestedFields.length >= 1
             ? ""
@@ -245,6 +251,21 @@ function ExpressionBuilder({
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
         const str = `${fieldName} ${map_operators[operator]}`;
+        const isManyToManyField = initValue && initValue.includes("{it->it$$}");
+        if (isManyToManyField) {
+          const name =
+            isParent || nestedFields.length >= 1
+              ? ""
+              : `${fieldName}${
+                  selectionList
+                    ? ""
+                    : `${join_operator[expression]}${targetName || "fullName"}`
+                }`;
+          return `${prefix}${join_operator[expression]}${initValue.replace(
+            /\$\$/g,
+            `${name} ${str}`
+          )}`;
+        }
         return `${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
           isParent ? `${str}` : ` ${str}`
