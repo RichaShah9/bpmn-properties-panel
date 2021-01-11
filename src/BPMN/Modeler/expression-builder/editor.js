@@ -447,6 +447,9 @@ function Rule(props) {
         expression={expression}
         type={parentType}
         isParent={true}
+        setInitialField={() => {
+          setField("none");
+        }}
       />
       <React.Fragment>
         <Select

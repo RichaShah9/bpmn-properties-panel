@@ -23,6 +23,7 @@ export default function FieldEditor({
   type,
   isParent = false,
   isBPM,
+  setInitialField = () => {},
 }) {
   const { fieldName = "", allField = [] } = value || {};
   const [fields, setFields] = useState([]);
@@ -47,9 +48,6 @@ export default function FieldEditor({
       value && fields.some((x) => x.name === value.name && x.target);
     if (isBPM) {
       let allFields;
-      if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
-        allFields = [...allField, value];
-      }
       if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
         allFields = [...allField, value];
       } else {
@@ -121,6 +119,7 @@ export default function FieldEditor({
         const val = fields[0];
         onChange({ name: "fieldType", value: (val && val.type) || "" }, editor);
         onChange({ name: "field", value: val }, editor);
+        setInitialField();
       }
     }
   }
@@ -173,6 +172,7 @@ export default function FieldEditor({
           type={type}
           isParent={relationModel ? true : false}
           isBPM={isBPM}
+          setInitialField={setInitialField}
         />
       )}
     </React.Fragment>
