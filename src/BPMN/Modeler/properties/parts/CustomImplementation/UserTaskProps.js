@@ -42,9 +42,9 @@ const useStyles = makeStyles({
   new: {
     cursor: "pointer",
   },
-  dialog:{
-    minWidth: 300
-  }
+  dialog: {
+    minWidth: 300,
+  },
 });
 
 export default function UserTaskProps({ element, index, label }) {
@@ -101,13 +101,19 @@ export default function UserTaskProps({ element, index, label }) {
               label: translate("Completed If"),
               modelProperty: "completedIf",
               get: function () {
+                let completedIf = getProperty("camunda:completedIf");
+                completedIf = (completedIf || "").replace(
+                  /[\u200B-\u200D\uFEFF]/g,
+                  ""
+                );
                 return {
-                  completedIf: getProperty("camunda:completedIf"),
+                  completedIf,
                 };
               },
               set: function (e, values) {
                 let oldVal = getProperty("camunda:completedIf");
                 let currentVal = values["completedIf"];
+                (currentVal || "").replace(/[\u200B-\u200D\uFEFF]/g, "");
                 setProperty("camunda:completedIf", currentVal);
                 if (
                   (oldVal && oldVal.trim().toLowerCase()) !==
