@@ -23,7 +23,38 @@ export async function getMetaFields(fields, model) {
   if (!model) return [];
   if (model.type === "metaModel") {
     let res = await metaFieldService.fields({ fields, model: model.fullName });
-    return res && res.data && res.data.fields;
+    const zonedDateTimeFieldsRes = await services.search(
+      "com.axelor.meta.db.MetaField",
+      {
+        data: {
+          _domain: `self.metaModel.name = '${model.name}' AND self.typeName = 'ZonedDateTime'`,
+          _domainContext: {
+            _model: "com.axelor.meta.db.MetaField",
+          },
+        },
+        fields: ["name", "typeName", "metaModel"],
+      }
+    );
+    const zonedDateTimeFields =
+      zonedDateTimeFieldsRes &&
+      zonedDateTimeFieldsRes.data &&
+      zonedDateTimeFieldsRes.data.length > 0 &&
+      zonedDateTimeFieldsRes.data.map((f) => f.name);
+    let fieldsRes = res && res.data && res.data.fields;
+    if (
+      zonedDateTimeFields &&
+      zonedDateTimeFields.length > 0 &&
+      fieldsRes &&
+      fieldsRes.length > 0
+    ) {
+      fieldsRes.forEach((field) => {
+        if (zonedDateTimeFields.includes(field.name)) {
+          field.typeName = "ZonedDateTime";
+        }
+      });
+      return fieldsRes;
+    }
+    return fieldsRes;
   } else {
     let res = await services.search("com.axelor.meta.db.MetaJsonField", {
       data: {

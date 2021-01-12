@@ -83,7 +83,7 @@ function ExpressionBuilder({
   ) {
     const map_operators =
       map_operator[isBPMQuery(parentType) ? "BPM" : expression];
-    const { fieldName, operator, allField } = rule;
+    const { fieldName: propFieldName, operator, allField } = rule;
     let {
       fieldValue,
       fieldValue2,
@@ -93,6 +93,7 @@ function ExpressionBuilder({
       relatedElseValueFieldName,
       relatedElseValueModal,
     } = rule;
+    let fieldName = propFieldName;
     const values = fieldName
       .split(join_operator[isBPMQuery(parentType) ? "BPM" : expression])
       .filter((f) => f !== "");
@@ -101,6 +102,7 @@ function ExpressionBuilder({
     const field = allField.find((f) => f.name === fName) || {};
     const { targetName, selectionList } = field || {};
     const type = field && field.type && field.type.toLowerCase();
+    const typeName = field && field.typeName;
     const nestedFields = values.splice(1);
     if (["many_to_many", "one_to_many"].includes(type)) {
       const findRelational = initValue.match(/\$\$/g);
@@ -178,6 +180,7 @@ function ExpressionBuilder({
           fieldValue = getDateTimeValue(type, fieldValue);
           fieldValue2 = getDateTimeValue(type, fieldValue2);
         }
+        fieldName = typeName ? `${fieldName}?.toLocalDateTime()` : fieldName;
       }
       if (["in", "notIn"].includes(operator)) {
         const isManyToManyField = initValue && initValue.includes("{it->it$$}");
@@ -345,14 +348,21 @@ function ExpressionBuilder({
     return (
       rules &&
       rules.map((rule) => {
-        const { fieldName, field = {}, operator, allField } = rule;
+        const {
+          fieldName: propFieldName,
+          field = {},
+          operator,
+          allField,
+        } = rule;
         const { targetName, selectionList } = field || {};
         const type = field && field.type && field.type.toLowerCase();
+        const typeName = field && field.typeName;
         const isNumber = ["long", "integer", "decimal", "boolean"].includes(
           type
         );
         const isDateTime = ["date", "time", "datetime"].includes(type);
         let { fieldValue, fieldValue2, isRelationalValue } = rule;
+        let fieldName = propFieldName;
         const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
         if (
           (fieldValue === null ||
@@ -399,6 +409,7 @@ function ExpressionBuilder({
             fieldValue = getDateTimeValue(type, fieldValue);
             fieldValue2 = getDateTimeValue(type, fieldValue2);
           }
+          fieldName = typeName ? `${fieldName}?.toLocalDateTime()` : fieldName;
         }
         const map_type = isBPM ? map_bpm_combinator : map_combinator;
         if (["in", "notIn"].includes(operator)) {

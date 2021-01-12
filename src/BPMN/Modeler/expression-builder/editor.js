@@ -604,10 +604,18 @@ function Rule(props) {
                     ? `self.${fieldNameValue}`
                     : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
                         join_operator[isBPM ? "BPM" : expression]
-                      }${fieldNameValue}`
+                      }${fieldNameValue}${
+                        value && value.typeName && !isBPM
+                          ? `${join_operator[expression]}toLocalDateTime()`
+                          : ""
+                      }`
                   : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
                       join_operator[isBPM ? "BPM" : expression]
-                    }${fieldNameValue}`
+                    }${fieldNameValue}${
+                      value && value.typeName && !isBPM
+                        ? `${join_operator[expression]}toLocalDateTime()`
+                        : ""
+                    }`
               );
               if (!value) {
                 setField(null);
@@ -667,12 +675,20 @@ function Rule(props) {
                             metaModal && metaModal.name
                           )}${
                             join_operator[isBPM ? "BPM" : expression]
-                          }${fieldNameValue}`
+                          }${fieldNameValue}${
+                            value && value.typeName && !isBPM
+                              ? `${join_operator[expression]}toLocalDateTime()`
+                              : ""
+                          }`
                       : `${lowerCaseFirstLetter(
                           elseMetaModal && elseMetaModal.name
                         )}${
                           join_operator[isBPM ? "BPM" : expression]
-                        }${fieldNameValue}`
+                        }${fieldNameValue}${
+                          value && value.typeName && !isBPM
+                            ? `${join_operator[expression]}toLocalDateTime()`
+                            : ""
+                        }`
                   );
                   if (!value) {
                     setField(null);
