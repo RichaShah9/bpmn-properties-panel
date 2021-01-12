@@ -330,10 +330,9 @@ function ExpressionBuilder({
         "YYYY-MM-DD"
       )}")`;
     } else if (type === "datetime") {
-      return `LocalDateTime.parse("${moment(
-        fieldValue,
-        dateFormat["datetime"]
-      ).format("YYYY-MM-DDTHH:​mm:ss")}")`;
+      return `LocalDateTime.of(${moment(fieldValue, dateFormat["datetime"])
+        .format("YYYY-M-D-H-m-s")
+        .split("-")})`;
     } else {
       return `LocalTime.parse("${moment(fieldValue, dateFormat["time"]).format(
         "HH:mm:ss"
