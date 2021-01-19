@@ -202,9 +202,9 @@ function ExpressionBuilder({
                   ? ""
                   : `${join_operator[expression]}${targetName || "fullName"}`
               }`;
-        const str = `${operator === "notIn" ? "!" : ""}${`[${value}]`}.${
-          map_operators[operator]
-        }${isManyToManyField ? "All" : ""}(${prefix}${
+        const str = `${operator === "notIn" ? "!" : ""}${`[${value}]`}${
+          join_operator[expression]
+        }${map_operators[operator]}${isManyToManyField ? "All" : ""}(${prefix}${
           join_operator[expression]
         }${initValue.replace(/\$\$/g, name)})`;
         return str;
@@ -230,9 +230,9 @@ function ExpressionBuilder({
               }`;
         const str = `${operator === "notContains" ? "!" : ""}(${prefix}${
           join_operator[expression]
-        }${initValue.replace(/\$\$/g, name)}).${map_operators[operator]}${
-          isManyToManyField ? "All" : ""
-        }(${`[${value}]`})`;
+        }${initValue.replace(/\$\$/g, name)})${join_operator[expression]}${
+          map_operators[operator]
+        }${isManyToManyField ? "All" : ""}(${`[${value}]`})`;
         return str;
       } else if (["between", "notBetween"].includes(operator)) {
         const temp = initValue.match(/it.\$\$/g);
@@ -281,7 +281,7 @@ function ExpressionBuilder({
           isParent ? `${str}` : ` ${str}`
         )}`;
       } else if (["like", "notLike"].includes(operator)) {
-        const str = `${fieldName}.${map_operators[operator]}(${fieldValue})`;
+        const str = `${fieldName}${join_operator[expression]}${map_operators[operator]}(${fieldValue})`;
         return `${operator === "notLike" ? "!" : ""}${prefix}${
           join_operator[expression]
         }${initValue.replace(
@@ -440,7 +440,9 @@ function ExpressionBuilder({
         } else if (["like", "notLike"].includes(operator)) {
           return `${operator === "notLike" ? "!" : ""}${prefix}${
             join_operator[expression]
-          }${fieldName}.${map_operators[operator]}(${fieldValue})`;
+          }${fieldName}${join_operator[expression]}${
+            map_operators[operator]
+          }(${fieldValue})`;
         } else {
           let value =
             typeof fieldValue === "object" && fieldValue
