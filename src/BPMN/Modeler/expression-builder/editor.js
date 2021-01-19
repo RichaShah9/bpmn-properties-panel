@@ -499,6 +499,7 @@ function Rule(props) {
                     e.target.value === "none" ? null : e.target.value
                   );
                   handleChange("fieldValue", null);
+                  handleChange("fieldValue2", null);
                   if (e.target.value === "self") {
                     setMetaModal(parentMetaModal);
                     setElseMetaModal(parentMetaModal);
@@ -612,6 +613,13 @@ function Rule(props) {
                   : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
                       join_operator[isBPM ? "BPM" : expression]
                     }${fieldNameValue}${
+                      value &&
+                      value.type === "MANY_TO_ONE" &&
+                      isBPM &&
+                      isField === "context"
+                        ? ".getTarget()"
+                        : ""
+                    }${
                       value && value.typeName && !isBPM
                         ? `${join_operator[expression]}toLocalDateTime()`
                         : ""
@@ -639,6 +647,7 @@ function Rule(props) {
                   optionLabelKey="name"
                   onChange={(e) => {
                     setElseMetaModal(e);
+                    setElseNameValue({});
                   }}
                   value={elseMetaModal}
                   classes={{ root: classes.MuiAutocompleteRoot }}
@@ -685,6 +694,13 @@ function Rule(props) {
                         )}${
                           join_operator[isBPM ? "BPM" : expression]
                         }${fieldNameValue}${
+                          value &&
+                          value.type === "MANY_TO_ONE" &&
+                          isBPM &&
+                          isField === "context"
+                            ? ".getTarget()"
+                            : ""
+                        }${
                           value && value.typeName && !isBPM
                             ? `${join_operator[expression]}toLocalDateTime()`
                             : ""
@@ -693,6 +709,7 @@ function Rule(props) {
                   if (!value) {
                     setField(null);
                     handleChange("fieldValue", null);
+                    handleChange("fieldValue2", null);
                   }
                 }}
                 value={elseNameValue}

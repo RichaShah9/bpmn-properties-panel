@@ -486,9 +486,13 @@ function ExpressionBuilder({
         fieldValue2,
         isRelationalValue,
         relatedValueModal = {},
+        relatedElseValueModal = {},
       } = rule || {};
       const relatedValueModalName = lowerCaseFirstLetter(
         relatedValueModal && relatedValueModal.name
+      );
+      const relatedElseValueModalName = lowerCaseFirstLetter(
+        relatedElseValueModal && relatedElseValueModal.name
       );
       const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
       if (
@@ -504,6 +508,7 @@ function ExpressionBuilder({
       }
       isValid = true;
       const isRelatedModalSame = relatedValueModalName === modalName;
+      const isRelatedElseModalSame = relatedElseValueModalName === modalName;
       if (!["isNotNull", "isNull"].includes(operator) && !isRelatedModalSame) {
         ++count;
       }
@@ -548,24 +553,32 @@ function ExpressionBuilder({
           values: isRelatedModalSame ? undefined : [[value]],
         };
       } else if (["between", "notBetween"].includes(operator)) {
+        let values =
+          isRelatedModalSame && isRelatedElseModalSame
+            ? undefined
+            : isRelatedModalSame
+            ? [fieldValue2]
+            : isRelatedElseModalSame
+            ? [fieldValue]
+            : [fieldValue, fieldValue2];
         if (isDateTime && isBPM) {
           if (operator === "notBetween") {
             return {
               condition: `${prefix}.${fieldName} NOT BETWEEN ${
                 isRelatedModalSame ? fieldValue : `?${count}`
               } ${map_type["and"]} ${
-                isRelatedModalSame ? fieldValue2 : `?${++count}`
+                isRelatedElseModalSame ? fieldValue2 : `?${++count}`
               }`,
-              values: [fieldValue, fieldValue2],
+              values,
             };
           }
           return {
             condition: `${prefix}.${fieldName} BETWEEN ${
               isRelatedModalSame ? fieldValue : `?${count}`
             } ${map_type["and"]} ${
-              isRelatedModalSame ? fieldValue2 : `?${++count}`
+              isRelatedElseModalSame ? fieldValue2 : `?${++count}`
             }`,
-            values: isRelatedModalSame ? undefined : [fieldValue, fieldValue2],
+            values,
           };
         } else {
           if (operator === "notBetween") {
@@ -573,18 +586,18 @@ function ExpressionBuilder({
               condition: `NOT (${prefix}.${fieldName} >= ${
                 isRelatedModalSame ? fieldValue : `?${count}`
               } ${map_type["and"]} ${prefix}.${fieldName} <= ${
-                isRelatedModalSame ? fieldValue2 : `?${++count}`
+                isRelatedElseModalSame ? fieldValue2 : `?${++count}`
               })`,
-              values: [fieldValue, fieldValue2],
+              values,
             };
           }
           return {
             condition: `(${prefix}.${fieldName} >= ${
               isRelatedModalSame ? fieldValue : `?${count}`
             } ${map_type["and"]} ${prefix}.${fieldName} <= ${
-              isRelatedModalSame ? fieldValue2 : `?${++count}`
+              isRelatedElseModalSame ? fieldValue2 : `?${++count}`
             })`,
-            values: isRelatedModalSame ? undefined : [fieldValue, fieldValue2],
+            values,
           };
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
