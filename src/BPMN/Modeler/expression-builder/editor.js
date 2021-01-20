@@ -441,6 +441,7 @@ function Rule(props) {
     <div className={classes.rules}>
       <FieldEditor
         getMetaFields={getMetaFields}
+        isField={isField}
         editor={editor}
         onChange={onChange}
         value={value}
@@ -577,6 +578,7 @@ function Rule(props) {
               isField === "context" ? fetchField(metaModal) : getMetaFields()
             }
             editor={editor}
+            isField={isField}
             onChange={({ value, fieldNameValue, allField }, editor) => {
               setNameValue({
                 allField: allField,
@@ -597,6 +599,7 @@ function Rule(props) {
               handleChange("relatedValueFieldName", value);
               handleChange("relatedValueModal", metaModal);
               let isBPM = isBPMQuery(parentType);
+              const isContextValue = isField === "context" && isBPM;
               handleChange(
                 "fieldValue",
                 (parentMetaModal && parentMetaModal.id) ===
@@ -604,24 +607,34 @@ function Rule(props) {
                   ? isBPM
                     ? `self.${fieldNameValue}`
                     : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
-                        join_operator[isBPM ? "BPM" : expression]
+                        isContextValue
+                          ? "?."
+                          : join_operator[isBPM ? "BPM" : expression]
                       }${fieldNameValue}${
                         value && value.typeName && !isBPM
-                          ? `${join_operator[expression]}toLocalDateTime()`
+                          ? `${
+                              isContextValue ? "?." : join_operator[expression]
+                            }toLocalDateTime()`
                           : ""
                       }`
                   : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
-                      join_operator[isBPM ? "BPM" : expression]
+                      isContextValue
+                        ? "?."
+                        : join_operator[isBPM ? "BPM" : expression]
                     }${fieldNameValue}${
                       value &&
                       value.type === "MANY_TO_ONE" &&
                       isBPM &&
                       isField === "context"
-                        ? ".getTarget()"
+                        ? `${
+                            isContextValue ? "?." : join_operator[expression]
+                          }getTarget()`
                         : ""
                     }${
                       value && value.typeName && !isBPM
-                        ? `${join_operator[expression]}toLocalDateTime()`
+                        ? `${
+                            isContextValue ? "?." : join_operator[expression]
+                          }toLocalDateTime()`
                         : ""
                     }`
               );
@@ -656,6 +669,7 @@ function Rule(props) {
               <FieldEditor
                 getMetaFields={() => fetchField(elseMetaModal)}
                 editor={editor}
+                isField={isField}
                 onChange={({ value, fieldNameValue, allField }, editor) => {
                   setElseNameValue({
                     allField: allField,
@@ -674,6 +688,7 @@ function Rule(props) {
                   handleChange("relatedElseValueFieldName", value);
                   handleChange("relatedElseValueModal", elseMetaModal);
                   let isBPM = isBPMQuery(parentType);
+                  const isContextValue = isField === "context" && isBPM;
                   handleChange(
                     "fieldValue2",
                     (parentMetaModal && parentMetaModal.id) ===
@@ -683,26 +698,42 @@ function Rule(props) {
                         : `${lowerCaseFirstLetter(
                             metaModal && metaModal.name
                           )}${
-                            join_operator[isBPM ? "BPM" : expression]
+                            isContextValue
+                              ? "?."
+                              : join_operator[isBPM ? "BPM" : expression]
                           }${fieldNameValue}${
                             value && value.typeName && !isBPM
-                              ? `${join_operator[expression]}toLocalDateTime()`
+                              ? `${
+                                  isContextValue
+                                    ? "?."
+                                    : join_operator[expression]
+                                }toLocalDateTime()`
                               : ""
                           }`
                       : `${lowerCaseFirstLetter(
                           elseMetaModal && elseMetaModal.name
                         )}${
-                          join_operator[isBPM ? "BPM" : expression]
+                          isContextValue
+                            ? "?."
+                            : join_operator[isBPM ? "BPM" : expression]
                         }${fieldNameValue}${
                           value &&
                           value.type === "MANY_TO_ONE" &&
                           isBPM &&
                           isField === "context"
-                            ? ".getTarget()"
+                            ? `${
+                                isContextValue
+                                  ? "?."
+                                  : join_operator[expression]
+                              }getTarget()`
                             : ""
                         }${
                           value && value.typeName && !isBPM
-                            ? `${join_operator[expression]}toLocalDateTime()`
+                            ? `${
+                                isContextValue
+                                  ? "?."
+                                  : join_operator[expression]
+                              }toLocalDateTime()`
                             : ""
                         }`
                   );

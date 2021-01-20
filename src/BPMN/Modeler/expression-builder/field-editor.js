@@ -23,17 +23,18 @@ export default function FieldEditor({
   type,
   isParent = false,
   isBPM,
+  isField,
   setInitialField = () => {},
 }) {
   const { fieldName = "", allField = [] } = value || {};
   const [fields, setFields] = useState([]);
   const classes = useStyles();
-
+  const isContextValue = isField === "context" && isBPMQuery(type) && isBPM;
   const expression = isBPMQuery(type) ? "BPM" : parentExpression;
   const values =
     fieldName &&
     join_operator[expression] &&
-    fieldName.split(join_operator[expression]);
+    fieldName.split(isContextValue ? "?." : join_operator[expression]);
   const [startValue] = values || [];
   const hasManyValues =
     fieldName &&
@@ -51,20 +52,28 @@ export default function FieldEditor({
       let newFieldName = isParent
         ? `${initValue}${value && value.name}`
         : value && value.name
-        ? `${isRelationalField ? join_operator[expression] : ""}${initValue}${
-            value && value.name
-          }`
+        ? `${
+            isRelationalField
+              ? isContextValue
+                ? "?."
+                : join_operator[expression]
+              : ""
+          }${initValue}${value && value.name}`
         : "";
       if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
         let fieldNames =
-          (newFieldName || "").split(join_operator[expression]) || [];
+          (newFieldName || "").split(
+            isContextValue ? "?." : join_operator[expression]
+          ) || [];
         let filterFields =
           (allField && allField.filter((f) => fieldNames.includes(f.name))) ||
           [];
         allFields = [...filterFields, value];
       } else {
         let fields = [...(allField || [])];
-        let fieldNames = (fieldName || "").split(join_operator[expression]);
+        let fieldNames = (fieldName || "").split(
+          isContextValue ? "?." : join_operator[expression]
+        );
         fieldNames &&
           fieldNames.length > 0 &&
           fieldNames.forEach((fName) => {
@@ -172,9 +181,13 @@ export default function FieldEditor({
         <FieldEditor
           getMetaFields={() => getSubMetaField(relationModel)}
           editor={editor}
-          initValue={`${initValue}${startValue}${join_operator[expression]}`}
+          initValue={`${initValue}${startValue}${
+            isContextValue ? "?." : join_operator[expression]
+          }`}
           value={{
-            fieldName: values.slice(1).join(join_operator[expression]),
+            fieldName: values
+              .slice(1)
+              .join(isContextValue ? "?." : join_operator[expression]),
             allField,
           }}
           onChange={onChange}
@@ -184,6 +197,7 @@ export default function FieldEditor({
           isParent={relationModel ? true : false}
           isBPM={isBPM}
           setInitialField={setInitialField}
+          isField={isField}
         />
       )}
     </React.Fragment>
