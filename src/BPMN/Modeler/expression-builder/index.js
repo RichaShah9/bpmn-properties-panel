@@ -92,6 +92,7 @@ function ExpressionBuilder({
       relatedValueModal,
       relatedElseValueFieldName,
       relatedElseValueModal,
+      parent,
     } = rule;
     let fieldName = propFieldName;
     const values = fieldName
@@ -132,6 +133,7 @@ function ExpressionBuilder({
           relatedValueModal,
           relatedElseValueFieldName,
           relatedElseValueModal,
+          parent: values && values[0],
         },
         initValue,
         nestedFields.length > 1,
@@ -184,6 +186,7 @@ function ExpressionBuilder({
       }
       if (["in", "notIn"].includes(operator)) {
         const isManyToManyField = initValue && initValue.includes("{it->it$$}");
+        const field = allField.find((f) => f.name === parent) || {};
         const value =
           typeof rule.fieldValue === "string"
             ? rule.fieldValue
@@ -200,7 +203,9 @@ function ExpressionBuilder({
             : `${fieldName}${
                 selectionList
                   ? ""
-                  : `${join_operator[expression]}${targetName || "fullName"}`
+                  : `${join_operator[expression]}${
+                      field.targetName || targetName || "fullName"
+                    }`
               }`;
         const str = `${operator === "notIn" ? "!" : ""}${`[${value}]`}${
           join_operator[expression]
@@ -420,9 +425,11 @@ function ExpressionBuilder({
             )
             .filter((f) => f !== "")
             .join(",");
-          return `${operator === "notIn" ? "!" : ""}${`[${value}]`}.${
-            map_operators[operator]
-          }(${prefix}${join_operator[expression]}${fieldName}${
+          return `${operator === "notIn" ? "!" : ""}${`[${value}]`}${
+            join_operator[expression]
+          }${map_operators[operator]}(${prefix}${
+            join_operator[expression]
+          }${fieldName}${
             selectionList
               ? " "
               : `${join_operator[expression]} ${targetName || "fullName"}`
