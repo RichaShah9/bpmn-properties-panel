@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/styles";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import _uniqueId from "lodash/uniqueId";
 
+import { translate } from "../../../../utils";
 import { useDebounce } from "../util";
 
 const useStyles = makeStyles((theme) => ({
@@ -17,6 +18,7 @@ export default function AutoComplete(props) {
   const [selectedValue, setSelectedValue] = useState(props.isMulti ? [] : null);
   const [inputValue, setInputValue] = useState("");
   const {
+    name,
     value,
     onChange,
     options: flatOptions,
@@ -107,6 +109,10 @@ export default function AutoComplete(props) {
       getOptionLabel={(option) => {
         return (option && option.type) === "metaJsonModel"
           ? `${option && option[optionLabelKey]} (Custom model)` || ""
+          : name === "fieldName"
+          ? `${translate(option && option["title"])} (${
+              option && option[optionLabelKey]
+            })`
           : (option && option[optionLabelKey]) || "";
       }}
       id={_uniqueId("select-widget")}
