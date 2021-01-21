@@ -23,6 +23,7 @@ import {
   dateFormat,
   map_combinator,
   map_bpm_combinator,
+  positive_operators,
 } from "./data";
 import { getModels } from "../../../services/api";
 import { isBPMQuery, lowerCaseFirstLetter } from "./util";
@@ -110,22 +111,34 @@ function ExpressionBuilder({
       if (findRelational && findRelational.length > 0) {
         const str =
           nestedFields.length >= 1
-            ? `${fName}.${
-                nestedFields.length > 0 ? "find" : "collect"
-              }{it->it.$$$$}`
+            ? `${fName}.find{it->it.$$$$}${
+                positive_operators.includes(operator) ? " != null" : " == null"
+              }`
             : `${fName}.${
                 nestedFields.length > 0 ? "find" : "collect"
-              }{it->it$$$$}`;
+              }{it->it$$$$}${
+                nestedFields.length > 0
+                  ? positive_operators.includes(operator)
+                    ? " != null"
+                    : " == null"
+                  : ""
+              }`;
         initValue = initValue.replace(/\$\$/g, str);
       } else {
         const str =
           nestedFields.length >= 1
-            ? `${fName}.${
-                nestedFields.length > 0 ? "find" : "collect"
-              }{it->it.$$}`
+            ? `${fName}.find{it->it.$$}${
+                positive_operators.includes(operator) ? " != null" : " == null"
+              }`
             : `${fName}.${
                 nestedFields.length > 0 ? "find" : "collect"
-              }{it->it$$}`;
+              }{it->it$$}${
+                nestedFields.length > 0
+                  ? positive_operators.includes(operator)
+                    ? " != null"
+                    : " == null"
+                  : ""
+              }`;
         initValue += str;
       }
       const nestedFieldName = nestedFields.join(join_operator[expression]);
