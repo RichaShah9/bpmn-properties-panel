@@ -212,7 +212,7 @@ function ExpressionBuilder({
                 selectionList
                   ? ""
                   : `${join_operator[expression]}${
-                      field.targetName || targetName || "fullName"
+                      (field && field.targetName) || targetName || "fullName"
                     }`
               }`;
         const str = `${operator === "notIn" ? "!" : ""}${`[${value}]`}${
@@ -223,6 +223,7 @@ function ExpressionBuilder({
         return str;
       } else if (["contains", "notContains"].includes(operator)) {
         const isManyToManyField = initValue && initValue.includes("{it->it$$}");
+        const field = allField.find((f) => f.name === parent) || {};
         const value =
           typeof rule.fieldValue === "string"
             ? rule.fieldValue
@@ -239,7 +240,9 @@ function ExpressionBuilder({
             : `${fieldName}${
                 selectionList
                   ? ""
-                  : `${join_operator[expression]}${targetName || "fullName"}`
+                  : `${join_operator[expression]}${
+                      (field && field.targetName) || targetName || "fullName"
+                    }`
               }`;
         const str = `${operator === "notContains" ? "!" : ""}(${prefix}${
           join_operator[expression]
@@ -267,6 +270,7 @@ function ExpressionBuilder({
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
         const str = `${fieldName} ${map_operators[operator]}`;
+        const field = allField.find((f) => f.name === parent) || {};
         const isManyToManyField = initValue && initValue.includes("{it->it$$}");
         if (isManyToManyField) {
           const name =
@@ -275,7 +279,9 @@ function ExpressionBuilder({
               : `${fieldName}${
                   selectionList
                     ? ""
-                    : `${join_operator[expression]}${targetName || "fullName"}`
+                    : `${join_operator[expression]}${
+                        (field && field.targetName) || targetName || "fullName"
+                      }`
                 }`;
           return `${prefix}${join_operator[expression]}${initValue.replace(
             /\$\$/g,
