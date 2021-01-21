@@ -104,20 +104,28 @@ function ExpressionBuilder({
     const { targetName, selectionList } = field || {};
     const type = field && field.type && field.type.toLowerCase();
     const typeName = field && field.typeName;
-    const nestedFields = values.splice(1);
+    const nestedFields = values.splice(1) || [];
     if (["many_to_many", "one_to_many"].includes(type)) {
       const findRelational = initValue.match(/\$\$/g);
       if (findRelational && findRelational.length > 0) {
         const str =
           nestedFields.length >= 1
-            ? `${fName}.collect{it->it.$$$$}`
-            : `${fName}.collect{it->it$$$$}`;
+            ? `${fName}.${
+                nestedFields.length > 0 ? "find" : "collect"
+              }{it->it.$$$$}`
+            : `${fName}.${
+                nestedFields.length > 0 ? "find" : "collect"
+              }{it->it$$$$}`;
         initValue = initValue.replace(/\$\$/g, str);
       } else {
         const str =
           nestedFields.length >= 1
-            ? `${fName}.collect{it->it.$$}`
-            : `${fName}.collect{it->it$$}`;
+            ? `${fName}.${
+                nestedFields.length > 0 ? "find" : "collect"
+              }{it->it.$$}`
+            : `${fName}.${
+                nestedFields.length > 0 ? "find" : "collect"
+              }{it->it$$}`;
         initValue += str;
       }
       const nestedFieldName = nestedFields.join(join_operator[expression]);
