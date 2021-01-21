@@ -30,6 +30,20 @@ const dateFormat = {
   datetime: "DD/MM/YYYY h:mm a",
 };
 
+const positive_operators = [
+  "=",
+  ">=",
+  "<=",
+  ">",
+  "<",
+  "like",
+  "isNull",
+  "between",
+  "contains",
+  "in",
+  "isTrue",
+];
+
 const operators_by_type = {
   enum: ["=", "!=", "isNull", "isNotNull"],
   text: ["like", "notLike", "isNull", "isNotNull"],
@@ -141,4 +155,5 @@ export {
   join_operator,
   map_operator_bpm,
   map_bpm_combinator,
+  positive_operators,
 };
