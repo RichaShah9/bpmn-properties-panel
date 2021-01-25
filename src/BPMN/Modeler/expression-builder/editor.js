@@ -488,8 +488,14 @@ function Rule(props) {
               value={isField || "none"}
               onChange={(e) => {
                 setField(e.target.value);
-                setNameValue({});
-                setElseNameValue({});
+                setNameValue({
+                  fieldValue: null,
+                });
+                handleChange("fieldValue", null);
+                setElseNameValue({
+                  fieldValue2: null,
+                });
+                handleChange("fieldValue2", null);
                 if (
                   e.target.value &&
                   (operator === "in" || operator === "notIn")
@@ -570,7 +576,10 @@ function Rule(props) {
               optionLabelKey="name"
               onChange={(e) => {
                 setMetaModal(e);
-                setNameValue({});
+                setNameValue({
+                  fieldValue: null,
+                });
+                handleChange("fieldValue", null);
               }}
               value={metaModal}
               classes={{ root: classes.MuiAutocompleteRoot }}
@@ -605,46 +614,46 @@ function Rule(props) {
               const isContextValue = isField === "context" && isBPM;
               handleChange(
                 "fieldValue",
-                (parentMetaModal && parentMetaModal.id) ===
-                  (metaModal && metaModal.id)
-                  ? isBPM
-                    ? `self.${fieldNameValue}`
+                fieldNameValue
+                  ? (parentMetaModal && parentMetaModal.id) ===
+                    (metaModal && metaModal.id)
+                    ? isBPM
+                      ? `self.${fieldNameValue}`
+                      : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
+                          isContextValue
+                            ? "?."
+                            : join_operator[isBPM ? "BPM" : expression]
+                        }${fieldNameValue}${
+                          value && value.typeName && !isBPM
+                            ? `${
+                                isContextValue
+                                  ? "?."
+                                  : join_operator[expression]
+                              }toLocalDateTime()`
+                            : ""
+                        }`
                     : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
                         isContextValue
                           ? "?."
                           : join_operator[isBPM ? "BPM" : expression]
                       }${fieldNameValue}${
+                        value &&
+                        value.type === "MANY_TO_ONE" &&
+                        isBPM &&
+                        isField === "context"
+                          ? `${
+                              isContextValue ? "?." : join_operator[expression]
+                            }getTarget()`
+                          : ""
+                      }${
                         value && value.typeName && !isBPM
                           ? `${
                               isContextValue ? "?." : join_operator[expression]
                             }toLocalDateTime()`
                           : ""
                       }`
-                  : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
-                      isContextValue
-                        ? "?."
-                        : join_operator[isBPM ? "BPM" : expression]
-                    }${fieldNameValue}${
-                      value &&
-                      value.type === "MANY_TO_ONE" &&
-                      isBPM &&
-                      isField === "context"
-                        ? `${
-                            isContextValue ? "?." : join_operator[expression]
-                          }getTarget()`
-                        : ""
-                    }${
-                      value && value.typeName && !isBPM
-                        ? `${
-                            isContextValue ? "?." : join_operator[expression]
-                          }toLocalDateTime()`
-                        : ""
-                    }`
+                  : undefined
               );
-              if (!value) {
-                setField(null);
-                handleChange("fieldValue", null);
-              }
             }}
             value={nameValue}
             expression={expression}
@@ -663,7 +672,10 @@ function Rule(props) {
                   optionLabelKey="name"
                   onChange={(e) => {
                     setElseMetaModal(e);
-                    setElseNameValue({});
+                    setElseNameValue({
+                      fieldValue2: null,
+                    });
+                    handleChange("fieldValue2", null);
                   }}
                   value={elseMetaModal}
                   classes={{ root: classes.MuiAutocompleteRoot }}
@@ -694,17 +706,44 @@ function Rule(props) {
                   const isContextValue = isField === "context" && isBPM;
                   handleChange(
                     "fieldValue2",
-                    (parentMetaModal && parentMetaModal.id) ===
-                      (elseMetaModal && elseMetaModal.id)
-                      ? isBPM
-                        ? `self.${fieldNameValue}`
+                    fieldNameValue
+                      ? (parentMetaModal && parentMetaModal.id) ===
+                        (elseMetaModal && elseMetaModal.id)
+                        ? isBPM
+                          ? `self.${fieldNameValue}`
+                          : `${lowerCaseFirstLetter(
+                              metaModal && metaModal.name
+                            )}${
+                              isContextValue
+                                ? "?."
+                                : join_operator[isBPM ? "BPM" : expression]
+                            }${fieldNameValue}${
+                              value && value.typeName && !isBPM
+                                ? `${
+                                    isContextValue
+                                      ? "?."
+                                      : join_operator[expression]
+                                  }toLocalDateTime()`
+                                : ""
+                            }`
                         : `${lowerCaseFirstLetter(
-                            metaModal && metaModal.name
+                            elseMetaModal && elseMetaModal.name
                           )}${
                             isContextValue
                               ? "?."
                               : join_operator[isBPM ? "BPM" : expression]
                           }${fieldNameValue}${
+                            value &&
+                            value.type === "MANY_TO_ONE" &&
+                            isBPM &&
+                            isField === "context"
+                              ? `${
+                                  isContextValue
+                                    ? "?."
+                                    : join_operator[expression]
+                                }getTarget()`
+                              : ""
+                          }${
                             value && value.typeName && !isBPM
                               ? `${
                                   isContextValue
@@ -713,38 +752,8 @@ function Rule(props) {
                                 }toLocalDateTime()`
                               : ""
                           }`
-                      : `${lowerCaseFirstLetter(
-                          elseMetaModal && elseMetaModal.name
-                        )}${
-                          isContextValue
-                            ? "?."
-                            : join_operator[isBPM ? "BPM" : expression]
-                        }${fieldNameValue}${
-                          value &&
-                          value.type === "MANY_TO_ONE" &&
-                          isBPM &&
-                          isField === "context"
-                            ? `${
-                                isContextValue
-                                  ? "?."
-                                  : join_operator[expression]
-                              }getTarget()`
-                            : ""
-                        }${
-                          value && value.typeName && !isBPM
-                            ? `${
-                                isContextValue
-                                  ? "?."
-                                  : join_operator[expression]
-                              }toLocalDateTime()`
-                            : ""
-                        }`
+                      : undefined
                   );
-                  if (!value) {
-                    setField(null);
-                    handleChange("fieldValue", null);
-                    handleChange("fieldValue2", null);
-                  }
                 }}
                 value={elseNameValue}
                 expression={expression}

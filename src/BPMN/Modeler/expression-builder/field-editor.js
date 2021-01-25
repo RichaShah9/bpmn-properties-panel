@@ -48,13 +48,24 @@ export default function FieldEditor({
     allField.length > 0 &&
     allField.find((f) => f.type === "MANY_TO_MANY");
 
+  const getUpdatedValue = () => {
+    let spiltedValues = initValue && initValue.split(join_operator[expression]);
+    return (
+      spiltedValues &&
+      spiltedValues.length > 0 &&
+      (spiltedValues.filter(Boolean) || []).join(join_operator[expression])
+    );
+  };
+
   function handleChange(value) {
     const isRelationalField =
       value && fields.some((x) => x.name === value.name && x.target);
     if (isBPM) {
       let allFields;
       let newFieldName = isParent
-        ? `${initValue}${value && value.name}`
+        ? value && value.name
+          ? `${initValue}${value.name}`
+          : `${getUpdatedValue()}`
         : value && value.name
         ? `${
             isRelationalField
@@ -62,7 +73,7 @@ export default function FieldEditor({
                 ? "?."
                 : join_operator[expression]
               : ""
-          }${initValue}${value && value.name}`
+          }${initValue}${value.name}`
         : "";
       if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
         let fieldNames =
@@ -92,7 +103,7 @@ export default function FieldEditor({
         {
           name: "fieldName",
           value,
-          fieldNameValue: newFieldName,
+          fieldNameValue: newFieldName ? newFieldName : undefined,
           allField: allFields,
         },
         editor
@@ -100,11 +111,7 @@ export default function FieldEditor({
       return;
     }
     let newFieldName = isParent
-      ? `${
-          initValue && value && value.name
-            ? initValue
-            : initValue.replace(join_operator[expression], "")
-        }${value ? value.name : ""}`
+      ? `${initValue}${value ? value.name : ""}`
       : value
       ? value.name
       : ""
@@ -130,17 +137,23 @@ export default function FieldEditor({
     } else {
       let fields = [...(allField || [])];
       let fieldNames = (fieldName || "").split(join_operator[expression]);
+      let initValues = (initValue || "").split(join_operator[expression]);
       fieldNames &&
         fieldNames.length > 0 &&
         fieldNames.forEach((fName) => {
           let index = fields.findIndex((f) => f.name === fName);
-          if (index > -1) {
+          if (index > -1 && !(initValues || []).includes(fName)) {
             fields.splice(index, 1);
           }
         });
       onChange({ name: "allField", value: fields }, editor);
       if (fields && fields.length === 1) {
         const val = fields[0];
+        onChange({ name: "fieldType", value: (val && val.type) || "" }, editor);
+        onChange({ name: "field", value: val }, editor);
+        setInitialField();
+      } else {
+        const val = fields[fields.length - 1];
         onChange({ name: "fieldType", value: (val && val.type) || "" }, editor);
         onChange({ name: "field", value: val }, editor);
         setInitialField();
