@@ -396,10 +396,10 @@ function ExpressionBuilder({
         let fieldName = propFieldName;
         const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
         if (
-          (fieldValue === null ||
-            fieldValue === undefined ||
-            fieldValue === "" ||
-            fieldValue.length <= 0) &&
+          (!fieldValue ||
+            (fieldValue && fieldValue.length <= 0) ||
+            ((!fieldValue2 || (fieldValue2 && fieldValue2.length <= 0)) &&
+              ["between", "notBetween"].includes(operator))) &&
           !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)
         ) {
           isValid = false;
@@ -532,10 +532,10 @@ function ExpressionBuilder({
       );
       const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
       if (
-        (fieldValue === null ||
-          fieldValue === undefined ||
-          fieldValue === "" ||
-          fieldValue.length <= 0) &&
+        (!fieldValue ||
+          (fieldValue && fieldValue.length <= 0) ||
+          ((!fieldValue2 || (fieldValue2 && fieldValue2.length <= 0)) &&
+            ["between", "notBetween"].includes(operator))) &&
         !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)
       ) {
         isValid = false;
