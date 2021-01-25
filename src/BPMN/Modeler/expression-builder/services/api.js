@@ -92,6 +92,9 @@ export async function getSubMetaField(model, isM2MFields = true) {
         (a.type || "").toLowerCase()
       )
   );
+  if (!isM2MFields && resultFields && resultFields.length > 0) {
+    return resultFields.filter((f) => f.type !== "MANY_TO_MANY");
+  }
   return resultFields;
 }
 

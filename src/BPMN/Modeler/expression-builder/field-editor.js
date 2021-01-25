@@ -43,6 +43,10 @@ export default function FieldEditor({
     fields.some((x) => x.name === startValue);
   const relationModel =
     hasManyValues && (fields.find((x) => x.name === startValue) || {}).target;
+  const isM2MField =
+    allField &&
+    allField.length > 0 &&
+    allField.find((f) => f.type === "MANY_TO_MANY");
 
   function handleChange(value) {
     const isRelationalField =
@@ -179,7 +183,16 @@ export default function FieldEditor({
       />
       {hasManyValues && relationModel && (
         <FieldEditor
-          getMetaFields={() => getSubMetaField(relationModel)}
+          getMetaFields={() => {
+            return getSubMetaField(
+              relationModel,
+              isM2MField &&
+                values &&
+                values.length > 0 &&
+                values.includes(isM2MField.name) &&
+                fieldName !== isM2MField.name
+            );
+          }}
           editor={editor}
           initValue={`${initValue}${startValue}${
             isContextValue ? "?." : join_operator[expression]
