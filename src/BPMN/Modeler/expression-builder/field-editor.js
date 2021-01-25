@@ -186,11 +186,13 @@ export default function FieldEditor({
           getMetaFields={() => {
             return getSubMetaField(
               relationModel,
-              isM2MField &&
-                values &&
-                values.length > 0 &&
-                values.includes(isM2MField.name) &&
-                fieldName !== isM2MField.name
+              !isBPMQuery(type)
+                ? isM2MField &&
+                    values &&
+                    values.length > 0 &&
+                    values.includes(isM2MField.name) &&
+                    values[0] !== isM2MField.name
+                : true
             );
           }}
           editor={editor}
