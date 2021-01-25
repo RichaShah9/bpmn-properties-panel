@@ -66,13 +66,7 @@ const defaultState = {
 };
 
 function ExpressionBuilder(props) {
-  const {
-    value = defaultState,
-    setValue,
-    index,
-    element,
-    type,
-  } = props;
+  const { value = defaultState, setValue, index, element, type } = props;
   const { metaModals: model, rules: r } = value;
   const [expression] = useState("GROOVY");
   const [metaModals, setMetaModals] = useState(model);
@@ -164,7 +158,10 @@ function ExpressionBuilder(props) {
   async function fetchField() {
     const allFields = (await getMetaFields(fields, metaModals)) || [];
     return allFields.filter(
-      (a) => !["button", "separator", "panel", "one_to_many"].includes(a.type)
+      (a) =>
+        !["button", "separator", "panel", "one_to_many", "binary"].includes(
+          (a.type || "").toLowerCase()
+        )
     );
   }
 

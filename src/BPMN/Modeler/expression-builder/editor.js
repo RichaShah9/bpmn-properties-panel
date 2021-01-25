@@ -70,7 +70,10 @@ async function fetchField(metaModals) {
     metaModals.metaFields.map((f) => f.name);
   const allFields = (await getMetaFieldsAPI(fields, metaModals)) || [];
   return allFields.filter(
-    (a) => !["button", "separator", "panel", "one_to_many"].includes(a.type)
+    (a) =>
+      !["button", "separator", "panel", "one_to_many", "binary"].includes(
+        (a.type || "").toLowerCase()
+      )
   );
 }
 
