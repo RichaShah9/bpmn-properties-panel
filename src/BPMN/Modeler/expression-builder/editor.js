@@ -63,16 +63,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-async function fetchField(metaModals) {
+async function fetchField(metaModals, type) {
   const fields =
     metaModals &&
     metaModals.metaFields &&
     metaModals.metaFields.map((f) => f.name);
   const allFields = (await getMetaFieldsAPI(fields, metaModals)) || [];
+  const isQuery = isBPMQuery(type);
   return allFields.filter(
     (a) =>
       !["button", "separator", "panel", "one_to_many", "binary"].includes(
-        (a.type || "").toLowerCase()
+        (a.type || "").toLowerCase() && (isQuery ? !a.json : true)
       )
   );
 }
@@ -589,7 +590,9 @@ function Rule(props) {
           )}
           <FieldEditor
             getMetaFields={() =>
-              isField === "context" ? fetchField(metaModal) : getMetaFields()
+              isField === "context"
+                ? fetchField(metaModal, parentType)
+                : getMetaFields()
             }
             editor={editor}
             isField={isField}

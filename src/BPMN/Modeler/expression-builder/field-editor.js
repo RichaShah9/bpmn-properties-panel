@@ -205,7 +205,8 @@ export default function FieldEditor({
                     values.length > 0 &&
                     values.includes(isM2MField.name) &&
                     values[0] !== isM2MField.name
-                : true
+                : true,
+              isBPMQuery(type)
             );
           }}
           editor={editor}

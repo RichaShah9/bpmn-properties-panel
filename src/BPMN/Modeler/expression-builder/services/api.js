@@ -74,7 +74,11 @@ export async function getMetaModal(data) {
   return res && res.data && res.data[0];
 }
 
-export async function getSubMetaField(model, isM2MFields = true) {
+export async function getSubMetaField(
+  model,
+  isM2MFields = true,
+  isQuery = false
+) {
   const data = {
     criteria: [{ fieldName: "fullName", operator: "=", value: model }],
   };
@@ -90,7 +94,7 @@ export async function getSubMetaField(model, isM2MFields = true) {
     (a) =>
       !["button", "separator", "panel", "one_to_many", "binary"].includes(
         (a.type || "").toLowerCase()
-      )
+      ) && (isQuery ? !a.json : true)
   );
   if (!isM2MFields && resultFields && resultFields.length > 0) {
     return resultFields.filter((f) => f.type !== "MANY_TO_MANY");

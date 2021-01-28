@@ -157,12 +157,14 @@ function ExpressionBuilder(props) {
 
   async function fetchField() {
     const allFields = (await getMetaFields(fields, metaModals)) || [];
-    return allFields.filter(
-      (a) =>
+    const isQuery = isBPMQuery(type);
+    return allFields.filter((a) => {
+      return (
         !["button", "separator", "panel", "one_to_many", "binary"].includes(
           (a.type || "").toLowerCase()
-        )
-    );
+        ) && (isQuery ? !a.json : true)
+      );
+    });
   }
 
   return (
