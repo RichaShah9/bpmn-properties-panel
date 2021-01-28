@@ -23,7 +23,11 @@ import {
   dateFormat,
   join_operator,
 } from "./data";
-import { getData, getMetaFields as getMetaFieldsAPI } from "./services/api";
+import {
+  getCustomModelData,
+  getData,
+  getMetaFields as getMetaFieldsAPI,
+} from "./services/api";
 import { isBPMQuery, lowerCaseFirstLetter, getProcessConfig } from "./util";
 import FieldEditor from "./field-editor";
 
@@ -82,10 +86,15 @@ function RenderRelationalWidget(props) {
   const { operator, editor, internalProps, parentType } = props;
   const { onChange, value, ...rest } = internalProps;
   const classes = useStyles();
-  const { field } = rest;
-  const { targetName } = field;
+  const { field = {} } = rest;
+  const { targetName, type, target, targetModel } = field;
   const fetchData = async () => {
-    const data = await getData(field.target);
+    let data;
+    if (type && type.includes("json")) {
+      data = await getCustomModelData(field["targetJsonModel.name"]);
+    } else {
+      data = await getData(target || targetModel);
+    }
     return data;
   };
   if (["like", "notLike"].includes(operator)) {
@@ -117,7 +126,11 @@ function RenderRelationalWidget(props) {
             ? false
             : true
         }
-        optionLabelKey={targetName}
+        optionLabelKey={
+          type && type.includes("json")
+            ? field["targetJsonModel.nameField"]
+            : targetName
+        }
         onChange={(value) =>
           onChange({ name: "fieldValue", value: value }, editor)
         }
@@ -221,6 +234,10 @@ function RenderWidget({
     case "many_to_one":
     case "many_to_many":
     case "one_to_many":
+    case "json_one_to_one":
+    case "json_many_to_one":
+    case "json_many_to_many":
+    case "json_one_to_many":
       return (
         <RenderRelationalWidget
           operator={operator}
@@ -352,7 +369,7 @@ function Rule(props) {
     relatedElseValueFieldName,
   } = value;
   const classes = useStyles();
-  const type = fieldType.toLowerCase();
+  const type = fieldType && fieldType.toLowerCase().replaceAll("-", "_");
   const [isField, setField] = useState(
     isRelationalValue ? isRelationalValue : "none"
   );
@@ -413,13 +430,16 @@ function Rule(props) {
     ["long", "decimal", "date", "time", "datetime"],
     operators_by_type.integer
   );
-  addOperatorByType(["one_to_many"], operators_by_type.text);
   addOperatorByType(
-    ["many_to_many"],
+    ["one_to_many", "json_one_to_many"],
+    operators_by_type.text
+  );
+  addOperatorByType(
+    ["many_to_many", "json_many_to_many"],
     ["in", "notIn", "isNull", "contains", "notContains"]
   );
   addOperatorByType(
-    ["many_to_one", "one_to_one"],
+    ["many_to_one", "one_to_one", "json_many_to_one", "json_one_to_one"],
     ["=", "!=", "in", "notIn", "isNull", "isNotNull"]
   );
 
@@ -643,7 +663,11 @@ function Rule(props) {
                           : join_operator[isBPM ? "BPM" : expression]
                       }${fieldNameValue}${
                         value &&
-                        value.type === "MANY_TO_ONE" &&
+                        [
+                          "json-many-to-one",
+                          "MANY_TO_ONE",
+                          "many-to-one",
+                        ].includes(value.type) &&
                         isBPM &&
                         isField === "context"
                           ? `${
@@ -741,7 +765,11 @@ function Rule(props) {
                               : join_operator[isBPM ? "BPM" : expression]
                           }${fieldNameValue}${
                             value &&
-                            value.type === "MANY_TO_ONE" &&
+                            [
+                              "json-many-to-one",
+                              "MANY_TO_ONE",
+                              "many-to-one",
+                            ].includes(value.type) &&
                             isBPM &&
                             isField === "context"
                               ? `${

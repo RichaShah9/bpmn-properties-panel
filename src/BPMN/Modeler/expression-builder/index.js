@@ -103,7 +103,8 @@ function ExpressionBuilder({
     const fName = values[0];
     const field = allField.find((f) => f.name === fName) || {};
     const { targetName, selectionList } = field || {};
-    const type = field && field.type && field.type.toLowerCase();
+    const type =
+      field && field.type && field.type.toLowerCase().replaceAll("-", "_");
     const typeName = field && field.typeName;
     const nestedFields = values.splice(1) || [];
     if (["many_to_many", "one_to_many"].includes(type)) {
@@ -160,7 +161,14 @@ function ExpressionBuilder({
         nestedFields.length > 1,
         prefix
       );
-    } else if (["many_to_one", "one_to_one"].includes(type)) {
+    } else if (
+      [
+        "json_many_to_one",
+        "json_one_to_one",
+        "many_to_one",
+        "one_to_one",
+      ].includes(type)
+    ) {
       const nestedFieldName = nestedFields.join(join_operator[expression]);
       const findRelational = initValue.match(/\$\$/g);
       const str =
@@ -426,6 +434,10 @@ function ExpressionBuilder({
           "one_to_many",
           "many_to_one",
           "one_to_one",
+          "json_many_to_many",
+          "json_one_to_many",
+          "json_many_to_one",
+          "json_one_to_one",
         ].includes(f && f.type && f.type.toLowerCase());
         if (isRelational) {
           return getRelationalCondition(rule, undefined, false, prefix);
@@ -495,7 +507,7 @@ function ExpressionBuilder({
                 : fieldValue["name"]
               : fieldValue;
           return `${prefix}${join_operator[expression]}${
-            type === "many_to_one"
+            type === "many_to_one" || type === "json_many_to_one"
               ? `${fieldName}${join_operator[expression]}${
                   field.targetName || "fullName"
                 }`
@@ -672,7 +684,8 @@ function ExpressionBuilder({
 
         return {
           condition: `${prefix}.${
-            type === "many_to_one" && !isRelationalValue
+            (type === "many_to_one" || type === "json_many_to_one") &&
+            !isRelationalValue
               ? `${fieldName}.${field.targetName || "fullName"}`
               : fieldName
           } ${map_operators[operator]} ${
@@ -849,7 +862,7 @@ function ExpressionBuilder({
       if (!values || values.length === 0) return;
       for (let i = 0; i < values.length; i++) {
         const element = values[i];
-        const { metaModalName } = element;
+        const { metaModalName, metaModalType } = element;
         if (!metaModalName) return;
         const criteria = {
           criteria: [
@@ -861,7 +874,11 @@ function ExpressionBuilder({
           ],
           operator: "and",
         };
-        const metaModels = await getModels(criteria);
+        const metaModels = await getModels(
+          criteria,
+          isBPMQuery(parentType),
+          metaModalType
+        );
         if (!metaModels) return;
         const value = {
           metaModals: metaModels && metaModels[0],
