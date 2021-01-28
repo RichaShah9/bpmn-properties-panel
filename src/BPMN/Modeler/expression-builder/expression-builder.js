@@ -177,7 +177,10 @@ function ExpressionBuilder(props) {
               title="Meta Modal"
               placeholder="meta modal"
               fetchAPI={() =>
-                getModels(isBPMQuery(type) ? null : getProcessConfig(element))
+                getModels(
+                  isBPMQuery(type) ? null : getProcessConfig(element),
+                  isBPMQuery(type)
+                )
               }
               optionLabelKey="name"
               onChange={(e) => {

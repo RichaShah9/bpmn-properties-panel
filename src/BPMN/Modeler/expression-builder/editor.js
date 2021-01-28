@@ -572,7 +572,9 @@ function Rule(props) {
               name="metaModal"
               title="Meta Modal"
               placeholder="meta modal"
-              fetchAPI={() => getModels(getProcessConfig(element))}
+              fetchAPI={() =>
+                getModels(getProcessConfig(element), isBPMQuery(parentType))
+              }
               optionLabelKey="name"
               onChange={(e) => {
                 setMetaModal(e);
@@ -668,7 +670,9 @@ function Rule(props) {
                   name="metaModal"
                   title="Meta Modal Else"
                   placeholder="meta modal"
-                  fetchAPI={() => getModels(getProcessConfig(element))}
+                  fetchAPI={() =>
+                    getModels(getProcessConfig(element), isBPMQuery(parentType))
+                  }
                   optionLabelKey="name"
                   onChange={(e) => {
                     setElseMetaModal(e);

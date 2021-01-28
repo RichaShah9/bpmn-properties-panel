@@ -1,7 +1,7 @@
 import Service from "./Service";
 import * as _ from "lodash";
 
-export async function getModels(data = {}) {
+export async function getModels(data = {}, isQuery = false) {
   const models = (await getMetaModels(data)) || [];
   const metaJsonModels = (await getCustomModels(data)) || [];
   const allModels = [];
@@ -12,11 +12,13 @@ export async function getModels(data = {}) {
       type: "metaModel",
     });
   }
-  for (let i = 0; i < metaJsonModels.length; i++) {
-    allModels.push({
-      ...metaJsonModels[i],
-      type: "metaJsonModel",
-    });
+  if (!isQuery) {
+    for (let i = 0; i < metaJsonModels.length; i++) {
+      allModels.push({
+        ...metaJsonModels[i],
+        type: "metaJsonModel",
+      });
+    }
   }
 
   return allModels || [];
@@ -324,7 +326,7 @@ export async function getBPMNModels(criteria = [], operator) {
   const res = await Service.search("com.axelor.apps.bpm.db.WkfProcess", {
     data: {
       criteria,
-      operator
+      operator,
     },
   });
   const { data = [] } = res || {};
