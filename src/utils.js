@@ -31,4 +31,12 @@ function getBool(val) {
   return !!JSON.parse(String(val).toLowerCase());
 }
 
-export { download, translate, pascalToKebabCase, getBool };
+function sortBy(array = [], key) {
+  return array.sort(function (a, b) {
+    let x = a[key];
+    let y = b[key];
+    return x < y ? -1 : x > y ? 1 : 0;
+  });
+}
+
+export { download, translate, pascalToKebabCase, getBool, sortBy };
