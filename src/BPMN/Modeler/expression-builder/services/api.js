@@ -1,5 +1,6 @@
 import AxelorService from "./axelor.rest";
 import services from "../../../../services/Service";
+import { sortBy } from "../../../../utils";
 
 const metaModalService = new AxelorService({
   model: "com.axelor.meta.db.MetaModel",
@@ -22,7 +23,10 @@ export async function getMetaModals({ search = "" }) {
 export async function getMetaFields(fields, model) {
   if (!model) return [];
   if (model.type === "metaModel") {
-    let res = await metaFieldService.fields({ fields, model: model.fullName });
+    let res = await metaFieldService.fields({
+      fields,
+      model: model.fullName,
+    });
     const zonedDateTimeFieldsRes = await services.search(
       "com.axelor.meta.db.MetaField",
       {
@@ -56,16 +60,34 @@ export async function getMetaFields(fields, model) {
     }
     return fieldsRes;
   } else {
-    let res = await services.search("com.axelor.meta.db.MetaJsonField", {
-      data: {
-        _domain: `self.jsonModel.name = '${model.name}'`,
-        _domainContext: {
-          _model: "com.axelor.meta.db.MetaJsonField",
-        },
-      },
-      fields: ["name", "model", "type", "title"],
-    });
-    return res && res.data;
+    const res = await services.get(
+      `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${model.name}`
+    );
+    const responseData = res && res.data;
+    const allFields = responseData && responseData.fields;
+    const jsonFields = Object.values(
+      (responseData && responseData.jsonFields) || [{}]
+    );
+    let result = [];
+    result = allFields.filter((f) => !f.json) || [];
+    jsonFields &&
+      jsonFields.forEach((jsonField) => {
+        const nestedFields = Object.values(jsonField || {}) || [];
+        const fields =
+          nestedFields.filter(
+            (a) =>
+              ![
+                "button",
+                "separator",
+                "panel",
+                "one_to_many",
+                "one-to-many",
+                "binary",
+              ].includes((a.type || "").toLowerCase())
+          ) || [];
+        result = [...result, ...fields];
+      });
+    return sortBy(result, "sequence") || [];
   }
 }
 
@@ -105,5 +127,18 @@ export async function getSubMetaField(
 export async function getData(model) {
   const modelService = new AxelorService({ model });
   const res = await modelService.search({});
+  return res && res.data;
+}
+
+export async function getCustomModelData(jsonModel) {
+  const res = await services.search("com.axelor.meta.db.MetaJsonRecord", {
+    _domain: `self.jsonModel = ${jsonModel}`,
+    _domainContext: {
+      jsonModel,
+      _id: null,
+      _model: "com.axelor.meta.db.MetaJsonRecord",
+      fields: ["name", "attrs"],
+    },
+  });
   return res && res.data;
 }
