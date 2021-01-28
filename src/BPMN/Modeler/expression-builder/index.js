@@ -795,6 +795,7 @@ function ExpressionBuilder({
         }
         expressionValues.push({
           metaModalName: modalName,
+          metaModalType: metaModals.type,
           rules,
         });
         return `${str}`;

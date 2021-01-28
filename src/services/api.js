@@ -1,9 +1,15 @@
 import Service from "./Service";
 import * as _ from "lodash";
 
-export async function getModels(data = {}, isQuery = false) {
-  const models = (await getMetaModels(data)) || [];
-  const metaJsonModels = (await getCustomModels(data)) || [];
+export async function getModels(data = {}, isQuery = false, metaModalType) {
+  const models =
+    ((!metaModalType || metaModalType === "metaModel") &&
+      (await getMetaModels(data))) ||
+    [];
+  const metaJsonModels =
+    ((!metaModalType || metaModalType === "metaJsonModel") &&
+      (await getCustomModels(data))) ||
+    [];
   const allModels = [];
 
   for (let i = 0; i < models.length; i++) {
