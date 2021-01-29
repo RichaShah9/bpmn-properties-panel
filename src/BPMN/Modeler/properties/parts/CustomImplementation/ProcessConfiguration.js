@@ -404,7 +404,7 @@ export default function ProcessConfiguration({
                             );
                           }}
                           name="metaModel"
-                          value={processConfig.metaModel}
+                          value={processConfig.metaModel || ""}
                           optionLabel="name"
                           isLabel={false}
                         />
@@ -422,7 +422,7 @@ export default function ProcessConfiguration({
                             )
                           }
                           name="metaJsonModel"
-                          value={processConfig.metaJsonModel}
+                          value={processConfig.metaJsonModel || ""}
                           optionLabel="name"
                           isLabel={false}
                         />
