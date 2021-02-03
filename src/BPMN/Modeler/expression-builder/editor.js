@@ -6,8 +6,8 @@ import classNames from "classnames";
 import moment from "moment";
 import { Radio, RadioGroup, FormControlLabel } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { getModels } from "../../../services/api";
 
+import { getModels } from "../../../services/api";
 import {
   Select,
   Button,
@@ -22,6 +22,7 @@ import {
   operators_by_type,
   dateFormat,
   join_operator,
+  allowed_types
 } from "./data";
 import {
   getCustomModelData,
@@ -76,7 +77,7 @@ async function fetchField(metaModals, type) {
   const isQuery = isBPMQuery(type);
   return allFields.filter(
     (a) =>
-      !["button", "separator", "panel", "one_to_many", "binary"].includes(
+    allowed_types.includes(
         (a.type || "").toLowerCase() && (isQuery ? !a.json : true)
       )
   );

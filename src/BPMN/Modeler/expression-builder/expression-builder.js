@@ -8,6 +8,7 @@ import { Selection } from "./component";
 import { getMetaFields } from "./services/api";
 import { getModels } from "../../../services/api";
 import { isBPMQuery, getProcessConfig } from "./util";
+import { allowed_types } from "./data";
 
 const useStyles = makeStyles((theme) => ({
   Container: {
@@ -160,9 +161,8 @@ function ExpressionBuilder(props) {
     const isQuery = isBPMQuery(type);
     return allFields.filter((a) => {
       return (
-        !["button", "separator", "panel", "one_to_many", "binary"].includes(
-          (a.type || "").toLowerCase()
-        ) && (isQuery ? !a.json : true)
+        allowed_types.includes((a.type || "").toLowerCase()) &&
+        (isQuery ? !a.json : true)
       );
     });
   }

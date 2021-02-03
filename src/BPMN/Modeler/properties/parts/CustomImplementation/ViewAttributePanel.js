@@ -259,7 +259,8 @@ export default function ViewAttributePanel({ handleAdd, element }) {
     if (
       !processConfigurations &&
       !processConfigurations.processConfigurationParameters
-    ) return noOptions
+    )
+      return noOptions;
     processConfigurations.processConfigurationParameters.forEach((config) => {
       if (config.metaModel) {
         metaModels.push(config.metaModel);
