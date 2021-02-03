@@ -1,6 +1,7 @@
 import AxelorService from "./axelor.rest";
 import services from "../../../../services/Service";
 import { sortBy } from "../../../../utils";
+import { allowed_types } from "../data";
 
 const metaModalService = new AxelorService({
   model: "com.axelor.meta.db.MetaModel",
@@ -20,13 +21,31 @@ export async function getMetaModals({ search = "" }) {
     .then(({ data = [] }) => data);
 }
 
+const getResultedFiels = (res) => {
+  const responseData = res && res.data;
+  const allFields = responseData && responseData.fields;
+  const jsonFields = Object.values(
+    (responseData && responseData.jsonFields) || [{}]
+  );
+  let result = [];
+  result = allFields.filter((f) => !f.json) || [];
+  jsonFields &&
+    jsonFields.forEach((jsonField) => {
+      const nestedFields = Object.values(jsonField || {}) || [];
+      const fields =
+        nestedFields.filter((a) =>
+          allowed_types.includes((a.type || "").toLowerCase())
+        ) || [];
+      result = [...result, ...fields];
+    });
+  return result;
+};
+
 export async function getMetaFields(fields, model) {
   if (!model) return [];
   if (model.type === "metaModel") {
-    let res = await metaFieldService.fields({
-      fields,
-      model: model.fullName,
-    });
+    let res = await services.get(`ws/meta/fields/${model.fullName}`);
+    let result = getResultedFiels(res);
     const zonedDateTimeFieldsRes = await services.search(
       "com.axelor.meta.db.MetaField",
       {
@@ -44,49 +63,25 @@ export async function getMetaFields(fields, model) {
       zonedDateTimeFieldsRes.data &&
       zonedDateTimeFieldsRes.data.length > 0 &&
       zonedDateTimeFieldsRes.data.map((f) => f.name);
-    let fieldsRes = res && res.data && res.data.fields;
     if (
       zonedDateTimeFields &&
       zonedDateTimeFields.length > 0 &&
-      fieldsRes &&
-      fieldsRes.length > 0
+      result &&
+      result.length > 0
     ) {
-      fieldsRes.forEach((field) => {
+      result.forEach((field) => {
         if (zonedDateTimeFields.includes(field.name)) {
           field.typeName = "ZonedDateTime";
         }
       });
-      return fieldsRes;
+      return result;
     }
-    return fieldsRes;
+    return result;
   } else {
     const res = await services.get(
       `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${model.name}`
     );
-    const responseData = res && res.data;
-    const allFields = responseData && responseData.fields;
-    const jsonFields = Object.values(
-      (responseData && responseData.jsonFields) || [{}]
-    );
-    let result = [];
-    result = allFields.filter((f) => !f.json) || [];
-    jsonFields &&
-      jsonFields.forEach((jsonField) => {
-        const nestedFields = Object.values(jsonField || {}) || [];
-        const fields =
-          nestedFields.filter(
-            (a) =>
-              ![
-                "button",
-                "separator",
-                "panel",
-                "one_to_many",
-                "one-to-many",
-                "binary",
-              ].includes((a.type || "").toLowerCase())
-          ) || [];
-        result = [...result, ...fields];
-      });
+    let result = getResultedFiels(res);
     return sortBy(result, "sequence") || [];
   }
 }
@@ -114,9 +109,8 @@ export async function getSubMetaField(
   let resultFields = res && res.data && res.data.fields;
   resultFields = resultFields.filter(
     (a) =>
-      !["button", "separator", "panel", "one_to_many", "binary"].includes(
-        (a.type || "").toLowerCase()
-      ) && (isQuery ? !a.json : true)
+      allowed_types.includes((a.type || "").toLowerCase()) &&
+      (isQuery ? !a.json : true)
   );
   if (!isM2MFields && resultFields && resultFields.length > 0) {
     return resultFields.filter((f) => f.type !== "MANY_TO_MANY");
