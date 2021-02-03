@@ -157,8 +157,8 @@ function ExpressionBuilder(props) {
   }
 
   async function fetchField() {
-    const allFields = (await getMetaFields(fields, metaModals)) || [];
     const isQuery = isBPMQuery(type);
+    const allFields = (await getMetaFields(fields, metaModals, isQuery)) || [];
     return allFields.filter((a) => {
       return (
         allowed_types.includes((a.type || "").toLowerCase()) &&

@@ -21,7 +21,7 @@ export async function getMetaModals({ search = "" }) {
     .then(({ data = [] }) => data);
 }
 
-const getResultedFiels = (res) => {
+const getResultedFiels = (res, isQuery) => {
   const responseData = res && res.data;
   const allFields = responseData && responseData.fields;
   const jsonFields = Object.values(
@@ -29,6 +29,7 @@ const getResultedFiels = (res) => {
   );
   let result = [];
   result = allFields.filter((f) => !f.json) || [];
+  if (isQuery) return result;
   jsonFields &&
     jsonFields.forEach((jsonField) => {
       const nestedFields = Object.values(jsonField || {}) || [];
@@ -41,11 +42,11 @@ const getResultedFiels = (res) => {
   return result;
 };
 
-export async function getMetaFields(fields, model) {
+export async function getMetaFields(fields, model, isQuery) {
   if (!model) return [];
   if (model.type === "metaModel") {
     let res = await services.get(`ws/meta/fields/${model.fullName}`);
-    let result = getResultedFiels(res);
+    let result = getResultedFiels(res, isQuery);
     const zonedDateTimeFieldsRes = await services.search(
       "com.axelor.meta.db.MetaField",
       {
@@ -81,7 +82,7 @@ export async function getMetaFields(fields, model) {
     const res = await services.get(
       `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${model.name}`
     );
-    let result = getResultedFiels(res);
+    let result = getResultedFiels(res, isQuery);
     return sortBy(result, "sequence") || [];
   }
 }
@@ -101,7 +102,7 @@ export async function getSubMetaField(
     const res = await services.get(
       `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${relationJsonModel}`
     );
-    let result = getResultedFiels(res) || [];
+    let result = getResultedFiels(res, isQuery) || [];
     result = result.filter(
       (a) =>
         allowed_types.includes((a.type || "").toLowerCase()) &&

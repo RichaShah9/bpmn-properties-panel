@@ -22,7 +22,7 @@ import {
   operators_by_type,
   dateFormat,
   join_operator,
-  allowed_types
+  allowed_types,
 } from "./data";
 import {
   getCustomModelData,
@@ -73,13 +73,12 @@ async function fetchField(metaModals, type) {
     metaModals &&
     metaModals.metaFields &&
     metaModals.metaFields.map((f) => f.name);
-  const allFields = (await getMetaFieldsAPI(fields, metaModals)) || [];
   const isQuery = isBPMQuery(type);
-  return allFields.filter(
-    (a) =>
+  const allFields = (await getMetaFieldsAPI(fields, metaModals, isQuery)) || [];
+  return allFields.filter((a) =>
     allowed_types.includes(
-        (a.type || "").toLowerCase() && (isQuery ? !a.json : true)
-      )
+      (a.type || "").toLowerCase() && (isQuery ? !a.json : true)
+    )
   );
 }
 
