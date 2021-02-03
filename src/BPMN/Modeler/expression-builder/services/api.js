@@ -94,28 +94,45 @@ export async function getMetaModal(data) {
 export async function getSubMetaField(
   model,
   isM2MFields = true,
-  isQuery = false
+  isQuery = false,
+  relationJsonModel
 ) {
-  const data = {
-    criteria: [{ fieldName: "fullName", operator: "=", value: model }],
-  };
-  const metaModel = await getMetaModal(data);
-  if (!metaModel) return [];
-  const fields = metaModel && metaModel.metaFields.map((f) => f.name);
-  const res = await metaFieldService.fields({
-    fields,
-    model: metaModel.fullName,
-  });
-  let resultFields = res && res.data && res.data.fields;
-  resultFields = resultFields.filter(
-    (a) =>
-      allowed_types.includes((a.type || "").toLowerCase()) &&
-      (isQuery ? !a.json : true)
-  );
-  if (!isM2MFields && resultFields && resultFields.length > 0) {
-    return resultFields.filter((f) => f.type !== "MANY_TO_MANY");
+  if (model === "com.axelor.meta.db.MetaJsonRecord" && relationJsonModel) {
+    const res = await services.get(
+      `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${relationJsonModel}`
+    );
+    let result = getResultedFiels(res) || [];
+    result = result.filter(
+      (a) =>
+        allowed_types.includes((a.type || "").toLowerCase()) &&
+        (isQuery ? !a.json : true)
+    );
+    if (!isM2MFields && result && result.length > 0) {
+      return result.filter((f) => f.type !== "MANY_TO_MANY");
+    }
+    return sortBy(result, "sequence") || [];
+  } else {
+    const data = {
+      criteria: [{ fieldName: "fullName", operator: "=", value: model }],
+    };
+    const metaModel = await getMetaModal(data);
+    if (!metaModel) return [];
+    const fields = metaModel && metaModel.metaFields.map((f) => f.name);
+    const res = await metaFieldService.fields({
+      fields,
+      model: metaModel.fullName,
+    });
+    let resultFields = res && res.data && res.data.fields;
+    resultFields = resultFields.filter(
+      (a) =>
+        allowed_types.includes((a.type || "").toLowerCase()) &&
+        (isQuery ? !a.json : true)
+    );
+    if (!isM2MFields && resultFields && resultFields.length > 0) {
+      return resultFields.filter((f) => f.type !== "MANY_TO_MANY");
+    }
+    return resultFields;
   }
-  return resultFields;
 }
 
 export async function getData(model) {

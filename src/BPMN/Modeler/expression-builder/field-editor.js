@@ -43,6 +43,10 @@ export default function FieldEditor({
     fields.some((x) => x.name === startValue);
   const relationModel =
     hasManyValues && (fields.find((x) => x.name === startValue) || {}).target;
+  const relationJsonModel =
+    hasManyValues &&
+    (fields.find((x) => x.name === startValue) || {}).jsonTarget;
+
   const isM2MField =
     allField &&
     allField.length > 0 &&
@@ -206,7 +210,8 @@ export default function FieldEditor({
                     values.includes(isM2MField.name) &&
                     values[0] !== isM2MField.name
                 : true,
-              isBPMQuery(type)
+              isBPMQuery(type),
+              relationJsonModel
             );
           }}
           editor={editor}
