@@ -123,6 +123,11 @@ export default function FieldEditor({
           value ? value.name : ""
         }`
       : "";
+    newFieldName = isBPMQuery(type)
+      ? value && value.name
+        ? newFieldName
+        : newFieldName.slice(0, -1)
+      : newFieldName;
     onChange(
       {
         name: "fieldName",
