@@ -26,6 +26,7 @@ import {
 } from "./data";
 import {
   getCustomModelData,
+  getNameField,
   getData,
   getMetaFields as getMetaFieldsAPI,
 } from "./services/api";
@@ -69,16 +70,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 async function fetchField(metaModals, type) {
-  const fields =
-    metaModals &&
-    metaModals.metaFields &&
-    metaModals.metaFields.map((f) => f.name);
   const isQuery = isBPMQuery(type);
-  const allFields = (await getMetaFieldsAPI(fields, metaModals, isQuery)) || [];
-  return allFields.filter((a) =>
-    allowed_types.includes(
-      (a.type || "").toLowerCase() && (isQuery ? !a.json : true)
-    )
+  const allFields = (await getMetaFieldsAPI(metaModals, isQuery)) || [];
+  return allFields.filter(
+    (a) =>
+      allowed_types.includes((a.type || "").toLowerCase()) &&
+      (isQuery ? !a.json : true)
   );
 }
 
@@ -87,11 +84,14 @@ function RenderRelationalWidget(props) {
   const { onChange, value, ...rest } = internalProps;
   const classes = useStyles();
   const { field = {} } = rest;
-  const { targetName, type, target, targetModel } = field;
+  const { targetName, target, targetModel, model, jsonTarget } = field;
+  const [nameField, setNameField] = useState(null);
   const fetchData = async () => {
     let data;
-    if (type && type.includes("json")) {
-      data = await getCustomModelData(field["targetJsonModel.name"]);
+    if (model === "com.axelor.meta.db.MetaJsonRecord" && jsonTarget) {
+      data = await getCustomModelData(jsonTarget);
+      let fieldData = await getNameField(jsonTarget);
+      setNameField(fieldData && fieldData.name);
     } else {
       data = await getData(target || targetModel);
     }
@@ -101,9 +101,20 @@ function RenderRelationalWidget(props) {
     return (
       <InputField
         name="fieldValue"
-        onChange={(value) =>
-          onChange({ name: "fieldValue", value: value }, editor)
-        }
+        onChange={(value) => {
+          let isNameField;
+          if (typeof value !== "string" && !isBPMQuery(parentType)) {
+            isNameField =
+              value && value.length > 0
+                ? value.find((v) => v[targetName])
+                : value[targetName];
+            onChange(
+              { name: "nameField", value: isNameField ? nameField : "id" },
+              editor
+            );
+          }
+          onChange({ name: "fieldValue", value: value }, editor);
+        }}
         margin="none"
         style={{ marginTop: "15px", width: "250px !important" }}
         value={value}
@@ -126,14 +137,21 @@ function RenderRelationalWidget(props) {
             ? false
             : true
         }
-        optionLabelKey={
-          type && type.includes("json")
-            ? field["targetJsonModel.nameField"]
-            : targetName
-        }
-        onChange={(value) =>
-          onChange({ name: "fieldValue", value: value }, editor)
-        }
+        optionLabelKey={targetName}
+        onChange={(value) => {
+          let isNameField;
+          if (typeof value !== "string" && !isBPMQuery(parentType)) {
+            isNameField =
+              value && value.length > 0
+                ? value.find((v) => v[targetName])
+                : value[targetName];
+            onChange(
+              { name: "nameField", value: isNameField ? nameField : "id" },
+              editor
+            );
+          }
+          onChange({ name: "fieldValue", value: value }, editor);
+        }}
         value={value || []}
         classes={{ root: classes.MuiAutocompleteRoot }}
       />
@@ -713,7 +731,7 @@ function Rule(props) {
                 />
               )}
               <FieldEditor
-                getMetaFields={() => fetchField(elseMetaModal)}
+                getMetaFields={() => fetchField(elseMetaModal, type)}
                 editor={editor}
                 isField={isField}
                 onChange={({ value, fieldNameValue, allField }, editor) => {

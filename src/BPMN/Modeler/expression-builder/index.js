@@ -94,6 +94,7 @@ function ExpressionBuilder({
       relatedElseValueFieldName,
       relatedElseValueModal,
       parent,
+      nameField,
     } = rule;
     let fieldName = propFieldName;
     const values = fieldName
@@ -101,8 +102,8 @@ function ExpressionBuilder({
       .filter((f) => f !== "");
 
     const fName = values[0];
-    const field = allField.find((f) => f.name === fName) || {};
-    const { targetName, selectionList } = field || {};
+    const field = allField.find((f) => f.name === fName);
+    const { targetName, selectionList, nameField: nameColumn } = field || {};
     const type =
       field && field.type && field.type.toLowerCase().replaceAll("-", "_");
     const typeName = field && field.typeName;
@@ -156,6 +157,7 @@ function ExpressionBuilder({
           relatedElseValueFieldName,
           relatedElseValueModal,
           parent: values && values[0],
+          nameField: nameColumn || nameField,
         },
         initValue,
         nestedFields.length > 1,
@@ -192,6 +194,8 @@ function ExpressionBuilder({
           relatedValueModal,
           relatedElseValueFieldName,
           relatedElseValueModal,
+          nameField: nameColumn || nameField,
+          parent: values && values[0],
         },
         initValue,
         nestedFields.length > 1,
@@ -222,8 +226,24 @@ function ExpressionBuilder({
             : rule.fieldValue
                 .map((i) =>
                   isNumber
-                    ? `${i["targetName"] || i["fullName"] || i["name"]}`
-                    : `'${i["targetName"] || i["fullName"] || i["name"]}'`
+                    ? `${
+                        i["nameField"] ||
+                        i["targetName"] ||
+                        i["fullName"] ||
+                        i["name"] ||
+                        i["id"]
+                      }`
+                    : i["nameField"] ||
+                      i["targetName"] ||
+                      i["fullName"] ||
+                      i["name"]
+                    ? `'${
+                        i["nameField"] ||
+                        i["targetName"] ||
+                        i["fullName"] ||
+                        i["name"]
+                      }'`
+                    : i["id"]
                 )
                 .join(",");
         const name =
@@ -233,7 +253,10 @@ function ExpressionBuilder({
                 selectionList
                   ? ""
                   : `${join_operator[expression]}${
-                      (field && field.targetName) || targetName || "fullName"
+                      nameField ||
+                      (field && field.targetName) ||
+                      targetName ||
+                      "fullName"
                     }`
               }`;
         const str = `${operator === "notIn" ? "!" : ""}${`[${value}]`}${
@@ -251,8 +274,24 @@ function ExpressionBuilder({
             : rule.fieldValue
                 .map((i) =>
                   isNumber
-                    ? `${i["targetName"] || i["fullName"] || i["name"]}`
-                    : `'${i["targetName"] || i["fullName"] || i["name"]}'`
+                    ? `${
+                        i["nameField"] ||
+                        i["targetName"] ||
+                        i["fullName"] ||
+                        i["name"] ||
+                        i["id"]
+                      }`
+                    : i["nameField"] ||
+                      i["targetName"] ||
+                      i["fullName"] ||
+                      i["name"]
+                    ? `'${
+                        i["nameField"] ||
+                        i["targetName"] ||
+                        i["fullName"] ||
+                        i["name"]
+                      }'`
+                    : i["id"]
                 )
                 .join(",");
         const name =
@@ -262,7 +301,10 @@ function ExpressionBuilder({
                 selectionList
                   ? ""
                   : `${join_operator[expression]}${
-                      (field && field.targetName) || targetName || "fullName"
+                      nameField ||
+                      (field && field.targetName) ||
+                      targetName ||
+                      "fullName"
                     }`
               }`;
         const str = `${operator === "notContains" ? "!" : ""}(${prefix}${
@@ -331,18 +373,23 @@ function ExpressionBuilder({
             : ` ${str}`
         )}`;
       } else {
+        let fieldNew = field || allField.find((f) => f.name === parent) || {};
         let value =
           typeof fieldValue === "object" && fieldValue
             ? `'${jsStringEscape(
-                fieldValue[targetName] ||
+                fieldValue[nameField] ||
+                  fieldValue[targetName] ||
                   fieldValue["fullName"] ||
                   fieldValue["name"] ||
+                  fieldValue["id"] ||
                   ""
               )}'`
               ? `'${jsStringEscape(
-                  fieldValue[targetName] ||
+                  fieldValue[nameField] ||
+                    fieldValue[targetName] ||
                     fieldValue["fullName"] ||
                     fieldValue["name"] ||
+                    fieldValue["id"] ||
                     ""
                 )}'`
               : fieldValue["name"]
@@ -350,7 +397,7 @@ function ExpressionBuilder({
         const str = `${
           typeof fieldValue === "object" && fieldValue
             ? `${fieldName}${join_operator[expression]}${
-                field.targetName || "fullName"
+                nameField || fieldNew.targetName || "fullName"
               }`
             : fieldName
         } ${map_operators[operator]} ${value}`;
@@ -438,7 +485,12 @@ function ExpressionBuilder({
           "json_one_to_many",
           "json_many_to_one",
           "json_one_to_one",
-        ].includes(f && f.type && f.type.toLowerCase());
+        ].includes(
+          f &&
+            f.type &&
+            f.type.toLowerCase() &&
+            f.type.toLowerCase().replaceAll("-", "_")
+        );
         if (isRelational) {
           return getRelationalCondition(rule, undefined, false, prefix);
         }
@@ -684,8 +736,12 @@ function ExpressionBuilder({
 
         return {
           condition: `${prefix}.${
-            (type === "many_to_one" || type === "json_many_to_one") &&
-            !isRelationalValue
+            [
+              "many_to_one",
+              "json_many_to_one",
+              "one_to_one",
+              "json_one_to_one",
+            ].includes(type) && !isRelationalValue
               ? `${fieldName}.${field.targetName || "fullName"}`
               : fieldName
           } ${map_operators[operator]} ${
