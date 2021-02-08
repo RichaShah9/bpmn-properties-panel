@@ -28,24 +28,35 @@ const getResultedFiels = (res, isQuery) => {
     (responseData && responseData.jsonFields) || [{}]
   );
   let result = [];
-  result = allFields.filter((f) => !f.json) || [];
+  result =
+    (allFields &&
+      allFields.filter(
+        (f) => !f.json && allowed_types.includes((f.type || "").toLowerCase())
+      )) ||
+    [];
   if (isQuery) return result;
   jsonFields &&
     jsonFields.forEach((jsonField) => {
       const nestedFields = Object.values(jsonField || {}) || [];
       const fields =
-        nestedFields.filter((a) =>
-          allowed_types.includes((a.type || "").toLowerCase())
+        nestedFields.filter(
+          (a) =>
+            allowed_types.includes((a.type || "").toLowerCase()) &&
+            (a.type === "many-to-many" ? a.targetName : true)
         ) || [];
       result = [...result, ...fields];
     });
   return result;
 };
 
-export async function getMetaFields(fields, model, isQuery) {
+export async function getMetaFields(model, isQuery) {
   if (!model) return [];
   if (model.type === "metaModel") {
-    let res = await services.get(`ws/meta/fields/${model.fullName}`);
+    let res = await services.get(
+      `ws/meta/fields/${
+        model.fullName ? model.fullName : `${model.packageName}.${model.name}`
+      }`
+    );
     let result = getResultedFiels(res, isQuery);
     const zonedDateTimeFieldsRes = await services.search(
       "com.axelor.meta.db.MetaField",
@@ -106,7 +117,8 @@ export async function getSubMetaField(
     result = result.filter(
       (a) =>
         allowed_types.includes((a.type || "").toLowerCase()) &&
-        (isQuery ? !a.json : true)
+        (isQuery ? !a.json : true) &&
+        (a.type === "many-to-many" ? a.targetName : true)
     );
     if (!isM2MFields && result && result.length > 0) {
       return result.filter((f) => f.type !== "MANY_TO_MANY");
@@ -127,7 +139,8 @@ export async function getSubMetaField(
     resultFields = resultFields.filter(
       (a) =>
         allowed_types.includes((a.type || "").toLowerCase()) &&
-        (isQuery ? !a.json : true)
+        (isQuery ? !a.json : true) &&
+        (a.type === "many-to-many" ? a.targetName : true)
     );
     if (!isM2MFields && resultFields && resultFields.length > 0) {
       return resultFields.filter((f) => f.type !== "MANY_TO_MANY");
@@ -139,18 +152,33 @@ export async function getSubMetaField(
 export async function getData(model) {
   const modelService = new AxelorService({ model });
   const res = await modelService.search({});
+  if (res && res.status === -1) return [];
   return res && res.data;
 }
 
 export async function getCustomModelData(jsonModel) {
   const res = await services.search("com.axelor.meta.db.MetaJsonRecord", {
-    _domain: `self.jsonModel = ${jsonModel}`,
-    _domainContext: {
-      jsonModel,
-      _id: null,
-      _model: "com.axelor.meta.db.MetaJsonRecord",
-      fields: ["name", "attrs"],
+    data: {
+      criteria: [{ fieldName: "jsonModel", operator: "=", value: jsonModel }],
+      operator: "and",
     },
   });
+  if (res && res.status === -1) return [];
   return res && res.data;
+}
+
+export async function getNameField(jsonModel) {
+  const res = await services.search("com.axelor.meta.db.MetaJsonField", {
+    data: {
+      criteria: [
+        { fieldName: "jsonModel", operator: "=", value: jsonModel },
+        { fieldName: "nameField", operator: "=", value: true },
+      ],
+      operator: "and",
+    },
+    fields: ["name"],
+  });
+  if (res && res.status > -1) {
+    return res.data && res.data[0];
+  }
 }
