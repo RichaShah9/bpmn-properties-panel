@@ -50,7 +50,11 @@ export default function FieldEditor({
   const isM2MField =
     allField &&
     allField.length > 0 &&
-    allField.find((f) => f.type === "MANY_TO_MANY");
+    allField.find((f) =>
+      ["many_to_many", "json_many_to_many"].includes(
+        (f && (f.type || "")).toLowerCase().replaceAll("-", "_")
+      )
+    );
 
   const getUpdatedValue = () => {
     let spiltedValues = initValue && initValue.split(join_operator[expression]);

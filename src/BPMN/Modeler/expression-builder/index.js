@@ -108,7 +108,14 @@ function ExpressionBuilder({
       field && field.type && field.type.toLowerCase().replaceAll("-", "_");
     const typeName = field && field.typeName;
     const nestedFields = values.splice(1) || [];
-    if (["many_to_many", "one_to_many"].includes(type)) {
+    if (
+      [
+        "many_to_many",
+        "one_to_many",
+        "json_many_to_many",
+        "json_one_to_many",
+      ].includes(type)
+    ) {
       const findRelational = initValue.match(/\$\$/g);
       if (findRelational && findRelational.length > 0) {
         const str =
