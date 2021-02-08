@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextField } from "@material-ui/core";
+import { TextField, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import _uniqueId from "lodash/uniqueId";
@@ -36,6 +36,7 @@ export default function AutoComplete(props) {
   } = props;
 
   const classes = useStyles();
+  const [loading, setLoading] = useState(false);
 
   const findOption = React.useCallback(
     (option) => {
@@ -56,19 +57,23 @@ export default function AutoComplete(props) {
   useEffect(() => {
     let active = true;
     if (open) {
-      fetchAPI
-        ? (async () => {
-            const data = await fetchAPI({ search: inputValue });
-
-            if (active) {
-              setOptions(data);
-            }
-          })()
-        : setOptions(flatOptions);
+      setLoading(true);
+      if (fetchAPI) {
+        (async () => {
+          const data = await fetchAPI({ search: inputValue });
+          if (active) {
+            setOptions(data);
+            setLoading(false);
+          }
+        })();
+      } else {
+        setOptions(flatOptions);
+        setLoading(false);
+      }
     }
-
     return () => {
       active = false;
+      setLoading(false);
     };
   }, [fetchAPI, flatOptions, inputValue, open]);
 
@@ -101,20 +106,35 @@ export default function AutoComplete(props) {
     }
   }
 
+  const checkValue = (option) => {
+    return (option && option.type) === "metaJsonModel"
+      ? `${
+          option && option[optionLabelKey] ? option[optionLabelKey] : ""
+        } (Custom model)` || ""
+      : name === "fieldName"
+      ? `${translate(option && option["title"] ? option["title"] : "")} (${
+          option && option[optionLabelKey]
+        })`
+      : option
+      ? option[optionLabelKey]
+        ? option[optionLabelKey]
+        : option["id"]
+        ? option["id"].toString()
+        : ""
+      : "";
+  };
+
   return (
     <Autocomplete
       getOptionSelected={(option, value) => {
-        return option[optionValueKey] === value[optionValueKey];
+        return isMulti
+          ? option[optionValueKey] === value[optionValueKey]
+          : checkValue(option) === checkValue(value);
       }}
       getOptionLabel={(option) => {
-        return (option && option.type) === "metaJsonModel"
-          ? `${option && option[optionLabelKey]} (Custom model)` || ""
-          : name === "fieldName"
-          ? `${translate(option && option["title"])} (${
-              option && option[optionLabelKey]
-            })`
-          : (option && option[optionLabelKey]) || "";
+        return checkValue(option);
       }}
+      loading={loading}
       id={_uniqueId("select-widget")}
       open={open}
       onOpen={() => setOpen(true)}
@@ -149,6 +169,12 @@ export default function AutoComplete(props) {
               ...params.InputProps,
               endAdornment: (
                 <React.Fragment>
+                  {loading ? (
+                    <CircularProgress
+                      className={classes.circularProgress}
+                      size={15}
+                    />
+                  ) : null}
                   {params.InputProps.endAdornment}
                 </React.Fragment>
               ),
