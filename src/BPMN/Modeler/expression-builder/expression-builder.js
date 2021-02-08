@@ -78,11 +78,6 @@ function ExpressionBuilder(props) {
     setValue({ metaModals, rules }, index);
   }, [index, setValue, metaModals, rules]);
 
-  const fields =
-    metaModals &&
-    metaModals.metaFields &&
-    metaModals.metaFields.map((f) => f.name);
-
   function onAddGroup(parentId) {
     id = id + 1;
     setRules((state) => [...state, { id, parentId, rules: [] }]);
@@ -158,7 +153,7 @@ function ExpressionBuilder(props) {
 
   async function fetchField() {
     const isQuery = isBPMQuery(type);
-    const allFields = (await getMetaFields(fields, metaModals, isQuery)) || [];
+    const allFields = (await getMetaFields(metaModals, isQuery)) || [];
     return allFields.filter((a) => {
       return (
         allowed_types.includes((a.type || "").toLowerCase()) &&
