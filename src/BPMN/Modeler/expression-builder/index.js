@@ -360,25 +360,20 @@ function ExpressionBuilder({
         }
         return `${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
-          isParent ? `${str}` : ` ${str}`
+          str
         )}`;
       } else if (["isTrue", "isFalse"].includes(operator)) {
         const value = operator === "isTrue" ? true : false;
         const str = `${fieldName} ${map_operators[operator]} ${value}`;
         return `${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
-          isParent ? `${str}` : ` ${str}`
+          str
         )}`;
       } else if (["like", "notLike"].includes(operator)) {
         const str = `${fieldName}${join_operator[expression]}${map_operators[operator]}(${fieldValue})`;
         return `${operator === "notLike" ? "!" : ""}${prefix}${
           join_operator[expression]
-        }${initValue.replace(
-          /\$\$/g,
-          isParent || (typeof fieldValue === "object" && fieldValue)
-            ? `${str}`
-            : ` ${str}`
-        )}`;
+        }${initValue.replace(/\$\$/g, str)}`;
       } else {
         let fieldNew = field || allField.find((f) => f.name === parent) || {};
         let value =
@@ -410,9 +405,7 @@ function ExpressionBuilder({
         } ${map_operators[operator]} ${value}`;
         return `${prefix}${join_operator[expression]}${initValue.replace(
           /\$\$/g,
-          isParent || (typeof fieldValue === "object" && fieldValue)
-            ? `${str}`
-            : ` ${str}`
+          str
         )}`;
       }
     }
