@@ -121,10 +121,11 @@ export async function getSubMetaField(
         ((a.type || "").toLowerCase() === "many-to-many" ? a.targetName : true)
     );
     if (!isM2MFields && result && result.length > 0) {
-      return result.filter((f) =>
-        ["many_to_many", "json_many_to_many"].includes(
-          (f && (f.type || "")).toLowerCase().replaceAll("-", "_")
-        )
+      return result.filter(
+        (f) =>
+          !["many_to_many", "json_many_to_many"].includes(
+            (f && (f.type || "")).toLowerCase().replaceAll("-", "_")
+          )
       );
     }
     return sortBy(result, "sequence") || [];
@@ -147,10 +148,11 @@ export async function getSubMetaField(
         (a.type === "many-to-many" ? a.targetName : true)
     );
     if (!isM2MFields && resultFields && resultFields.length > 0) {
-      return resultFields.filter((f) =>
-        ["many_to_many", "json_many_to_many"].includes(
-          (f && (f.type || "")).toLowerCase().replaceAll("-", "_")
-        )
+      return resultFields.filter(
+        (f) =>
+          !["many_to_many", "json_many_to_many"].includes(
+            (f && (f.type || "")).toLowerCase().replaceAll("-", "_")
+          )
       );
     }
     return resultFields;
