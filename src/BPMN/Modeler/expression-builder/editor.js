@@ -881,9 +881,7 @@ export default function Editor({
           onChange={(value) => onChange({ name: "combinator", value }, editor)}
         />
         <Button title="Rules" Icon={AddIcon} onClick={() => onAddRule(id)} />
-        {!isBPM && (
-          <Button title="Group" Icon={AddIcon} onClick={() => onAddGroup(id)} />
-        )}
+        <Button title="Group" Icon={AddIcon} onClick={() => onAddGroup(id)} />
         {isRemoveGroup && (
           <Button
             title="Group"

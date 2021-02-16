@@ -570,11 +570,11 @@ function ExpressionBuilder({
     );
   }
 
-  function getBPMCondition(rules, modalName) {
+  function getBPMCondition(rules, modalName, parentCount = 0) {
     const isBPM = isBPMQuery(parentType);
     const prefix = isBPM ? "self" : modalName;
     const map_operators = map_operator[isBPM ? "BPM" : expression];
-    let count = 0;
+    let count = parentCount;
     return rules.map((rule) => {
       const { fieldName, field = {}, operator } = rule;
       const { targetName, selectionList } = field || {};
@@ -759,11 +759,22 @@ function ExpressionBuilder({
     });
   }
 
-  function getBPMCriteria(rule, modalName, isChildren) {
+  function getBPMCriteria(rule, modalName, isChildren, count = 0) {
     const { rules, combinator, children } = rule[0];
-    const condition = getBPMCondition(rules, modalName).filter((f) => f !== "");
+    const condition = getBPMCondition(rules, modalName, count).filter(
+      (f) => f !== ""
+    );
     if (children.length > 0) {
-      const { conditions, values } = getBPMCriteria(children, modalName, true);
+      const parentValues =
+        (condition &&
+          condition.map((co) => co && co.values).filter((f) => f)) ||
+        [];
+      const { condition: conditions, values } = getBPMCriteria(
+        children,
+        modalName,
+        true,
+        parentValues && parentValues.length
+      );
       condition.push({ condition: conditions, values });
     }
     const map_type = isBPMQuery(parentType)
@@ -773,12 +784,17 @@ function ExpressionBuilder({
     if (isChildren) {
       return {
         condition: " (" + c.join(" " + map_type[combinator] + " ") + ") ",
-        values: condition && condition.map((co) => co && co.values),
+        values:
+          condition &&
+          condition
+            .map((co) => co && co.values && co.values[0])
+            .filter((f) => f),
       };
     } else {
       return {
         condition: c.join(" " + map_type[combinator] + " "),
-        values: condition && condition.map((co) => co && co.values),
+        values:
+          condition && condition.map((co) => co && co.values).filter((f) => f),
       };
     }
   }
@@ -844,15 +860,9 @@ function ExpressionBuilder({
           ? getBPMCriteria(
               listOfTree,
               lowerCaseFirstLetter(modalName),
-              undefined,
-              combinator
+              undefined
             )
-          : getCriteria(
-              listOfTree,
-              lowerCaseFirstLetter(modalName),
-              undefined,
-              combinator
-            );
+          : getCriteria(listOfTree, lowerCaseFirstLetter(modalName), undefined);
         vals.push(
           ...(criteria &&
             ((criteria.values || []).filter((f) => Array.isArray(f)) || []))
