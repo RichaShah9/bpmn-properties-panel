@@ -4,8 +4,15 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import Paper from "@material-ui/core/Paper";
 import classNames from "classnames";
 import moment from "moment";
-import { Radio, RadioGroup, FormControlLabel } from "@material-ui/core";
+import {
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  IconButton,
+  Tooltip,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Close, ArrowForward } from "@material-ui/icons";
 
 import { getModels } from "../../../services/api";
 import {
@@ -32,6 +39,8 @@ import {
 } from "./services/api";
 import { isBPMQuery, lowerCaseFirstLetter, getProcessConfig } from "./util";
 import FieldEditor from "./field-editor";
+import { translate } from "../../../utils";
+import { firstCharLowerCase } from "xml2js/lib/processors";
 
 const useStyles = makeStyles((theme) => ({
   Container: {
@@ -66,6 +75,9 @@ const useStyles = makeStyles((theme) => ({
   },
   operators: {
     minWidth: 75,
+  },
+  iconButton: {
+    marginRight: 10,
   },
 }));
 
@@ -385,6 +397,8 @@ function Rule(props) {
     relatedValueFieldName,
     relatedElseValueModal,
     relatedElseValueFieldName,
+    isShowMetaModelField: showMetaModelField,
+    isShowElseMetaModelField: showElseMetaModelField,
   } = value;
   const classes = useStyles();
   const type = fieldType && fieldType.toLowerCase().replaceAll("-", "_");
@@ -392,8 +406,14 @@ function Rule(props) {
     isRelationalValue ? isRelationalValue : "none"
   );
   const [metaModal, setMetaModal] = useState(relatedValueModal || null);
+  const [isShowMetaModelField, setIsShowMetaModelField] = useState(
+    showMetaModelField || false
+  );
   const [elseMetaModal, setElseMetaModal] = useState(
     relatedElseValueModal || null
+  );
+  const [isShowElseMetaModelField, setIsShowElseMetaModelField] = useState(
+    showElseMetaModelField || false
   );
 
   const getValue = (val) => {
@@ -555,6 +575,8 @@ function Rule(props) {
                   } else {
                     setMetaModal(null);
                     setElseMetaModal(null);
+                    setIsShowElseMetaModelField(false);
+                    setIsShowMetaModelField(false);
                   }
                 } else {
                   handleChange("relatedValueFieldName", null);
@@ -607,201 +629,105 @@ function Rule(props) {
       !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) ? (
         <React.Fragment>
           {isField === "context" && (
-            <Selection
-              name="metaModal"
-              title="Meta Modal"
-              placeholder="meta modal"
-              fetchAPI={() =>
-                getModels(getProcessConfig(element), isBPMQuery(parentType))
-              }
-              optionLabelKey="name"
-              onChange={(e) => {
-                setMetaModal(e);
-                setNameValue({
-                  fieldValue: null,
-                });
-                handleChange("fieldValue", null);
-              }}
-              value={metaModal}
-              classes={{ root: classes.MuiAutocompleteRoot }}
-            />
-          )}
-          <FieldEditor
-            getMetaFields={() =>
-              isField === "context"
-                ? fetchField(metaModal, parentType)
-                : getMetaFields()
-            }
-            editor={editor}
-            isField={isField}
-            onChange={({ value, fieldNameValue, allField, isShow }, editor) => {
-              setNameValue({
-                allField: allField,
-                field: value,
-                fieldName: fieldNameValue,
-                fieldType: value && value.type,
-                fieldValue: null,
-                fieldValue2: null,
-                operator: null,
-                isRelationalValue: isField === "none" ? null : isField,
-                relatedValueFieldName: null,
-                relatedValueModal: null,
-                isShow,
-              });
-              handleChange(
-                "isRelationalValue",
-                isField === "none" ? null : isField
-              );
-              handleChange("relatedValueFieldName", value);
-              handleChange("relatedValueModal", metaModal);
-              let isBPM = isBPMQuery(parentType);
-              const isContextValue = isField === "context" && isBPM;
-              handleChange(
-                "fieldValue",
-                fieldNameValue
-                  ? (parentMetaModal && parentMetaModal.id) ===
-                    (metaModal && metaModal.id)
-                    ? isBPM
-                      ? `self.${fieldNameValue}`
-                      : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
-                          isContextValue
-                            ? "?."
-                            : join_operator[isBPM ? "BPM" : expression]
-                        }${fieldNameValue}${
-                          value && value.typeName && !isBPM
-                            ? `${
-                                isContextValue
-                                  ? "?."
-                                  : join_operator[expression]
-                              }toLocalDateTime()`
-                            : ""
-                        }`
-                    : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
-                        isContextValue
-                          ? "?."
-                          : join_operator[isBPM ? "BPM" : expression]
-                      }${fieldNameValue}${
-                        value &&
-                        [
-                          "json-many-to-one",
-                          "MANY_TO_ONE",
-                          "many-to-one",
-                        ].includes(value.type) &&
-                        isBPM &&
-                        isField === "context"
-                          ? `${
-                              isContextValue ? "?." : join_operator[expression]
-                            }getTarget()`
-                          : ""
-                      }${
-                        value && value.typeName && !isBPM
-                          ? `${
-                              isContextValue ? "?." : join_operator[expression]
-                            }toLocalDateTime()`
-                          : ""
-                      }`
-                  : undefined
-              );
-            }}
-            value={nameValue}
-            expression={expression}
-            type={parentType}
-            isParent={true}
-            isBPM={true}
-          />
-          {["between", "notBetween"].includes(operator) && (
             <React.Fragment>
-              {isField === "context" && (
-                <Selection
-                  name="metaModal"
-                  title="Meta Modal Else"
-                  placeholder="meta modal"
-                  fetchAPI={() =>
-                    getModels(getProcessConfig(element), isBPMQuery(parentType))
-                  }
-                  optionLabelKey="name"
-                  onChange={(e) => {
-                    setElseMetaModal(e);
-                    setElseNameValue({
-                      fieldValue2: null,
+              <Selection
+                name="metaModal"
+                title="Meta Modal"
+                placeholder="meta modal"
+                fetchAPI={() =>
+                  getModels(getProcessConfig(element), isBPMQuery(parentType))
+                }
+                optionLabelKey="name"
+                onChange={(e) => {
+                  setMetaModal(e);
+                  if (e) {
+                    setNameValue({
+                      fieldValue: firstCharLowerCase(e.name),
                     });
-                    handleChange("fieldValue2", null);
+                    handleChange("relatedValueModal", e);
+                    handleChange("fieldValue", firstCharLowerCase(e.name));
+                  } else {
+                    setNameValue({
+                      fieldValue: null,
+                    });
+                    handleChange("fieldValue", null);
+                  }
+                }}
+                value={metaModal}
+                classes={{ root: classes.MuiAutocompleteRoot }}
+              />
+              {isShowMetaModelField && isField === "context" && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setIsShowMetaModelField(false);
+                    handleChange("isShowMetaModelField", false);
+                    if (!metaModal) return;
+                    const model = metaModal.name;
+                    setNameValue({
+                      fieldValue: firstCharLowerCase(model),
+                    });
+                    handleChange("relatedValueModal", metaModal);
+                    handleChange("fieldValue", firstCharLowerCase(model));
                   }}
-                  value={elseMetaModal}
-                  classes={{ root: classes.MuiAutocompleteRoot }}
-                />
+                  className={classes.iconButton}
+                >
+                  <Tooltip title={translate("Remove sub field")}>
+                    <Close color="primary" fontSize="small" />
+                  </Tooltip>
+                </IconButton>
               )}
-              <FieldEditor
-                getMetaFields={() => fetchField(elseMetaModal, type)}
-                editor={editor}
-                isField={isField}
-                onChange={(
-                  { value, fieldNameValue, allField, isShow },
-                  editor
-                ) => {
-                  setElseNameValue({
-                    allField: allField,
-                    field: value,
-                    fieldName: fieldNameValue,
-                    fieldType: value && value.type,
-                    fieldValue: null,
-                    fieldValue2: null,
-                    operator: null,
-                    isRelationalValue: isField === "none" ? null : isField,
-                    relatedValueFieldName: relatedValueFieldName,
-                    relatedValueModal: relatedElseValueModal,
-                    relatedElseValueFieldName: relatedElseValueFieldName,
-                    relatedElseValueModal: relatedElseValueModal,
-                    isShow,
-                  });
-                  handleChange("relatedElseValueFieldName", value);
-                  handleChange("relatedElseValueModal", elseMetaModal);
-                  let isBPM = isBPMQuery(parentType);
-                  const isContextValue = isField === "context" && isBPM;
-                  handleChange(
-                    "fieldValue2",
-                    fieldNameValue
-                      ? (parentMetaModal && parentMetaModal.id) ===
-                        (elseMetaModal && elseMetaModal.id)
-                        ? isBPM
-                          ? `self.${fieldNameValue}`
-                          : `${lowerCaseFirstLetter(
-                              metaModal && metaModal.name
-                            )}${
-                              isContextValue
-                                ? "?."
-                                : join_operator[isBPM ? "BPM" : expression]
-                            }${fieldNameValue}${
-                              value && value.typeName && !isBPM
-                                ? `${
-                                    isContextValue
-                                      ? "?."
-                                      : join_operator[expression]
-                                  }toLocalDateTime()`
-                                : ""
-                            }`
+            </React.Fragment>
+          )}
+          {(isShowMetaModelField || isField === "self") && (
+            <FieldEditor
+              getMetaFields={() =>
+                isField === "context"
+                  ? fetchField(metaModal, parentType)
+                  : getMetaFields()
+              }
+              editor={editor}
+              isField={isField}
+              onChange={(
+                { value, fieldNameValue, allField, isShow },
+                editor
+              ) => {
+                setNameValue({
+                  allField: allField,
+                  field: value,
+                  fieldName: fieldNameValue,
+                  fieldType: value && value.type,
+                  fieldValue: null,
+                  fieldValue2: null,
+                  operator: null,
+                  isRelationalValue: isField === "none" ? null : isField,
+                  relatedValueFieldName: null,
+                  relatedValueModal: null,
+                  isShow,
+                  isShowMetaModelField,
+                });
+                handleChange(
+                  "isRelationalValue",
+                  isField === "none" ? null : isField
+                );
+                handleChange("relatedValueFieldName", value);
+                handleChange("relatedValueModal", metaModal);
+                let isBPM = isBPMQuery(parentType);
+                const isContextValue = isField === "context" && isBPM;
+                handleChange(
+                  "fieldValue",
+                  fieldNameValue
+                    ? (parentMetaModal && parentMetaModal.id) ===
+                      (metaModal && metaModal.id)
+                      ? isBPM
+                        ? `self.${fieldNameValue}`
                         : `${lowerCaseFirstLetter(
-                            elseMetaModal && elseMetaModal.name
+                            metaModal && metaModal.name
                           )}${
                             isContextValue
                               ? "?."
                               : join_operator[isBPM ? "BPM" : expression]
                           }${fieldNameValue}${
-                            value &&
-                            [
-                              "json-many-to-one",
-                              "MANY_TO_ONE",
-                              "many-to-one",
-                            ].includes(value.type) &&
-                            isBPM &&
-                            isField === "context"
-                              ? `${
-                                  isContextValue
-                                    ? "?."
-                                    : join_operator[expression]
-                                }getTarget()`
-                              : ""
-                          }${
                             value && value.typeName && !isBPM
                               ? `${
                                   isContextValue
@@ -810,15 +736,222 @@ function Rule(props) {
                                 }toLocalDateTime()`
                               : ""
                           }`
-                      : undefined
-                  );
-                }}
-                value={elseNameValue}
-                expression={expression}
-                type={parentType}
-                isParent={true}
-                isBPM={true}
-              />
+                      : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
+                          isContextValue
+                            ? "?."
+                            : join_operator[isBPM ? "BPM" : expression]
+                        }${fieldNameValue}${
+                          value &&
+                          [
+                            "json-many-to-one",
+                            "MANY_TO_ONE",
+                            "many-to-one",
+                          ].includes(value.type) &&
+                          isBPM &&
+                          isField === "context"
+                            ? `${
+                                isContextValue
+                                  ? "?."
+                                  : join_operator[expression]
+                              }getTarget()`
+                            : ""
+                        }${
+                          value && value.typeName && !isBPM
+                            ? `${
+                                isContextValue
+                                  ? "?."
+                                  : join_operator[expression]
+                              }toLocalDateTime()`
+                            : ""
+                        }`
+                    : undefined
+                );
+              }}
+              value={nameValue}
+              expression={expression}
+              type={parentType}
+              isParent={true}
+              isBPM={true}
+            />
+          )}
+          {!isShowMetaModelField && metaModal && isField === "context" && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                setIsShowMetaModelField(true);
+                handleChange("isShowMetaModelField", true);
+              }}
+              className={classes.iconButton}
+            >
+              <Tooltip title={translate("Add sub field")}>
+                <ArrowForward color="primary" fontSize="small" />
+              </Tooltip>
+            </IconButton>
+          )}
+          {["between", "notBetween"].includes(operator) && (
+            <React.Fragment>
+              {isField === "context" && (
+                <React.Fragment>
+                  <Selection
+                    name="metaModal"
+                    title="Meta Modal Else"
+                    placeholder="meta modal"
+                    fetchAPI={() =>
+                      getModels(
+                        getProcessConfig(element),
+                        isBPMQuery(parentType)
+                      )
+                    }
+                    optionLabelKey="name"
+                    onChange={(e) => {
+                      setElseMetaModal(e);
+                      if (e) {
+                        setElseNameValue({
+                          fieldValue2: firstCharLowerCase(e.name),
+                        });
+                        handleChange("relatedElseValueModal", e);
+                        handleChange("fieldValue2", firstCharLowerCase(e.name));
+                      } else {
+                        setElseNameValue({
+                          fieldValue2: null,
+                        });
+                        handleChange("fieldValue2", null);
+                      }
+                    }}
+                    value={elseMetaModal}
+                    classes={{ root: classes.MuiAutocompleteRoot }}
+                  />
+                  {isShowElseMetaModelField && isField === "context" && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setIsShowElseMetaModelField(false);
+                        handleChange("isShowElseMetaModelField", false);
+                        if (!elseMetaModal) return;
+                        const model = elseMetaModal.name;
+                        setNameValue({
+                          fieldValue: firstCharLowerCase(model),
+                        });
+                        handleChange("relatedElseValueModal", elseMetaModal);
+                        handleChange("fieldValue2", firstCharLowerCase(model));
+                      }}
+                      className={classes.iconButton}
+                    >
+                      <Tooltip title={translate("Remove sub field")}>
+                        <Close color="primary" fontSize="small" />
+                      </Tooltip>
+                    </IconButton>
+                  )}
+                </React.Fragment>
+              )}
+              {(isShowElseMetaModelField || isField === "self") && (
+                <FieldEditor
+                  getMetaFields={() => fetchField(elseMetaModal, type)}
+                  editor={editor}
+                  isField={isField}
+                  onChange={(
+                    { value, fieldNameValue, allField, isShow },
+                    editor
+                  ) => {
+                    setElseNameValue({
+                      allField: allField,
+                      field: value,
+                      fieldName: fieldNameValue,
+                      fieldType: value && value.type,
+                      fieldValue: null,
+                      fieldValue2: null,
+                      operator: null,
+                      isRelationalValue: isField === "none" ? null : isField,
+                      relatedValueFieldName: relatedValueFieldName,
+                      relatedValueModal: relatedElseValueModal,
+                      relatedElseValueFieldName: relatedElseValueFieldName,
+                      relatedElseValueModal: relatedElseValueModal,
+                      isShow,
+                      isShowMetaModelField,
+                      isShowElseMetaModelField,
+                    });
+                    handleChange("relatedElseValueFieldName", value);
+                    handleChange("relatedElseValueModal", elseMetaModal);
+                    let isBPM = isBPMQuery(parentType);
+                    const isContextValue = isField === "context" && isBPM;
+                    handleChange(
+                      "fieldValue2",
+                      fieldNameValue
+                        ? (parentMetaModal && parentMetaModal.id) ===
+                          (elseMetaModal && elseMetaModal.id)
+                          ? isBPM
+                            ? `self.${fieldNameValue}`
+                            : `${lowerCaseFirstLetter(
+                                metaModal && metaModal.name
+                              )}${
+                                isContextValue
+                                  ? "?."
+                                  : join_operator[isBPM ? "BPM" : expression]
+                              }${fieldNameValue}${
+                                value && value.typeName && !isBPM
+                                  ? `${
+                                      isContextValue
+                                        ? "?."
+                                        : join_operator[expression]
+                                    }toLocalDateTime()`
+                                  : ""
+                              }`
+                          : `${lowerCaseFirstLetter(
+                              elseMetaModal && elseMetaModal.name
+                            )}${
+                              isContextValue
+                                ? "?."
+                                : join_operator[isBPM ? "BPM" : expression]
+                            }${fieldNameValue}${
+                              value &&
+                              [
+                                "json-many-to-one",
+                                "MANY_TO_ONE",
+                                "many-to-one",
+                              ].includes(value.type) &&
+                              isBPM &&
+                              isField === "context"
+                                ? `${
+                                    isContextValue
+                                      ? "?."
+                                      : join_operator[expression]
+                                  }getTarget()`
+                                : ""
+                            }${
+                              value && value.typeName && !isBPM
+                                ? `${
+                                    isContextValue
+                                      ? "?."
+                                      : join_operator[expression]
+                                  }toLocalDateTime()`
+                                : ""
+                            }`
+                        : undefined
+                    );
+                  }}
+                  value={elseNameValue}
+                  expression={expression}
+                  type={parentType}
+                  isParent={true}
+                  isBPM={true}
+                />
+              )}
+              {!isShowElseMetaModelField &&
+                elseMetaModal &&
+                isField === "context" && (
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setIsShowElseMetaModelField(true);
+                      handleChange("isShowElseMetaModelField", true);
+                    }}
+                    className={classes.iconButton}
+                  >
+                    <Tooltip title={translate("Add sub field")}>
+                      <ArrowForward color="primary" fontSize="small" />
+                    </Tooltip>
+                  </IconButton>
+                )}
             </React.Fragment>
           )}
         </React.Fragment>
