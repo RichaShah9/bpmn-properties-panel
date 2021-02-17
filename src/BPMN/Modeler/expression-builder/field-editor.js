@@ -7,6 +7,7 @@ import { Close, ArrowForward } from "@material-ui/icons";
 import { Selection } from "./component";
 import { getSubMetaField } from "./services/api";
 import { isBPMQuery, join_operator } from "./util";
+import { translate } from "../../../utils";
 
 const useStyles = makeStyles(() => ({
   MuiAutocompleteRoot: {
@@ -243,7 +244,7 @@ export default function FieldEditor({
               }}
               className={classes.iconButton}
             >
-              <Tooltip title="Remove nested field">
+              <Tooltip title={translate("Remove sub field")}>
                 <Close color="primary" fontSize="small" />
               </Tooltip>
             </IconButton>
@@ -290,7 +291,7 @@ export default function FieldEditor({
               onClick={() => setShow((isShow) => !isShow)}
               className={classes.iconButton}
             >
-              <Tooltip title="Add nested field">
+              <Tooltip title={translate("Add sub field")}>
                 <ArrowForward color="primary" fontSize="small" />
               </Tooltip>
             </IconButton>
