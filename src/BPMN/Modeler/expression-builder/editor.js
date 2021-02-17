@@ -634,7 +634,7 @@ function Rule(props) {
             }
             editor={editor}
             isField={isField}
-            onChange={({ value, fieldNameValue, allField }, editor) => {
+            onChange={({ value, fieldNameValue, allField, isShow }, editor) => {
               setNameValue({
                 allField: allField,
                 field: value,
@@ -646,6 +646,7 @@ function Rule(props) {
                 isRelationalValue: isField === "none" ? null : isField,
                 relatedValueFieldName: null,
                 relatedValueModal: null,
+                isShow,
               });
               handleChange(
                 "isRelationalValue",
@@ -734,7 +735,10 @@ function Rule(props) {
                 getMetaFields={() => fetchField(elseMetaModal, type)}
                 editor={editor}
                 isField={isField}
-                onChange={({ value, fieldNameValue, allField }, editor) => {
+                onChange={(
+                  { value, fieldNameValue, allField, isShow },
+                  editor
+                ) => {
                   setElseNameValue({
                     allField: allField,
                     field: value,
@@ -748,6 +752,7 @@ function Rule(props) {
                     relatedValueModal: relatedElseValueModal,
                     relatedElseValueFieldName: relatedElseValueFieldName,
                     relatedElseValueModal: relatedElseValueModal,
+                    isShow,
                   });
                   handleChange("relatedElseValueFieldName", value);
                   handleChange("relatedElseValueModal", elseMetaModal);

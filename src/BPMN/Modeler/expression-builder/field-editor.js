@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from "react";
+import classnames from "classnames";
+import { IconButton, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Close, ArrowForward } from "@material-ui/icons";
+
 import { Selection } from "./component";
 import { getSubMetaField } from "./services/api";
-import classnames from "classnames";
 import { isBPMQuery, join_operator } from "./util";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   MuiAutocompleteRoot: {
     width: "250px",
     marginRight: "10px",
+  },
+  iconButton: {
+    marginRight: 10,
   },
 }));
 
@@ -26,7 +32,7 @@ export default function FieldEditor({
   isField,
   setInitialField = () => {},
 }) {
-  const { fieldName = "", allField = [] } = value || {};
+  const { fieldName = "", allField = [], isShow: propIsShow } = value || {};
   const [fields, setFields] = useState([]);
   const classes = useStyles();
   const isContextValue = isField === "context" && isBPMQuery(type) && isBPM;
@@ -35,6 +41,11 @@ export default function FieldEditor({
     fieldName &&
     join_operator[expression] &&
     fieldName.split(isContextValue ? "?." : join_operator[expression]);
+  const isName =
+    values &&
+    values.slice(1) &&
+    values.slice(1).join(isContextValue ? "?." : join_operator[expression]);
+  const [isShow, setShow] = useState(propIsShow || isName ? true : false);
   const [startValue] = values || [];
   const hasManyValues =
     fieldName &&
@@ -46,7 +57,7 @@ export default function FieldEditor({
   const relationJsonModel =
     hasManyValues &&
     (fields.find((x) => x.name === startValue) || {}).jsonTarget;
-
+  const fieldType = (fields.find((x) => x.name === startValue) || {}).type;
   const isM2MField =
     allField &&
     allField.length > 0 &&
@@ -55,6 +66,9 @@ export default function FieldEditor({
         (f && (f.type || "")).toLowerCase().replaceAll("-", "_")
       )
     );
+  const isOneToOne = ["one_to_one", "json_one_to_one"].includes(
+    (fieldType || "").toLowerCase().replaceAll("-", "_")
+  );
 
   const getUpdatedValue = () => {
     let spiltedValues = initValue && initValue.split(join_operator[expression]);
@@ -113,6 +127,7 @@ export default function FieldEditor({
           value,
           fieldNameValue: newFieldName ? newFieldName : undefined,
           allField: allFields,
+          isShow,
         },
         editor
       );
@@ -141,6 +156,7 @@ export default function FieldEditor({
     );
     onChange({ name: "fieldType", value: (value && value.type) || "" }, editor);
     onChange({ name: "field", value }, editor);
+    onChange({ name: "isShow", value: isShow }, editor);
     if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
       let fieldNames =
         (newFieldName || "").split(join_operator[expression]) || [];
@@ -150,7 +166,9 @@ export default function FieldEditor({
     } else {
       let fields = [...(allField || [])];
       let fieldNames = (fieldName || "").split(join_operator[expression]);
-      let initValues = (initValue || "").split(join_operator[expression]);
+      let initValues = `${initValue}${join_operator[expression]}${startValue}`.split(
+        join_operator[expression]
+      );
       fieldNames &&
         fieldNames.length > 0 &&
         fieldNames.forEach((fName) => {
@@ -208,40 +226,76 @@ export default function FieldEditor({
         }}
       />
       {hasManyValues && relationModel && (
-        <FieldEditor
-          getMetaFields={() => {
-            return getSubMetaField(
-              relationModel,
-              !isBPMQuery(type)
-                ? isM2MField &&
-                    values &&
-                    values.length > 0 &&
-                    values.includes(isM2MField.name) &&
-                    values[0] !== isM2MField.name
-                : true,
-              isBPMQuery(type),
-              relationJsonModel
-            );
-          }}
-          editor={editor}
-          initValue={`${initValue}${startValue}${
-            isContextValue ? "?." : join_operator[expression]
-          }`}
-          value={{
-            fieldName: values
-              .slice(1)
-              .join(isContextValue ? "?." : join_operator[expression]),
-            allField,
-          }}
-          onChange={onChange}
-          classNames={classNames}
-          expression={expression}
-          type={type}
-          isParent={relationModel ? true : false}
-          isBPM={isBPM}
-          setInitialField={setInitialField}
-          isField={isField}
-        />
+        <React.Fragment>
+          {isShow && !isOneToOne && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                setShow((isShow) => !isShow);
+                if (allField && allField.length > 0 && startValue) {
+                  const previousField = allField.find(
+                    (f) => f.name === startValue
+                  );
+                  handleChange({
+                    ...(previousField || {}),
+                  });
+                }
+              }}
+              className={classes.iconButton}
+            >
+              <Tooltip title="Remove nested field">
+                <Close color="primary" fontSize="small" />
+              </Tooltip>
+            </IconButton>
+          )}
+          {(isShow || isOneToOne) && (
+            <FieldEditor
+              getMetaFields={() => {
+                return getSubMetaField(
+                  relationModel,
+                  !isBPMQuery(type)
+                    ? isM2MField &&
+                        values &&
+                        values.length > 0 &&
+                        values.includes(isM2MField.name) &&
+                        values[0] !== isM2MField.name
+                    : true,
+                  isBPMQuery(type),
+                  relationJsonModel
+                );
+              }}
+              editor={editor}
+              initValue={`${initValue}${startValue}${
+                isContextValue ? "?." : join_operator[expression]
+              }`}
+              value={{
+                fieldName: values
+                  .slice(1)
+                  .join(isContextValue ? "?." : join_operator[expression]),
+                allField,
+              }}
+              onChange={onChange}
+              classNames={classNames}
+              expression={expression}
+              type={type}
+              isParent={relationModel ? true : false}
+              isBPM={isBPM}
+              setInitialField={setInitialField}
+              isField={isField}
+            />
+          )}
+          {!isShow && !isOneToOne && (
+            <IconButton
+              size="small"
+              onClick={() => setShow((isShow) => !isShow)}
+              className={classes.iconButton}
+            >
+              <Tooltip title="Add nested field">
+                <ArrowForward color="primary" fontSize="small" />
+              </Tooltip>
+            </IconButton>
+          )}
+        </React.Fragment>
       )}
     </React.Fragment>
   );
