@@ -828,7 +828,8 @@ function ExpressionBuilder({
     for (let i = 0; i < rules.length; i += 1) {
       node = rules[i];
       if (node.parentId >= 0) {
-        rules[map[node.parentId]].children.push(node);
+        rules[map[node.parentId]] &&
+          rules[map[node.parentId]].children.push(node);
       } else {
         roots.push(node);
       }
