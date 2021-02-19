@@ -44,6 +44,17 @@ const positive_operators = [
   "isTrue",
 ];
 
+const query_custom_types = [
+  "many_to_many",
+  "many-to-many",
+  "json_many_to_many",
+  "json-many-to-many",
+  "one_to_one",
+  "one-to-one",
+  "json_one_to_one",
+  "json-one-to-one",
+];
+
 const allowed_types = [
   "long",
   "decimal",
@@ -182,4 +193,5 @@ export {
   map_bpm_combinator,
   positive_operators,
   allowed_types,
+  query_custom_types
 };
