@@ -1,7 +1,7 @@
 import Service from "./Service";
 import * as _ from "lodash";
 
-export async function getModels(data = {}, isQuery = false, metaModalType) {
+export async function getModels(data = {}, metaModalType) {
   const models =
     ((!metaModalType || metaModalType === "metaModel") &&
       (await getMetaModels(data))) ||
@@ -18,20 +18,17 @@ export async function getModels(data = {}, isQuery = false, metaModalType) {
       type: "metaModel",
     });
   }
-  if (!isQuery) {
-    for (let i = 0; i < metaJsonModels.length; i++) {
-      allModels.push({
-        ...metaJsonModels[i],
-        type: "metaJsonModel",
-      });
-    }
+  for (let i = 0; i < metaJsonModels.length; i++) {
+    allModels.push({
+      ...metaJsonModels[i],
+      type: "metaJsonModel",
+    });
   }
-
   return allModels || [];
 }
 
 export async function getViews(model, criteria, type = "form") {
-  if (!model || !model.name || !model.fullName) return [];
+  if (!model || !model.name) return [];
   let options = [
     {
       fieldName: "type",
@@ -47,6 +44,7 @@ export async function getViews(model, criteria, type = "form") {
       value: `custom-model-${model.name}-${type}`,
     });
   } else {
+    if (!model.fullName) return;
     options.push({
       fieldName: "model",
       operator: "=",

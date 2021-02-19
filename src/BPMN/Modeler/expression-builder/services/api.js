@@ -1,7 +1,7 @@
 import AxelorService from "./axelor.rest";
 import services from "../../../../services/Service";
 import { sortBy } from "../../../../utils";
-import { allowed_types } from "../data";
+import { allowed_types, query_custom_types } from "../data";
 
 const metaModalService = new AxelorService({
   model: "com.axelor.meta.db.MetaModel",
@@ -21,7 +21,7 @@ export async function getMetaModals({ search = "" }) {
     .then(({ data = [] }) => data);
 }
 
-const getResultedFiels = (res, isQuery) => {
+const getResultedFiels = (res, isQuery, isM2OField, isContextValue = false) => {
   const responseData = res && res.data;
   const allFields = responseData && responseData.fields;
   const jsonFields = Object.values(
@@ -34,16 +34,33 @@ const getResultedFiels = (res, isQuery) => {
         (f) => !f.json && allowed_types.includes((f.type || "").toLowerCase())
       )) ||
     [];
-  if (isQuery) return result;
+
   jsonFields &&
     jsonFields.forEach((jsonField) => {
       const nestedFields = Object.values(jsonField || {}) || [];
-      const fields =
+      let fields =
         nestedFields.filter(
           (a) =>
             allowed_types.includes((a.type || "").toLowerCase()) &&
             (a.type === "many-to-many" ? a.targetName : true)
         ) || [];
+      if (isQuery && !isContextValue) {
+        fields =
+          fields.filter(
+            (f) =>
+              ![
+                ...query_custom_types,
+                ...(isM2OField
+                  ? [
+                      "many_to_one",
+                      "json_many_to_one",
+                      "many-to-one",
+                      "json-many-to-one",
+                    ]
+                  : []),
+              ].includes((f.type || "").toLowerCase())
+          ) || [];
+      }
       result = [...result, ...fields];
     });
   return result;
@@ -107,13 +124,16 @@ export async function getSubMetaField(
   model,
   isM2MFields = true,
   isQuery = false,
-  relationJsonModel
+  relationJsonModel,
+  isM2OField = false,
+  isContextValue
 ) {
   if (model === "com.axelor.meta.db.MetaJsonRecord" && relationJsonModel) {
     const res = await services.get(
       `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${relationJsonModel}`
     );
-    let result = getResultedFiels(res, isQuery) || [];
+    let result =
+      getResultedFiels(res, isQuery, isM2OField, isContextValue) || [];
     result = result.filter(
       (a) =>
         allowed_types.includes((a.type || "").toLowerCase()) &&
