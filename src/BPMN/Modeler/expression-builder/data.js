@@ -53,6 +53,7 @@ const query_custom_types = [
   "one-to-one",
   "json_one_to_one",
   "json-one-to-one",
+  "enum",
 ];
 
 const allowed_types = [
@@ -193,5 +194,5 @@ export {
   map_bpm_combinator,
   positive_operators,
   allowed_types,
-  query_custom_types
+  query_custom_types,
 };
