@@ -444,6 +444,7 @@ function Rule(props) {
     relatedValueModal: relatedValueModal,
     relatedElseValueFieldName: relatedElseValueFieldName,
     relatedElseValueModal: relatedElseValueModal,
+    isShow: isShowElseMetaModelField,
   });
   const [nameValue, setNameValue] = useState({
     allField: allField,
@@ -458,6 +459,7 @@ function Rule(props) {
     isRelationalValue: isField === "none" ? null : isField,
     relatedValueFieldName: relatedValueFieldName,
     relatedValueModal: relatedValueModal,
+    isShow: isShowMetaModelField,
   });
 
   const addOperatorByType = (keys, value) => {
@@ -634,9 +636,7 @@ function Rule(props) {
                 name="metaModal"
                 title="Meta Modal"
                 placeholder="meta modal"
-                fetchAPI={() =>
-                  getModels(getProcessConfig(element), isBPMQuery(parentType))
-                }
+                fetchAPI={() => getModels(getProcessConfig(element))}
                 optionLabelKey="name"
                 onChange={(e) => {
                   setMetaModal(e);
@@ -796,12 +796,7 @@ function Rule(props) {
                     name="metaModal"
                     title="Meta Modal Else"
                     placeholder="meta modal"
-                    fetchAPI={() =>
-                      getModels(
-                        getProcessConfig(element),
-                        isBPMQuery(parentType)
-                      )
-                    }
+                    fetchAPI={() => getModels(getProcessConfig(element))}
                     optionLabelKey="name"
                     onChange={(e) => {
                       setElseMetaModal(e);

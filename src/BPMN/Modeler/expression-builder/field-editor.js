@@ -67,6 +67,14 @@ export default function FieldEditor({
         (f && (f.type || "")).toLowerCase().replaceAll("-", "_")
       )
     );
+  const isM2OField =
+    allField &&
+    allField.length > 0 &&
+    allField.find((f) =>
+      ["many_to_one", "json_many_to_one"].includes(
+        (f && (f.type || "")).toLowerCase().replaceAll("-", "_")
+      )
+    );
   const isOneToOne = ["one_to_one", "json_one_to_one"].includes(
     (fieldType || "").toLowerCase().replaceAll("-", "_")
   );
@@ -262,7 +270,9 @@ export default function FieldEditor({
                         values[0] !== isM2MField.name
                     : true,
                   isBPMQuery(type),
-                  relationJsonModel
+                  relationJsonModel,
+                  isM2OField,
+                  isBPM
                 );
               }}
               editor={editor}

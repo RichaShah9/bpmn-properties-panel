@@ -26,7 +26,7 @@ import {
   positive_operators,
 } from "./data";
 import { getModels } from "../../../services/api";
-import { isBPMQuery, lowerCaseFirstLetter } from "./util";
+import { isBPMQuery, lowerCaseFirstLetter, getJsonExpression } from "./util";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -411,19 +411,30 @@ function ExpressionBuilder({
     }
   }
 
-  function getDateTimeValue(type, fieldValue) {
+  function getDateTimeValue(type, fieldValue, isJsonField = false) {
     if (type === "date") {
-      return `LocalDate.parse("${moment(fieldValue, dateFormat["date"]).format(
+      let date = `"${moment(fieldValue, dateFormat["date"]).format(
         "YYYY-MM-DD"
-      )}")`;
+      )}"`;
+      if (isJsonField) {
+        return date;
+      }
+      return `LocalDate.parse(${date})`;
     } else if (type === "datetime") {
+      if (isJsonField) {
+        return `"${moment(fieldValue, dateFormat["datetime"]).toISOString()}"`;
+      }
       return `LocalDateTime.of(${moment(fieldValue, dateFormat["datetime"])
         .format("YYYY-M-D-H-m-s")
         .split("-")})`;
     } else {
-      return `LocalTime.parse("${moment(fieldValue, dateFormat["time"]).format(
+      let time = `"${moment(fieldValue, dateFormat["time"]).format(
         "HH:mm:ss"
-      )}")`;
+      )}"`;
+      if (isJsonField) {
+        return time;
+      }
+      return `LocalTime.parse(${time})`;
     }
   }
 
@@ -577,10 +588,16 @@ function ExpressionBuilder({
     let count = parentCount;
     return rules.map((rule) => {
       const { fieldName, field = {}, operator } = rule;
-      const { targetName, selectionList } = field || {};
+      const { targetName, selectionList, model, target } = field || {};
       const type = field && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
+      const isJsonField =
+        model === "com.axelor.meta.db.MetaJsonRecord" ||
+        target === "com.axelor.meta.db.MetaJsonRecord";
+      const jsonFieldName = isJsonField
+        ? `${getJsonExpression(field, prefix, fieldName)}`
+        : undefined;
       let {
         fieldValue,
         fieldValue2,
@@ -630,8 +647,8 @@ function ExpressionBuilder({
 
       if (isDateTime) {
         if (!isRelationalValue) {
-          fieldValue = getDateTimeValue(type, fieldValue);
-          fieldValue2 = getDateTimeValue(type, fieldValue2);
+          fieldValue = getDateTimeValue(type, fieldValue, isJsonField);
+          fieldValue2 = getDateTimeValue(type, fieldValue2, isJsonField);
         }
       }
 
@@ -645,8 +662,12 @@ function ExpressionBuilder({
           )
           .filter((f) => f !== "");
         return {
-          condition: `${prefix}.${fieldName}${
-            selectionList ? "" : `.${targetName || "fullName"}`
+          condition: `${
+            jsonFieldName
+              ? jsonFieldName
+              : `${prefix}.${fieldName}${
+                  selectionList ? "" : `.${targetName || "fullName"}`
+                }`
           } ${map_operators[operator]} ${
             isRelatedModalSame ? fieldValue : `?${count}`
           }`,
@@ -664,37 +685,41 @@ function ExpressionBuilder({
         if (isDateTime && isBPM) {
           if (operator === "notBetween") {
             return {
-              condition: `${prefix}.${fieldName} NOT BETWEEN ${
-                isRelatedModalSame ? fieldValue : `?${count}`
-              } ${map_type["and"]} ${
-                isRelatedElseModalSame ? fieldValue2 : `?${++count}`
-              }`,
+              condition: `${
+                jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`
+              } NOT BETWEEN ${isRelatedModalSame ? fieldValue : `?${count}`} ${
+                map_type["and"]
+              } ${isRelatedElseModalSame ? fieldValue2 : `?${++count}`}`,
               values,
             };
           }
           return {
-            condition: `${prefix}.${fieldName} BETWEEN ${
-              isRelatedModalSame ? fieldValue : `?${count}`
-            } ${map_type["and"]} ${
-              isRelatedElseModalSame ? fieldValue2 : `?${++count}`
-            }`,
+            condition: `${
+              jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`
+            } BETWEEN ${isRelatedModalSame ? fieldValue : `?${count}`} ${
+              map_type["and"]
+            } ${isRelatedElseModalSame ? fieldValue2 : `?${++count}`}`,
             values,
           };
         } else {
           if (operator === "notBetween") {
             return {
-              condition: `NOT (${prefix}.${fieldName} >= ${
-                isRelatedModalSame ? fieldValue : `?${count}`
-              } ${map_type["and"]} ${prefix}.${fieldName} <= ${
-                isRelatedElseModalSame ? fieldValue2 : `?${++count}`
-              })`,
+              condition: `NOT (${
+                jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`
+              } >= ${isRelatedModalSame ? fieldValue : `?${count}`} ${
+                map_type["and"]
+              } ${
+                jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`
+              } <= ${isRelatedElseModalSame ? fieldValue2 : `?${++count}`})`,
               values,
             };
           }
           return {
-            condition: `(${prefix}.${fieldName} >= ${
-              isRelatedModalSame ? fieldValue : `?${count}`
-            } ${map_type["and"]} ${prefix}.${fieldName} <= ${
+            condition: `(${
+              jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`
+            } >= ${isRelatedModalSame ? fieldValue : `?${count}`} ${
+              map_type["and"]
+            } ${jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`} <= ${
               isRelatedElseModalSame ? fieldValue2 : `?${++count}`
             })`,
             values,
@@ -702,12 +727,16 @@ function ExpressionBuilder({
         }
       } else if (["isNotNull", "isNull"].includes(operator)) {
         return {
-          condition: `${prefix}.${fieldName} ${map_operators[operator]}`,
+          condition: `${
+            jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`
+          } ${map_operators[operator]}`,
         };
       } else if (["isTrue", "isFalse"].includes(operator)) {
         const value = operator === "isTrue" ? true : false;
         return {
-          condition: `${prefix}.${fieldName} ${map_operators[operator]} ${
+          condition: `${
+            jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`
+          } ${map_operators[operator]} ${
             isRelatedModalSame ? fieldValue : `?${count}`
           }`,
           values: isRelatedModalSame ? undefined : [value],
@@ -723,7 +752,7 @@ function ExpressionBuilder({
         return {
           condition: `${isRelatedModalSame ? fieldValue : `?${count}`} ${
             map_operators[operator]
-          } ${prefix}.${fieldName}`,
+          } ${jsonFieldName ? jsonFieldName : `${prefix}.${fieldName}`}`,
           values: isRelatedModalSame ? undefined : [value],
         };
       } else {
@@ -735,15 +764,19 @@ function ExpressionBuilder({
             : fieldValue;
 
         return {
-          condition: `${prefix}.${
-            [
-              "many_to_one",
-              "json_many_to_one",
-              "one_to_one",
-              "json_one_to_one",
-            ].includes(type) && !isRelationalValue
-              ? `${fieldName}.${field.targetName || "fullName"}`
-              : fieldName
+          condition: `${
+            jsonFieldName
+              ? jsonFieldName
+              : `${prefix}.${
+                  [
+                    "many_to_one",
+                    "json_many_to_one",
+                    "one_to_one",
+                    "json_one_to_one",
+                  ].includes(type) && !isRelationalValue
+                    ? `${fieldName}.${field.targetName || "fullName"}`
+                    : fieldName
+                }`
           } ${map_operators[operator]} ${
             isRelatedModalSame
               ? ["like", "notLike"].includes(operator)
@@ -941,11 +974,7 @@ function ExpressionBuilder({
           ],
           operator: "and",
         };
-        const metaModels = await getModels(
-          criteria,
-          isBPMQuery(parentType),
-          metaModalType
-        );
+        const metaModels = await getModels(criteria, metaModalType);
         if (!metaModels) return;
         const value = {
           metaModals: metaModels && metaModels[0],
