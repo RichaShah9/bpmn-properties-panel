@@ -212,6 +212,15 @@ function ExpressionBuilder({
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
 
+      if (isNumber) {
+        if (!fieldValue) {
+          fieldValue = 0;
+        }
+        if (["between", "notBetween"].includes(operator) && !fieldValue2) {
+          fieldValue2 = 0;
+        }
+      }
+
       if (!isRelationalValue && !isNumber && typeof fieldValue !== "object") {
         fieldValue = `'${jsStringEscape(fieldValue)}'`;
         fieldValue2 = `'${jsStringEscape(fieldValue2)}'`;
@@ -460,8 +469,17 @@ function ExpressionBuilder({
         const isDateTime = ["date", "time", "datetime"].includes(type);
         let { fieldValue, fieldValue2, isRelationalValue } = rule;
         let fieldName = propFieldName;
+        if (isNumber) {
+          if (!fieldValue) {
+            fieldValue = 0;
+          }
+          if (["between", "notBetween"].includes(operator) && !fieldValue2) {
+            fieldValue2 = 0;
+          }
+        }
         const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
         if (
+          !isNumber &&
           (!fieldValue ||
             (fieldValue && fieldValue.length <= 0) ||
             ((!fieldValue2 || (fieldValue2 && fieldValue2.length <= 0)) &&
@@ -605,6 +623,14 @@ function ExpressionBuilder({
         relatedValueModal = {},
         relatedElseValueModal = {},
       } = rule || {};
+      if (isNumber) {
+        if (!fieldValue) {
+          fieldValue = 0;
+        }
+        if (["between", "notBetween"].includes(operator) && !fieldValue2) {
+          fieldValue2 = 0;
+        }
+      }
       const relatedValueModalName = lowerCaseFirstLetter(
         relatedValueModal && relatedValueModal.name
       );
@@ -613,7 +639,7 @@ function ExpressionBuilder({
       );
       const fValue = isNaN(fieldValue) ? fieldValue : `${fieldValue}`;
       if (
-        (!fieldValue ||
+        ((!isNumber && !fieldValue) ||
           (fieldValue && fieldValue.length <= 0) ||
           ((!fieldValue2 || (fieldValue2 && fieldValue2.length <= 0)) &&
             ["between", "notBetween"].includes(operator))) &&
