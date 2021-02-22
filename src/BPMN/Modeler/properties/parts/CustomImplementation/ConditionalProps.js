@@ -4,9 +4,19 @@ import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
+import { Edit } from "@material-ui/icons";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  Button,
+} from "@material-ui/core";
 
 import { Textbox } from "../../components";
 import { translate } from "../../../../../utils";
+import ExpressionBuilder from "../../../expression-builder";
 
 const useStyles = makeStyles({
   groupLabel: {
@@ -22,6 +32,23 @@ const useStyles = makeStyles({
   divider: {
     marginTop: 15,
     borderTop: "1px dotted #ccc",
+  },
+  newIcon: {
+    color: "#58B423",
+    marginLeft: 5,
+  },
+  new: {
+    cursor: "pointer",
+    marginTop: 18.6,
+    display: "flex",
+  },
+  textbox: {
+    width: "100%",
+  },
+  expressionBuilder: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });
 
@@ -46,7 +73,35 @@ export default function ConditionalProps({
   bpmnModeler,
 }) {
   const [isVisible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [openAlert, setAlert] = useState(false);
   const classes = useStyles();
+
+  const openAlertDialog = () => {
+    setAlert(true);
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const getProperty = (name) => {
+    const bo = getBusinessObject(element);
+    return (bo.$attrs && bo.$attrs[name]) || "";
+  };
+
+  const setProperty = (name, value) => {
+    const bo = getBusinessObject(element);
+    if (!bo) return;
+    if (bo.$attrs) {
+      bo.$attrs[name] = value;
+    } else {
+      bo.$attrs = { [name]: value };
+    }
+  };
 
   useEffect(() => {
     if (
@@ -64,114 +119,264 @@ export default function ConditionalProps({
           {index > 0 && <div className={classes.divider} />}
         </React.Fragment>
         <div className={classes.groupLabel}>{label}</div>
-        <Textbox
-          element={element}
-          rows={3}
-          entry={{
-            id: "script",
-            label: translate("Script"),
-            modelProperty: "script",
-            get: function () {
-              let bo = getBusinessObject(element);
-              if (bo.conditionExpression && bo.conditionExpression.body) {
-                return { script: bo.conditionExpression.body };
-              }
-            },
-            set: function (e, values) {
-              if (
-                element.businessObject &&
-                element.businessObject.conditionExpression
-              ) {
-                element.businessObject.conditionExpression.body = values.script
-                  ? values.script
-                  : undefined;
-                element.businessObject.conditionExpression.resource = undefined;
-                element.businessObject.conditionExpression.language = "axelor";
-                let conditionOrConditionExpression;
-                let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
-                  element
-                );
-                if (conditionalEventDefinition) {
-                  element.businessObject.condition = conditionOrConditionExpression;
-                } else {
-                  element.businessObject.conditionExpression = conditionOrConditionExpression;
-                  if (conditionOrConditionExpression) {
-                    element.businessObject.conditionExpression.body =
-                      values.script;
-                    element.businessObject.conditionExpression.resource = undefined;
-                    element.businessObject.conditionExpression.language =
-                      "axelor";
-                  }
-                }
+        <div className={classes.expressionBuilder}>
+          <Textbox
+            element={element}
+            rows={3}
+            className={classes.textbox}
+            entry={{
+              id: "script",
+              label: translate("Script"),
+              modelProperty: "script",
+              get: function () {
                 let bo = getBusinessObject(element);
-                if (!bpmnModeler) return;
-                let elementRegistry = bpmnModeler.get("elementRegistry");
-                let modeling = bpmnModeler.get("modeling");
-                let shape = elementRegistry.get(element.id);
-                if (!shape) return;
-                if (CONDITIONAL_SOURCES.includes(bo.sourceRef.$type)) return;
-                modeling &&
-                  modeling.updateProperties(shape, {
-                    [conditionalEventDefinition
-                      ? "condition"
-                      : "conditionExpression"]: conditionOrConditionExpression,
-                  });
-              } else {
-                let conditionOrConditionExpression;
-                let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
-                  element
-                );
-                let bo = getBusinessObject(element);
-                if (values.script && values.script !== "" && conditionType) {
-                  const conditionProps = {
-                    body: "",
-                    language: "",
-                    "camunda:resource": undefined,
+                if (bo.conditionExpression && bo.conditionExpression.body) {
+                  return {
+                    script: bo.conditionExpression.body.replace(
+                      /[\u200B-\u200D\uFEFF]/g,
+                      ""
+                    ),
                   };
-                  conditionOrConditionExpression = elementHelper.createElement(
-                    "bpmn:FormalExpression",
-                    conditionProps,
-                    conditionalEventDefinition || bo,
-                    bpmnFactory
+                }
+              },
+              set: function (e, values) {
+                if (
+                  element.businessObject &&
+                  element.businessObject.conditionExpression
+                ) {
+                  element.businessObject.conditionExpression.body = values.script
+                    ? values.script
+                    : undefined;
+                  element.businessObject.conditionExpression.resource = undefined;
+                  element.businessObject.conditionExpression.language =
+                    "axelor";
+                  let conditionOrConditionExpression;
+                  let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
+                    element
                   );
-
-                  let source = element.source;
-
-                  // if default-flow, remove default-property from source
-                  if (source && source.businessObject.default === bo) {
-                    source.default = undefined;
+                  if (conditionalEventDefinition) {
+                    element.businessObject.condition = conditionOrConditionExpression;
+                  } else {
+                    element.businessObject.conditionExpression = conditionOrConditionExpression;
+                    if (conditionOrConditionExpression) {
+                      element.businessObject.conditionExpression.body =
+                        values.script;
+                      element.businessObject.conditionExpression.resource = undefined;
+                      element.businessObject.conditionExpression.language =
+                        "axelor";
+                    }
                   }
-                }
-
-                if (conditionalEventDefinition) {
-                  element.businessObject.condition = conditionOrConditionExpression;
+                  let bo = getBusinessObject(element);
+                  if (!bpmnModeler) return;
+                  let elementRegistry = bpmnModeler.get("elementRegistry");
+                  let modeling = bpmnModeler.get("modeling");
+                  let shape = elementRegistry.get(element.id);
+                  if (!shape) return;
+                  if (CONDITIONAL_SOURCES.includes(bo.sourceRef.$type)) return;
+                  modeling &&
+                    modeling.updateProperties(shape, {
+                      [conditionalEventDefinition
+                        ? "condition"
+                        : "conditionExpression"]: conditionOrConditionExpression,
+                    });
                 } else {
-                  element.businessObject.conditionExpression = conditionOrConditionExpression;
-                  if (conditionOrConditionExpression) {
-                    element.businessObject.conditionExpression.body =
-                      values.script;
-                    element.businessObject.conditionExpression.resource = undefined;
-                    element.businessObject.conditionExpression.language =
-                      "axelor";
-                  }
-                }
+                  let conditionOrConditionExpression;
+                  let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
+                    element
+                  );
+                  let bo = getBusinessObject(element);
+                  if (values.script && values.script !== "" && conditionType) {
+                    const conditionProps = {
+                      body: "",
+                      language: "",
+                      "camunda:resource": undefined,
+                    };
+                    conditionOrConditionExpression = elementHelper.createElement(
+                      "bpmn:FormalExpression",
+                      conditionProps,
+                      conditionalEventDefinition || bo,
+                      bpmnFactory
+                    );
 
-                if (!bpmnModeler) return;
-                let elementRegistry = bpmnModeler.get("elementRegistry");
-                let modeling = bpmnModeler.get("modeling");
-                let shape = elementRegistry.get(element.id);
-                if (!shape) return;
-                if (CONDITIONAL_SOURCES.includes(bo.sourceRef.$type)) return;
-                modeling &&
-                  modeling.updateProperties(shape, {
-                    [conditionalEventDefinition
-                      ? "condition"
-                      : "conditionExpression"]: conditionOrConditionExpression,
-                  });
-              }
-            },
-          }}
-        />
+                    let source = element.source;
+
+                    // if default-flow, remove default-property from source
+                    if (source && source.businessObject.default === bo) {
+                      source.default = undefined;
+                    }
+                  }
+
+                  if (conditionalEventDefinition) {
+                    element.businessObject.condition = conditionOrConditionExpression;
+                  } else {
+                    element.businessObject.conditionExpression = conditionOrConditionExpression;
+                    if (conditionOrConditionExpression) {
+                      element.businessObject.conditionExpression.body =
+                        values.script;
+                      element.businessObject.conditionExpression.resource = undefined;
+                      element.businessObject.conditionExpression.language =
+                        "axelor";
+                    }
+                  }
+
+                  if (!bpmnModeler) return;
+                  let elementRegistry = bpmnModeler.get("elementRegistry");
+                  let modeling = bpmnModeler.get("modeling");
+                  let shape = elementRegistry.get(element.id);
+                  if (!shape) return;
+                  if (CONDITIONAL_SOURCES.includes(bo.sourceRef.$type)) return;
+                  modeling &&
+                    modeling.updateProperties(shape, {
+                      [conditionalEventDefinition
+                        ? "condition"
+                        : "conditionExpression"]: conditionOrConditionExpression,
+                    });
+                }
+              },
+            }}
+          />
+          <div className={classes.new}>
+            <Edit className={classes.newIcon} onClick={handleClickOpen} />
+            <ExpressionBuilder
+              open={open}
+              handleClose={() => handleClose()}
+              openAlertDialog={openAlertDialog}
+              getExpression={() => {
+                const value = getProperty("camunda:conditionValue");
+                const combinator = getProperty("camunda:conditionCombinator");
+                let values;
+                if (value !== undefined) {
+                  try {
+                    values = JSON.parse(value);
+                  } catch (errror) {}
+                }
+                return { values: values, combinator };
+              }}
+              setProperty={(val) => {
+                const { expression, value, combinator } = val;
+                if (value) {
+                  setProperty("camunda:conditionValue", value);
+                }
+                if (combinator) {
+                  setProperty("camunda:conditionCombinator", combinator);
+                }
+                if (
+                  element.businessObject &&
+                  element.businessObject.conditionExpression
+                ) {
+                  element.businessObject.conditionExpression.body = expression
+                    ? expression
+                    : undefined;
+                  element.businessObject.conditionExpression.resource = undefined;
+                  element.businessObject.conditionExpression.language =
+                    "axelor";
+                  let conditionOrConditionExpression;
+                  let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
+                    element
+                  );
+                  if (conditionalEventDefinition) {
+                    element.businessObject.condition = conditionOrConditionExpression;
+                  } else {
+                    element.businessObject.conditionExpression = conditionOrConditionExpression;
+                    if (conditionOrConditionExpression) {
+                      element.businessObject.conditionExpression.body = expression;
+                      element.businessObject.conditionExpression.resource = undefined;
+                      element.businessObject.conditionExpression.language =
+                        "axelor";
+                    }
+                  }
+                  let bo = getBusinessObject(element);
+                  if (!bpmnModeler) return;
+                  let elementRegistry = bpmnModeler.get("elementRegistry");
+                  let modeling = bpmnModeler.get("modeling");
+                  let shape = elementRegistry.get(element.id);
+                  if (!shape) return;
+                  if (CONDITIONAL_SOURCES.includes(bo.sourceRef.$type)) return;
+                  modeling &&
+                    modeling.updateProperties(shape, {
+                      [conditionalEventDefinition
+                        ? "condition"
+                        : "conditionExpression"]: conditionOrConditionExpression,
+                    });
+                } else {
+                  let conditionOrConditionExpression;
+                  let conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(
+                    element
+                  );
+                  let bo = getBusinessObject(element);
+                  if (expression && expression !== "" && conditionType) {
+                    const conditionProps = {
+                      body: "",
+                      language: "",
+                      "camunda:resource": undefined,
+                    };
+                    conditionOrConditionExpression = elementHelper.createElement(
+                      "bpmn:FormalExpression",
+                      conditionProps,
+                      conditionalEventDefinition || bo,
+                      bpmnFactory
+                    );
+
+                    let source = element.source;
+
+                    // if default-flow, remove default-property from source
+                    if (source && source.businessObject.default === bo) {
+                      source.default = undefined;
+                    }
+                  }
+
+                  if (conditionalEventDefinition) {
+                    element.businessObject.condition = conditionOrConditionExpression;
+                  } else {
+                    element.businessObject.conditionExpression = conditionOrConditionExpression;
+                    if (conditionOrConditionExpression) {
+                      element.businessObject.conditionExpression.body = expression;
+                      element.businessObject.conditionExpression.resource = undefined;
+                      element.businessObject.conditionExpression.language =
+                        "axelor";
+                    }
+                  }
+
+                  if (!bpmnModeler) return;
+                  let elementRegistry = bpmnModeler.get("elementRegistry");
+                  let modeling = bpmnModeler.get("modeling");
+                  let shape = elementRegistry.get(element.id);
+                  if (!shape) return;
+                  if (CONDITIONAL_SOURCES.includes(bo.sourceRef.$type)) return;
+                  modeling &&
+                    modeling.updateProperties(shape, {
+                      [conditionalEventDefinition
+                        ? "condition"
+                        : "conditionExpression"]: conditionOrConditionExpression,
+                    });
+                }
+              }}
+              element={element}
+              title="Add Expression"
+            />
+          </div>
+          <Dialog
+            open={openAlert}
+            onClose={() => setAlert(false)}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+            classes={{
+              paper: classes.dialog,
+            }}
+          >
+            <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Add all values
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setAlert(false)} color="primary" autoFocus>
+                Ok
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </div>
       </div>
     )
   );
