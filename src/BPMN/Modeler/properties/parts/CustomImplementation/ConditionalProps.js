@@ -97,8 +97,15 @@ export default function ConditionalProps({
     const bo = getBusinessObject(element);
     if (!bo) return;
     if (bo.$attrs) {
+      if (!value) {
+        delete bo.$attrs[name];
+        return;
+      }
       bo.$attrs[name] = value;
     } else {
+      if (!value) {
+        return;
+      }
       bo.$attrs = { [name]: value };
     }
   };
@@ -143,6 +150,7 @@ export default function ConditionalProps({
                 let value =
                   values.script &&
                   values.script.replace(/[\u200B-\u200D\uFEFF]/g, "");
+                value = !value || /^\s*$/.test(value) ? undefined : value;
                 if (
                   element.businessObject &&
                   element.businessObject.conditionExpression
@@ -179,6 +187,11 @@ export default function ConditionalProps({
                       element.businessObject.conditionExpression.language =
                         "axelor";
                     }
+                  }
+                  if (!value) {
+                    conditionOrConditionExpression = undefined;
+                    setProperty("camunda:conditionValue", undefined);
+                    setProperty("camunda:conditionCombinator", undefined);
                   }
                   let bo = getBusinessObject(element);
                   if (!bpmnModeler) return;
@@ -231,7 +244,11 @@ export default function ConditionalProps({
                         "axelor";
                     }
                   }
-
+                  if (!value) {
+                    conditionOrConditionExpression = undefined;
+                    setProperty("camunda:conditionValue", undefined);
+                    setProperty("camunda:conditionCombinator", undefined);
+                  }
                   if (!bpmnModeler) return;
                   let elementRegistry = bpmnModeler.get("elementRegistry");
                   let modeling = bpmnModeler.get("modeling");
@@ -276,6 +293,10 @@ export default function ConditionalProps({
                 let expression =
                   valExpression &&
                   valExpression.replace(/[\u200B-\u200D\uFEFF]/g, "");
+                expression =
+                  !expression || /^\s*$/.test(expression)
+                    ? undefined
+                    : expression;
                 if (
                   element.businessObject &&
                   element.businessObject.conditionExpression
@@ -314,6 +335,11 @@ export default function ConditionalProps({
                     }
                   }
                   let bo = getBusinessObject(element);
+                  if (!expression) {
+                    conditionOrConditionExpression = undefined;
+                    setProperty("camunda:conditionValue", undefined);
+                    setProperty("camunda:conditionCombinator", undefined);
+                  }
                   if (!bpmnModeler) return;
                   let elementRegistry = bpmnModeler.get("elementRegistry");
                   let modeling = bpmnModeler.get("modeling");
@@ -365,6 +391,11 @@ export default function ConditionalProps({
                     }
                   }
 
+                  if (!expression) {
+                    conditionOrConditionExpression = undefined;
+                    setProperty("camunda:conditionValue", undefined);
+                    setProperty("camunda:conditionCombinator", undefined);
+                  }
                   if (!bpmnModeler) return;
                   let elementRegistry = bpmnModeler.get("elementRegistry");
                   let modeling = bpmnModeler.get("modeling");
