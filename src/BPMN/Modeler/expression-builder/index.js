@@ -606,13 +606,15 @@ function ExpressionBuilder({
     let count = parentCount;
     return rules.map((rule) => {
       const { fieldName, field = {}, operator } = rule;
-      const { targetName, selectionList, model, target } = field || {};
+      const { targetName, selectionList, model, target, jsonField } =
+        field || {};
       const type = field && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
       const isJsonField =
         model === "com.axelor.meta.db.MetaJsonRecord" ||
-        target === "com.axelor.meta.db.MetaJsonRecord";
+        target === "com.axelor.meta.db.MetaJsonRecord" ||
+        jsonField;
       const jsonFieldName = isJsonField
         ? `${getJsonExpression(field, prefix, fieldName)}`
         : undefined;
