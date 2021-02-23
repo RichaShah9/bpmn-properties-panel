@@ -140,12 +140,15 @@ export default function ConditionalProps({
                 }
               },
               set: function (e, values) {
+                let value =
+                  values.script &&
+                  values.script.replace(/[\u200B-\u200D\uFEFF]/g, "");
                 if (
                   element.businessObject &&
                   element.businessObject.conditionExpression
                 ) {
-                  element.businessObject.conditionExpression.body = values.script
-                    ? values.script
+                  element.businessObject.conditionExpression.body = value
+                    ? value
                     : undefined;
                   element.businessObject.conditionExpression.resource = undefined;
                   element.businessObject.conditionExpression.language =
@@ -157,10 +160,21 @@ export default function ConditionalProps({
                   if (conditionalEventDefinition) {
                     element.businessObject.condition = conditionOrConditionExpression;
                   } else {
+                    let bo = getBusinessObject(element);
+                    const conditionProps = {
+                      body: "",
+                      language: "",
+                      "camunda:resource": undefined,
+                    };
+                    conditionOrConditionExpression = elementHelper.createElement(
+                      "bpmn:FormalExpression",
+                      conditionProps,
+                      conditionalEventDefinition || bo,
+                      bpmnFactory
+                    );
                     element.businessObject.conditionExpression = conditionOrConditionExpression;
                     if (conditionOrConditionExpression) {
-                      element.businessObject.conditionExpression.body =
-                        values.script;
+                      element.businessObject.conditionExpression.body = value;
                       element.businessObject.conditionExpression.resource = undefined;
                       element.businessObject.conditionExpression.language =
                         "axelor";
@@ -185,7 +199,7 @@ export default function ConditionalProps({
                     element
                   );
                   let bo = getBusinessObject(element);
-                  if (values.script && values.script !== "" && conditionType) {
+                  if (value && value !== "" && conditionType) {
                     const conditionProps = {
                       body: "",
                       language: "",
@@ -211,8 +225,7 @@ export default function ConditionalProps({
                   } else {
                     element.businessObject.conditionExpression = conditionOrConditionExpression;
                     if (conditionOrConditionExpression) {
-                      element.businessObject.conditionExpression.body =
-                        values.script;
+                      element.businessObject.conditionExpression.body = value;
                       element.businessObject.conditionExpression.resource = undefined;
                       element.businessObject.conditionExpression.language =
                         "axelor";
@@ -253,13 +266,16 @@ export default function ConditionalProps({
                 return { values: values, combinator };
               }}
               setProperty={(val) => {
-                const { expression, value, combinator } = val;
+                const { expression: valExpression, value, combinator } = val;
                 if (value) {
                   setProperty("camunda:conditionValue", value);
                 }
                 if (combinator) {
                   setProperty("camunda:conditionCombinator", combinator);
                 }
+                let expression =
+                  valExpression &&
+                  valExpression.replace(/[\u200B-\u200D\uFEFF]/g, "");
                 if (
                   element.businessObject &&
                   element.businessObject.conditionExpression
@@ -277,6 +293,18 @@ export default function ConditionalProps({
                   if (conditionalEventDefinition) {
                     element.businessObject.condition = conditionOrConditionExpression;
                   } else {
+                    let bo = getBusinessObject(element);
+                    const conditionProps = {
+                      body: "",
+                      language: "",
+                      "camunda:resource": undefined,
+                    };
+                    conditionOrConditionExpression = elementHelper.createElement(
+                      "bpmn:FormalExpression",
+                      conditionProps,
+                      conditionalEventDefinition || bo,
+                      bpmnFactory
+                    );
                     element.businessObject.conditionExpression = conditionOrConditionExpression;
                     if (conditionOrConditionExpression) {
                       element.businessObject.conditionExpression.body = expression;
