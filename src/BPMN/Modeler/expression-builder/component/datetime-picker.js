@@ -34,6 +34,8 @@ function DateTimePicker({ inline, type = "date", ...props }) {
       <Picker
         autoOk={true}
         open={open}
+        ampm={false}
+        views={["hours", "minutes", "seconds"]}
         onChange={(value) => {
           valueRef.current = value;
           onChange(value);
