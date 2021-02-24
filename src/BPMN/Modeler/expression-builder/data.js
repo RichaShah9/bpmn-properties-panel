@@ -27,7 +27,7 @@ const join_operator = {
 const dateFormat = {
   date: "DD/MM/YYYY",
   time: "HH:mm:ss",
-  datetime: "DD/MM/YYYY HH:mm:ss",
+  datetime: "DD/MM/YYYY HH:mm",
 };
 
 const positive_operators = [

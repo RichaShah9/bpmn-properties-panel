@@ -35,7 +35,15 @@ function DateTimePicker({ inline, type = "date", ...props }) {
         autoOk={true}
         open={open}
         ampm={false}
-        views={["hours", "minutes", "seconds"]}
+        views={
+          type === "date"
+            ? ["date"]
+            : type === "datetime"
+            ? ["date", "hours", "minutes"]
+            : type === "time"
+            ? ["hours", "minutes", "seconds"]
+            : ["date"]
+        }
         onChange={(value) => {
           valueRef.current = value;
           onChange(value);
