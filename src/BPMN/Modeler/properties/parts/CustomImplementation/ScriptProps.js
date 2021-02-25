@@ -308,6 +308,7 @@ export default function ScriptProps({ element, index, label }) {
       const bo = getBusinessObject(element);
       if (bo) {
         setVisible(true);
+        element.businessObject.scriptFormat = "axelor";
       }
     }
   }, [element]);
@@ -333,8 +334,8 @@ export default function ScriptProps({ element, index, label }) {
             },
             set: function (e, values) {
               let query = !values.query;
+              element.businessObject.scriptFormat = "axelor";
               if (!query) {
-                element.businessObject.scriptFormat = "axelor";
                 updateValue("metaModel", undefined);
                 updateValue("metaJsonModel", undefined);
                 setProperty("defaultForm", undefined);
@@ -406,6 +407,7 @@ export default function ScriptProps({ element, index, label }) {
                 setProperty={(val) => {
                   const { expression, value, combinator } = val;
                   element.businessObject.script = expression;
+                  element.businessObject.scriptFormat = "axelor";
                   if (
                     expression === "" ||
                     expression === null ||
