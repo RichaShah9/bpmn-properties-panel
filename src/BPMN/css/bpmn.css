@@ -81,7 +81,7 @@ body,
   display: none;
 }
 
-.highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
+#canvas-task .highlight:not(.djs-connection) .djs-visual > :nth-child(1) {
   stroke: var(--main-bg-color, #1e88e5) !important;
 }
 

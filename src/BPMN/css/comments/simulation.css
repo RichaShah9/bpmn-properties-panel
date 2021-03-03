@@ -1,0 +1,13 @@
+.simulation {
+  height: calc(100% - 90px) !important;
+  width: calc(100% - 40px) !important;
+  margin: 20px;
+}
+
+.toggle-mode {
+  top: 14px;
+}
+
+.process-instances {
+  top: 14px;
+}
