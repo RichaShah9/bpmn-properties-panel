@@ -35,7 +35,6 @@ export default function Comments(eventBus, overlays, bpmnjs) {
       let comments = getComments(element);
       comments.forEach(function (val) {
         let $comment = $(Comments.COMMENT_HTML);
-        console.log(val);
         $comment.find("[data-text]").text(val[1]);
         $comment.find("[data-head]").text(val[0]);
         $comment.find("[data-delete]").click(function (e) {
@@ -55,7 +54,6 @@ export default function Comments(eventBus, overlays, bpmnjs) {
 
     $textarea.on("keydown", async function (e) {
       if (e.which === 13 && !e.shiftKey) {
-        console.log("CALLED");
         const info = await getInfo();
         const username = (info && info["user.name"]) || "";
         e.preventDefault();
