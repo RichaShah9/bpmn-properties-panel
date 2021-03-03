@@ -8,6 +8,7 @@ import cmdHelper from "bpmn-js-properties-panel/lib/helper/CmdHelper";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import Alert from "@material-ui/lab/Alert";
+import tokenSimulation from "bpmn-js-token-simulation/lib/modeler";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { makeStyles } from "@material-ui/core/styles";
@@ -44,9 +45,11 @@ import { getTranslations, getInfo } from "../../services/api";
 import { getBool } from "../../utils";
 
 import "bpmn-js/dist/assets/diagram-js.css";
-import "bpmn-font/dist/css/bpmn-embedded.css";
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css";
 import "../css/bpmn.css";
+import "../css/comments/comments.css";
+import "../css/comments/simulation.css";
 
 const resizeStyle = {
   display: "flex",
@@ -1024,6 +1027,7 @@ function BpmnModelerComponent() {
         propertiesPanelModule,
         propertiesProviderModule,
         propertiesCustomProviderModule,
+        tokenSimulation,
       ],
       moddleExtensions: {
         camunda: camundaModdleDescriptor,
