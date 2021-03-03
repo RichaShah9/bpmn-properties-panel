@@ -11,7 +11,7 @@ import { download, getBool } from "../../utils";
 import { getInfo, getTranslations } from "../../services/api";
 
 import "bpmn-js/dist/assets/diagram-js.css";
-import "bpmn-font/dist/css/bpmn-embedded.css";
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import "../css/bpmn.css";
 
 let bpmnViewer = null;
