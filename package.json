@@ -24,6 +24,7 @@
     "dmn-js": "^8.3.0",
     "dmn-js-properties-panel": "^0.4.0",
     "inherits": "^2.0.4",
+    "jquery": "^3.6.0",
     "js-string-escape": "^1.0.1",
     "lodash": "^4.17.15",
     "material-ui-color": "^0.4.6",
