@@ -679,9 +679,17 @@ function BpmnModelerComponent() {
   const changeColor = (color) => {
     if (!selectedElement || !color) return;
     let modeling = bpmnModeler.get("modeling");
-    modeling.setColor(selectedElement, {
-      fill: color,
-    });
+    let colors = {};
+    if (
+      selectedElement.type &&
+      selectedElement.type.toLowerCase().includes("event")
+    ) {
+      colors.stroke = color;
+    } else {
+      colors.fill = color;
+      colors.stroke = "white";
+    }
+    modeling.setColor(selectedElement, colors);
   };
 
   const toolBarButtons = [
