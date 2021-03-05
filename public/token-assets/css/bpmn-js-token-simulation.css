@@ -1,18 +1,20 @@
-@import '../font-awesome/css/font-awesome.min.css';
+@import "../font-awesome/css/font-awesome.min.css";
 
 :root {
-  --token-simulation-green-base-44: #3ECF8E;
+  --token-simulation-green-base-44: #3ecf8e;
   --token-simulation-grey-base-40: #666666;
   --token-simulation-grey-darken-30: #212121;
   --token-simulation-grey-lighten-56: #909090;
-  --token-simulation-red-base-62: #FF3D3D;
-  --token-simulation-silver-base-97: #F8F8F8;
-  --token-simulation-silver-darken-94: #EFEFEF;
+  --token-simulation-red-base-62: #ff3d3d;
+  --token-simulation-silver-base-97: #f8f8f8;
+  --token-simulation-silver-darken-94: #efefef;
 
-  --token-simulation-white: #FFFFFF;
+  --token-simulation-white: #ffffff;
 }
 
-html, body, #canvas {
+html,
+body,
+#canvas {
   margin: 0;
   width: 100%;
   height: 100%;
@@ -25,7 +27,7 @@ html, body, #canvas {
 }
 
 .bjs-container.simulation {
-  border-color: var(--token-simulation-green-base-44, #3ECF8E);
+  border-color: var(--token-simulation-green-base-44, #3ecf8e);
 }
 
 .bjs-container.simulation.paused {
@@ -33,7 +35,7 @@ html, body, #canvas {
 }
 
 .bjs-container.simulation.warning {
-  border-color: var(--token-simulation-red-base-62, #FF3D3D) !important;
+  border-color: var(--token-simulation-red-base-62, #ff3d3d) !important;
 }
 
 .context-pad {
@@ -55,13 +57,13 @@ html, body, #canvas {
 
 .context-pad:not(.disabled):hover {
   width: 40px;
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
   opacity: 1;
-  color: var(--token-simulation-white, #FFFFFF);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .context-pad.disabled {
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
   color: var(--token-simulation-grey-base-40, #666666);
   pointer-events: none;
 }
@@ -70,17 +72,18 @@ html, body, #canvas {
   display: none;
 }
 
-.context-pad [class^="bpmn-icon-"]:before, [class*=" bpmn-icon-"]:before {
+.context-pad [class^="bpmn-icon-"]:before,
+[class*=" bpmn-icon-"]:before {
   margin: 0;
 }
 
 .token .text {
-  fill: var(--token-simulation-white, #FFFFFF);
-  font-family: 'Arial', sans-serif;
+  fill: var(--token-simulation-white, #ffffff);
+  font-family: "Arial", sans-serif;
 }
 
 .token-count {
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   border-radius: 100%;
   width: 25px;
   height: 25px;
@@ -96,13 +99,15 @@ html, body, #canvas {
 }
 
 .token-count.waiting {
-  color: var(--token-simulation-white, #FFFFFF);
-  font-family: 'Arial', sans-serif;
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
+  color: var(--token-simulation-white, #ffffff);
+  font-family: "Arial", sans-serif;
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
 }
 
 @keyframes jump {
-  50% { top: 5px; }
+  50% {
+    top: 5px;
+  }
 }
 
 .notifications {
@@ -112,29 +117,29 @@ html, body, #canvas {
 }
 
 .notifications .notification {
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
   border-radius: 2px;
   padding: 4px 8px;
   font-size: 16px;
-  color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  color: var(--token-simulation-silver-darken-94, #efefef);
   user-select: none;
   margin-top: 4px;
   min-width: 300px;
 }
 
 .notifications .notification.info {
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
   color: #000;
 }
 
 .notifications .notification.success {
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .notifications .notification.warning {
-  background-color: var(--token-simulation-red-base-62, #FF3D3D);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-red-base-62, #ff3d3d);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .notifications .notification .icon {
@@ -144,18 +149,19 @@ html, body, #canvas {
   min-width: 20px;
 }
 
-.notifications .notification .icon [class^="bpmn-icon-"]:before, [class*=" bpmn-icon-"]:before {
+.notifications .notification .icon [class^="bpmn-icon-"]:before,
+[class*=" bpmn-icon-"]:before {
   margin: 0;
 }
 
 .bjs-container.paused .play-pause.active {
-  color: var(--token-simulation-silver-darken-94, #EFEFEF);
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  color: var(--token-simulation-silver-darken-94, #efefef);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
 }
 
 .element-notification {
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
-  color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
+  color: var(--token-simulation-silver-darken-94, #efefef);
   border-radius: 2px;
   height: 30px;
   box-sizing: border-box;
@@ -176,13 +182,13 @@ html, body, #canvas {
 }
 
 .element-notification.success {
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .element-notification.warning {
-  background-color: var(--token-simulation-red-base-62, #FF3D3D);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-red-base-62, #ff3d3d);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .toggle-mode {
@@ -190,7 +196,7 @@ html, body, #canvas {
   position: absolute;
   top: 20px;
   left: 20px;
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
   border-radius: 2px;
   padding: 6px;
   font-size: 16px;
@@ -200,8 +206,8 @@ html, body, #canvas {
 
 .bjs-container.simulation .toggle-mode,
 .toggle-mode:hover {
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .bjs-container .djs-palette {
@@ -231,7 +237,7 @@ html, body, #canvas {
 
 .token-simulation-palette .entry {
   cursor: pointer;
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
   border-radius: 2px;
   padding: 6px 0;
   margin-bottom: 6px;
@@ -252,13 +258,13 @@ html, body, #canvas {
 
 .token-simulation-palette .entry:not(.disabled):hover {
   width: 40px;
-  color: var(--token-simulation-white, #FFFFFF);
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
+  color: var(--token-simulation-white, #ffffff);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
 }
 
 .token-simulation-palette .entry.active {
-  color: var(--token-simulation-white, #FFFFFF);
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
+  color: var(--token-simulation-white, #ffffff);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
 }
 
 .token-simulation-palette .entry.disabled {
@@ -272,22 +278,20 @@ html, body, #canvas {
   bottom: 20px;
   left: 20px;
   right: 20px;
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
   border-radius: 2px;
   z-index: 10000;
   overflow: hidden;
 }
 
-
 .token-simulation-log.hidden {
   display: none;
 }
 
-
 .token-simulation-log .header {
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
   padding: 6px 8px;
-  color: var(--token-simulation-white, #FFFFFF);
+  color: var(--token-simulation-white, #ffffff);
   height: 30px;
   box-sizing: border-box;
   font-size: 16px;
@@ -298,7 +302,7 @@ html, body, #canvas {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--token-simulation-white, #FFFFFF);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .token-simulation-log .header .fa-align-left {
@@ -320,23 +324,23 @@ html, body, #canvas {
   font-size: 16px;
   margin: 0 0 6px 0;
   padding: 6px;
-  background: var(--token-simulation-white, #FFFFFF);
+  background: var(--token-simulation-white, #ffffff);
   border-radius: 2px;
 }
 
 .token-simulation-log .content .entry.success {
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .token-simulation-log .content .entry.success .date,
 .token-simulation-log .content .entry.warning .date {
- color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  color: var(--token-simulation-silver-darken-94, #efefef);
 }
 
 .token-simulation-log .content .entry.warning {
-  background-color: var(--token-simulation-red-base-62, #FF3D3D);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-red-base-62, #ff3d3d);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .token-simulation-log .content .entry:last-child {
@@ -380,18 +384,18 @@ html, body, #canvas {
   font-size: 16px;
   line-height: 30px;
   text-align: center;
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
   margin-right: 10px;
   cursor: pointer;
 }
 
 .process-instances .process-instance.active {
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
+  color: var(--token-simulation-white, #ffffff);
 }
 
 .djs-container.highlight {
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
 }
 
 .set-animation-speed {
@@ -401,7 +405,7 @@ html, body, #canvas {
   transform: translate(-50%, 0);
   font-size: 16px;
   text-align: center;
-  background-color: var(--token-simulation-silver-darken-94, #EFEFEF);
+  background-color: var(--token-simulation-silver-darken-94, #efefef);
   border-radius: 2px;
   cursor: pointer;
   display: flex;
@@ -435,6 +439,6 @@ html, body, #canvas {
 
 .set-animation-speed .animation-speed-buttons .animation-speed-button.active,
 .set-animation-speed .animation-speed-buttons .animation-speed-button:hover {
-  background-color: var(--token-simulation-green-base-44, #3ECF8E);
-  color: var(--token-simulation-white, #FFFFFF);
+  background-color: var(--token-simulation-green-base-44, #3ecf8e);
+  color: var(--token-simulation-white, #ffffff);
 }
