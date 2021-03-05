@@ -608,7 +608,7 @@ function ExpressionBuilder({
       const { fieldName, field = {}, operator } = rule;
       const { targetName, selectionList, model, target, jsonField } =
         field || {};
-      const type = field && field.type.toLowerCase();
+      const type = field && field.type && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
       const isJsonField =
@@ -836,7 +836,11 @@ function ExpressionBuilder({
         true,
         parentValues && parentValues.length
       );
-      condition.push({ condition: conditions, values });
+      const newValues = [].concat.apply([], values);
+      condition.push({
+        condition: conditions,
+        values: newValues && newValues.length > 0 ? newValues : undefined,
+      });
     }
     const map_type = isBPMQuery(parentType)
       ? map_bpm_combinator
@@ -846,10 +850,7 @@ function ExpressionBuilder({
       return {
         condition: " (" + c.join(" " + map_type[combinator] + " ") + ") ",
         values:
-          condition &&
-          condition
-            .map((co) => co && co.values && co.values[0])
-            .filter((f) => f),
+          condition && condition.map((co) => co && co.values).filter((f) => f),
       };
     } else {
       return {
@@ -953,13 +954,16 @@ function ExpressionBuilder({
 
     let expr = str;
     if (isBPMQuery(type)) {
-      let parametes = "";
+      let parameters = "";
       vals &&
         vals.forEach((v) => {
-          if (v && Array.isArray(v[0])) {
-            parametes = parametes + `, [${v[0]}]`;
+          if (v && Array.isArray(v[0]) && v[0]) {
+            parameters = parameters + `, [${v[0]}]`;
           } else {
-            parametes = parametes + ", " + v;
+            if (v && Array.isArray(v) && v.length > 0) {
+              v = v.join(", ");
+            }
+            parameters = parameters + ", " + v;
           }
         });
 
@@ -967,7 +971,7 @@ function ExpressionBuilder({
         ? `return $ctx.createVariable($ctx.${
             singleResult ? "filterOne" : "filter"
           }("${model}"," ${str} "${
-            vals && vals.length > 0 ? `${parametes}` : ``
+            vals && vals.length > 0 ? `${parameters}` : ``
           }))`
         : undefined;
     }
