@@ -1,7 +1,7 @@
 @import '../font-awesome/css/font-awesome.min.css';
 
 :root {
-  --token-simulation-green-base-44: #10D070;
+  --token-simulation-green-base-44: #3ECF8E;
   --token-simulation-grey-base-40: #666666;
   --token-simulation-grey-darken-30: #212121;
   --token-simulation-grey-lighten-56: #909090;
@@ -25,7 +25,7 @@ html, body, #canvas {
 }
 
 .bjs-container.simulation {
-  border-color: var(--token-simulation-green-base-44, #10D070);
+  border-color: var(--token-simulation-green-base-44, #3ECF8E);
 }
 
 .bjs-container.simulation.paused {
@@ -55,7 +55,7 @@ html, body, #canvas {
 
 .context-pad:not(.disabled):hover {
   width: 40px;
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
   opacity: 1;
   color: var(--token-simulation-white, #FFFFFF);
 }
@@ -98,7 +98,7 @@ html, body, #canvas {
 .token-count.waiting {
   color: var(--token-simulation-white, #FFFFFF);
   font-family: 'Arial', sans-serif;
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
 }
 
 @keyframes jump {
@@ -128,7 +128,7 @@ html, body, #canvas {
 }
 
 .notifications .notification.success {
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
   color: var(--token-simulation-white, #FFFFFF);
 }
 
@@ -176,7 +176,7 @@ html, body, #canvas {
 }
 
 .element-notification.success {
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
   color: var(--token-simulation-white, #FFFFFF);
 }
 
@@ -200,7 +200,7 @@ html, body, #canvas {
 
 .bjs-container.simulation .toggle-mode,
 .toggle-mode:hover {
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
   color: var(--token-simulation-white, #FFFFFF);
 }
 
@@ -253,12 +253,12 @@ html, body, #canvas {
 .token-simulation-palette .entry:not(.disabled):hover {
   width: 40px;
   color: var(--token-simulation-white, #FFFFFF);
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
 }
 
 .token-simulation-palette .entry.active {
   color: var(--token-simulation-white, #FFFFFF);
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
 }
 
 .token-simulation-palette .entry.disabled {
@@ -285,7 +285,7 @@ html, body, #canvas {
 
 
 .token-simulation-log .header {
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
   padding: 6px 8px;
   color: var(--token-simulation-white, #FFFFFF);
   height: 30px;
@@ -325,7 +325,7 @@ html, body, #canvas {
 }
 
 .token-simulation-log .content .entry.success {
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
   color: var(--token-simulation-white, #FFFFFF);
 }
 
@@ -386,7 +386,7 @@ html, body, #canvas {
 }
 
 .process-instances .process-instance.active {
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
   color: var(--token-simulation-white, #FFFFFF);
 }
 
@@ -435,6 +435,6 @@ html, body, #canvas {
 
 .set-animation-speed .animation-speed-buttons .animation-speed-button.active,
 .set-animation-speed .animation-speed-buttons .animation-speed-button:hover {
-  background-color: var(--token-simulation-green-base-44, #10D070);
+  background-color: var(--token-simulation-green-base-44, #3ECF8E);
   color: var(--token-simulation-white, #FFFFFF);
 }
