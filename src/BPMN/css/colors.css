@@ -38,6 +38,26 @@
   color: #f9c000 !important;
 }
 
-.djs-context-pad .bpmn-icon-trash{
+.djs-context-pad .bpmn-icon-trash {
   color: red !important;
+}
+
+.djs-context-pad .bpmn-icon-receive-task {
+  color: #f8b200 !important;
+}
+
+.djs-context-pad .bpmn-icon-intermediate-event-catch-message {
+  color: #ff9800 !important;
+}
+
+.djs-context-pad .bpmn-icon-intermediate-event-catch-timer {
+  color: #ff9800 !important;
+}
+
+.djs-context-pad .bpmn-icon-intermediate-event-catch-condition {
+  color: #ff9800 !important;
+}
+
+.djs-context-pad .bpmn-icon-intermediate-event-catch-signal {
+  color: #ff9800 !important;
 }
