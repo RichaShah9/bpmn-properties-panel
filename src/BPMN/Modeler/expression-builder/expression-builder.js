@@ -79,7 +79,7 @@ function ExpressionBuilder(props) {
   }, [index, setValue, metaModals, rules]);
 
   function onAddGroup(parentId) {
-    id = id + 1;
+    id = (rules ? rules.length : id) + 1;
     setRules((state) => [...state, { id, parentId, rules: [] }]);
   }
 
