@@ -17,19 +17,21 @@ const useStyles = makeStyles({
 });
 
 const palette = {
-  red: "#ff0000",
-  blue: "#0000ff",
-  green: "#00ff00",
-  yellow: "yellow",
-  cyan: "cyan",
-  lime: "lime",
-  gray: "gray",
-  orange: "orange",
-  purple: "purple",
-  black: "black",
-  white: "white",
-  pink: "pink",
-  darkblue: "darkblue",
+  FF7043: "#FF7043",
+  "5FC34C": "#5FC34C",
+  F9C000: "#F9C000",
+  F8B200: "#F8B200",
+  "3FBDD6": "#3FBDD6",
+  "3F97F6": "#3F97F6",
+  FF9E0F: "#FF9E0F",
+  F79000: "#F79000",
+  E76092: "#E76092",
+  B567CA: "#B567CA",
+  "3EBFA5": "#3EBFA5",
+  FBA729: "#FBA729",
+  "3FC84C": "#3FC84C",
+  E4EBF8: "#E4EBF8",
+  "8ECB60": "#8ECB60",
 };
 
 export default function ColorPickerComponent({ changeColor, entry, element }) {
