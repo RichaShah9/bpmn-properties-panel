@@ -330,7 +330,7 @@ function BpmnModelerComponent() {
         </bpmn2:process>
         <bpmndi:BPMNDiagram id="BPMNDiagram_1">
           <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1" bioc:stroke="#55c041">
               <dc:Bounds height="36.0" width="36.0" x="412.0" y="240.0" />
             </bpmndi:BPMNShape>
           </bpmndi:BPMNPlane>
