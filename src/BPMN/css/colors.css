@@ -1,0 +1,43 @@
+.djs-palette .bpmn-icon-task {
+  color: #3f97f6 !important;
+}
+
+.djs-palette .bpmn-icon-start-event-none {
+  color: #55c041 !important;
+}
+
+.djs-palette .bpmn-icon-intermediate-event-none {
+  color: #ff9800 !important;
+}
+
+.djs-palette .bpmn-icon-end-event-none {
+  color: #ff7043 !important;
+}
+
+.djs-palette .bpmn-icon-gateway-none {
+  color: #f9c000 !important;
+}
+
+.djs-context-pad .bpmn-icon-task {
+  color: #3f97f6 !important;
+}
+
+.djs-context-pad .bpmn-icon-start-event-none {
+  color: #55c041 !important;
+}
+
+.djs-context-pad .bpmn-icon-intermediate-event-none {
+  color: #ff9800 !important;
+}
+
+.djs-context-pad .bpmn-icon-end-event-none {
+  color: #ff7043 !important;
+}
+
+.djs-context-pad .bpmn-icon-gateway-none {
+  color: #f9c000 !important;
+}
+
+.djs-context-pad .bpmn-icon-trash{
+  color: red !important;
+}

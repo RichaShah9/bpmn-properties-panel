@@ -50,6 +50,7 @@ import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css";
 import "../css/bpmn.css";
 import "../css/comments/comments.css";
 import "../css/comments/simulation.css";
+import "../css/colors.css";
 
 const resizeStyle = {
   display: "flex",
