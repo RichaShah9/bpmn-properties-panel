@@ -73,8 +73,8 @@ export default function Comments(eventBus, overlays, bpmnjs) {
     // attach an overlay to a node
     overlays.add(element, "comments", {
       position: {
-        bottom: 10,
-        right: 10,
+        bottom: 20,
+        right: 20,
       },
       html: $overlay,
     });
