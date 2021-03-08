@@ -1053,6 +1053,7 @@ export default function Editor({
             editor={editor}
             type={type}
             element={element}
+            expression={expression}
           />
         </React.Fragment>
       ))}
