@@ -1044,6 +1044,9 @@ function BpmnModelerComponent() {
         propertiesProviderModule,
         propertiesCustomProviderModule,
         tokenSimulation,
+        {
+          preserveElementColors: ["value", {}],
+        },
       ],
       moddleExtensions: {
         camunda: camundaModdleDescriptor,
