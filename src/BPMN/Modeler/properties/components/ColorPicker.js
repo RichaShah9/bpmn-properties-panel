@@ -49,17 +49,14 @@ export default function ColorPickerComponent({ changeColor, entry, element }) {
 
   useEffect(() => {
     const bo = getBusinessObject(element);
-    const color =
-      [
-        "bpmn:StartEvent",
-        "bpmn:EndEvent",
-        "bpmn:IntermediateThrowEvent",
-        "bpmn:IntermediateCatchEvent",
-      ].includes(element.type) &&
-      bo &&
-      bo.di
-        ? bo.di.stroke
-        : bo.di.fill;
+    const color = [
+      "bpmn:StartEvent",
+      "bpmn:EndEvent",
+      "bpmn:IntermediateThrowEvent",
+      "bpmn:IntermediateCatchEvent",
+    ].includes(element.type)
+      ? bo && bo.di && bo.di.stroke
+      : bo && bo.di && bo.di.fill;
     if (!color) return;
     setColor(color);
   }, [element]);
