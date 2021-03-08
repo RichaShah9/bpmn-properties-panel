@@ -61,3 +61,11 @@
 .djs-context-pad .bpmn-icon-intermediate-event-catch-signal {
   color: #ff9800 !important;
 }
+
+.djs-context-pad .bpmn-icon-text-annotation {
+  color: #a9b1bd !important;
+}
+
+.djs-label {
+  fill: #54657d !important;
+}

@@ -32,6 +32,7 @@ const palette = {
   "3FC84C": "#3FC84C",
   E4EBF8: "#E4EBF8",
   "8ECB60": "#8ECB60",
+  "5EAEDA": "#5EAEDA",
 };
 
 export default function ColorPickerComponent({ changeColor, entry, element }) {
@@ -48,7 +49,17 @@ export default function ColorPickerComponent({ changeColor, entry, element }) {
 
   useEffect(() => {
     const bo = getBusinessObject(element);
-    const color = bo && bo.di && bo.di.fill;
+    const color =
+      [
+        "bpmn:StartEvent",
+        "bpmn:EndEvent",
+        "bpmn:IntermediateThrowEvent",
+        "bpmn:IntermediateCatchEvent",
+      ].includes(element.type) &&
+      bo &&
+      bo.di
+        ? bo.di.stroke
+        : bo.di.fill;
     if (!color) return;
     setColor(color);
   }, [element]);

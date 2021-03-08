@@ -688,9 +688,16 @@ function BpmnModelerComponent() {
       colors.stroke = color;
     } else {
       colors.fill = color;
-      colors.stroke = "white";
+      colors.stroke =
+        selectedElement.type === "bpmn:CallActivity"
+          ? "#54657D"
+          : selectedElement.type === "bpmn:SubProcess"
+          ? "#92ACE2"
+          : "white";
     }
     modeling.setColor(selectedElement, colors);
+    selectedElement.businessObject.di.set("stroke", color);
+    selectedElement.businessObject.di.set("fill", color);
   };
 
   const toolBarButtons = [
