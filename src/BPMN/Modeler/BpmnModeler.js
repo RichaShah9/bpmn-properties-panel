@@ -164,7 +164,6 @@ function isConditionalSource(element) {
 }
 
 function setColors(element, forceUpdate = false) {
-  console.log(element);
   if (
     element.businessObject &&
     element.businessObject.di &&
