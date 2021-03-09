@@ -43,6 +43,7 @@ import {
 } from "./extra.js";
 import { getTranslations, getInfo } from "../../services/api";
 import { getBool } from "../../utils";
+import { TASKCOLOR } from "./constants";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
@@ -162,6 +163,59 @@ function isConditionalSource(element) {
   return isAny(element, CONDITIONAL_SOURCES);
 }
 
+function setColors(element, forceUpdate = false) {
+  console.log(element);
+  if (
+    element.businessObject &&
+    element.businessObject.di &&
+    (element.businessObject.di.stroke || element.businessObject.di.fill) &&
+    !forceUpdate
+  ) {
+    return;
+  }
+  if (is(element, "bpmn:SequenceFlow")) {
+    element.businessObject.di.set("stroke", TASKCOLOR[element.type]);
+  } else if (is(element, "bpmn:StartEvent")) {
+    element.businessObject.di.set("stroke", "#55c041");
+  } else if (is(element, "bpmn:EndEvent")) {
+    element.businessObject.di.set("stroke", "#ff7043");
+  } else if (
+    isAny(element, [
+      "bpmn:IntermediateThrowEvent",
+      "bpmn:IntermediateCatchEvent",
+    ])
+  ) {
+    element.businessObject.di.set("stroke", "#ff9800");
+  } else if (is(element, "bpmn:SubProcess")) {
+    element.businessObject.di.set("stroke", "#92ACE2");
+    element.businessObject.di.set("fill", TASKCOLOR[element.type]);
+  } else if (is(element, ["bpmn:Gateway"])) {
+    element.businessObject.di.set("fill", "#f9c000");
+    element.businessObject.di.set("stroke", "white");
+  } else if (is(element, "bpmn:TextAnnotation")) {
+    element.businessObject.di.set("stroke", "#A9B1BD");
+  } else if (
+    isAny(element, [
+      "bpmn:UserTask",
+      "bpmn:SendTask",
+      "bpmn:ReceiveTask",
+      "bpmn:ManualTask",
+      "bpmn:BusinessRuleTask",
+      "bpmn:ServiceTask",
+      "bpmn:ScriptTask",
+    ])
+  ) {
+    element.businessObject.di.set("stroke", "#fff");
+    element.businessObject.di.set("fill", TASKCOLOR[element.type]);
+  } else if (is(element, "bpmn:CallActivity")) {
+    element.businessObject.di.set("stroke", "#54657D");
+    element.businessObject.di.set("fill", TASKCOLOR[element.type]);
+  } else if (is(element, "bpmn:Task")) {
+    element.businessObject.di.set("stroke", "#fff");
+    element.businessObject.di.set("fill", TASKCOLOR[element.type]);
+  }
+}
+
 function BpmnModelerComponent() {
   const [wkf, setWkf] = useState(null);
   const [id, setId] = useState(null);
@@ -275,12 +329,19 @@ function BpmnModelerComponent() {
       let tabs = getTabs(bpmnModeler, element);
       setTabs(tabs);
       let elementRegistry = bpmnModeler.get("elementRegistry");
+      let modeling = bpmnModeler.get("modeling");
       let nodes = elementRegistry && elementRegistry._elements;
       if (!nodes) return;
       Object.entries(nodes).forEach(([key, value]) => {
         if (!value) return;
         const { element } = value;
         if (!element) return;
+        if (modeling && element.businessObject && element.businessObject.di) {
+          modeling.setColor(element, {
+            stroke: element.businessObject.di.stroke,
+            fill: element.businessObject.di.fill,
+          });
+        }
         if (["Shape", "Root"].includes(element.constructor.name)) {
           let bo = element.businessObject;
           if (!bo) return;
@@ -696,8 +757,6 @@ function BpmnModelerComponent() {
           : "white";
     }
     modeling.setColor(selectedElement, colors);
-    selectedElement.businessObject.di.set("stroke", color);
-    selectedElement.businessObject.di.set("fill", color);
   };
 
   const toolBarButtons = [
@@ -1062,6 +1121,17 @@ function BpmnModelerComponent() {
 
   useEffect(() => {
     if (!bpmnModeler) return;
+    bpmnModeler.on("connection.added", (event) => {
+      setColors(event && event.element);
+    });
+    bpmnModeler.on("shape.added", (event) => {
+      setColors(event && event.element);
+    });
+    bpmnModeler
+      .get("eventBus")
+      .on("commandStack.shape.replace.postExecute", (event) => {
+        setColors(event && event.context && event.context.newShape, true);
+      });
     bpmnModeler.on("element.click", (event) => {
       updateTabs(event);
     });
