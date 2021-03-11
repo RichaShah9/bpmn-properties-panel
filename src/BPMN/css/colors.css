@@ -69,3 +69,8 @@
 .djs-label {
   fill: #54657d !important;
 }
+
+.djs-context-pad .entry {
+  background-color: transparent;
+  box-shadow: 0 0 2px 1px transparent;
+}
