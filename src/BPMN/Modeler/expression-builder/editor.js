@@ -155,7 +155,7 @@ function RenderRelationalWidget(props) {
           if (typeof value !== "string" && !isBPMQuery(parentType)) {
             isNameField =
               value && value.length > 0
-                ? value.find((v) => v[targetName])
+                ? value.find((v) => v && v[targetName])
                 : value[targetName];
             onChange(
               { name: "nameField", value: isNameField ? nameField : "id" },
