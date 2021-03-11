@@ -25,13 +25,21 @@ export function lowerCaseFirstLetter(str) {
   return str.charAt(0).toLowerCase() + str.slice(1);
 }
 
+export function getBO(bo) {
+  if (bo && bo.$type === "bpmn:SubProcess") {
+    return getBO(bo.$parent);
+  }
+  return bo;
+}
+
 export function getProcessConfig(element) {
   if (!element) return null;
   let bo = element && element.businessObject && element.businessObject.$parent;
   if (element && element.type === "bpmn:Process") {
     bo = element.businessObject;
-  }
-  if (
+  } else if (bo.$type === "bpmn:SubProcess") {
+    bo = getBO(bo.$parent);
+  } else if (
     (element && element.businessObject && element.businessObject.$type) ===
     "bpmn:Participant"
   ) {
