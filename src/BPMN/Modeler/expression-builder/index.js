@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     padding: theme.spacing(3, 2),
     width: `calc(100% - 16px)`,
+    display: "flex",
+    height:"calc(100% - 50px)",
+    overflow: "auto"
   },
   expressionContainer: {
     display: "flex",
@@ -55,8 +58,8 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start",
-    height: "calc(100% - 50px)",
-    overflow: "auto",
+    height: "100%",
+    overflow: "hidden",
   },
   combinator: {
     width: "fit-content",
@@ -85,7 +88,8 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
-    maxWidth: "15%"
+    maxWidth: "15%",
+    padding: 0
   },
   checkbox: {
     color: "#0275d8",
@@ -1134,9 +1138,6 @@ function ExpressionBuilder({
         <Paper
           variant="outlined"
           className={classes.paper}
-          style={{
-            display: "flex",
-          }}
         >
           <div style={{ height: "100%", width: "100%" }}>
             <div className={classes.expression}>

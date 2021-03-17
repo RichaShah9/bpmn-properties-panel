@@ -114,6 +114,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "flex-end",
     maxWidth: "15%",
+    padding: 0,
   },
 }));
 

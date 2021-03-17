@@ -146,7 +146,6 @@ const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
       modeling.setColor(nodes[element].element, {
         stroke: "#006400",
       });
-      // canvas.addMarker(element, "highlight");
     });
 
     const activities = (activityCounts && activityCounts.split(",")) || [];
