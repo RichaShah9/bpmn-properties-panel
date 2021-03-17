@@ -134,8 +134,8 @@ function updateSVGStroke(obj, taskIds = []) {
         let reactangle = obj[key]["g"][0]["g"][0].rect[0];
         let newStyle = reactangle["$"].style.replace(
           "stroke: black",
-          "stroke: #1e88e5"
-        );
+          "stroke: #006400"
+          );
         reactangle["$"].style = newStyle;
       }
       updateSVGStroke(obj[key]["g"], taskIds);
