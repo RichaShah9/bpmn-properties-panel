@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
 import BpmnModeler from "bpmn-js/lib/Modeler";
-import xml2js, { parseString } from "xml2js";
-import _ from "lodash";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Service from "../../services/Service";
@@ -127,24 +125,6 @@ const fetchInstanceDiagram = async (id, taskIds, activityCounts) => {
   }
 };
 
-function updateSVGStroke(obj, taskIds = []) {
-  return _.forEach(obj, (value, key) => {
-    if (key && obj[key] && obj[key]["g"]) {
-      if (taskIds.includes(obj[key]["g"][0]["$"]["data-element-id"])) {
-        let reactangle = obj[key]["g"][0]["g"][0].rect[0];
-        let newStyle = reactangle["$"].style.replace(
-          "stroke: black",
-          "stroke: #006400"
-          );
-        reactangle["$"].style = newStyle;
-      }
-      updateSVGStroke(obj[key]["g"], taskIds);
-    } else {
-      return;
-    }
-  });
-}
-
 const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
   if (!diagramXml) return;
   bpmnViewer.importXML(diagramXml, (err) => {
@@ -162,7 +142,11 @@ const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
       (element) => taskIds && taskIds.includes(element)
     );
     filteredElements.forEach((element) => {
-      canvas.addMarker(element, "highlight");
+      let modeling = bpmnViewer.get("modeling");
+      modeling.setColor(nodes[element].element, {
+        stroke: "#006400",
+      });
+      // canvas.addMarker(element, "highlight");
     });
 
     const activities = (activityCounts && activityCounts.split(",")) || [];
@@ -207,16 +191,9 @@ const resetZoom = () => {
 };
 
 function BpmnViewerComponent({ isInstance }) {
-  const [taskIds, setTaskIds] = React.useState(null);
-
   const saveSVG = () => {
     bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
-      parseString(svg, function (err, result) {
-        let updatedSVG = updateSVGStroke(result, taskIds);
-        let builder = new xml2js.Builder();
-        let xml = builder.buildObject(updatedSVG);
-        download(xml, "diagram.svg");
-      });
+      download(svg, "diagram.svg");
     });
   };
 
@@ -257,13 +234,12 @@ function BpmnViewerComponent({ isInstance }) {
       additionalModules: [readOnlyModule],
     });
     let { id, taskIds, activityCounts } = fetchId(isInstance) || {};
-    setTaskIds(taskIds);
     if (isInstance) {
       fetchInstanceDiagram(id, taskIds, activityCounts);
     } else {
       fetchDiagram(id, taskIds, activityCounts);
     }
-  }, [isInstance, setTaskIds]);
+  }, [isInstance]);
 
   return (
     <React.Fragment>
