@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextField, CircularProgress } from "@material-ui/core";
+import { TextField, CircularProgress, Chip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import _uniqueId from "lodash/uniqueId";
@@ -10,6 +10,13 @@ import { useDebounce } from "../util";
 const useStyles = makeStyles((theme) => ({
   listbox: {
     maxHeight: "300px !important",
+  },
+  chip: {
+    "&.MuiChip-outlined .MuiChip-deleteIconSmall": {
+      color: "#0275d8",
+    },
+    border: "1px solid #0275d8",
+    color: "#0275d8",
   },
 }));
 export default function AutoComplete(props) {
@@ -156,6 +163,19 @@ export default function AutoComplete(props) {
       filterSelectedOptions={filterSelectedOptions}
       onInputChange={(e, value) => delayChange(value)}
       classes={{ option: "menu-item", listbox: classes.listbox }}
+      renderTags={(value, getTagProps) =>
+        value.map((option, index) => (
+          <Chip
+            variant="outlined"
+            label={option[optionLabelKey]}
+            size="small"
+            classes={{
+              root: classes.chip,
+            }}
+            {...getTagProps({ index })}
+          />
+        ))
+      }
       renderInput={(params) => {
         return (
           <TextField

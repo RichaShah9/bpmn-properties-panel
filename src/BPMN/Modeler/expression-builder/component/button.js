@@ -1,21 +1,30 @@
 import React from "react";
+import classnames from "classnames";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
   button: {
-    margin: theme.spacing(1),
-    textTransform: "none"
+    color: "#0275d8",
+    textTransform: "none",
+  },
+  buttonLabel: {
+    maxHeight: 30,
   },
 }));
 
-function ButtonComp({ title, Icon, onClick }) {
+function ButtonComp({ title, Icon, onClick, className }) {
   const classes = useStyles();
   if (!title) {
     return (
-      <IconButton onClick={onClick} className={classes.button}>
-        <Icon />
+      <IconButton
+        size="medium"
+        onClick={onClick}
+        className={classnames(classes.button, className)}
+        style={{ padding: "0px 12px" }}
+      >
+        <Icon fontSize="small" />
       </IconButton>
     );
   }
@@ -23,8 +32,7 @@ function ButtonComp({ title, Icon, onClick }) {
   if (!Icon) {
     return (
       <Button
-        variant="contained"
-        className={classes.button}
+        className={classnames(classes.button, classes.buttonLabel, className)}
         onClick={onClick}
       >
         {title}
@@ -34,9 +42,8 @@ function ButtonComp({ title, Icon, onClick }) {
 
   return (
     <Button
-      variant="contained"
-      className={classes.button}
-      startIcon={<Icon />}
+      className={classnames(classes.button, classes.buttonLabel, className)}
+      endIcon={<Icon />}
       onClick={onClick}
     >
       {title}

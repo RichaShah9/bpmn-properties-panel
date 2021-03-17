@@ -13,6 +13,15 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Close, ArrowForward } from "@material-ui/icons";
+import {
+  TimelineContent,
+  TimelineItem,
+  TimelineConnector,
+  TimelineSeparator,
+  Timeline,
+  TimelineOppositeContent,
+  TimelineDot,
+} from "@material-ui/lab";
 
 import { getModels } from "../../../services/api";
 import {
@@ -56,6 +65,9 @@ const useStyles = makeStyles((theme) => ({
   },
   rules: {
     display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "flex-start",
+    marginBottom: 15,
   },
   MuiAutocompleteRoot: {
     width: "250px",
@@ -66,18 +78,42 @@ const useStyles = makeStyles((theme) => ({
     opacity: 0.5,
   },
   valueFrom: {
-    fontSize: 9,
+    fontSize: 12,
     color: "rgba(0, 0, 0, 0.54)",
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
   },
   radio: {
     padding: "1px 9px",
+    color: "#0275d8",
+    "&.MuiRadio-colorSecondary.Mui-checked": {
+      color: "#0275d8",
+    },
   },
   operators: {
     minWidth: 75,
   },
   iconButton: {
     marginRight: 10,
+  },
+  timelineConnector: {
+    backgroundColor: "#0275d8",
+  },
+  combinator: {
+    width: "fit-content",
+  },
+  icon: {
+    color: "#0275d8",
+  },
+  timeline: {
+    height: "100%",
+    padding: 0,
+    margin: 0,
+  },
+  timelineOppositeContent: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    maxWidth: "15%",
   },
 }));
 
@@ -591,35 +627,17 @@ function Rule(props) {
               <label className={classes.valueFrom}>Value from</label>
               <FormControlLabel
                 value="self"
-                control={
-                  <Radio
-                    className={classes.radio}
-                    color="primary"
-                    size="small"
-                  />
-                }
+                control={<Radio className={classes.radio} size="small" />}
                 label="Self"
               />
               <FormControlLabel
                 value="context"
-                control={
-                  <Radio
-                    className={classes.radio}
-                    color="primary"
-                    size="small"
-                  />
-                }
+                control={<Radio className={classes.radio} size="small" />}
                 label="Context"
               />
               <FormControlLabel
                 value="none"
-                control={
-                  <Radio
-                    className={classes.radio}
-                    color="primary"
-                    size="small"
-                  />
-                }
+                control={<Radio className={classes.radio} size="small" />}
                 label="None"
               />
             </RadioGroup>
@@ -784,7 +802,7 @@ function Rule(props) {
               className={classes.iconButton}
             >
               <Tooltip title={translate("Add sub field")}>
-                <ArrowForward color="primary" fontSize="small" />
+                <ArrowForward className={classes.icon} fontSize="small" />
               </Tooltip>
             </IconButton>
           )}
@@ -943,7 +961,7 @@ function Rule(props) {
                     className={classes.iconButton}
                   >
                     <Tooltip title={translate("Add sub field")}>
-                      <ArrowForward color="primary" fontSize="small" />
+                      <ArrowForward className={classes.icon} fontSize="small" />
                     </Tooltip>
                   </IconButton>
                 )}
@@ -1006,57 +1024,85 @@ export default function Editor({
       className={classNames(classes.paper, isDisable && classes.disabled)}
     >
       <div className={classNames(classes.rulesGroupHeader)}>
-        <Select
-          name="combinator"
-          title="Combinator"
-          options={combinator}
-          value={editor.combinator}
-          onChange={(value) => onChange({ name: "combinator", value }, editor)}
-        />
-        <Button title="Rules" Icon={AddIcon} onClick={() => onAddRule(id)} />
-        <Button title="Group" Icon={AddIcon} onClick={() => onAddGroup(id)} />
-        {isRemoveGroup && (
-          <Button
-            title="Group"
-            Icon={DeleteIcon}
-            onClick={() => onRemoveGroup(id)}
-          />
-        )}
+        <Timeline align="alternate" className={classes.timeline}>
+          <TimelineItem>
+            <TimelineOppositeContent
+              className={classes.timelineOppositeContent}
+            >
+              <Select
+                name="combinator"
+                className={classes.combinator}
+                disableUnderline={true}
+                options={combinator}
+                value={editor.combinator || "and"}
+                onChange={(value) =>
+                  onChange({ name: "combinator", value }, editor)
+                }
+              />
+            </TimelineOppositeContent>
+            <TimelineSeparator>
+              <TimelineDot
+                variant="outlined"
+                style={{ borderColor: "#0275d8" }}
+              />
+              <TimelineConnector className={classes.timelineConnector} />
+            </TimelineSeparator>
+            <TimelineContent>
+              <Button
+                title="Add Group"
+                Icon={AddIcon}
+                onClick={() => onAddGroup(id)}
+              />
+              {isRemoveGroup && (
+                <Button
+                  title="Remove Group"
+                  Icon={DeleteIcon}
+                  onClick={() => onRemoveGroup(id)}
+                />
+              )}
+              {rules.map((rule, i) => (
+                <React.Fragment key={i}>
+                  <Rule
+                    getMetaFields={getMetaFields}
+                    onRemoveRule={() => onRemoveRule(editor.id, i)}
+                    onChange={(e, editor) => onChange(e, editor, i)}
+                    editor={editor}
+                    value={rule}
+                    expression={expression}
+                    parentType={type}
+                    isBPM={isBPM}
+                    parentMetaModal={parentMetaModal}
+                    element={element}
+                  />
+                </React.Fragment>
+              ))}
+              <Button
+                title="Add Rule"
+                Icon={AddIcon}
+                onClick={() => onAddRule(id)}
+              />
+              {childEditors.map((editor, i) => (
+                <React.Fragment key={editor.id}>
+                  <Editor
+                    isRemoveGroup={true}
+                    onAddGroup={onAddGroup}
+                    onRemoveGroup={onRemoveGroup}
+                    onAddRule={onAddRule}
+                    onRemoveRule={onRemoveRule}
+                    getChildEditors={getChildEditors}
+                    getMetaFields={getMetaFields}
+                    onChange={(e, editor, i) => onChange(e, editor, i)}
+                    editor={editor}
+                    type={type}
+                    element={element}
+                    expression={expression}
+                  />
+                </React.Fragment>
+              ))}
+            </TimelineContent>
+          </TimelineItem>
+        </Timeline>
       </div>
-      {rules.map((rule, i) => (
-        <React.Fragment key={i}>
-          <Rule
-            getMetaFields={getMetaFields}
-            onRemoveRule={() => onRemoveRule(editor.id, i)}
-            onChange={(e, editor) => onChange(e, editor, i)}
-            editor={editor}
-            value={rule}
-            expression={expression}
-            parentType={type}
-            isBPM={isBPM}
-            parentMetaModal={parentMetaModal}
-            element={element}
-          />
-        </React.Fragment>
-      ))}
-      {childEditors.map((editor, i) => (
-        <React.Fragment key={editor.id}>
-          <Editor
-            isRemoveGroup={true}
-            onAddGroup={onAddGroup}
-            onRemoveGroup={onRemoveGroup}
-            onAddRule={onAddRule}
-            onRemoveRule={onRemoveRule}
-            getChildEditors={getChildEditors}
-            getMetaFields={getMetaFields}
-            onChange={(e, editor, i) => onChange(e, editor, i)}
-            editor={editor}
-            type={type}
-            element={element}
-            expression={expression}
-          />
-        </React.Fragment>
-      ))}
     </Paper>
   );
 }

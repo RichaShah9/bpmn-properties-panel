@@ -17,6 +17,9 @@ const useStyles = makeStyles(() => ({
   iconButton: {
     marginRight: 10,
   },
+  icon: {
+    color: "#0275d8",
+  },
 }));
 
 export default function FieldEditor({
@@ -253,7 +256,7 @@ export default function FieldEditor({
               className={classes.iconButton}
             >
               <Tooltip title={translate("Remove sub field")}>
-                <Close color="primary" fontSize="small" />
+                <Close className={classes.icon} fontSize="small" />
               </Tooltip>
             </IconButton>
           )}
@@ -302,7 +305,7 @@ export default function FieldEditor({
               className={classes.iconButton}
             >
               <Tooltip title={translate("Add sub field")}>
-                <ArrowForward color="primary" fontSize="small" />
+                <ArrowForward className={classes.icon} fontSize="small" />
               </Tooltip>
             </IconButton>
           )}

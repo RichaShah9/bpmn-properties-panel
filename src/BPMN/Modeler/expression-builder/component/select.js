@@ -22,6 +22,7 @@ export default function Selection({
   options,
   title,
   className,
+  disableUnderline = false,
   ...rest
 }) {
   const classes = useStyles();
@@ -29,11 +30,12 @@ export default function Selection({
     <FormControl className={classnames(classes.formControl, className)}>
       <InputLabel>{title}</InputLabel>
       <Select
+        disableUnderline={disableUnderline}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         name={name}
         style={{ marginRight: 8 }}
-        classes={{ select: classes.select }}
+        classes={{ select: classnames(classes.select, className) }}
         {...rest}
       >
         {options &&

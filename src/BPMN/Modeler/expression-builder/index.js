@@ -8,6 +8,15 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@material-ui/core";
+import {
+  TimelineContent,
+  TimelineItem,
+  TimelineConnector,
+  TimelineSeparator,
+  Timeline,
+  TimelineOppositeContent,
+  TimelineDot,
+} from "@material-ui/lab";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import produce from "immer";
@@ -32,13 +41,66 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     margin: theme.spacing(1),
     padding: theme.spacing(3, 2),
+    width: `calc(100% - 16px)`,
   },
   expressionContainer: {
     display: "flex",
     alignItems: "center",
+    width: "100%",
   },
   dialogPaper: {
     maxWidth: "100%",
+  },
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    height: "calc(100% - 50px)",
+    overflow: "auto",
+  },
+  combinator: {
+    width: "fit-content",
+  },
+  timelineConnector: {
+    backgroundColor: "#0275d8",
+  },
+  save: {
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
+  },
+  timeline: {
+    height: "100%",
+    width: "100%",
+    padding: 0,
+    margin: 0,
+  },
+  timelineOppositeContent: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    maxWidth: "15%"
+  },
+  checkbox: {
+    color: "#0275d8",
+    "&.MuiCheckbox-colorSecondary.Mui-checked": {
+      color: "#0275d8",
+    },
+  },
+  timelineItem: {
+    "&.MuiTimelineItem-missingOppositeContent:before": {
+      padding: 0,
+    },
+  },
+  expression: {
+    height: "100%",
+    width: "100%",
   },
 }));
 
@@ -1068,61 +1130,130 @@ function ExpressionBuilder({
       }}
     >
       <DialogTitle id="simple-dialog-title">{title}</DialogTitle>
-      <div>
-        <Paper variant="outlined" className={classes.paper}>
-          {!isBPMQuery(parentType) && (
-            <div>
-              <Select
-                name="expression"
-                title="Expression"
-                options={combinators}
-                value={combinator}
-                onChange={(value) => {
-                  setCombinator(value);
-                }}
-              />
-              <Button
-                title="Expression"
-                Icon={AddIcon}
-                onClick={() => onAddExpressionEditor()}
-              />
-            </div>
-          )}
-          {isBPMQuery(parentType) && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={singleResult}
-                  onChange={(e) => setSingleResult(e.target.checked)}
-                  name="singleResult"
-                  color="primary"
-                />
-              }
-              label="Single Result"
-            />
-          )}
-          {expressionComponents.map(({ Component, value }, index) => {
-            return (
-              <div className={classes.expressionContainer} key={index}>
-                <Component
-                  value={value}
-                  index={index}
-                  setValue={onChange}
-                  element={element}
-                  type={parentType}
-                />
-                {!isBPMQuery(parentType) && (
-                  <Button
-                    Icon={DeleteIcon}
-                    onClick={() => onRemoveExpressionEditor(index)}
-                  />
+      <div className={classes.root}>
+        <Paper
+          variant="outlined"
+          className={classes.paper}
+          style={{
+            display: "flex",
+          }}
+        >
+          <div style={{ height: "100%", width: "100%" }}>
+            <div className={classes.expression}>
+              <Timeline align="alternate" className={classes.timeline}>
+                {isBPMQuery(parentType) ? (
+                  <TimelineItem
+                    className={classes.timelineItem}
+                    style={{
+                      width: "100%",
+                    }}
+                  >
+                    <div style={{
+                      width: "100%",
+                    }}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={singleResult}
+                            onChange={(e) => setSingleResult(e.target.checked)}
+                            name="singleResult"
+                            className={classes.checkbox}
+                          />
+                        }
+                        style={{ color: "#0275d8" }}
+                        label="Single Result"
+                      />
+                      {expressionComponents &&
+                        expressionComponents.map(
+                          ({ Component, value }, index) => {
+                            return (
+                              <div
+                                className={classes.expressionContainer}
+                                key={index}
+                              >
+                                <Component
+                                  value={value}
+                                  index={index}
+                                  setValue={onChange}
+                                  element={element}
+                                  type={parentType}
+                                />
+                              </div>
+                            );
+                          }
+                        )}
+                    </div>
+                  </TimelineItem>
+                ) : (
+                  <TimelineItem style={{ minHeight: "100%", width: "89%" }}>
+                    <TimelineOppositeContent
+                      className={classes.timelineOppositeContent}
+                    >
+                      <Select
+                        name="expression"
+                        options={combinators}
+                        value={combinator || "and"}
+                        disableUnderline={true}
+                        className={classes.combinator}
+                        onChange={(value) => {
+                          setCombinator(value);
+                        }}
+                      />
+                    </TimelineOppositeContent>
+                    <TimelineSeparator>
+                      <TimelineDot
+                        variant="outlined"
+                        style={{ borderColor: "#0275d8" }}
+                      />
+                      <TimelineConnector
+                        className={classes.timelineConnector}
+                      />
+                    </TimelineSeparator>
+                    <TimelineContent style={{ width: "100%" }}>
+                      <Button
+                        title="Add Expression"
+                        Icon={AddIcon}
+                        onClick={() => onAddExpressionEditor()}
+                      />
+                      <div>
+                        {expressionComponents &&
+                          expressionComponents.map(
+                            ({ Component, value }, index) => {
+                              return (
+                                <div
+                                  className={classes.expressionContainer}
+                                  key={index}
+                                >
+                                  <Component
+                                    value={value}
+                                    index={index}
+                                    setValue={onChange}
+                                    element={element}
+                                    type={parentType}
+                                  />
+                                  {!isBPMQuery(parentType) && (
+                                    <Button
+                                      Icon={DeleteIcon}
+                                      onClick={() =>
+                                        onRemoveExpressionEditor(index)
+                                      }
+                                    />
+                                  )}
+                                </div>
+                              );
+                            }
+                          )}
+                      </div>
+                    </TimelineContent>
+                  </TimelineItem>
                 )}
-              </div>
-            );
-          })}
+              </Timeline>
+            </div>
+          </div>
         </Paper>
         <Button
           title="Generate"
+          className={classes.save}
           onClick={() => generateExpression(combinator, parentType)}
         />
       </div>
