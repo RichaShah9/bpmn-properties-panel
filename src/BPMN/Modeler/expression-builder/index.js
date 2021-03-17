@@ -605,18 +605,46 @@ function ExpressionBuilder({
     const map_operators = map_operator[isBPM ? "BPM" : expression];
     let count = parentCount;
     return rules.map((rule) => {
-      const { fieldName, field = {}, operator } = rule;
+      const { fieldName, field = {}, operator, allField } = rule;
       const { targetName, selectionList, model, target, jsonField } =
         field || {};
       const type = field && field.type && field.type.toLowerCase();
       const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
-      const isJsonField =
+      let isJsonField =
         model === "com.axelor.meta.db.MetaJsonRecord" ||
         target === "com.axelor.meta.db.MetaJsonRecord" ||
         jsonField;
+      let parentCustomField;
+      const values = fieldName && fieldName.split(join_operator[expression]);
+      if (!isJsonField && values && values.length > 1) {
+        values.forEach((name) => {
+          let value =
+            allField &&
+            allField.find(
+              (field) =>
+                field.name === name &&
+                (field.model === "com.axelor.meta.db.MetaJsonRecord" ||
+                  field.target === "com.axelor.meta.db.MetaJsonRecord" ||
+                  field.jsonField)
+            );
+          if (value) {
+            isJsonField = true;
+            parentCustomField = value;
+          }
+        });
+      }
       const jsonFieldName = isJsonField
-        ? `${getJsonExpression(field, prefix, fieldName)}`
+        ? `${getJsonExpression(
+            parentCustomField
+              ? {
+                  ...parentCustomField,
+                  targetName: field && field.targetName,
+                }
+              : field,
+            prefix,
+            fieldName
+          )}`
         : undefined;
       let {
         fieldValue,
