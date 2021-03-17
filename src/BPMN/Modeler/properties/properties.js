@@ -282,7 +282,7 @@ function createGeneralTabGroups(
   groups.push(multiInstanceGroup);
   groups.push(translationGroup);
 
-  if (element.type !== "bpmn:Process") {
+  if (element && element.type !== "bpmn:Process") {
     groups.push(externalTaskGroup);
     groups.push(jobConfigurationGroup);
     groups.push(candidateStarterGroup);

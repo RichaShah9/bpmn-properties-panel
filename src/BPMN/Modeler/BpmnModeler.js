@@ -1128,13 +1128,13 @@ function BpmnModelerComponent() {
     });
     bpmnModeler
       .get("eventBus")
-      .on("commandStack.shape.replace.postExecute", (event) => {
+      .on("commandStack.shape.replace.postExecuted", (event) => {
         setColors(event && event.context && event.context.newShape, true);
+        updateTabs({
+          element: event && event.context && event.context.newShape,
+        });
       });
     bpmnModeler.on("element.click", (event) => {
-      updateTabs(event);
-    });
-    bpmnModeler.on("shape.changed", (event) => {
       updateTabs(event);
     });
     bpmnModeler.on("shape.removed", () => {
