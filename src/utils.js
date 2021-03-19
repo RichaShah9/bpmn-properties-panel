@@ -39,4 +39,23 @@ function sortBy(array = [], key) {
   });
 }
 
-export { download, translate, pascalToKebabCase, getBool, sortBy };
+function getItemsByType(view, type) {
+  function collectItems(item) {
+    const { items = [], jsonFields = [] } = item;
+    const allItems = [...items, ...jsonFields];
+    return allItems.reduce(
+      (all, item) => [...all, ...collectItems(item)],
+      item.type === type ? [item] : []
+    );
+  }
+  return collectItems(view);
+}
+
+export {
+  download,
+  translate,
+  pascalToKebabCase,
+  getBool,
+  sortBy,
+  getItemsByType,
+};
