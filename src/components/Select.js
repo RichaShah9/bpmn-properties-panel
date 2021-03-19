@@ -297,7 +297,8 @@ export default function SelectComponent({
             name === "menuParent" ||
             name === "positionMenu" ||
             name === "userParentMenu" ||
-            name === "userPositionMenu"
+            name === "userPositionMenu" ||
+            name === "buttons"
           ) {
             optionName = `${option["title"]} (${option["name"]})`;
           } else if (name === "dmnModel") {

@@ -99,6 +99,11 @@ export class Service {
     const url = `ws/action`;
     return this.post(url, data);
   }
+
+  view(data) {
+    const url = "/ws/meta/view";
+    return this.post(url, data);
+  }
 }
 
 export default new Service();

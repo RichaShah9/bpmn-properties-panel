@@ -1,5 +1,7 @@
-import Service from "./Service";
 import * as _ from "lodash";
+
+import Service from "./Service";
+import { getItemsByType } from "../utils";
 
 export async function getModels(data = {}, metaModalType) {
   const models =
@@ -27,7 +29,7 @@ export async function getModels(data = {}, metaModalType) {
   return allModels || [];
 }
 
-export async function getViews(model, criteria, type = "form") {
+export async function getViews(model, criteria = [], type = "form") {
   if (!model || !model.name) return [];
   let options = [
     {
@@ -335,4 +337,62 @@ export async function getBPMNModels(criteria = [], operator) {
   });
   const { data = [] } = res || {};
   return data;
+}
+
+export async function getButtons(models = []) {
+  let buttons = [];
+  let modelNames = [];
+  if (models.length > 0) {
+    for (let i = 0; i < models.length; i++) {
+      const { type, model, modelFullName } = models[i];
+      const formName = model.match(/[A-Z][a-z]+/g).join("-");
+      if (formName) {
+        if (type === "metaModel") {
+          modelNames.push(modelFullName);
+        }
+        const res = await Service.view({
+          data: {
+            name:
+              type === "metaModel"
+                ? `${formName.toLowerCase()}-form`
+                : `custom-model-${model}-form`,
+            type: "form",
+          },
+          model,
+        });
+        const formView = res && res.data && res.data.view;
+        if (formView) {
+          const btns = getItemsByType(formView, "button");
+          buttons = [...buttons, ...(btns || [])];
+        }
+      }
+    }
+    if (modelNames && modelNames.length > 0) {
+      const customFieldsRes = await Service.search(
+        "com.axelor.meta.db.MetaJsonField",
+        {
+          data: {
+            criteria: [
+              {
+                fieldName: "type",
+                operator: "=",
+                value: "button",
+              },
+              {
+                fieldName: "model",
+                operator: "IN",
+                value: modelNames,
+              },
+            ],
+            operator: "and",
+            _domain: "self.jsonModel is null",
+          },
+          fields: ["name", "title", "type"],
+        }
+      );
+      const customFields = customFieldsRes && customFieldsRes.data;
+      buttons = [...buttons, ...(customFields || [])];
+    }
+    return buttons;
+  }
 }
