@@ -21,7 +21,7 @@ export async function getMetaModals({ search = "" }) {
     .then(({ data = [] }) => data);
 }
 
-const getResultedFiels = (res, isQuery, isM2OField, isContextValue = false) => {
+const getResultedFields = (res, isQuery, isM2OField, isContextValue = false) => {
   const responseData = res && res.data;
   const allFields = responseData && responseData.fields;
   const jsonFields = Object.values(
@@ -74,7 +74,7 @@ export async function getMetaFields(model, isQuery) {
         model.fullName ? model.fullName : `${model.packageName}.${model.name}`
       }`
     );
-    let result = getResultedFiels(res, isQuery);
+    let result = getResultedFields(res, isQuery);
     const zonedDateTimeFieldsRes = await services.search(
       "com.axelor.meta.db.MetaField",
       {
@@ -110,7 +110,7 @@ export async function getMetaFields(model, isQuery) {
     const res = await services.get(
       `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${model.name}`
     );
-    let result = getResultedFiels(res, isQuery);
+    let result = getResultedFields(res, isQuery);
     return sortBy(result, "sequence") || [];
   }
 }
@@ -133,7 +133,7 @@ export async function getSubMetaField(
       `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${relationJsonModel}`
     );
     let result =
-      getResultedFiels(res, isQuery, isM2OField, isContextValue) || [];
+      getResultedFields(res, isQuery, isM2OField, isContextValue) || [];
     result = result.filter(
       (a) =>
         allowed_types.includes((a.type || "").toLowerCase()) &&
