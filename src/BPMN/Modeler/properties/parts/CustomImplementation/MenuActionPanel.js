@@ -120,7 +120,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
   const [positionMenu, setPositionMenu] = useState(null);
   const [userMenuName, setUserMenuName] = useState(null);
   const [userParentMenu, setUserParentMenu] = useState(null);
-  const [userPosition, setUserPosition] = useState(null);
+  const [userMenuPosition, setUserMenuPosition] = useState(null);
   const [userPositionMenu, setUserPositionMenu] = useState(null);
   const [userSubMenuOptions, setUserSubMenuOptions] = useState([]);
   const [subMenuOptions, setSubMenuOptions] = useState([]);
@@ -414,7 +414,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     const newUserMenu = getProperty("newUserMenu");
     const userMenuName = getProperty("userMenuName");
     const userParentMenu = getSelectValue("userParentMenu");
-    const userPosition = getSelectValue("userPosition");
+    const userMenuPosition = getSelectValue("userMenuPosition");
     const userPositionMenu = getSelectValue("userPositionMenu");
     const deadlineFieldPath = getProperty("deadlineFieldPath");
     const tagCount = getProperty("tagCount");
@@ -437,7 +437,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     setPositionMenu(positionMenu);
     setUserMenuName(userMenuName);
     setUserParentMenu(userParentMenu);
-    setUserPosition(userPosition);
+    setUserMenuPosition(userMenuPosition);
     setUserPositionMenu(userPositionMenu);
     setDeadlineFieldPath(deadlineFieldPath);
     setTagCount(getBool(tagCount));
@@ -497,7 +497,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
           "userMenuName",
           "userParentMenu",
           "userParentMenuLabel",
-          "userPosition",
+          "userMenuPosition",
           "userPositionMenu",
           "userPositionMenuLabel",
           "userTagCount",
@@ -885,8 +885,8 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                 setProperty("userMenuName", undefined);
                 setUserParentMenu(undefined);
                 updateMenuValue("userParentMenu", undefined);
-                setUserPosition(undefined);
-                updateValue("userPosition", undefined);
+                setUserMenuPosition(undefined);
+                updateValue("userMenuPosition", undefined);
                 setUserPositionMenu(undefined);
                 updateMenuValue("userPositionMenu", undefined);
                 setUserTagCount(undefined);
@@ -950,12 +950,12 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
             <label className={classes.label}>{translate("Position")}</label>
             <Select
               className={classes.select}
-              name="userPosition"
-              value={userPosition}
+              name="userMenuPosition"
+              value={userMenuPosition}
               optionLabel="name"
               update={(value) => {
-                setUserPosition(value);
-                updateValue("userPosition", value);
+                setUserMenuPosition(value);
+                updateValue("userMenuPosition", value);
               }}
               isLabel={false}
               options={[
