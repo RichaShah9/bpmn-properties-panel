@@ -396,7 +396,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
         let items = getKeyData(modelArr, "item");
         modelArr.forEach((ele) => {
           if (ele.name === "model") {
-            value.model = { model: ele.value };
+            value.model = { model: ele.value, fullName: ele.value };
           }
           if (ele.name === "modelName") {
             value.model = { ...value.model, name: ele.value };

@@ -122,7 +122,8 @@ export async function getItems(formName, model, criteria) {
     let uniqueItems = _.uniqBy(allItems, "name") || [];
     return [...uniqueItems, { name: "self", label: "Self" }];
   } else {
-    let metaFields = [];
+    let metaFields = [],
+      metaRealModelJsonFields = [];
     if (model.type === "metaModel") {
       let metaFieldsRes =
         (await Service.search("com.axelor.meta.db.MetaField", {
@@ -134,6 +135,17 @@ export async function getItems(formName, model, criteria) {
           },
         })) || {};
       metaFields = _.uniqBy(metaFieldsRes.data || [], "label") || [];
+
+      let metaJsonFieldsRes =
+        (await Service.search("com.axelor.meta.db.MetaJsonField", {
+          data: {
+            _domain: `self.model = '${model.fullName}' AND self.jsonModel is null`,
+            _domainContext: {
+              _model: "com.axelor.meta.db.MetaJsonField",
+            },
+          },
+        })) || {};
+      metaRealModelJsonFields = metaJsonFieldsRes.data || [];
     }
     let metaJsonFields =
       (await Service.search("com.axelor.meta.db.MetaJsonField", {
@@ -145,7 +157,11 @@ export async function getItems(formName, model, criteria) {
         },
         fields: ["name", "model", "type", "title"],
       })) || {};
-    let response = [...(metaFields || []), ...(metaJsonFields.data || [])];
+    let response = [
+      ...(metaFields || []),
+      ...(metaRealModelJsonFields || []),
+      ...(metaJsonFields.data || []),
+    ];
     return response;
   }
 }
