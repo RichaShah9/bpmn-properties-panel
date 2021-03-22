@@ -1054,6 +1054,7 @@ function BpmnModelerComponent() {
             id={id}
             handleAdd={handleAdd}
             onSave={onSave}
+            openSnackbar={openSnackbar.open}
           />
         ) : (
           group.entries.length > 0 && (

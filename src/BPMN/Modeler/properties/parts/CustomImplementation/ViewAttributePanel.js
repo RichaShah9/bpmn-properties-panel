@@ -139,9 +139,14 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ViewAttributePanel({ handleAdd, element }) {
+export default function ViewAttributePanel({
+  handleAdd,
+  element,
+  openSnackbar,
+}) {
   const classes = useStyles();
   const [row, setRow] = useState(null);
+  const [isAdd, setAdd] = useState(openSnackbar ? true : false);
 
   const addModelView = () => {
     setRow({
@@ -354,6 +359,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
         });
     }
     if (isValid) {
+      setAdd(true);
       handleAdd(row);
     }
   };
@@ -433,6 +439,12 @@ export default function ViewAttributePanel({ handleAdd, element }) {
       });
     setRow(createData(values));
   }, [element]);
+
+  useEffect(() => {
+    if (openSnackbar) {
+      setAdd(true);
+    }
+  }, [openSnackbar]);
 
   return (
     <div>
@@ -823,7 +835,11 @@ export default function ViewAttributePanel({ handleAdd, element }) {
         </div>
       )}
       <div className={classes.icons}>
-        <IconButton className={classes.iconButton} onClick={addModelView}>
+        <IconButton
+          className={classes.iconButton}
+          disabled={isAdd}
+          onClick={addModelView}
+        >
           <Add fontSize="small" />
         </IconButton>
         <Button
