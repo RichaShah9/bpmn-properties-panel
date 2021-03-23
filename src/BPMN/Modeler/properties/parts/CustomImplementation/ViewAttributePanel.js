@@ -563,7 +563,7 @@ export default function ViewAttributePanel({
                                 <Button
                                   className={classes.button}
                                   onClick={() => addItems(index)}
-                                  disabled={!val.model}
+                                  disabled={!val.model || isAdd}
                                   startIcon={<Add />}
                                 >
                                   New
