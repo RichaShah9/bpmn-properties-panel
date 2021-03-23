@@ -116,41 +116,51 @@ export default function UserTaskProps({ element, index, label }) {
   };
 
   function getProcessConfig() {
-    let bo =
-      element && element.businessObject && element.businessObject.$parent;
-    if (element.type === "bpmn:Process") {
-      bo = element.businessObject;
-    }
-    if (
-      (element && element.businessObject && element.businessObject.$type) ===
-      "bpmn:Participant"
-    ) {
-      bo =
-        element && element.businessObject && element.businessObject.processRef;
-    }
-    const extensionElements = bo && bo.extensionElements;
-    if (!extensionElements || !extensionElements.values) return [];
-    const processConfigurations = extensionElements.values.find(
-      (e) => e.$type === "camunda:ProcessConfiguration"
-    );
-    const models = [];
-    if (
-      !processConfigurations &&
-      !processConfigurations.processConfigurationParameters
-    )
-      return [];
-    processConfigurations.processConfigurationParameters.forEach((config) => {
-      if (config.metaModel) {
-        models.push({
-          model: config.metaModel,
-          type: "metaModel",
-          modelFullName: config.model,
-        });
-      } else if (config.metaJsonModel) {
-        models.push({ model: config.metaJsonModel, type: "metaJsonModel" });
+    const model = getProperty("camunda:metaModel");
+    const jsonModel = getProperty("camunda:metaJsonModel");
+    if (model) {
+      return [{ model, type: "metaModel" }];
+    } else if (jsonModel) {
+      return [{ model: jsonModel, type: "metaJsonModel" }];
+    } else {
+      let bo =
+        element && element.businessObject && element.businessObject.$parent;
+      if (element.type === "bpmn:Process") {
+        bo = element.businessObject;
       }
-    });
-    return models;
+      if (
+        (element && element.businessObject && element.businessObject.$type) ===
+        "bpmn:Participant"
+      ) {
+        bo =
+          element &&
+          element.businessObject &&
+          element.businessObject.processRef;
+      }
+      const extensionElements = bo && bo.extensionElements;
+      if (!extensionElements || !extensionElements.values) return [];
+      const processConfigurations = extensionElements.values.find(
+        (e) => e.$type === "camunda:ProcessConfiguration"
+      );
+      const models = [];
+      if (
+        !processConfigurations &&
+        !processConfigurations.processConfigurationParameters
+      )
+        return [];
+      processConfigurations.processConfigurationParameters.forEach((config) => {
+        if (config.metaModel) {
+          models.push({
+            model: config.metaModel,
+            type: "metaModel",
+            modelFullName: config.model,
+          });
+        } else if (config.metaJsonModel) {
+          models.push({ model: config.metaJsonModel, type: "metaJsonModel" });
+        }
+      });
+      return models;
+    }
   }
 
   const setProperty = (name, value) => {
