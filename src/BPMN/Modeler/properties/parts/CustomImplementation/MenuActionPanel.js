@@ -11,8 +11,10 @@ import {
   getSubMenus,
   getViews,
   getTemplates,
+  getItems,
 } from "../../../../../services/api";
 import { translate, getBool } from "../../../../../utils";
+import { USER_TASKS_TYPES } from "../../../constants";
 
 const useStyles = makeStyles({
   main: {
@@ -172,6 +174,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     updateValue(name, value, optionLabel);
     if (!value) {
       setProperty(`${name}Label`, undefined);
+      return;
     }
     setProperty(`${name}Label`, label);
   };
@@ -404,7 +407,6 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
   useEffect(() => {
     const createUserAction = getProperty("createUserAction");
     const actionEmailTitle = getProperty("actionEmailTitle");
-    const userFieldPath = getProperty("userFieldPath");
     const emailNotification = getProperty("emailNotification");
     const newMenu = getProperty("newMenu");
     const menuName = getProperty("menuName");
@@ -424,7 +426,12 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     const userFormView = getSelectValue("userFormView");
     const userGridView = getSelectValue("userGridView");
     const template = getSelectValue("template");
-
+    let userFieldPath;
+    if (USER_TASKS_TYPES.includes(element.type)) {
+      userFieldPath = getSelectValue("userFieldPath");
+    } else {
+      userFieldPath = getProperty("userFieldPath");
+    }
     setCreateUserAction(getBool(createUserAction));
     setEmailNotification(getBool(emailNotification));
     setNewMenu(getBool(newMenu));
@@ -447,7 +454,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     setUserFormView(userFormView);
     setUserGridView(userGridView);
     setTemplate(template);
-  }, [getProperty, getSelectValue]);
+  }, [getProperty, getSelectValue, element]);
 
   useEffect(() => {
     const metaModel = getSelectValue("metaModel");
@@ -614,7 +621,29 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
             }}
           />
         )}
-        {(createUserAction || emailNotification || newUserMenu) && (
+        {(createUserAction || emailNotification || newUserMenu) &&
+        USER_TASKS_TYPES.includes(element.type) ? (
+          <React.Fragment>
+            <label className={classes.label}>
+              {translate("User field path")}
+            </label>
+            <Select
+              className={classes.select}
+              update={(value) => {
+                setUserFieldPath(value);
+                updateMenuValue(
+                  "userFieldPath",
+                  value,
+                  value["label"] || value["title"]
+                );
+              }}
+              name="userFieldPath"
+              value={userFieldPath}
+              isLabel={false}
+              fetchMethod={(data) => getItems(undefined, model, data)}
+            />
+          </React.Fragment>
+        ) : (
           <TextField
             element={element}
             canRemove={true}
@@ -1013,7 +1042,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                   className={classnames(classes.select, classes.lastChild)}
                   update={(value, label) => {
                     setUserFormView(value);
-                    updateMenuValue("userFormView", value, label)
+                    updateMenuValue("userFormView", value, label);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria)}
                   name="userFormView"

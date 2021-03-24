@@ -220,7 +220,7 @@ export default function SelectComponent({
         getOptionSelected={(option, val) => {
           if (!val) return;
           let optionName = "";
-          if (name === "itemName") {
+          if (name === "itemName" || name === "userFieldPath") {
             optionName = option["label"]
               ? "label"
               : option["title"]
@@ -294,7 +294,7 @@ export default function SelectComponent({
         )}
         getOptionLabel={(option) => {
           let optionName = "";
-          if (name === "itemName") {
+          if (name === "itemName" || name === "userFieldPath") {
             optionName =
               option["label"] || option["title"]
                 ? `${option["label"] || option["title"]} (${option["name"]})`
