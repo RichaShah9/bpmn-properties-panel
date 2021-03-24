@@ -32,7 +32,7 @@ export const tabProperty = [
   {
     type: "bpmn:EndEvent",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:ExclusiveGateway",
@@ -87,17 +87,17 @@ export const tabProperty = [
   {
     type: "bpmn:EndEvent",
     subType: "bpmn:SignalEventDefinition",
-    tabs: variableTabs,
+    tabs: variableTabsWithViewAttributes,
   },
   {
     type: "bpmn:StartEvent",
     subType: "bpmn:IntermediateCatchEvent",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:IntermediateCatchEvent",
     subType: "bpmn:MessageEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:IntermediateThrowEvent",
@@ -113,22 +113,22 @@ export const tabProperty = [
   {
     type: "bpmn:IntermediateCatchEvent",
     subType: "bpmn:TimerEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:EndEvent",
     subType: "bpmn:MessageEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:IntermediateCatchEvent",
     subType: "bpmn:ConditionalEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:IntermediateCatchEvent",
     subType: "bpmn:LinkEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:IntermediateThrowEvent",
@@ -143,12 +143,12 @@ export const tabProperty = [
   {
     type: "bpmn:EndEvent",
     subType: "bpmn:CompensateEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:IntermediateCatchEvent",
     subType: "bpmn:SignalEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:IntermediateThrowEvent",
@@ -158,12 +158,12 @@ export const tabProperty = [
   {
     type: "bpmn:EndEvent",
     subType: "bpmn:ErrorEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:EndEvent",
     subType: "bpmn:TerminateEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:Participant",
@@ -253,7 +253,7 @@ export const tabProperty = [
   {
     type: "bpmn:EndEvent",
     subType: "bpmn:EscalationEventDefinition",
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:TextAnnotation",
