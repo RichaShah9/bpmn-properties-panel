@@ -4,6 +4,19 @@ const variableTabs = ["general", "variables", "menu-action-tab", "listeners"];
 const commonTabsWithoutMenuAction = ["general", "listeners"];
 const defaultTabsWithoutMenuAction = ["general"];
 const variableTabsWithoutMenuAction = ["general", "variables", "listeners"];
+const withViewAttributes = [
+  "general",
+  "listeners",
+  "view-attributes",
+  "menu-action-tab",
+];
+const variableTabsWithViewAttributes = [
+  "general",
+  "variables",
+  "view-attributes",
+  "menu-action-tab",
+  "listeners",
+];
 
 export const tabProperty = [
   {
@@ -45,11 +58,6 @@ export const tabProperty = [
     type: "bpmn:ParallelGateway",
     subType: null || undefined,
     tabs: commonTabsWithoutMenuAction,
-  },
-  {
-    type: "bpmn:SubProcess",
-    subType: null || undefined,
-    tabs: commonTabs,
   },
   {
     type: "bpmn:AdHocSubProcess",
@@ -190,32 +198,27 @@ export const tabProperty = [
   {
     type: "bpmn:Task",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:SendTask",
     subType: null || undefined,
-    tabs: commonTabs,
-  },
-  {
-    type: "bpmn:RecieveTask",
-    subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:UserTask",
     subType: null || undefined,
-    tabs: ["general", "listeners", "view-attributes", "menu-action-tab"],
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:ManualTask",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:BusinessRuleTask",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:ServiceTask",
@@ -225,22 +228,22 @@ export const tabProperty = [
   {
     type: "bpmn:ReceiveTask",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:ScriptTask",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: commonTabsWithoutMenuAction,
   },
   {
     type: "bpmn:CallActivity",
     subType: null || undefined,
-    tabs: variableTabs,
+    tabs: variableTabsWithViewAttributes,
   },
   {
     type: "bpmn:SubProcess",
     subType: null || undefined,
-    tabs: commonTabs,
+    tabs: withViewAttributes,
   },
   {
     type: "bpmn:IntermediateThrowEvent",
