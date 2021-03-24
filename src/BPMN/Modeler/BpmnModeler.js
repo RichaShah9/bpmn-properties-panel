@@ -328,6 +328,8 @@ function BpmnModelerComponent() {
       const metaJsonModel = getProperty(element, "metaJsonModel");
       if (!metaJsonModel && !metaModel) {
         setMenuAction(true);
+      } else {
+        setMenuAction(false);
       }
     } else {
       setMenuAction(false);
