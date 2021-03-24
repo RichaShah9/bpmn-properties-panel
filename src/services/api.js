@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 
 import Service from "./Service";
-import { getItemsByType } from "../utils";
+import { getItemsByType, getFormName } from "../utils";
 
 export async function getModels(data = {}, metaModalType) {
   const models =
@@ -206,13 +206,65 @@ export async function getProcessConfigModel(data = {}) {
     return model;
   }
 }
+
+export async function getFormViews(formViewNames) {
+  const res = await Service.search("com.axelor.meta.db.MetaView", {
+    data: {
+      _domain:
+        "self.type = :type and self.extension IS NULL and self.name in :names",
+      _domainContext: {
+        type: "form",
+        names: formViewNames,
+      },
+    },
+    fields: ["name", "title", "model"],
+  });
+  const { data = [] } = res || {};
+  return data;
+}
+
 export async function getMetaModels(criteria = {}) {
   const res = await Service.search("com.axelor.meta.db.MetaModel", {
     data: criteria,
   });
   if (res && res.status === -1) return [];
   const { data = [] } = res || {};
-  return data;
+  const defaultForms = data.reduce(async (arrs, item) => {
+    const accumulator = await arrs.then();
+    const formName = getFormName(item.name);
+    if (formName === "fetchAPI") {
+      const views = await getViews({
+        ...item,
+        type: "metaModel",
+      });
+      if (views && views[0]) {
+        accumulator.push(views[0].name);
+      }
+    } else if (formName) {
+      accumulator.push(formName);
+    }
+    return Promise.resolve(accumulator);
+  }, Promise.resolve([]));
+  const forms = await defaultForms
+  const formData = await getFormViews(forms);
+  const result = data.reduce(async (arrs, item) => {
+    const accumulator = await arrs.then();
+    const formName = getFormName(item.name);
+    if (formName === "fetchAPI") {
+      const views = await getViews({
+        ...item,
+        type: "metaModel",
+      });
+      if (views && views[0]) {
+        accumulator.push({ ...item, title: views[0].title });
+      }
+    } else if (formName) {
+      const form = formData.find((f) => f.name === formName);
+      accumulator.push({ ...item, title: form && form.title });
+    }
+    return Promise.resolve(accumulator);
+  }, Promise.resolve([]));
+  return result;
 }
 
 export async function getCustomModels(criteria = {}) {
@@ -361,7 +413,17 @@ export async function getButtons(models = []) {
   if (models.length > 0) {
     for (let i = 0; i < models.length; i++) {
       const { type, model, modelFullName } = models[i];
-      const formName = model.match(/[A-Z][a-z]+/g).join("-");
+      let formName = getFormName(model);
+      if (formName === "fetchAPI") {
+        const views = await getViews({
+          name: model,
+          type,
+          fullName: modelFullName,
+        });
+        if (views && views[0]) {
+          formName = views[0].name;
+        }
+      }
       if (formName) {
         if (type === "metaModel") {
           modelNames.push(modelFullName);
@@ -369,9 +431,7 @@ export async function getButtons(models = []) {
         const res = await Service.view({
           data: {
             name:
-              type === "metaModel"
-                ? `${formName.toLowerCase()}-form`
-                : `custom-model-${model}-form`,
+              type === "metaModel" ? formName : `custom-model-${model}-form`,
             type: "form",
           },
           model,
