@@ -115,13 +115,17 @@ export default function AutoComplete(props) {
 
   const checkValue = (option) => {
     return (option && option.type) === "metaJsonModel"
-      ? `${
+      ? `${option && option.title} (${
           option && option[optionLabelKey] ? option[optionLabelKey] : ""
-        } (Custom model)` || ""
+        }) (Custom model)` || ""
       : name === "fieldName"
       ? `${translate(option && option["title"] ? option["title"] : "")} (${
           option && option[optionLabelKey]
         })`
+      : (option && option.type) === "metaModel"
+      ? `${option && option.title} (${
+          option && option[optionLabelKey] ? option[optionLabelKey] : ""
+        })` || ""
       : option
       ? option[optionLabelKey]
         ? option[optionLabelKey]
