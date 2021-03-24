@@ -316,6 +316,7 @@ export default function ViewAttributePanel({
             "title",
             "domain",
             "itemLabel",
+            "active",
           ].includes(val.name)
       );
       if (camundaProperty) {
@@ -658,11 +659,22 @@ export default function ViewAttributePanel({
                                                   item &&
                                                   item.itemName &&
                                                   item.itemName.type &&
-                                                  (item.itemName.type.includes(
+                                                  item.itemName.type.includes(
                                                     "panel"
-                                                  ) ||
-                                                    item.itemName.type ===
-                                                      "button")
+                                                  )
+                                                    ? [
+                                                        "readonly",
+                                                        "readonlyIf",
+                                                        "hidden",
+                                                        "hideIf",
+                                                        "title",
+                                                        "active",
+                                                      ]
+                                                    : item &&
+                                                      item.itemName &&
+                                                      item.itemName.type &&
+                                                      item.itemName.type ===
+                                                        "button"
                                                     ? [
                                                         "readonly",
                                                         "readonlyIf",
@@ -717,6 +729,7 @@ export default function ViewAttributePanel({
                                                   "readonly",
                                                   "hidden",
                                                   "required",
+                                                  "active",
                                                 ].includes(
                                                   item.attributeName
                                                 ) && (
