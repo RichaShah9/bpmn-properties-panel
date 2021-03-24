@@ -655,7 +655,6 @@ export default function CallActivityProps({
                   setWkfModel({ id: value.wkfModel.id, name: value.name });
                 }}
                 name="wkfModel"
-                optionLabel="name"
                 isLabel={true}
                 fetchMethod={() => getBPMNModels()}
               />

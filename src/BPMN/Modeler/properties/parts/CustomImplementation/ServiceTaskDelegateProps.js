@@ -349,7 +349,6 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   }
                 }}
                 name="bamlModel"
-                optionLabel="name"
                 isLabel={false}
                 value={bamlModel}
                 fetchMethod={() => getBamlModels()}
@@ -877,7 +876,6 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
                   setDmnModel(value);
                 }}
                 name="dmnModel"
-                optionLabel="name"
                 isLabel={true}
                 fetchMethod={() => getDMNModels()}
               />

@@ -117,9 +117,10 @@ export default function UserTaskProps({ element, index, label }) {
 
   function getProcessConfig() {
     const model = getProperty("camunda:metaModel");
+    const modelFullName = getProperty("camunda:metaModelModelName");
     const jsonModel = getProperty("camunda:metaJsonModel");
     if (model) {
-      return [{ model, type: "metaModel" }];
+      return [{ model, type: "metaModel", modelFullName }];
     } else if (jsonModel) {
       return [{ model: jsonModel, type: "metaJsonModel" }];
     } else {

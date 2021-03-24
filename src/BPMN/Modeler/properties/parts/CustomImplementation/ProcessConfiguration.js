@@ -290,11 +290,18 @@ export default function ProcessConfiguration({
     setProcessConfigList(cloneProcessConfigList);
   };
 
-  const updateValue = async (value, name, label, index, optionLabel) => {
+  const updateValue = async (
+    value,
+    name,
+    label,
+    index,
+    optionLabel,
+    valueLabel
+  ) => {
     const cloneProcessConfigList = [...(processConfigList || [])];
     cloneProcessConfigList[index] = {
       ...(cloneProcessConfigList[index] || {}),
-      [name]: (value && value[label]) || value,
+      [name]: (value && value[optionLabel]) || value,
     };
     let model = "";
     if (name === "metaModel" || name === "metaJsonModel") {
@@ -315,6 +322,11 @@ export default function ProcessConfiguration({
       updateElement(model, "model", index);
     }
     updateElement((value && value[optionLabel]) || value, name, index);
+    updateElement(
+      `${valueLabel} (${value[optionLabel]})`,
+      `${name}Label`,
+      index
+    );
     setProcessConfigList(cloneProcessConfigList);
   };
 
@@ -394,36 +406,36 @@ export default function ProcessConfiguration({
                       <TableCell className={classes.tableHead} align="center">
                         <Select
                           fetchMethod={() => getMetaModels()}
-                          update={(value) => {
+                          update={(value, label) => {
                             updateValue(
                               value,
                               "metaModel",
                               undefined,
                               key,
-                              "name"
+                              "name",
+                              label
                             );
                           }}
                           name="metaModel"
-                          value={processConfig.metaModel || ""}
-                          optionLabel="name"
+                          value={processConfig.metaModelLabel}
                           isLabel={false}
                         />
                       </TableCell>
                       <TableCell className={classes.tableHead} align="center">
                         <Select
                           fetchMethod={() => getCustomModels()}
-                          update={(value) =>
+                          update={(value, label) =>
                             updateValue(
                               value,
                               "metaJsonModel",
                               undefined,
                               key,
-                              "name"
+                              "name",
+                              label
                             )
                           }
                           name="metaJsonModel"
-                          value={processConfig.metaJsonModel || ""}
-                          optionLabel="name"
+                          value={processConfig.metaJsonModelLabel}
                           isLabel={false}
                         />
                       </TableCell>

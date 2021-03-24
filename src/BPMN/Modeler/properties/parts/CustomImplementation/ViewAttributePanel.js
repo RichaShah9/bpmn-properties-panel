@@ -165,13 +165,14 @@ export default function ViewAttributePanel({
     setRow({ ...cloneRow });
   };
 
-  const updateValue = (value, name, label, index) => {
+  const updateValue = (value, name, label, index, valueLabel) => {
     const cloneRow = { ...row };
     let values = cloneRow.values;
     values[index] = {
       ...(values[index] || {}),
       [name]: (value && value[label]) || value,
       [`${name}Error`]: false,
+      [`${name}Label`]: valueLabel,
     };
     setRow({ ...cloneRow });
   };
@@ -204,7 +205,7 @@ export default function ViewAttributePanel({
     setRow({ ...cloneRow });
   };
 
-  const handleItems = (value, name, label, index, itemIndex) => {
+  const handleItems = (value, name, label, index, itemIndex, valueLabel) => {
     const cloneRow = { ...row };
     let values = cloneRow.values;
     let items = cloneRow.values[index].items;
@@ -212,6 +213,7 @@ export default function ViewAttributePanel({
       ...(items[itemIndex] || []),
       [name]: value && (value[label] || value),
       [`${name}Error`]: false,
+      [`${name}Label`]: valueLabel,
     };
     if (name === "attributeName") {
       items[itemIndex].attributeValue = null;
@@ -411,8 +413,16 @@ export default function ViewAttributePanel({
           if (ele.name === "modelType") {
             value.model = { ...value.model, type: ele.value };
           }
+          if (ele.name === "modelLabel") {
+            value.modelLabel = ele.value;
+            value.model = { ...value.model, title: ele.value };
+          }
           if (ele.name === "view") {
-            value.view = ele.value;
+            value.view = { name: ele.value };
+          }
+          if (ele.name === "viewLabel") {
+            value.viewLabel = ele.value;
+            value.view = { ...value.view, title: ele.value };
           }
           if (ele.name === "roles") {
             if (!ele.value) return;
@@ -432,6 +442,7 @@ export default function ViewAttributePanel({
                 name: item[0] && item[0].value,
                 label: item[2] && item[2].value,
               },
+              itemNameLabel: item[2] && item[2].value,
               attributeName: item[1] && item[1].name,
               attributeValue: item[1] && item[1].value,
             });
@@ -472,12 +483,13 @@ export default function ViewAttributePanel({
                                   fetchMethod={() =>
                                     getModels(getProcessConfig())
                                   }
-                                  update={(value) =>
+                                  update={(value, label) =>
                                     updateValue(
                                       value,
                                       "model",
                                       undefined,
-                                      index
+                                      index,
+                                      label
                                     )
                                   }
                                   name="model"
@@ -487,7 +499,6 @@ export default function ViewAttributePanel({
                                     }
                                   }}
                                   value={val.model}
-                                  optionLabel="name"
                                   isLabel={false}
                                 />
                               </Grid>
@@ -506,14 +517,15 @@ export default function ViewAttributePanel({
                                       fetchMethod={(data) =>
                                         getViews(val.model, data)
                                       }
-                                      update={(value) =>
+                                      update={(value, label) => {
                                         updateValue(
                                           value,
                                           "view",
-                                          "name",
-                                          index
-                                        )
-                                      }
+                                          undefined,
+                                          index,
+                                          label
+                                        );
+                                      }}
                                       name="view"
                                       value={val.view || ""}
                                       isLabel={false}
@@ -541,7 +553,6 @@ export default function ViewAttributePanel({
                                   value={val.roles || []}
                                   multiple={true}
                                   isLabel={false}
-                                  optionLabel="name"
                                 />
                               </div>
                             )}
@@ -621,18 +632,19 @@ export default function ViewAttributePanel({
                                                 isLabel={false}
                                                 fetchMethod={(data) =>
                                                   getItems(
-                                                    val.view,
+                                                    val.view && val.view.name,
                                                     val.model,
                                                     data
                                                   )
                                                 }
-                                                update={(value) =>
+                                                update={(value, label) =>
                                                   handleItems(
                                                     value,
                                                     "itemName",
                                                     undefined,
                                                     index,
-                                                    key
+                                                    key,
+                                                    label
                                                   )
                                                 }
                                                 validate={(values) => {
@@ -645,7 +657,6 @@ export default function ViewAttributePanel({
                                                 }}
                                                 name="itemName"
                                                 value={item.itemName}
-                                                optionLabel="name"
                                                 label="Item"
                                               />
                                             </TableCell>

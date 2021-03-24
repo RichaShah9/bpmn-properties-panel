@@ -914,7 +914,14 @@ function BpmnModelerComponent() {
     if (values && values.length > 0) {
       values &&
         values.forEach((value) => {
-          const { model, view, roles = [], items = [] } = value;
+          const {
+            model,
+            modelLabel,
+            view,
+            viewLabel,
+            roles = [],
+            items = [],
+          } = value;
           const checkItems = items.filter(
             (item) => item && (!item.itemName || !item.attributeName)
           );
@@ -931,10 +938,12 @@ function BpmnModelerComponent() {
                 : model.fullName || model.model
             );
             addProperty("modelName", model.name);
+            addProperty("modelLabel", modelLabel);
             addProperty("modelType", model.type);
           }
           if (view) {
-            addProperty("view", view);
+            addProperty("view", view.name);
+            addProperty("viewLabel", viewLabel);
           }
           if (roles.length > 0) {
             const roleNames = roles.map((role) => role.name);
@@ -942,7 +951,12 @@ function BpmnModelerComponent() {
           }
           if (items.length > 0) {
             items.forEach((item) => {
-              let { itemName, attributeName, attributeValue } = item;
+              let {
+                itemName,
+                itemNameLabel,
+                attributeName,
+                attributeValue,
+              } = item;
               if (!itemName || !attributeName) {
                 isValid = false;
                 alertOpen();
@@ -959,18 +973,9 @@ function BpmnModelerComponent() {
                   return;
                 }
               }
-              let itemLabel = itemName["label"]
-                ? itemName["label"]
-                : itemName["title"]
-                ? itemName["title"]
-                : itemName["name"]
-                ? itemName["name"]
-                : typeof itemName === "object"
-                ? ""
-                : itemName;
               addProperty("item", itemName.name);
               addProperty(attributeName, attributeValue);
-              addProperty("itemLabel", itemLabel);
+              addProperty("itemLabel", itemNameLabel);
             });
           }
         });

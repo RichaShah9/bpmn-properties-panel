@@ -61,7 +61,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SelectComponent({
   name,
-  optionLabel = "name",
+  optionLabel = "title",
+  optionLabelSecondary = "name",
   multiple = false,
   index,
   value,
@@ -223,9 +224,7 @@ export default function SelectComponent({
               ? "title"
               : "name";
           }
-          return name === "view"
-            ? option[optionName] === val
-            : option[optionName] === val[optionName];
+          return option[optionName] === val[optionName];
         }}
         onChange={(e, value) => {
           let values = value;
@@ -284,33 +283,27 @@ export default function SelectComponent({
         getOptionLabel={(option) => {
           let optionName = "";
           if (name === "itemName") {
-            optionName = option["label"]
-              ? option["label"]
-              : option["title"]
-              ? option["title"]
-              : option["name"]
-              ? option["name"]
-              : typeof option === "object"
-              ? ""
-              : option;
-          } else if (
-            name === "menuParent" ||
-            name === "positionMenu" ||
-            name === "userParentMenu" ||
-            name === "userPositionMenu" ||
-            name === "buttons"
-          ) {
-            optionName = `${option["title"]} (${option["name"]})`;
+            optionName =
+              option["label"] || option["title"]
+                ? `${option["label"] || option["title"]} (${option["name"]})`
+                : typeof option === "object"
+                ? `(${option["name"]})`
+                : option;
           } else if (name === "dmnModel") {
-            optionName = `${option[optionLabel]} (${option["decisionId"]})`;
+            optionName = `${option["name"]} (${option["decisionId"]})`;
           } else {
-            optionName = option[optionLabel]
-              ? option[optionLabel]
-              : option["title"]
-              ? option["title"]
-              : typeof option === "object"
-              ? ""
-              : option;
+            optionName =
+              option[optionLabel] && option[optionLabelSecondary]
+                ? `${option[optionLabel]} (${option[optionLabelSecondary]})`
+                : option[optionLabel]
+                ? option[optionLabel]
+                : option[optionLabelSecondary]
+                ? `${option[optionLabelSecondary]}`
+                : option["title"]
+                ? option["title"]
+                : typeof option === "object"
+                ? ""
+                : option;
           }
           return isTranslated ? translate(optionName) : optionName;
         }}

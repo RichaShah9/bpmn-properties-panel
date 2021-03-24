@@ -577,13 +577,12 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
             <label className={classes.label}>{translate("Template")}</label>
             <Select
               className={classes.select}
-              update={(value) => {
+              update={(value, label) => {
                 setTemplate(value);
-                updateValue("template", value, "name");
+                updateMenuValue("template", value, label, "name");
               }}
               name="template"
               value={template}
-              optionLabel="name"
               isLabel={false}
               fetchMethod={() => getTemplates(getProcessConfig())}
             />
@@ -729,7 +728,6 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               }}
               name="menuParent"
               value={menuParent}
-              optionLabel="title"
               isLabel={false}
               fetchMethod={() => getParentMenus()}
               validate={(values) => {
@@ -747,7 +745,6 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               }}
               name="position"
               value={position}
-              optionLabel="name"
               isLabel={false}
               options={[
                 { name: "After", id: "after" },
@@ -767,7 +764,6 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               fetchMethod={() => getSubMenus(menuParent)}
               name="positionMenu"
               value={positionMenu}
-              optionLabel="title"
               isLabel={false}
             />
             <Checkbox
@@ -795,14 +791,13 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                 </label>
                 <Select
                   className={classes.select}
-                  update={(value) => {
+                  update={(value, label) => {
                     setGridView(value);
-                    updateValue("gridView", value);
+                    updateMenuValue("gridView", value, label);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria, "grid")}
                   name="gridView"
                   value={gridView}
-                  optionLabel="name"
                   label={translate("Grid view")}
                   isLabel={false}
                 />
@@ -811,14 +806,13 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                 </label>
                 <Select
                   className={classes.select}
-                  update={(value) => {
+                  update={(value, label) => {
                     setFormView(value);
-                    updateValue("formView", value);
+                    updateMenuValue("formView", value, label);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria)}
                   name="formView"
                   value={formView}
-                  optionLabel="name"
                   label={translate("Form view")}
                   isLabel={false}
                 />
@@ -938,7 +932,6 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               fetchMethod={() => getParentMenus()}
               name="userParentMenu"
               value={userParentMenu}
-              optionLabel="title"
               label="User Parent menu"
               isLabel={false}
               validate={(values) => {
@@ -952,10 +945,9 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               className={classes.select}
               name="userMenuPosition"
               value={userMenuPosition}
-              optionLabel="name"
-              update={(value) => {
+              update={(value, label) => {
                 setUserMenuPosition(value);
-                updateValue("userMenuPosition", value);
+                updateMenuValue("userMenuPosition", value, label);
               }}
               isLabel={false}
               options={[
@@ -976,7 +968,6 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               options={userSubMenuOptions}
               name="userPositionMenu"
               value={userPositionMenu}
-              optionLabel="title"
               isLabel={false}
             />
             <Checkbox
@@ -1004,14 +995,14 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                 </label>
                 <Select
                   className={classes.select}
-                  update={(value) => {
+                  update={(value, label) => {
                     setUserGridView(value);
-                    updateValue("userGridView", value);
+                    updateMenuValue("userGridView", value, label);
+                    // updateValue("userGridView", value);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria, "grid")}
                   name="userGridView"
                   value={userGridView}
-                  optionLabel="name"
                   label={translate("Grid view")}
                   isLabel={false}
                 />
@@ -1020,14 +1011,13 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                 </label>
                 <Select
                   className={classnames(classes.select, classes.lastChild)}
-                  update={(value) => {
+                  update={(value, label) => {
                     setUserFormView(value);
-                    updateValue("userFormView", value);
+                    updateMenuValue("userFormView", value, label)
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria)}
                   name="userFormView"
                   value={userFormView}
-                  optionLabel="name"
                   label={translate("Form view")}
                   isLabel={false}
                 />

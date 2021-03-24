@@ -230,24 +230,38 @@ export default function ScriptProps({ element, index, label }) {
     getFormViews(value, name);
   };
 
+  const updateSelectValue = (name, value, label, optionLabel = "name") => {
+    updateValue(name, value, optionLabel);
+    if (!value) {
+      setProperty(`${name}Label`, undefined);
+    }
+    setProperty(`${name}Label`, label);
+  };
+
   const addModels = (values) => {
-    const displayOnModels = [];
+    const displayOnModels = [],
+      modelLabels = [];
+
     if (Array.isArray(values)) {
       if (values && values.length === 0) {
         setProperty("displayOnModels", undefined);
+        setProperty(`displayOnModelLabels`, undefined);
         return;
       }
       values &&
         values.forEach((value) => {
           if (!value) {
             setProperty("displayOnModels", undefined);
+            setProperty(`displayOnModelLabels`, undefined);
             return;
           }
           displayOnModels.push(value.name);
+          modelLabels.push(value.title);
         });
     }
     if (displayOnModels.length > 0) {
       setProperty("displayOnModels", displayOnModels.toString());
+      setProperty(`displayOnModelLabels`, modelLabels.toString());
     }
   };
 
@@ -273,8 +287,9 @@ export default function ScriptProps({ element, index, label }) {
     const metaModelName = getSelectValue("metaModelModelName");
     const metaJsonModel = getSelectValue("metaJsonModel");
     const displayOnModels = getProperty("displayOnModels");
+    const displayOnModelLabels = getProperty("displayOnModelLabels");
     const displayStatus = getProperty("displayStatus");
-    const defaultForm = getProperty("defaultForm");
+    const defaultForm = getSelectValue("defaultForm");
     setDisplayStatus(getBool(displayStatus));
     setMetaModel(metaModel);
     setMetaJsonModel(metaJsonModel);
@@ -287,10 +302,12 @@ export default function ScriptProps({ element, index, label }) {
     const models = [];
     if (displayOnModels) {
       const names = displayOnModels.split(",");
+      const labels = displayOnModelLabels && displayOnModelLabels.split(",");
       names &&
-        names.forEach((name) => {
+        names.forEach((name, i) => {
           models.push({
             name: name,
+            title: labels && labels[i],
           });
         });
       setModels(models);
@@ -488,13 +505,12 @@ export default function ScriptProps({ element, index, label }) {
               <Select
                 className={classes.select}
                 fetchMethod={() => getMetaModels(getProcessConfig("metaModel"))}
-                update={(value) => {
+                update={(value, label) => {
                   setMetaModel(value);
-                  updateValue("metaModel", value);
+                  updateSelectValue("metaModel", value, label);
                 }}
                 name="metaModel"
                 value={metaModel}
-                optionLabel="name"
                 isLabel={false}
                 placeholder={translate("Model")}
               />
@@ -505,13 +521,12 @@ export default function ScriptProps({ element, index, label }) {
                 fetchMethod={() =>
                   getCustomModels(getProcessConfig("metaJsonModel"))
                 }
-                update={(value) => {
+                update={(value, label) => {
                   setMetaJsonModel(value);
-                  updateValue("metaJsonModel", value);
+                  updateSelectValue("metaJsonModel", value, label);
                 }}
                 name="metaJsonModel"
                 value={metaJsonModel}
-                optionLabel="name"
                 placeholder={translate("Custom model")}
                 isLabel={false}
               />
@@ -523,14 +538,17 @@ export default function ScriptProps({ element, index, label }) {
                 </label>
                 <Select
                   className={classes.select}
-                  update={(value) => {
+                  update={(value, label) => {
                     setDefaultForm(value);
                     setProperty("defaultForm", value ? value.name : undefined);
+                    if (!value) {
+                      setProperty(`defaultFormLabel`, undefined);
+                    }
+                    setProperty(`defaultFormLabel`, label);
                   }}
                   options={formViews}
                   name="defaultForm"
                   value={defaultForm}
-                  optionLabel="name"
                   label={translate("Default form")}
                   isLabel={false}
                 />
@@ -578,7 +596,6 @@ export default function ScriptProps({ element, index, label }) {
                       value={models || []}
                       multiple={true}
                       isLabel={false}
-                      optionLabel="name"
                     />
                   </div>
                 </React.Fragment>
