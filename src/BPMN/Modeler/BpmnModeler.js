@@ -43,7 +43,7 @@ import {
 } from "./extra.js";
 import { getTranslations, getInfo } from "../../services/api";
 import { getBool } from "../../utils";
-import { TASKCOLOR } from "./constants";
+import { TASKCOLOR, USER_TASKS_TYPES } from "./constants";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
@@ -232,11 +232,16 @@ function BpmnModelerComponent() {
     message: null,
   });
   const [selectedElement, setSelectedElement] = useState(null);
+  const [isMenuActionDisable, setMenuAction] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [tabs, setTabs] = useState([]);
   const [width, setWidth] = useState(drawerWidth);
   const [height, setHeight] = useState("100%");
   const classes = useStyles();
+
+  const handleMenuActionTab = (val) => {
+    setMenuAction(val);
+  };
 
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
@@ -307,69 +312,89 @@ function BpmnModelerComponent() {
     }
   };
 
-  const openBpmnDiagram = React.useCallback(function openBpmnDiagram(
-    xml,
-    isDeploy,
-    id,
-    oldWkf
-  ) {
-    bpmnModeler.importXML(xml, (error) => {
-      if (error) {
-        handleSnackbarClick("error", "Error! Can't import XML");
-        return;
+  const getProperty = (element, name) => {
+    let propertyName = `camunda:${name}`;
+    let bo = getBusinessObject(element);
+    if ((element && element.type) === "bpmn:Participant") {
+      bo = getBusinessObject(bo.processRef);
+    }
+    return (bo.$attrs && bo.$attrs[propertyName]) || "";
+  };
+
+  const checkMenuActionTab = React.useCallback((element) => {
+    if (!element) return;
+    if (USER_TASKS_TYPES.includes(element.type)) {
+      const metaModel = getProperty(element, "metaModel");
+      const metaJsonModel = getProperty(element, "metaJsonModel");
+      if (!metaJsonModel && !metaModel) {
+        setMenuAction(true);
       }
-      if (isDeploy) {
-        addOldNodes(oldWkf, setWkf, bpmnModeler);
-      }
-      let canvas = bpmnModeler.get("canvas");
-      canvas.zoom("fit-viewport");
-      let element = canvas.getRootElement();
-      setSelectedElement(element);
-      let tabs = getTabs(bpmnModeler, element);
-      setTabs(tabs);
-      let elementRegistry = bpmnModeler.get("elementRegistry");
-      let modeling = bpmnModeler.get("modeling");
-      let nodes = elementRegistry && elementRegistry._elements;
-      if (!nodes) return;
-      Object.entries(nodes).forEach(([key, value]) => {
-        if (!value) return;
-        const { element } = value;
-        if (!element) return;
-        if (modeling && element.businessObject && element.businessObject.di) {
-          modeling.setColor(element, {
-            stroke: element.businessObject.di.stroke,
-            fill: element.businessObject.di.fill,
-          });
+    } else {
+      setMenuAction(false);
+    }
+  }, []);
+
+  const openBpmnDiagram = React.useCallback(
+    function openBpmnDiagram(xml, isDeploy, id, oldWkf) {
+      bpmnModeler.importXML(xml, (error) => {
+        if (error) {
+          handleSnackbarClick("error", "Error! Can't import XML");
+          return;
         }
-        if (["Shape", "Root"].includes(element.constructor.name)) {
-          let bo = element.businessObject;
-          if (!bo) return;
-          if (isConditionalSource(element)) return;
-          if (bo.$attrs["camunda:displayStatus"] === "false") return;
-          if (
-            bo.$attrs &&
-            (bo.$attrs["camunda:displayStatus"] === undefined ||
-              bo.$attrs["camunda:displayStatus"] === null)
-          ) {
-            bo.$attrs["camunda:displayStatus"] = true;
+        if (isDeploy) {
+          addOldNodes(oldWkf, setWkf, bpmnModeler);
+        }
+        let canvas = bpmnModeler.get("canvas");
+        canvas.zoom("fit-viewport");
+        let element = canvas.getRootElement();
+        setSelectedElement(element);
+        checkMenuActionTab(element);
+        let tabs = getTabs(bpmnModeler, element);
+        setTabs(tabs);
+        let elementRegistry = bpmnModeler.get("elementRegistry");
+        let modeling = bpmnModeler.get("modeling");
+        let nodes = elementRegistry && elementRegistry._elements;
+        if (!nodes) return;
+        Object.entries(nodes).forEach(([key, value]) => {
+          if (!value) return;
+          const { element } = value;
+          if (!element) return;
+          if (modeling && element.businessObject && element.businessObject.di) {
+            modeling.setColor(element, {
+              stroke: element.businessObject.di.stroke,
+              fill: element.businessObject.di.fill,
+            });
           }
-        }
-        let bo = getBusinessObject(element);
-        const elementType = element && element.type;
-        let modelProperty =
-          elementType === "bpmn:TextAnnotation"
-            ? "text"
-            : elementType === "bpmn:Group"
-            ? "categoryValue"
-            : "name";
-        let nameKey =
-          element.businessObject.$attrs["camunda:key"] ||
-          bo.get([modelProperty]);
-        updateTranslations(element, bpmnModeler, nameKey);
+          if (["Shape", "Root"].includes(element.constructor.name)) {
+            let bo = element.businessObject;
+            if (!bo) return;
+            if (isConditionalSource(element)) return;
+            if (bo.$attrs["camunda:displayStatus"] === "false") return;
+            if (
+              bo.$attrs &&
+              (bo.$attrs["camunda:displayStatus"] === undefined ||
+                bo.$attrs["camunda:displayStatus"] === null)
+            ) {
+              bo.$attrs["camunda:displayStatus"] = true;
+            }
+          }
+          let bo = getBusinessObject(element);
+          const elementType = element && element.type;
+          let modelProperty =
+            elementType === "bpmn:TextAnnotation"
+              ? "text"
+              : elementType === "bpmn:Group"
+              ? "categoryValue"
+              : "name";
+          let nameKey =
+            element.businessObject.$attrs["camunda:key"] ||
+            bo.get([modelProperty]);
+          updateTranslations(element, bpmnModeler, nameKey);
+        });
       });
-    });
-  },
-  []);
+    },
+    [checkMenuActionTab]
+  );
 
   const newBpmnDiagram = React.useCallback(
     function newBpmnDiagram(rec, isDeploy, id, oldWkf) {
@@ -1060,6 +1085,7 @@ function BpmnModelerComponent() {
             handleAdd={handleAdd}
             onSave={onSave}
             openSnackbar={openSnackbar.open}
+            handleMenuActionTab={handleMenuActionTab}
           />
         ) : (
           group.entries.length > 0 && (
@@ -1080,21 +1106,25 @@ function BpmnModelerComponent() {
     );
   };
 
-  const updateTabs = (event) => {
-    let { element } = event;
-    if (element && element.type === "label") {
-      const elementRegistry = bpmnModeler.get("elementRegistry");
-      const newElement = elementRegistry.get(
-        element.businessObject && element.businessObject.id
-      );
-      element = newElement;
-    }
-    let tabs = getTabs(bpmnModeler, element);
-    setTabValue(0);
-    setTabs(tabs);
-    setSelectedElement(element);
-    setDrawerOpen(true);
-  };
+  const updateTabs = React.useCallback(
+    (event) => {
+      let { element } = event;
+      if (element && element.type === "label") {
+        const elementRegistry = bpmnModeler.get("elementRegistry");
+        const newElement = elementRegistry.get(
+          element.businessObject && element.businessObject.id
+        );
+        element = newElement;
+      }
+      let tabs = getTabs(bpmnModeler, element);
+      setTabValue(0);
+      setTabs(tabs);
+      setSelectedElement(element);
+      checkMenuActionTab(element);
+      setDrawerOpen(true);
+    },
+    [checkMenuActionTab]
+  );
 
   useEffect(() => {
     let modeler = {
@@ -1155,7 +1185,7 @@ function BpmnModelerComponent() {
         element: rootElement,
       });
     });
-  }, []);
+  }, [updateTabs]);
 
   return (
     <div id="container">
@@ -1228,7 +1258,14 @@ function BpmnModelerComponent() {
               </Typography>
               <Tabs value={tabValue} onChange={handleChange}>
                 {tabs.map((tab, tabIndex) => (
-                  <Tab label={tab.label} key={tabIndex} data-tab={tab.id} />
+                  <Tab
+                    disabled={
+                      tab.id === "menu-action-tab" && isMenuActionDisable
+                    }
+                    label={tab.label}
+                    key={tabIndex}
+                    data-tab={tab.id}
+                  />
                 ))}
               </Tabs>
               <React.Fragment>

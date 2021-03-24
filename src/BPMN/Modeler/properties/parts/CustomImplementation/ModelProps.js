@@ -13,6 +13,7 @@ import {
   getViews,
 } from "../../../../../services/api";
 import { translate, getBool } from "../../../../../utils";
+import { USER_TASKS_TYPES } from "../../../constants";
 
 const CONDITIONAL_SOURCES = [
   "bpmn:EventBasedGateway",
@@ -83,7 +84,12 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ModelProps({ element, index, label }) {
+export default function ModelProps({
+  element,
+  index,
+  label,
+  handleMenuActionTab,
+}) {
   const [isVisible, setVisible] = useState(false);
   const [metaModel, setMetaModel] = useState(null);
   const [metaJsonModel, setMetaJsonModel] = useState(null);
@@ -92,6 +98,8 @@ export default function ModelProps({ element, index, label }) {
   const [defaultForm, setDefaultForm] = useState(null);
   const [formViews, setFormViews] = useState(null);
   const [isDefaultFormVisible, setDefaultFormVisible] = useState(false);
+  const [isModelsDisable, setModelsDisable] = useState(false);
+
   const classes = useStyles();
 
   const subType =
@@ -195,6 +203,21 @@ export default function ModelProps({ element, index, label }) {
     [element]
   );
 
+  const checkMenuActionTab = (value, name) => {
+    if (!element) return;
+    if (USER_TASKS_TYPES.includes(element.type)) {
+      if (value) {
+        handleMenuActionTab(false);
+        return;
+      }
+      if (getProperty(name)) {
+        handleMenuActionTab(false);
+        return;
+      }
+      handleMenuActionTab(true);
+    }
+  };
+
   const getFormViews = React.useCallback(
     async (value, name) => {
       if (!value) return;
@@ -290,6 +313,23 @@ export default function ModelProps({ element, index, label }) {
   }, [element]);
 
   useEffect(() => {
+    if (!element) return;
+    const createUserAction = getProperty("createUserAction");
+    const emailNotification = getProperty("emailNotification");
+    const newMenu = getProperty("newMenu");
+    const newUserMenu = getProperty("newUserMenu");
+    if (
+      USER_TASKS_TYPES.includes(element.type) &&
+      (getBool(createUserAction) ||
+        getBool(emailNotification) ||
+        getBool(newMenu) ||
+        getBool(newUserMenu))
+    ) {
+      setModelsDisable(true);
+    }
+  }, [getProperty, element]);
+
+  useEffect(() => {
     const metaModel = getSelectValue("metaModel");
     const metaModelName = getSelectValue("metaModelModelName");
     const metaJsonModel = getSelectValue("metaJsonModel");
@@ -346,10 +386,12 @@ export default function ModelProps({ element, index, label }) {
                 update={(value, label) => {
                   setMetaModel(value);
                   updateSelectValue("metaModel", value, label);
+                  checkMenuActionTab(value, "metaJsonModel");
                 }}
                 name="metaModel"
                 value={metaModel}
                 isLabel={false}
+                disabled={isModelsDisable}
                 placeholder={translate("Model")}
               />
             )}
@@ -362,7 +404,9 @@ export default function ModelProps({ element, index, label }) {
                 update={(value, label) => {
                   setMetaJsonModel(value);
                   updateSelectValue("metaJsonModel", value, label);
+                  checkMenuActionTab(value, "metaModel");
                 }}
+                disabled={isModelsDisable}
                 name="metaJsonModel"
                 value={metaJsonModel}
                 placeholder={translate("Custom model")}

@@ -11,3 +11,10 @@ export const TASKCOLOR = {
   "bpmn:SubProcess": "#E4EBF8",
   "bpmn:SequenceFlow": "#8095B3",
 };
+
+export const USER_TASKS_TYPES = [
+  "bpmn:UserTask",
+  "bpmn:ReceiveTask",
+  "bpmn:CallActivity",
+  "bpmn:SubProcess",
+];
