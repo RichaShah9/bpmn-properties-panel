@@ -1,6 +1,6 @@
 const commonTabs = ["general", "menu-action-tab", "listeners"];
 const defaultTabs = ["general", "menu-action-tab"];
-const variableTabs = ["general", "variables", "menu-action-tab", "listeners"];
+// const variableTabs = ["general", "variables", "menu-action-tab", "listeners"];
 const commonTabsWithoutMenuAction = ["general", "listeners"];
 const defaultTabsWithoutMenuAction = ["general"];
 const variableTabsWithoutMenuAction = ["general", "variables", "listeners"];
