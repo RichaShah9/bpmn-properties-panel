@@ -322,11 +322,15 @@ export default function ProcessConfiguration({
       updateElement(model, "model", index);
     }
     updateElement((value && value[optionLabel]) || value, name, index);
-    updateElement(
-      `${valueLabel} (${value[optionLabel]})`,
-      `${name}Label`,
-      index
-    );
+    if (value) {
+      updateElement(
+        `${valueLabel} (${value[optionLabel]})`,
+        `${name}Label`,
+        index
+      );
+    } else {
+      updateElement(undefined, `${name}Label`, index);
+    }
     setProcessConfigList(cloneProcessConfigList);
   };
 
