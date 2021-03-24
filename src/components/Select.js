@@ -57,6 +57,14 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 5,
     color: "#CC3333",
   },
+  disabled: {
+    fontSize: 14,
+    color: "rgba(0, 0, 0, 0.38)",
+    padding: "3px 0 3px !important",
+  },
+  disableAutoComplete: {
+    background: "#dddddd",
+  },
 }));
 
 export default function SelectComponent({
@@ -79,6 +87,7 @@ export default function SelectComponent({
   isTranslated = true,
   placeholder,
   validate,
+  disabled = false,
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
@@ -174,9 +183,9 @@ export default function SelectComponent({
     <React.Fragment>
       <AutoComplete
         classes={{
-          inputFocused: classes.input,
-          clearIndicator: classes.input,
-          popupIndicator: classes.input,
+          inputFocused: disabled ? classes.disabled : classes.input,
+          clearIndicator: disabled ? classes.disabled : classes.input,
+          popupIndicator: disabled ? classes.disabled : classes.input,
           endAdornment: classes.endAdornment,
         }}
         size="small"
@@ -201,11 +210,13 @@ export default function SelectComponent({
         className={classnames(
           classes.autoComplete,
           className,
-          isError && classes.error
+          isError && classes.error,
+          disabled && classes.disableAutoComplete
         )}
         options={options}
         multiple={multiple}
         value={value}
+        disabled={disabled}
         getOptionSelected={(option, val) => {
           if (!val) return;
           let optionName = "";
@@ -244,6 +255,7 @@ export default function SelectComponent({
         renderInput={(params) => (
           <TextField
             error={error}
+            disabled={disabled}
             helperText={error ? "Required" : ""}
             className={isError ? classes.error : ""}
             fullWidth
