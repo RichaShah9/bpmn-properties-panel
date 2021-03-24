@@ -1253,7 +1253,7 @@ function ExpressionBuilder({
           </div>
         </Paper>
         <Button
-          title="Ok"
+          title="OK"
           className={classes.save}
           onClick={() => generateExpression(combinator, parentType)}
         />
