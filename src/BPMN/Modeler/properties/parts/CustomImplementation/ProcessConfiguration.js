@@ -187,7 +187,9 @@ export default function ProcessConfiguration({
     let entries = getProcessConfigList();
     if (!entries) return;
     const entry = entries[optionIndex];
-    entry[label] = value;
+    if (entry) {
+      entry[label] = value;
+    }
   };
 
   const newElement = function (
@@ -546,6 +548,15 @@ export default function ProcessConfiguration({
                                       }
                                     : undefined
                                 );
+                                if (
+                                  !selectedProcessConfig &&
+                                  processConfig.isStartModel
+                                ) {
+                                  setSelectedProcessConfig({
+                                    processConfig,
+                                    key,
+                                  });
+                                }
                               }}
                             />
                           )}
@@ -669,6 +680,15 @@ export default function ProcessConfiguration({
                 "fieldName",
                 JSON.stringify(val)
               );
+              if (selectedProcessConfig) {
+                setSelectedProcessConfig({
+                  processConfig: {
+                    ...selectedProcessConfig,
+                    processPathLabel: val && JSON.stringify(val),
+                  },
+                  key: selectedProcessConfig.key,
+                });
+              }
             }}
             value={
               selectedProcessConfig &&
