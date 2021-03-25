@@ -166,6 +166,68 @@ export async function getItems(formName, model, criteria) {
   }
 }
 
+const getResultedFields = (res) => {
+  const responseData = res && res.data;
+  const allFields = responseData && responseData.fields;
+  const jsonFields = Object.values(
+    (responseData && responseData.jsonFields) || [{}]
+  );
+  let result = [];
+  result = allFields || [];
+
+  jsonFields &&
+    jsonFields.forEach((jsonField) => {
+      const nestedFields = Object.values(jsonField || {}) || [];
+      result = [...result, ...nestedFields];
+    });
+  return result;
+};
+
+export async function getMetaModal(data) {
+  const res = await Service.search("com.axelor.meta.db.MetaModel", { data });
+  return res && res.data && res.data[0];
+}
+
+export async function getSubMetaField(model, relationJsonModel) {
+  if (model === "com.axelor.meta.db.MetaJsonRecord" && relationJsonModel) {
+    const res = await Service.get(
+      `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${relationJsonModel}`
+    );
+    let result = getResultedFields(res) || [];
+    return result;
+  } else {
+    const data = {
+      criteria: [{ fieldName: "fullName", operator: "=", value: model }],
+    };
+    const metaModel = await getMetaModal(data);
+    if (!metaModel) return [];
+    const fields = metaModel && metaModel.metaFields.map((f) => f.name);
+    const res = await Service.fields({
+      fields,
+      model: metaModel.fullName,
+    });
+    let resultFields = res && res.data && res.data.fields;
+    return resultFields;
+  }
+}
+
+export async function getMetaFields(model) {
+  if (!model) return [];
+  if (model.type === "metaModel") {
+    if (!model.fullName) return [];
+    let res = await Service.get(`ws/meta/fields/${model.fullName}`);
+    let result = getResultedFields(res);
+    return result;
+  } else {
+    if (!model.name) return [];
+    const res = await Service.get(
+      `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${model.name}`
+    );
+    let result = getResultedFields(res);
+    return result || [];
+  }
+}
+
 export async function getRoles(criteria) {
   const res = await Service.search(`com.axelor.auth.db.Role`, {
     fields: ["name"],
@@ -245,7 +307,7 @@ export async function getMetaModels(criteria = {}) {
     }
     return Promise.resolve(accumulator);
   }, Promise.resolve([]));
-  const forms = await defaultForms
+  const forms = await defaultForms;
   const formData = await getFormViews(forms);
   const result = data.reduce(async (arrs, item) => {
     const accumulator = await arrs.then();

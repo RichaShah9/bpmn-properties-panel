@@ -7,6 +7,7 @@ import Description from "./Description";
 import ExtensionElementTable from "./ExtensionElementTable";
 import Table from "./Table";
 import ColorPicker from "./ColorPicker";
+import FieldEditor from "./FieldEditor";
 
 export {
   Textbox,
@@ -17,5 +18,6 @@ export {
   Description,
   ExtensionElementTable,
   Table,
-  ColorPicker
+  ColorPicker,
+  FieldEditor
 };

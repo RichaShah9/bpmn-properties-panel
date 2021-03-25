@@ -104,6 +104,11 @@ export class Service {
     const url = "/ws/meta/view";
     return this.post(url, data);
   }
+
+  fields(data) {
+    const url = "/ws/meta/view/fields";
+    return this.post(url, data);
+  }
 }
 
 export default new Service();

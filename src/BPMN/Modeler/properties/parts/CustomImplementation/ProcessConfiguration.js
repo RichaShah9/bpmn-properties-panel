@@ -13,19 +13,24 @@ import {
   Grid,
   IconButton,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
 } from "@material-ui/core";
-import { Add, Close, ReportProblem } from "@material-ui/icons";
+import { Add, Edit, Close, ReportProblem } from "@material-ui/icons";
 
 import Select from "../../../../../components/Select";
-import { TextField, Checkbox } from "../../components";
+import { TextField, Checkbox, FieldEditor } from "../../components";
 import {
   getMetaModels,
   getCustomModels,
   getProcessConfigModel,
+  getMetaFields,
 } from "../../../../../services/api";
 import { translate, getBool } from "../../../../../utils";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   groupLabel: {
     fontWeight: "bolder",
     display: "inline-block",
@@ -89,11 +94,32 @@ const useStyles = makeStyles({
   icon: {
     marginRight: 10,
   },
-});
+  newIcon: {
+    color: "#58B423",
+    cursor: "pointer",
+  },
+  save: {
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
+  },
+  clearClassName: {
+    paddingLeft: 10,
+  },
+}));
 
 const initialProcessConfigList = {
   isStartModel: "false",
   metaJsonModel: null,
+  metaJsonName: null,
+  metaModelName: null,
+  metaModelFullName: null,
   metaModel: null,
   model: null,
   pathCondition: null,
@@ -135,6 +161,9 @@ export default function ProcessConfiguration({
 }) {
   const classes = useStyles();
   const [processConfigList, setProcessConfigList] = useState(null);
+  const [openProcessPathDialog, setOpenProcessDialog] = useState(false);
+  const [startModel, setStartModel] = useState(null);
+  const [selectedProcessConfig, setSelectedProcessConfig] = useState(null);
 
   const getProcessConfigList = React.useCallback(
     (field = "processConfigurationParameters") => {
@@ -303,6 +332,10 @@ export default function ProcessConfiguration({
       ...(cloneProcessConfigList[index] || {}),
       [name]: (value && value[optionLabel]) || value,
     };
+    if (name === "metaModel") {
+      cloneProcessConfigList[index][`${name}FullName`] =
+        value && value.fullName;
+    }
     let model = "";
     if (name === "metaModel" || name === "metaJsonModel") {
       model = await getProcessConfigModel({
@@ -323,11 +356,18 @@ export default function ProcessConfiguration({
     }
     updateElement((value && value[optionLabel]) || value, name, index);
     if (value) {
-      updateElement(
-        `${valueLabel} (${value[optionLabel]})`,
-        `${name}Label`,
-        index
-      );
+      if (name === "processPath") {
+        updateElement(valueLabel, `${name}Label`, index);
+      } else {
+        updateElement(
+          `${valueLabel || ""} (${value[optionLabel]})`,
+          `${name}Label`,
+          index
+        );
+      }
+      if (name === "metaModel") {
+        updateElement(value.fullName, `${name}FullName`, index);
+      }
     } else {
       updateElement(undefined, `${name}Label`, index);
     }
@@ -337,6 +377,17 @@ export default function ProcessConfiguration({
   useEffect(() => {
     const processConfigList = getProcessConfigs();
     setProcessConfigList(processConfigList);
+    let selectedProcessConfig;
+    for (let i = 0; i < processConfigList.length; i++) {
+      if (getBool(processConfigList[i].isStartModel)) {
+        selectedProcessConfig = {
+          processConfig: processConfigList[i],
+          key: i,
+        };
+        setSelectedProcessConfig(selectedProcessConfig);
+        return;
+      }
+    }
   }, [getProcessConfigs, element]);
 
   return (
@@ -444,30 +495,61 @@ export default function ProcessConfiguration({
                         />
                       </TableCell>
                       <TableCell className={classes.tableHead} align="center">
-                        <TextField
-                          element={element}
-                          canRemove={true}
-                          rootClass={classes.textFieldRoot}
-                          labelClass={classes.textFieldLabel}
-                          entry={{
-                            id: `processPath_${key}`,
-                            name: "processPath",
-                            modelProperty: "processPath",
-                            get: function () {
-                              return {
-                                processPath: processConfig.processPath,
-                              };
-                            },
-                            set: function (e, value) {
-                              updateValue(
-                                value.processPath,
-                                "processPath",
-                                undefined,
-                                key
-                              );
-                            },
-                          }}
-                        />
+                        <div style={{ display: "flex" }}>
+                          <TextField
+                            element={element}
+                            canRemove={true}
+                            rootClass={classes.textFieldRoot}
+                            labelClass={classes.textFieldLabel}
+                            clearClassName={classes.clearClassName}
+                            entry={{
+                              id: `processPath_${key}`,
+                              name: "processPath",
+                              modelProperty: "processPath",
+                              get: function () {
+                                return {
+                                  processPath: processConfig.processPath,
+                                };
+                              },
+                              set: function (e, value) {
+                                if (
+                                  value.processPath !==
+                                  processConfig.processPath
+                                ) {
+                                  updateValue(
+                                    value.processPath,
+                                    "processPath",
+                                    undefined,
+                                    key
+                                  );
+                                }
+                              },
+                            }}
+                          />
+                          {getBool(processConfig.isStartModel) && (
+                            <Edit
+                              className={classes.newIcon}
+                              onClick={() => {
+                                setOpenProcessDialog(true);
+                                setStartModel(
+                                  processConfig.metaModel
+                                    ? {
+                                        fullName:
+                                          processConfig.metaModelFullName,
+                                        name: processConfig.metaModel,
+                                        type: "metaModel",
+                                      }
+                                    : processConfig.metaJsonModel
+                                    ? {
+                                        name: processConfig.metaJsonModel,
+                                        type: "metaJsonModel",
+                                      }
+                                    : undefined
+                                );
+                              }}
+                            />
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className={classes.tableHead} align="center">
                         <TextField
@@ -565,6 +647,52 @@ export default function ProcessConfiguration({
           )}
         </Grid>
       </div>
+      <Dialog
+        open={openProcessPathDialog}
+        onClose={() => setOpenProcessDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        classes={{
+          paper: classes.dialog,
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">Process Path</DialogTitle>
+        <DialogContent>
+          <FieldEditor
+            getMetaFields={() => getMetaFields(startModel)}
+            onChange={(val) => {
+              updateValue(
+                val,
+                "processPath",
+                undefined,
+                selectedProcessConfig && selectedProcessConfig.key,
+                "fieldName",
+                JSON.stringify(val)
+              );
+            }}
+            value={
+              selectedProcessConfig &&
+              selectedProcessConfig.processConfig &&
+              selectedProcessConfig.processConfig.processPathLabel
+                ? JSON.parse(
+                    selectedProcessConfig.processConfig.processPathLabel
+                  )
+                : {}
+            }
+            isParent={true}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setOpenProcessDialog(false)}
+            color="primary"
+            autoFocus
+            className={classes.save}
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

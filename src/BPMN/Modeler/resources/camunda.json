@@ -1110,6 +1110,16 @@
           "name": "model",
           "isAttr": true,
           "type": "String"
+        },
+        {
+          "name": "metaModelFullName",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "processPathLabel",
+          "isAttr": true,
+          "type": "String"
         }
       ]
     }
