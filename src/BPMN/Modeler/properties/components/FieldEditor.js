@@ -20,7 +20,7 @@ export default function FieldEditor({
   classNames,
   isParent = false,
 }) {
-  const { fieldName = "", allField = [] } = value || {};
+  const { fieldName = "" } = value || {};
   const [fields, setFields] = useState([]);
   const classes = useStyles();
   const values = fieldName && fieldName.split(".");
@@ -46,45 +46,9 @@ export default function FieldEditor({
       : ""
       ? `${isRelationalField ? "." : ""}${initValue}${value ? value.name : ""}`
       : "";
-    let allFieldValues, fieldType, field;
-    if (value && allField.findIndex((f) => f.name === value.name) <= -1) {
-      let fieldNames = (newFieldName || "").split(".") || [];
-      let allFields =
-        (allField && allField.filter((f) => fieldNames.includes(f.name))) || [];
-      allFieldValues = [...allFields, value];
-    } else {
-      let fields = [...(allField || [])];
-      let fieldNames = (fieldName || "").split(".");
-      let initValues = `${initValue}${"."}${startValue}`.split(".");
-      fieldNames &&
-        fieldNames.length > 0 &&
-        fieldNames.forEach((fName) => {
-          let index = fields.findIndex((f) => f.name === fName);
-          if (index > -1 && !(initValues || []).includes(fName)) {
-            fields.splice(index, 1);
-          }
-        });
-      allFieldValues = fields;
-      if (fields && fields.length === 1) {
-        const val = fields[0];
-        fieldType = (val && val.type) || "";
-        field = val;
-      } else {
-        const val = fields[fields.length - 1];
-        fieldType = (val && val.type) || "";
-        field = val;
-      }
-    }
-    onChange({
-      fieldName: newFieldName,
-      fieldType: fieldType || (value && value.type),
-      field: field || value,
-      allField: allFieldValues,
-    });
+    onChange(newFieldName === "" ? undefined : newFieldName);
   }
-  const transformValue =
-    (fields && fields.find((f) => f.name === startValue)) ||
-    (allField && allField.find((f) => f.name === startValue));
+  const transformValue = fields && fields.find((f) => f.name === startValue);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -124,7 +88,6 @@ export default function FieldEditor({
           initValue={`${initValue}${startValue}${"."}`}
           value={{
             fieldName: values.slice(1).join("."),
-            allField,
           }}
           onChange={onChange}
           classNames={classNames}

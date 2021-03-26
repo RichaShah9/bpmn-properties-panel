@@ -340,6 +340,10 @@ export default function ProcessConfiguration({
     }
     let model = "";
     if (name === "metaModel" || name === "metaJsonModel") {
+      cloneProcessConfigList[index][`${name}Label`] = value
+        ? `${valueLabel || ""} (${value[optionLabel]})`
+        : undefined;
+
       model = await getProcessConfigModel({
         ...cloneProcessConfigList[index],
         [name === "metaModel" ? "metaJsonModel" : "metaModel"]: null,
@@ -358,15 +362,11 @@ export default function ProcessConfiguration({
     }
     updateElement((value && value[optionLabel]) || value, name, index);
     if (value) {
-      if (name === "processPath") {
-        updateElement(valueLabel, `${name}Label`, index);
-      } else {
-        updateElement(
-          `${valueLabel || ""} (${value[optionLabel]})`,
-          `${name}Label`,
-          index
-        );
-      }
+      updateElement(
+        `${valueLabel || ""} (${value[optionLabel]})`,
+        `${name}Label`,
+        index
+      );
       if (name === "metaModel") {
         updateElement(value.fullName, `${name}FullName`, index);
       }
@@ -519,7 +519,9 @@ export default function ProcessConfiguration({
                                   processConfig.processPath
                                 ) {
                                   updateValue(
-                                    value.processPath,
+                                    value.processPath === ""
+                                      ? undefined
+                                      : value.processPath,
                                     "processPath",
                                     undefined,
                                     key
@@ -677,28 +679,15 @@ export default function ProcessConfiguration({
                 "processPath",
                 undefined,
                 selectedProcessConfig && selectedProcessConfig.key,
-                "fieldName",
-                JSON.stringify(val)
+                "fieldName"
               );
-              if (selectedProcessConfig) {
-                setSelectedProcessConfig({
-                  processConfig: {
-                    ...selectedProcessConfig,
-                    processPathLabel: val && JSON.stringify(val),
-                  },
-                  key: selectedProcessConfig.key,
-                });
-              }
             }}
-            value={
-              selectedProcessConfig &&
-              selectedProcessConfig.processConfig &&
-              selectedProcessConfig.processConfig.processPathLabel
-                ? JSON.parse(
-                    selectedProcessConfig.processConfig.processPathLabel
-                  )
-                : {}
-            }
+            value={{
+              fieldName:
+                selectedProcessConfig &&
+                selectedProcessConfig.processConfig &&
+                selectedProcessConfig.processConfig.processPath,
+            }}
             isParent={true}
           />
         </DialogContent>
