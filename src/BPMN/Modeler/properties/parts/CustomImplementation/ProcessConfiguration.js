@@ -112,6 +112,11 @@ const useStyles = makeStyles((theme) => ({
   clearClassName: {
     paddingLeft: 10,
   },
+  dialogContent: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 }));
 
 const initialProcessConfigList = {
@@ -361,7 +366,7 @@ export default function ProcessConfiguration({
       updateElement(model, "model", index);
     }
     updateElement((value && value[optionLabel]) || value, name, index);
-    if (value) {
+    if (value && (name === "metaModel" || name === "metaJsonModel")) {
       updateElement(
         `${valueLabel || ""} (${value[optionLabel]})`,
         `${name}Label`,
@@ -376,17 +381,30 @@ export default function ProcessConfiguration({
     setProcessConfigList(cloneProcessConfigList);
   };
 
+  const updateStartModel = (processConfig) => {
+    setStartModel(
+      processConfig && processConfig.metaModel
+        ? {
+            fullName: processConfig.metaModelFullName,
+            name: processConfig.metaModel,
+            type: "metaModel",
+          }
+        : processConfig && processConfig.metaJsonModel
+        ? {
+            name: processConfig.metaJsonModel,
+            type: "metaJsonModel",
+          }
+        : undefined
+    );
+  };
+
   useEffect(() => {
     const processConfigList = getProcessConfigs();
     setProcessConfigList(processConfigList);
-    let selectedProcessConfig;
     for (let i = 0; i < processConfigList.length; i++) {
-      if (getBool(processConfigList[i].isStartModel)) {
-        selectedProcessConfig = {
-          processConfig: processConfigList[i],
-          key: i,
-        };
-        setSelectedProcessConfig(selectedProcessConfig);
+      const processConfig = processConfigList[i];
+      if (getBool(processConfig.isStartModel)) {
+        updateStartModel(processConfig);
         return;
       }
     }
@@ -530,34 +548,22 @@ export default function ProcessConfiguration({
                               },
                             }}
                           />
-                          {getBool(processConfig.isStartModel) && (
+                          {!getBool(processConfig.isStartModel) && (
                             <Edit
                               className={classes.newIcon}
                               onClick={() => {
                                 setOpenProcessDialog(true);
-                                setStartModel(
-                                  processConfig.metaModel
-                                    ? {
-                                        fullName:
-                                          processConfig.metaModelFullName,
-                                        name: processConfig.metaModel,
-                                        type: "metaModel",
-                                      }
-                                    : processConfig.metaJsonModel
-                                    ? {
-                                        name: processConfig.metaJsonModel,
-                                        type: "metaJsonModel",
-                                      }
-                                    : undefined
-                                );
-                                if (
-                                  !selectedProcessConfig &&
-                                  processConfig.isStartModel
-                                ) {
-                                  setSelectedProcessConfig({
-                                    processConfig,
-                                    key,
-                                  });
+                                setSelectedProcessConfig({
+                                  processConfig,
+                                  key,
+                                });
+                                if (!startModel) {
+                                  const model =
+                                    processConfigList &&
+                                    processConfigList.find((f) =>
+                                      getBool(f.isStartModel)
+                                    );
+                                  updateStartModel(model);
                                 }
                               }}
                             />
@@ -610,6 +616,9 @@ export default function ProcessConfiguration({
                                 undefined,
                                 key
                               );
+                              if (!values.isStartModel) {
+                                updateStartModel(processConfig);
+                              }
                             },
                           }}
                           element={element}
@@ -662,7 +671,9 @@ export default function ProcessConfiguration({
       </div>
       <Dialog
         open={openProcessPathDialog}
-        onClose={() => setOpenProcessDialog(false)}
+        onClose={() => {
+          setOpenProcessDialog(false);
+        }}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         classes={{
@@ -670,7 +681,7 @@ export default function ProcessConfiguration({
         }}
       >
         <DialogTitle id="alert-dialog-title">Process Path</DialogTitle>
-        <DialogContent>
+        <DialogContent className={classes.dialogContent}>
           <FieldEditor
             getMetaFields={() => getMetaFields(startModel)}
             onChange={(val) => {
@@ -678,9 +689,17 @@ export default function ProcessConfiguration({
                 val,
                 "processPath",
                 undefined,
-                selectedProcessConfig && selectedProcessConfig.key,
-                "fieldName"
+                selectedProcessConfig && selectedProcessConfig.key
               );
+              setSelectedProcessConfig({
+                processConfig: {
+                  ...((selectedProcessConfig &&
+                    selectedProcessConfig.processConfig) ||
+                    {}),
+                  processPath: val,
+                },
+                key: selectedProcessConfig && selectedProcessConfig.key,
+              });
             }}
             value={{
               fieldName:
