@@ -355,15 +355,23 @@ export async function getParentMenus() {
   if (data.status === -1) {
     return [];
   }
-  return _.uniqBy(data || [], "name") || [];
+  const output =
+    data &&
+    Object.values(
+      data.reduce((a, item) => {
+        a[item.name] = item;
+        return a;
+      }, {})
+    );
+  return output;
 }
 
 export async function getSubMenus(parentMenu) {
-  if (!parentMenu || !parentMenu.id) return;
+  if (!parentMenu || !parentMenu.name) return;
   const res = await Service.search("com.axelor.meta.db.MetaMenu", {
     data: {
       criteria: [
-        { fieldName: "parent.id", operator: "=", value: parentMenu.id },
+        { fieldName: "parent.name", operator: "=", value: parentMenu.name },
       ],
       operator: "and",
     },
