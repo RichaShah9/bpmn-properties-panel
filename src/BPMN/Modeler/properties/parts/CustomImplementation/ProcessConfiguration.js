@@ -671,9 +671,7 @@ export default function ProcessConfiguration({
       </div>
       <Dialog
         open={openProcessPathDialog}
-        onClose={() => {
-          setOpenProcessDialog(false);
-        }}
+        onClose={() => setOpenProcessDialog(false)}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         classes={{
@@ -685,12 +683,6 @@ export default function ProcessConfiguration({
           <FieldEditor
             getMetaFields={() => getMetaFields(startModel)}
             onChange={(val) => {
-              updateValue(
-                val,
-                "processPath",
-                undefined,
-                selectedProcessConfig && selectedProcessConfig.key
-              );
               setSelectedProcessConfig({
                 processConfig: {
                   ...((selectedProcessConfig &&
@@ -712,7 +704,18 @@ export default function ProcessConfiguration({
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setOpenProcessDialog(false)}
+            onClick={() => {
+              setOpenProcessDialog(false);
+              if (selectedProcessConfig) {
+                updateValue(
+                  selectedProcessConfig.processConfig &&
+                    selectedProcessConfig.processConfig.processPath,
+                  "processPath",
+                  undefined,
+                  selectedProcessConfig.key
+                );
+              }
+            }}
             color="primary"
             autoFocus
             className={classes.save}
