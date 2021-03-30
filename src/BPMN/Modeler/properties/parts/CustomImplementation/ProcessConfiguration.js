@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
+  DialogContentText,
 } from "@material-ui/core";
 import { Add, Edit, Close, ReportProblem } from "@material-ui/icons";
 
@@ -28,6 +29,7 @@ import {
   getProcessConfigModel,
   getMetaFields,
 } from "../../../../../services/api";
+import ExpressionBuilder from "../../../expression-builder";
 import { translate, getBool } from "../../../../../utils";
 
 const useStyles = makeStyles((theme) => ({
@@ -169,6 +171,12 @@ export default function ProcessConfiguration({
   const [openProcessPathDialog, setOpenProcessDialog] = useState(false);
   const [startModel, setStartModel] = useState(null);
   const [selectedProcessConfig, setSelectedProcessConfig] = useState(null);
+  const [openExpressionAlert, setExpressionAlert] = useState(false);
+  const [openExpressionBuilder, setExpressionBuilder] = useState(false);
+
+  const openExpressionAlertDialog = () => {
+    setExpressionAlert(true);
+  };
 
   const getProcessConfigList = React.useCallback(
     (field = "processConfigurationParameters") => {
@@ -339,16 +347,21 @@ export default function ProcessConfiguration({
       ...(cloneProcessConfigList[index] || {}),
       [name]: (value && value[optionLabel]) || value,
     };
-    if (name === "metaModel") {
-      cloneProcessConfigList[index][`${name}FullName`] =
-        value && value.fullName;
+    if (name === "pathCondition") {
+      cloneProcessConfigList[index] = {
+        ...(cloneProcessConfigList[index] || {}),
+        pathConditionValue: valueLabel,
+      };
+      updateElement(valueLabel, "pathConditionValue", index);
     }
     let model = "";
     if (name === "metaModel" || name === "metaJsonModel") {
-      cloneProcessConfigList[index][`${name}Label`] = value
-        ? `${valueLabel || ""} (${value[optionLabel]})`
-        : undefined;
-
+      if (name === "metaModel") {
+        cloneProcessConfigList[index][`${name}FullName`] =
+          value && value.fullName;
+      } else {
+        cloneProcessConfigList[index][`${name}FullName`] = undefined;
+      }
       model = await getProcessConfigModel({
         ...cloneProcessConfigList[index],
         [name === "metaModel" ? "metaJsonModel" : "metaModel"]: null,
@@ -364,20 +377,31 @@ export default function ProcessConfiguration({
         index
       );
       updateElement(model, "model", index);
-    }
-    updateElement((value && value[optionLabel]) || value, name, index);
-    if (value && (name === "metaModel" || name === "metaJsonModel")) {
+
+      cloneProcessConfigList[index][`${name}Label`] = value
+        ? `${valueLabel || ""} ${value ? `(${value[optionLabel]})` : ""}`
+        : undefined;
       updateElement(
-        `${valueLabel || ""} (${value[optionLabel]})`,
+        `${valueLabel || ""} ${value ? `(${value[optionLabel]})` : ""}`,
         `${name}Label`,
         index
       );
-      if (name === "metaModel") {
-        updateElement(value.fullName, `${name}FullName`, index);
+      cloneProcessConfigList[index][
+        name === "metaModel" ? "metaJsonModelLabel" : "metaModelLabel"
+      ] = undefined;
+      updateElement(
+        undefined,
+        name === "metaModel" ? "metaJsonModelLabel" : "metaModelLabel",
+        index
+      );
+
+      if (name === "metaModel" && value) {
+        updateElement(value.fullName, "metaModelFullName", index);
+      } else {
+        updateElement(undefined, `metaModelFullName`, index);
       }
-    } else {
-      updateElement(undefined, `${name}Label`, index);
     }
+    updateElement((value && value[optionLabel]) || value, name, index);
     setProcessConfigList(cloneProcessConfigList);
   };
 
@@ -492,7 +516,7 @@ export default function ProcessConfiguration({
                             );
                           }}
                           name="metaModel"
-                          value={processConfig.metaModelLabel}
+                          value={processConfig.metaModelLabel || ""}
                           isLabel={false}
                         />
                       </TableCell>
@@ -510,7 +534,7 @@ export default function ProcessConfiguration({
                             )
                           }
                           name="metaJsonModel"
-                          value={processConfig.metaJsonModelLabel}
+                          value={processConfig.metaJsonModelLabel || ""}
                           isLabel={false}
                         />
                       </TableCell>
@@ -571,30 +595,60 @@ export default function ProcessConfiguration({
                         </div>
                       </TableCell>
                       <TableCell className={classes.tableHead} align="center">
-                        <TextField
-                          element={element}
-                          canRemove={true}
-                          rootClass={classes.textFieldRoot}
-                          labelClass={classes.textFieldLabel}
-                          entry={{
-                            id: `pathCondition_${key}`,
-                            name: "pathCondition",
-                            modelProperty: "pathCondition",
-                            get: function () {
-                              return {
-                                pathCondition: processConfig.pathCondition,
-                              };
-                            },
-                            set: function (e, values) {
-                              updateValue(
-                                values.pathCondition,
-                                "pathCondition",
-                                undefined,
-                                key
-                              );
-                            },
-                          }}
-                        />
+                        <div style={{ display: "flex" }}>
+                          <TextField
+                            element={element}
+                            canRemove={true}
+                            rootClass={classes.textFieldRoot}
+                            labelClass={classes.textFieldLabel}
+                            entry={{
+                              id: `pathCondition_${key}`,
+                              name: "pathCondition",
+                              modelProperty: "pathCondition",
+                              get: function () {
+                                return {
+                                  pathCondition: processConfig.pathCondition,
+                                };
+                              },
+                              set: function (e, values) {
+                                if (
+                                  values.pathCondition !==
+                                  processConfig.pathCondition
+                                ) {
+                                  updateValue(
+                                    values.pathCondition === ""
+                                      ? undefined
+                                      : values.pathCondition,
+                                    "pathCondition",
+                                    undefined,
+                                    key
+                                  );
+                                }
+                                if (
+                                  values.pathCondition === "" ||
+                                  !values.pathCondition
+                                ) {
+                                  updateValue(
+                                    undefined,
+                                    "pathConditionValue",
+                                    undefined,
+                                    key
+                                  );
+                                }
+                              },
+                            }}
+                          />
+                          <Edit
+                            className={classes.newIcon}
+                            onClick={() => {
+                              setSelectedProcessConfig({
+                                processConfig,
+                                key,
+                              });
+                              setExpressionBuilder(true);
+                            }}
+                          />
+                        </div>
                       </TableCell>
                       <TableCell className={classes.tableHead} align="center">
                         <Checkbox
@@ -671,7 +725,10 @@ export default function ProcessConfiguration({
       </div>
       <Dialog
         open={openProcessPathDialog}
-        onClose={() => setOpenProcessDialog(false)}
+        onClose={() => {
+          setOpenProcessDialog(false);
+          setSelectedProcessConfig(null);
+        }}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         classes={{
@@ -721,6 +778,68 @@ export default function ProcessConfiguration({
             className={classes.save}
           >
             OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <ExpressionBuilder
+        open={openExpressionBuilder}
+        handleClose={() => setExpressionBuilder(false)}
+        openAlertDialog={openExpressionAlertDialog}
+        getExpression={() => {
+          const value =
+            selectedProcessConfig &&
+            selectedProcessConfig.processConfig &&
+            selectedProcessConfig.processConfig.pathConditionValue;
+          let values;
+          try {
+            values = value !== undefined ? JSON.parse(value) : undefined;
+          } catch (errror) {}
+          return { values };
+        }}
+        setProperty={(val) => {
+          const { expression, value } = val;
+          updateValue(
+            expression,
+            "pathCondition",
+            undefined,
+            selectedProcessConfig && selectedProcessConfig.key,
+            undefined,
+            value
+          );
+        }}
+        processConfigs={[
+          selectedProcessConfig &&
+            selectedProcessConfig.processConfig &&
+            selectedProcessConfig.processConfig.metaModel,
+          selectedProcessConfig &&
+            selectedProcessConfig.processConfig &&
+            selectedProcessConfig.processConfig.metaJsonModel,
+        ]}
+        element={element}
+        title="Add Expression"
+      />
+      <Dialog
+        open={openExpressionAlert}
+        onClose={() => setExpressionAlert(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        classes={{
+          paper: classes.dialog,
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Add all values
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setExpressionAlert(false)}
+            color="primary"
+            autoFocus
+          >
+            Ok
           </Button>
         </DialogActions>
       </Dialog>

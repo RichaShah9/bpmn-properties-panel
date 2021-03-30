@@ -43,8 +43,8 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(3, 2),
     width: `calc(100% - 16px)`,
     display: "flex",
-    height:"calc(100% - 50px)",
-    overflow: "auto"
+    height: "calc(100% - 50px)",
+    overflow: "auto",
   },
   expressionContainer: {
     display: "flex",
@@ -89,7 +89,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "flex-end",
     maxWidth: "15%",
-    padding: 0
+    padding: 0,
   },
   checkbox: {
     color: "#0275d8",
@@ -118,6 +118,7 @@ function ExpressionBuilder({
   type: parentType = "expressionBuilder",
   title = "Add Expression",
   openAlertDialog,
+  processConfigs,
 }) {
   const expression = isBPMQuery(parentType) ? "BPM" : "GROOVY";
   const [combinator, setCombinator] = useState("and");
@@ -1085,7 +1086,15 @@ function ExpressionBuilder({
     async function fetchValue() {
       const { values, combinator } = getExpression() || {};
       const expressionComponents = [];
-      if (!values || values.length === 0) return;
+      if (!values || values.length === 0) {
+        setExpressionComponents([
+          {
+            Component: ExpressionComponent,
+            value: undefined,
+          },
+        ]);
+        return;
+      }
       for (let i = 0; i < values.length; i++) {
         const element = values[i];
         const { metaModalName, metaModalType } = element;
@@ -1135,10 +1144,7 @@ function ExpressionBuilder({
     >
       <DialogTitle id="simple-dialog-title">{title}</DialogTitle>
       <div className={classes.root}>
-        <Paper
-          variant="outlined"
-          className={classes.paper}
-        >
+        <Paper variant="outlined" className={classes.paper}>
           <div style={{ height: "100%", width: "100%" }}>
             <div className={classes.expression}>
               <Timeline align="alternate" className={classes.timeline}>
@@ -1149,9 +1155,11 @@ function ExpressionBuilder({
                       width: "100%",
                     }}
                   >
-                    <div style={{
-                      width: "100%",
-                    }}>
+                    <div
+                      style={{
+                        width: "100%",
+                      }}
+                    >
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -1178,6 +1186,7 @@ function ExpressionBuilder({
                                   setValue={onChange}
                                   element={element}
                                   type={parentType}
+                                  processConfigs={processConfigs}
                                 />
                               </div>
                             );
@@ -1231,6 +1240,7 @@ function ExpressionBuilder({
                                     setValue={onChange}
                                     element={element}
                                     type={parentType}
+                                    processConfigs={processConfigs}
                                   />
                                   {!isBPMQuery(parentType) && (
                                     <Button

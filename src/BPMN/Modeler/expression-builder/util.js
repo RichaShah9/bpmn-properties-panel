@@ -32,7 +32,19 @@ export function getBO(bo) {
   return bo;
 }
 
-export function getProcessConfig(element) {
+export function getProcessConfig(element, processConfigs) {
+  if (processConfigs) {
+    return {
+      criteria: [
+        {
+          fieldName: "name",
+          operator: "IN",
+          value: processConfigs,
+        },
+      ],
+      operator: "or",
+    };
+  }
   if (!element) return null;
   let bo = element && element.businessObject && element.businessObject.$parent;
   if (element && element.type === "bpmn:Process") {

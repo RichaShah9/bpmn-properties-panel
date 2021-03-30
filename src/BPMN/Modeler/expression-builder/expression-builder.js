@@ -67,7 +67,14 @@ const defaultState = {
 };
 
 function ExpressionBuilder(props) {
-  const { value = defaultState, setValue, index, element, type } = props;
+  const {
+    value = defaultState,
+    setValue,
+    index,
+    element,
+    type,
+    processConfigs,
+  } = props;
   const { metaModals: model, rules: r } = value;
   const [expression] = useState("GROOVY");
   const [metaModals, setMetaModals] = useState(model);
@@ -162,6 +169,11 @@ function ExpressionBuilder(props) {
     });
   }
 
+  useEffect(() => {
+    setMetaModals(model);
+    setRules(r);
+  }, [r, model]);
+
   return (
     <div style={{ width: "100%" }}>
       <Paper variant="outlined" className={classes.paper}>
@@ -174,7 +186,11 @@ function ExpressionBuilder(props) {
               title="Meta Modal"
               placeholder="meta modal"
               fetchAPI={() =>
-                getModels(isBPMQuery(type) ? null : getProcessConfig(element))
+                getModels(
+                  isBPMQuery(type)
+                    ? null
+                    : getProcessConfig(element, processConfigs)
+                )
               }
               optionLabelKey="name"
               onChange={(e) => {
@@ -205,6 +221,7 @@ function ExpressionBuilder(props) {
                   type={type}
                   parentMetaModal={metaModals}
                   element={element}
+                  processConfigs={processConfigs}
                 />
                 <br />
               </React.Fragment>
