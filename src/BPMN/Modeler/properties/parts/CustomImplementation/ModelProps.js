@@ -5,7 +5,7 @@ import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 
 import Select from "../../../../../components/Select";
-import { Checkbox } from "../../components";
+import { Checkbox, Textbox } from "../../components";
 import {
   getCustomModels,
   getMetaModels,
@@ -41,6 +41,12 @@ const TITLE_SOURCES = [
   "bpmn:Transaction",
   "bpmn:Task",
   "bpmn:TextAnnotation",
+];
+
+const HELP_SOURCES = [
+  "bpmn:EndEvent",
+  "bpmn:IntermediateCatchEvent",
+  ...USER_TASKS_TYPES,
 ];
 
 function isConditionalSource(element) {
@@ -483,6 +489,35 @@ export default function ModelProps({
             </React.Fragment>
           )}
         </div>
+        {HELP_SOURCES.includes(element && element.type) && (
+          <Textbox
+            element={element}
+            className={classes.textbox}
+            rows={3}
+            entry={{
+              id: "help",
+              label: translate("Help"),
+              modelProperty: "help",
+              get: function () {
+                return {
+                  help: getProperty("help") || "",
+                };
+              },
+              set: function (e, values) {
+                if (element.businessObject) {
+                  setProperty(
+                    "help",
+                    values.help
+                      ? values.help === ""
+                        ? undefined
+                        : values.help
+                      : undefined
+                  );
+                }
+              },
+            }}
+          />
+        )}
       </div>
     )
   );
