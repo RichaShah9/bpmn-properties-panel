@@ -3,20 +3,28 @@ import classnames from "classnames";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+import { Edit } from "@material-ui/icons";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+} from "@material-ui/core";
 
 import Select from "../../../../../components/Select";
-import { TextField, Checkbox, Table } from "../../components";
+import { TextField, Checkbox, Table, FieldEditor } from "../../components";
 import {
   getParentMenus,
   getSubMenus,
   getViews,
   getTemplates,
-  getItems,
+  getMetaFields,
 } from "../../../../../services/api";
 import { translate, getBool } from "../../../../../utils";
 import { USER_TASKS_TYPES } from "../../../constants";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   main: {
     display: "flex",
     flexDirection: "column",
@@ -37,7 +45,30 @@ const useStyles = makeStyles({
   lastChild: {
     marginBottom: 10,
   },
-});
+  icon: {
+    marginRight: 10,
+  },
+  newIcon: {
+    color: "#58B423",
+    cursor: "pointer",
+  },
+  save: {
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
+  },
+  dialogContent: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+}));
 
 function getContextMap(element) {
   const bo = getBusinessObject(element);
@@ -115,6 +146,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
   const [newMenu, setNewMenu] = useState(false);
   const [newUserMenu, setNewUserMenu] = useState(false);
   const [userFieldPath, setUserFieldPath] = useState(null);
+  const [userFieldPathDummy, setUserFieldPathDummy] = useState(null);
   const [menuName, setMenuName] = useState(null);
   const [actionEmailTitle, setActionEmailTitle] = useState(null);
   const [menuParent, setMenuParent] = useState(null);
@@ -135,6 +167,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
   const [userFormView, setUserFormView] = useState(null);
   const [userGridView, setUserGridView] = useState(null);
   const [template, setTemplate] = useState(null);
+  const [openUserPathDialog, setOpenUserPathDialog] = useState(false);
   const classes = useStyles();
 
   const getContextMapEntries = (field) => {
@@ -426,12 +459,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     const userFormView = getSelectValue("userFormView");
     const userGridView = getSelectValue("userGridView");
     const template = getSelectValue("template");
-    let userFieldPath;
-    if (USER_TASKS_TYPES.includes(element.type)) {
-      userFieldPath = getSelectValue("userFieldPath");
-    } else {
-      userFieldPath = getProperty("userFieldPath");
-    }
+    const userFieldPath = getProperty("userFieldPath");
     setCreateUserAction(getBool(createUserAction));
     setEmailNotification(getBool(emailNotification));
     setNewMenu(getBool(newMenu));
@@ -439,6 +467,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     setMenuName(menuName);
     setActionEmailTitle(actionEmailTitle);
     setUserFieldPath(userFieldPath);
+    setUserFieldPathDummy(userFieldPath);
     setMenuParent(menuParent);
     setPosition(position);
     setPositionMenu(positionMenu);
@@ -541,6 +570,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                   setProperty("actionEmailTitle", undefined);
                   if (newUserMenu === false) {
                     setUserFieldPath(undefined);
+                    setUserFieldPathDummy(undefined);
                     setProperty("userFieldPath", undefined);
                   }
                 }
@@ -571,6 +601,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                     setProperty("actionEmailTitle", undefined);
                     if (newUserMenu === false) {
                       setUserFieldPath(undefined);
+                      setUserFieldPathDummy(undefined);
                       setProperty("userFieldPath", undefined);
                     }
                   }
@@ -625,24 +656,34 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
           <React.Fragment>
             {USER_TASKS_TYPES.includes(element.type) ? (
               <React.Fragment>
-                <label className={classes.label}>
-                  {translate("User field path")}
-                </label>
-                <Select
-                  className={classes.select}
-                  update={(value) => {
-                    setUserFieldPath(value);
-                    updateMenuValue(
-                      "userFieldPath",
-                      value,
-                      value["label"] || value["title"]
-                    );
-                  }}
-                  name="userFieldPath"
-                  value={userFieldPath}
-                  isLabel={false}
-                  fetchMethod={(data) => getItems(undefined, model, data)}
-                />
+                <div style={{ display: "flex", alignItems: "flex-end" }}>
+                  <TextField
+                    element={element}
+                    canRemove={true}
+                    entry={{
+                      id: "userFieldPath",
+                      name: "userFieldPath",
+                      label: translate("User field path"),
+                      modelProperty: "userFieldPath",
+                      get: function () {
+                        return {
+                          userFieldPath: userFieldPath || "",
+                        };
+                      },
+                      set: function (e, value) {
+                        setUserFieldPath(value.userFieldPath);
+                        setUserFieldPathDummy(value.userFieldPath);
+                        setProperty("userFieldPath", value.userFieldPath);
+                      },
+                    }}
+                  />
+                  <Edit
+                    className={classes.newIcon}
+                    onClick={() => {
+                      setOpenUserPathDialog(true);
+                    }}
+                  />
+                </div>
               </React.Fragment>
             ) : (
               <TextField
@@ -660,6 +701,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                   },
                   set: function (e, value) {
                     setUserFieldPath(value.userFieldPath);
+                    setUserFieldPathDummy(value.userFieldPath);
                     setProperty("userFieldPath", value.userFieldPath);
                   },
                 }}
@@ -905,6 +947,7 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               if (newUserMenu === false) {
                 if (createUserAction === false && emailNotification === false) {
                   setUserFieldPath(undefined);
+                  setUserFieldPathDummy(undefined);
                   setProperty("userFieldPath", undefined);
                 }
                 setUserMenuName(undefined);
@@ -1091,6 +1134,46 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
           </React.Fragment>
         )}
       </div>
+      <Dialog
+        open={openUserPathDialog}
+        onClose={() => {
+          setOpenUserPathDialog(false);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        classes={{
+          paper: classes.dialog,
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">User default Path</DialogTitle>
+        <DialogContent className={classes.dialogContent}>
+          <FieldEditor
+            getMetaFields={() => getMetaFields(model)}
+            isUserPath={true}
+            onChange={(val) => {
+              setUserFieldPathDummy(val);
+            }}
+            value={{
+              fieldName: userFieldPathDummy,
+            }}
+            isParent={true}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setOpenUserPathDialog(false);
+              setUserFieldPath(userFieldPathDummy);
+              setProperty("userFieldPath", userFieldPathDummy);
+            }}
+            color="primary"
+            autoFocus
+            className={classes.save}
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
