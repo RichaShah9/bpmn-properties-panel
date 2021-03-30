@@ -169,6 +169,7 @@ export default function ProcessConfiguration({
   const classes = useStyles();
   const [processConfigList, setProcessConfigList] = useState(null);
   const [openProcessPathDialog, setOpenProcessDialog] = useState(false);
+  const [openUserPathDialog, setOpenUserPathDialog] = useState(false);
   const [startModel, setStartModel] = useState(null);
   const [selectedProcessConfig, setSelectedProcessConfig] = useState(null);
   const [openExpressionAlert, setExpressionAlert] = useState(false);
@@ -405,22 +406,24 @@ export default function ProcessConfiguration({
     setProcessConfigList(cloneProcessConfigList);
   };
 
-  const updateStartModel = (processConfig) => {
-    setStartModel(
-      processConfig && processConfig.metaModel
-        ? {
-            fullName: processConfig.metaModelFullName,
-            name: processConfig.metaModel,
-            type: "metaModel",
-          }
-        : processConfig && processConfig.metaJsonModel
-        ? {
-            name: processConfig.metaJsonModel,
-            type: "metaJsonModel",
-          }
-        : undefined
-    );
+  const getData = (processConfig) => {
+    return processConfig && processConfig.metaModel
+      ? {
+          fullName: processConfig.metaModelFullName,
+          name: processConfig.metaModel,
+          type: "metaModel",
+        }
+      : processConfig && processConfig.metaJsonModel
+      ? {
+          name: processConfig.metaJsonModel,
+          type: "metaJsonModel",
+        }
+      : undefined;
   };
+
+  const updateStartModel = React.useCallback((processConfig) => {
+    setStartModel(getData(processConfig));
+  }, []);
 
   useEffect(() => {
     const processConfigList = getProcessConfigs();
@@ -432,7 +435,7 @@ export default function ProcessConfiguration({
         return;
       }
     }
-  }, [getProcessConfigs, element]);
+  }, [getProcessConfigs, updateStartModel, element]);
 
   return (
     <div>
@@ -601,6 +604,7 @@ export default function ProcessConfiguration({
                             canRemove={true}
                             rootClass={classes.textFieldRoot}
                             labelClass={classes.textFieldLabel}
+                            clearClassName={classes.clearClassName}
                             entry={{
                               id: `pathCondition_${key}`,
                               name: "pathCondition",
@@ -679,30 +683,44 @@ export default function ProcessConfiguration({
                         />
                       </TableCell>
                       <TableCell className={classes.tableHead} align="center">
-                        <TextField
-                          element={element}
-                          canRemove={true}
-                          rootClass={classes.textFieldRoot}
-                          labelClass={classes.textFieldLabel}
-                          entry={{
-                            id: `userDefaultPath_${key}`,
-                            name: "userDefaultPath",
-                            modelProperty: "userDefaultPath",
-                            get: function () {
-                              return {
-                                userDefaultPath: processConfig.userDefaultPath,
-                              };
-                            },
-                            set: function (e, value) {
-                              updateValue(
-                                value.userDefaultPath,
-                                "userDefaultPath",
-                                undefined,
-                                key
-                              );
-                            },
-                          }}
-                        />
+                        <div style={{ display: "flex" }}>
+                          <TextField
+                            element={element}
+                            canRemove={true}
+                            rootClass={classes.textFieldRoot}
+                            labelClass={classes.textFieldLabel}
+                            clearClassName={classes.clearClassName}
+                            entry={{
+                              id: `userDefaultPath_${key}`,
+                              name: "userDefaultPath",
+                              modelProperty: "userDefaultPath",
+                              get: function () {
+                                return {
+                                  userDefaultPath:
+                                    processConfig.userDefaultPath,
+                                };
+                              },
+                              set: function (e, value) {
+                                updateValue(
+                                  value.userDefaultPath,
+                                  "userDefaultPath",
+                                  undefined,
+                                  key
+                                );
+                              },
+                            }}
+                          />
+                          <Edit
+                            className={classes.newIcon}
+                            onClick={() => {
+                              setOpenUserPathDialog(true);
+                              setSelectedProcessConfig({
+                                processConfig,
+                                key,
+                              });
+                            }}
+                          />
+                        </div>
                       </TableCell>
                       <TableCell align="center" className={classes.tableCell}>
                         <IconButton
@@ -840,6 +858,71 @@ export default function ProcessConfiguration({
             autoFocus
           >
             Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openUserPathDialog}
+        onClose={() => {
+          setOpenUserPathDialog(false);
+          setSelectedProcessConfig(null);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        classes={{
+          paper: classes.dialog,
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">User default Path</DialogTitle>
+        <DialogContent className={classes.dialogContent}>
+          <FieldEditor
+            getMetaFields={() =>
+              getMetaFields(
+                getData(
+                  selectedProcessConfig && selectedProcessConfig.processConfig
+                )
+              )
+            }
+            isUserPath={true}
+            onChange={(val) => {
+              setSelectedProcessConfig({
+                processConfig: {
+                  ...((selectedProcessConfig &&
+                    selectedProcessConfig.processConfig) ||
+                    {}),
+                  userDefaultPath: val,
+                },
+                key: selectedProcessConfig && selectedProcessConfig.key,
+              });
+            }}
+            value={{
+              fieldName:
+                selectedProcessConfig &&
+                selectedProcessConfig.processConfig &&
+                selectedProcessConfig.processConfig.userDefaultPath,
+            }}
+            isParent={true}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setOpenUserPathDialog(false);
+              if (selectedProcessConfig) {
+                updateValue(
+                  selectedProcessConfig.processConfig &&
+                    selectedProcessConfig.processConfig.userDefaultPath,
+                  "userDefaultPath",
+                  undefined,
+                  selectedProcessConfig.key
+                );
+              }
+            }}
+            color="primary"
+            autoFocus
+            className={classes.save}
+          >
+            OK
           </Button>
         </DialogActions>
       </Dialog>

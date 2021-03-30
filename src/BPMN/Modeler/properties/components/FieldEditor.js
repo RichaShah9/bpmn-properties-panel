@@ -19,6 +19,7 @@ export default function FieldEditor({
   value,
   classNames,
   isParent = false,
+  isUserPath = false,
 }) {
   const { fieldName = "" } = value || {};
   const [fields, setFields] = useState([]);
@@ -55,13 +56,19 @@ export default function FieldEditor({
     (async () => {
       const data = await getMetaFields();
       if (isSubscribed) {
+        if (isUserPath) {
+          setFields(
+            data && data.filter((d) => d.target === "com.axelor.auth.db.User")
+          );
+          return;
+        }
         setFields(data);
       }
     })();
     return () => {
       isSubscribed = false;
     };
-  }, [getMetaFields]);
+  }, [getMetaFields, isUserPath]);
 
   return (
     <React.Fragment>

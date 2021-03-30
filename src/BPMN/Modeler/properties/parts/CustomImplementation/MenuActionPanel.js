@@ -621,48 +621,51 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
             }}
           />
         )}
-        {(createUserAction || emailNotification || newUserMenu) &&
-        USER_TASKS_TYPES.includes(element.type) ? (
+        {(createUserAction || emailNotification || newUserMenu) && (
           <React.Fragment>
-            <label className={classes.label}>
-              {translate("User field path")}
-            </label>
-            <Select
-              className={classes.select}
-              update={(value) => {
-                setUserFieldPath(value);
-                updateMenuValue(
-                  "userFieldPath",
-                  value,
-                  value["label"] || value["title"]
-                );
-              }}
-              name="userFieldPath"
-              value={userFieldPath}
-              isLabel={false}
-              fetchMethod={(data) => getItems(undefined, model, data)}
-            />
+            {USER_TASKS_TYPES.includes(element.type) ? (
+              <React.Fragment>
+                <label className={classes.label}>
+                  {translate("User field path")}
+                </label>
+                <Select
+                  className={classes.select}
+                  update={(value) => {
+                    setUserFieldPath(value);
+                    updateMenuValue(
+                      "userFieldPath",
+                      value,
+                      value["label"] || value["title"]
+                    );
+                  }}
+                  name="userFieldPath"
+                  value={userFieldPath}
+                  isLabel={false}
+                  fetchMethod={(data) => getItems(undefined, model, data)}
+                />
+              </React.Fragment>
+            ) : (
+              <TextField
+                element={element}
+                canRemove={true}
+                entry={{
+                  id: "userFieldPath",
+                  name: "userFieldPath",
+                  label: translate("User field path"),
+                  modelProperty: "userFieldPath",
+                  get: function () {
+                    return {
+                      userFieldPath: userFieldPath || "",
+                    };
+                  },
+                  set: function (e, value) {
+                    setUserFieldPath(value.userFieldPath);
+                    setProperty("userFieldPath", value.userFieldPath);
+                  },
+                }}
+              />
+            )}
           </React.Fragment>
-        ) : (
-          <TextField
-            element={element}
-            canRemove={true}
-            entry={{
-              id: "userFieldPath",
-              name: "userFieldPath",
-              label: translate("User field path"),
-              modelProperty: "userFieldPath",
-              get: function () {
-                return {
-                  userFieldPath: userFieldPath || "",
-                };
-              },
-              set: function (e, value) {
-                setUserFieldPath(value.userFieldPath);
-                setProperty("userFieldPath", value.userFieldPath);
-              },
-            }}
-          />
         )}
         {createUserAction && (
           <TextField
