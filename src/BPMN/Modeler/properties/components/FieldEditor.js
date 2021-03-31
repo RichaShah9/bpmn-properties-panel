@@ -19,7 +19,6 @@ export default function FieldEditor({
   value,
   classNames,
   isParent = false,
-  isUserPath = false,
 }) {
   const { fieldName = "" } = value || {};
   const [fields, setFields] = useState([]);
@@ -47,7 +46,7 @@ export default function FieldEditor({
       : ""
       ? `${isRelationalField ? "." : ""}${initValue}${value ? value.name : ""}`
       : "";
-    onChange(newFieldName === "" ? undefined : newFieldName);
+    onChange(newFieldName === "" ? undefined : newFieldName, value);
   }
   const transformValue = fields && fields.find((f) => f.name === startValue);
 
@@ -56,19 +55,13 @@ export default function FieldEditor({
     (async () => {
       const data = await getMetaFields();
       if (isSubscribed) {
-        if (isUserPath) {
-          setFields(
-            data && data.filter((d) => d.target === "com.axelor.auth.db.User")
-          );
-          return;
-        }
-        setFields(data);
+        setFields(data && data.filter(d => d.type.toLowerCase() === "many_to_one"));
       }
     })();
     return () => {
       isSubscribed = false;
     };
-  }, [getMetaFields, isUserPath]);
+  }, [getMetaFields]);
 
   return (
     <React.Fragment>

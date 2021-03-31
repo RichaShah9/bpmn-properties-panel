@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
+  DialogContentText
 } from "@material-ui/core";
 
 import Select from "../../../../../components/Select";
@@ -168,6 +169,8 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
   const [userGridView, setUserGridView] = useState(null);
   const [template, setTemplate] = useState(null);
   const [openUserPathDialog, setOpenUserPathDialog] = useState(false);
+  const [field, setField] = useState(null);
+  const [openExpressionAlert, setExpressionAlert] = useState(false);
   const classes = useStyles();
 
   const getContextMapEntries = (field) => {
@@ -1073,7 +1076,6 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
                   update={(value, label) => {
                     setUserGridView(value);
                     updateMenuValue("userGridView", value, label);
-                    // updateValue("userGridView", value);
                   }}
                   fetchMethod={(criteria) => getViews(model, criteria, "grid")}
                   name="userGridView"
@@ -1149,9 +1151,9 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
         <DialogContent className={classes.dialogContent}>
           <FieldEditor
             getMetaFields={() => getMetaFields(model)}
-            isUserPath={true}
-            onChange={(val) => {
+            onChange={(val, field) => {
               setUserFieldPathDummy(val);
+              setField(field);
             }}
             value={{
               fieldName: userFieldPathDummy,
@@ -1162,6 +1164,10 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
         <DialogActions>
           <Button
             onClick={() => {
+              if (field.target !== "com.axelor.auth.db.User") {
+                setExpressionAlert(true)
+                return;
+              }
               setOpenUserPathDialog(false);
               setUserFieldPath(userFieldPathDummy);
               setProperty("userFieldPath", userFieldPathDummy);
@@ -1171,6 +1177,31 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
             className={classes.save}
           >
             OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openExpressionAlert}
+        onClose={() => setExpressionAlert(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        classes={{
+          paper: classes.dialog,
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Last sub field must be user field
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setExpressionAlert(false)}
+            color="primary"
+            autoFocus
+          >
+            Ok
           </Button>
         </DialogActions>
       </Dialog>

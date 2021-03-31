@@ -194,7 +194,9 @@ export async function getSubMetaField(model, relationJsonModel) {
       `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${relationJsonModel}`
     );
     let result = getResultedFields(res) || [];
-    return result;
+    return (
+      result && result.filter((r) => r.type.toLowerCase() === "many_to_one")
+    );
   } else {
     const data = {
       criteria: [{ fieldName: "fullName", operator: "=", value: model }],
@@ -207,7 +209,10 @@ export async function getSubMetaField(model, relationJsonModel) {
       model: metaModel.fullName,
     });
     let resultFields = res && res.data && res.data.fields;
-    return resultFields;
+    return (
+      resultFields &&
+      resultFields.filter((r) => r.type.toLowerCase() === "many_to_one")
+    );
   }
 }
 

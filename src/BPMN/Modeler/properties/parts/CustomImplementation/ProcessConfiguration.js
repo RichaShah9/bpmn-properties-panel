@@ -174,8 +174,11 @@ export default function ProcessConfiguration({
   const [selectedProcessConfig, setSelectedProcessConfig] = useState(null);
   const [openExpressionAlert, setExpressionAlert] = useState(false);
   const [openExpressionBuilder, setExpressionBuilder] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [field, setField] = useState(null);
 
   const openExpressionAlertDialog = () => {
+    setErrorMessage("Add all values");
     setExpressionAlert(true);
   };
 
@@ -756,8 +759,15 @@ export default function ProcessConfiguration({
         <DialogTitle id="alert-dialog-title">Process Path</DialogTitle>
         <DialogContent className={classes.dialogContent}>
           <FieldEditor
-            getMetaFields={() => getMetaFields(startModel)}
-            onChange={(val) => {
+            getMetaFields={() =>
+              getMetaFields(
+                getData(
+                  selectedProcessConfig && selectedProcessConfig.processConfig
+                )
+              )
+            }
+            onChange={(val, field) => {
+              setField(field);
               setSelectedProcessConfig({
                 processConfig: {
                   ...((selectedProcessConfig &&
@@ -780,6 +790,17 @@ export default function ProcessConfiguration({
         <DialogActions>
           <Button
             onClick={() => {
+              if (
+                (field && field.target) !==
+                  (startModel && startModel.fullName) &&
+                (field && field.jsonTarget) !== (startModel && startModel.name)
+              ) {
+                setExpressionAlert(true);
+                setErrorMessage(
+                  "Last subfield should be related to start model"
+                );
+                return;
+              }
               setOpenProcessDialog(false);
               if (selectedProcessConfig) {
                 updateValue(
@@ -848,7 +869,7 @@ export default function ProcessConfiguration({
         <DialogTitle id="alert-dialog-title">Error</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Add all values
+            {errorMessage}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -883,8 +904,8 @@ export default function ProcessConfiguration({
                 )
               )
             }
-            isUserPath={true}
-            onChange={(val) => {
+            onChange={(val, field) => {
+              setField(field);
               setSelectedProcessConfig({
                 processConfig: {
                   ...((selectedProcessConfig &&
@@ -907,6 +928,11 @@ export default function ProcessConfiguration({
         <DialogActions>
           <Button
             onClick={() => {
+              if ((field && field.target) !== "com.axelor.auth.db.User") {
+                setExpressionAlert(true);
+                setErrorMessage("Last subfield should be related to user");
+                return;
+              }
               setOpenUserPathDialog(false);
               if (selectedProcessConfig) {
                 updateValue(
