@@ -116,8 +116,7 @@ const useStyles = makeStyles((theme) => ({
   },
   dialogContent: {
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "flex-end",
   },
 }));
 
@@ -778,6 +777,7 @@ export default function ProcessConfiguration({
                 key: selectedProcessConfig && selectedProcessConfig.key,
               });
             }}
+            startModel={startModel}
             value={{
               fieldName:
                 selectedProcessConfig &&
@@ -923,6 +923,7 @@ export default function ProcessConfiguration({
                 selectedProcessConfig.processConfig.userDefaultPath,
             }}
             isParent={true}
+            isUserPath={true}
           />
         </DialogContent>
         <DialogActions>

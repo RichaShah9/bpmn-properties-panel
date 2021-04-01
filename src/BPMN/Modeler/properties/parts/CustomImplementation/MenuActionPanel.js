@@ -66,8 +66,7 @@ const useStyles = makeStyles((theme) => ({
   },
   dialogContent: {
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "flex-end",
   },
 }));
 
@@ -1159,12 +1158,13 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
               fieldName: userFieldPathDummy,
             }}
             isParent={true}
+            isUserPath={true}
           />
         </DialogContent>
         <DialogActions>
           <Button
             onClick={() => {
-              if (field.target !== "com.axelor.auth.db.User") {
+              if (field && (field.target !== "com.axelor.auth.db.User")) {
                 setExpressionAlert(true)
                 return;
               }

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
+import { Close, ArrowForward } from "@material-ui/icons";
+import { IconButton, Tooltip } from "@material-ui/core";
 
+import { translate } from "../../../../utils";
 import { Selection } from "../../expression-builder/component";
 import { getSubMetaField } from "../../../../services/api";
 
@@ -9,6 +12,12 @@ const useStyles = makeStyles(() => ({
   MuiAutocompleteRoot: {
     width: "250px",
     marginRight: "10px",
+  },
+  iconButton: {
+    marginRight: 10,
+  },
+  icon: {
+    color: "#0275d8",
   },
 }));
 
@@ -19,9 +28,12 @@ export default function FieldEditor({
   value,
   classNames,
   isParent = false,
+  isUserPath = false,
+  startModel,
 }) {
   const { fieldName = "" } = value || {};
   const [fields, setFields] = useState([]);
+  const [isShow, setShow] = useState(true);
   const classes = useStyles();
   const values = fieldName && fieldName.split(".");
   const [startValue] = values || [];
@@ -46,6 +58,8 @@ export default function FieldEditor({
       : ""
       ? `${isRelationalField ? "." : ""}${initValue}${value ? value.name : ""}`
       : "";
+    newFieldName =
+      value && value.name ? newFieldName : newFieldName.slice(0, -1);
     onChange(newFieldName === "" ? undefined : newFieldName, value);
   }
   const transformValue = fields && fields.find((f) => f.name === startValue);
@@ -68,6 +82,39 @@ export default function FieldEditor({
     };
   }, [getMetaFields]);
 
+  useEffect(() => {
+    const values = fieldName && fieldName.split(".");
+    const transformValue =
+      fields && fields.find((f) => f.name === (values && values[0]));
+
+    const lastValue =
+      values && values.length > 0 ? values[values.length - 1] : undefined;
+
+    if (
+      isUserPath &&
+      transformValue &&
+      lastValue &&
+      transformValue.name === lastValue &&
+      values.length === 1
+    ) {
+      if (transformValue.target === "com.axelor.auth.db.User") {
+        setShow(false);
+      }
+    } else if (
+      startModel &&
+      transformValue &&
+      lastValue &&
+      transformValue.name === lastValue &&
+      (startModel.fullName === transformValue.target ||
+        startModel.name === transformValue.jsonTarget) &&
+      values.length === 1
+    ) {
+      setShow(false);
+    } else {
+      setShow(true);
+    }
+  }, [isUserPath, startModel, fields, fieldName]);
+
   return (
     <React.Fragment>
       <Selection
@@ -86,18 +133,56 @@ export default function FieldEditor({
         }}
       />
       {hasManyValues && relationModel && (
-        <FieldEditor
-          getMetaFields={() => {
-            return getSubMetaField(relationModel, true, relationJsonModel);
-          }}
-          initValue={`${initValue}${startValue}${"."}`}
-          value={{
-            fieldName: values.slice(1).join("."),
-          }}
-          onChange={onChange}
-          classNames={classNames}
-          isParent={relationModel ? true : false}
-        />
+        <React.Fragment>
+          {isShow && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                setShow((isShow) => !isShow);
+                if (fields && fields.length > 0 && startValue) {
+                  const previousField = fields.find(
+                    (f) => f.name === startValue
+                  );
+                  handleChange({
+                    ...(previousField || {}),
+                  });
+                }
+              }}
+              className={classes.iconButton}
+            >
+              <Tooltip title={translate("Remove sub field")}>
+                <Close className={classes.icon} fontSize="small" />
+              </Tooltip>
+            </IconButton>
+          )}
+          {isShow && (
+            <FieldEditor
+              getMetaFields={() => {
+                return getSubMetaField(relationModel, true, relationJsonModel);
+              }}
+              initValue={`${initValue}${startValue}${"."}`}
+              value={{
+                fieldName: values.slice(1).join("."),
+              }}
+              onChange={onChange}
+              classNames={classNames}
+              isParent={relationModel ? true : false}
+              isUserPath={isUserPath}
+              startModel={startModel}
+            />
+          )}
+          {!isShow && (
+            <IconButton
+              size="small"
+              onClick={() => setShow((isShow) => !isShow)}
+              className={classes.iconButton}
+            >
+              <Tooltip title={translate("Add sub field")}>
+                <ArrowForward className={classes.icon} fontSize="small" />
+              </Tooltip>
+            </IconButton>
+          )}
+        </React.Fragment>
       )}
     </React.Fragment>
   );
