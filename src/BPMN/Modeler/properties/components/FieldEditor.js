@@ -55,7 +55,12 @@ export default function FieldEditor({
     (async () => {
       const data = await getMetaFields();
       if (isSubscribed) {
-        setFields(data && data.filter(d => d.type.toLowerCase() === "many_to_one"));
+        setFields(
+          data &&
+            data.filter((d) =>
+              ["many_to_one", "many-to-one"].includes(d.type.toLowerCase())
+            )
+        );
       }
     })();
     return () => {

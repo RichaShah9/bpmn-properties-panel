@@ -195,7 +195,10 @@ export async function getSubMetaField(model, relationJsonModel) {
     );
     let result = getResultedFields(res) || [];
     return (
-      result && result.filter((r) => r.type.toLowerCase() === "many_to_one")
+      result &&
+      result.filter((r) =>
+        ["many_to_one", "many-to-one"].includes(r.type.toLowerCase())
+      )
     );
   } else {
     const data = {
@@ -211,7 +214,9 @@ export async function getSubMetaField(model, relationJsonModel) {
     let resultFields = res && res.data && res.data.fields;
     return (
       resultFields &&
-      resultFields.filter((r) => r.type.toLowerCase() === "many_to_one")
+      resultFields.filter((r) =>
+        ["many_to_one", "many-to-one"].includes(r.type.toLowerCase())
+      )
     );
   }
 }
