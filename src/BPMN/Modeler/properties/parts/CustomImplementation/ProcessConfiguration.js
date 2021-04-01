@@ -367,6 +367,7 @@ export default function ProcessConfiguration({
       }
       model = await getProcessConfigModel({
         ...cloneProcessConfigList[index],
+        [name]: value,
         [name === "metaModel" ? "metaJsonModel" : "metaModel"]: null,
       });
       cloneProcessConfigList[index] = {
