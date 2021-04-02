@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
-  DialogContentText
+  DialogContentText,
 } from "@material-ui/core";
 
 import Select from "../../../../../components/Select";
@@ -1164,8 +1164,8 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
         <DialogActions>
           <Button
             onClick={() => {
-              if (field && (field.target !== "com.axelor.auth.db.User")) {
-                setExpressionAlert(true)
+              if (field && field.target !== "com.axelor.auth.db.User") {
+                setExpressionAlert(true);
                 return;
               }
               setOpenUserPathDialog(false);

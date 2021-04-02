@@ -99,6 +99,8 @@ export default function FieldEditor({
     ) {
       if (transformValue.target === "com.axelor.auth.db.User") {
         setShow(false);
+      } else {
+        setShow(true);
       }
     } else if (
       startModel &&

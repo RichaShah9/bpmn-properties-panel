@@ -595,6 +595,7 @@ export default function ProcessConfiguration({
                                   processConfig,
                                   key,
                                 });
+                                setField(null);
                                 if (!startModel) {
                                   const model =
                                     processConfigList &&
@@ -725,6 +726,7 @@ export default function ProcessConfiguration({
                             className={classes.newIcon}
                             onClick={() => {
                               setOpenUserPathDialog(true);
+                              setField(null);
                               setSelectedProcessConfig({
                                 processConfig,
                                 key,
@@ -800,9 +802,9 @@ export default function ProcessConfiguration({
           <Button
             onClick={() => {
               if (
-                (field && field.target) !==
-                  (startModel && startModel.fullName) &&
-                (field && field.jsonTarget) !== (startModel && startModel.name)
+                field &&
+                field.target !== (startModel && startModel.fullName) &&
+                field.jsonTarget !== (startModel && startModel.name)
               ) {
                 setExpressionAlert(true);
                 setErrorMessage(
@@ -938,7 +940,7 @@ export default function ProcessConfiguration({
         <DialogActions>
           <Button
             onClick={() => {
-              if ((field && field.target) !== "com.axelor.auth.db.User") {
+              if (field && field.target !== "com.axelor.auth.db.User") {
                 setExpressionAlert(true);
                 setErrorMessage("Last subfield should be related to user");
                 return;
