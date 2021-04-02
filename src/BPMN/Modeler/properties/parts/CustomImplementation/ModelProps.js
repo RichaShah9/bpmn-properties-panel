@@ -399,6 +399,8 @@ export default function ModelProps({
                 isLabel={false}
                 disabled={isModelsDisable}
                 placeholder={translate("Model")}
+                optionLabel="name"
+                optionLabelSecondary="title"
               />
             )}
             {!metaModel && (
@@ -417,6 +419,8 @@ export default function ModelProps({
                 value={metaJsonModel}
                 placeholder={translate("Custom model")}
                 isLabel={false}
+                optionLabel="name"
+                optionLabelSecondary="title"
               />
             )}
             {isDefaultFormVisible && (
@@ -484,6 +488,8 @@ export default function ModelProps({
                   value={models || []}
                   multiple={true}
                   isLabel={false}
+                  optionLabel="name"
+                  optionLabelSecondary="title"
                 />
               </div>
             </React.Fragment>

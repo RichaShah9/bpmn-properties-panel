@@ -383,10 +383,14 @@ export default function ProcessConfiguration({
       updateElement(model, "model", index);
 
       cloneProcessConfigList[index][`${name}Label`] = value
-        ? `${valueLabel || ""} ${value ? `(${value[optionLabel]})` : ""}`
+        ? `${valueLabel || ""}${
+            value && value[optionLabel] ? ` (${value[optionLabel]})` : ""
+          }`
         : undefined;
       updateElement(
-        `${valueLabel || ""} ${value ? `(${value[optionLabel]})` : ""}`,
+        `${valueLabel || ""}${
+          value && value[optionLabel] ? ` (${value[optionLabel]})` : ""
+        }`,
         `${name}Label`,
         index
       );
@@ -517,11 +521,13 @@ export default function ProcessConfiguration({
                               "metaModel",
                               undefined,
                               key,
-                              "name",
+                              "title",
                               label
                             );
                           }}
                           name="metaModel"
+                          optionLabel="name"
+                          optionLabelSecondary="title"
                           value={processConfig.metaModelLabel || ""}
                           isLabel={false}
                         />
@@ -535,13 +541,15 @@ export default function ProcessConfiguration({
                               "metaJsonModel",
                               undefined,
                               key,
-                              "name",
+                              "title",
                               label
                             )
                           }
                           name="metaJsonModel"
                           value={processConfig.metaJsonModelLabel || ""}
                           isLabel={false}
+                          optionLabel="name"
+                          optionLabelSecondary="title"
                         />
                       </TableCell>
                       <TableCell className={classes.tableHead} align="center">

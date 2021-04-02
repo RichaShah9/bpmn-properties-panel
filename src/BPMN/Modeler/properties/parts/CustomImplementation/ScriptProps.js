@@ -510,6 +510,8 @@ export default function ScriptProps({ element, index, label }) {
                   updateSelectValue("metaModel", value, label);
                 }}
                 name="metaModel"
+                optionLabel="name"
+                optionLabelSecondary="title"
                 value={metaModel}
                 isLabel={false}
                 placeholder={translate("Model")}
@@ -529,6 +531,8 @@ export default function ScriptProps({ element, index, label }) {
                 value={metaJsonModel}
                 placeholder={translate("Custom model")}
                 isLabel={false}
+                optionLabel="name"
+                optionLabelSecondary="title"
               />
             )}
             {isDefaultFormVisible && (
@@ -596,6 +600,8 @@ export default function ScriptProps({ element, index, label }) {
                       value={models || []}
                       multiple={true}
                       isLabel={false}
+                      optionLabel="name"
+                      optionLabelSecondary="title"
                     />
                   </div>
                 </React.Fragment>

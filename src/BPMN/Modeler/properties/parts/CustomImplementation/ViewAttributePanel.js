@@ -494,6 +494,8 @@ export default function ViewAttributePanel({
                                       label
                                     )
                                   }
+                                  optionLabel="name"
+                                  optionLabelSecondary="title"
                                   name="model"
                                   validate={(values) => {
                                     if (!values.model) {
