@@ -228,6 +228,8 @@ export default function SelectComponent({
               : option["name"]
               ? "name"
               : "name";
+          } else if(name === "wkfModel"){
+            optionName = `${option["name"]} ${option["processId"]}`
           } else {
             optionName = option[optionLabel]
               ? optionLabel
@@ -303,6 +305,8 @@ export default function SelectComponent({
                 : option;
           } else if (name === "dmnModel") {
             optionName = `${option["name"]} (${option["decisionId"]})`;
+          } else if(name === "wkfModel"){
+            optionName = `${option["name"]} (${option["processId"]})`
           } else {
             optionName =
               option[optionLabel] && option[optionLabelSecondary]

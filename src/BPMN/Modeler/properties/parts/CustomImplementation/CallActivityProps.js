@@ -3,20 +3,31 @@ import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import AddIcon from "@material-ui/icons/Add";
+import EditIcon from "@material-ui/icons/Edit";
 import {
   Dialog,
   DialogActions,
   DialogTitle,
   DialogContent,
   Button,
+  Snackbar,
 } from "@material-ui/core";
+import Alert from "@material-ui/lab/Alert";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../../../components/Select";
+import Service from "../../../../../services/Service";
 import { TextField, SelectBox, Checkbox } from "../../components";
 import { translate } from "../../../../../utils";
 import { getBPMNModels } from "../../../../../services/api";
+
+const Ids = require("ids").default;
+
+function nextId() {
+  let ids = new Ids([32, 32, 1]);
+  return ids.nextPrefixed("Process_");
+}
 
 const useStyles = makeStyles({
   groupLabel: {
@@ -184,9 +195,14 @@ export default function CallActivityProps({
   const [bindingType, setBindingType] = useState("latest");
   const [isBusinessKey, setBusinessKey] = useState(false);
   const [wkfModel, setWkfModel] = useState(null);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const classes = useStyles();
-
+  const [openSnackbar, setSnackbar] = useState({
+    open: false,
+    messageType: null,
+    message: null,
+  });
+  const id = nextId();
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -216,6 +232,66 @@ export default function CallActivityProps({
     ] = value;
   };
 
+  const handleSnackbarClick = (messageType, message) => {
+    setSnackbar({
+      open: true,
+      messageType,
+      message,
+    });
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar({
+      open: false,
+      messageType: null,
+      message: null,
+    });
+  };
+
+  const addNewBPMRecord = async () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8" ?>
+      <bpmn2:definitions 
+        xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" 
+        xs:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+        xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
+        xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
+        xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
+        id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn">
+        <bpmn2:process id="${id}" isExecutable="true">
+          <bpmn2:startEvent id="StartEvent_1" />
+        </bpmn2:process>
+        <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+          <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="${id}">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1" bioc:stroke="#55c041">
+              <dc:Bounds height="36.0" width="36.0" x="412.0" y="240.0" />
+            </bpmndi:BPMNShape>
+          </bpmndi:BPMNPlane>
+        </bpmndi:BPMNDiagram>
+      </bpmn2:definitions>`;
+    let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
+      name: id,
+      code: id,
+      diagramXml: xml,
+    });
+    const wkfModel = res && res.data && res.data[0];
+    if (wkfModel) {
+      setWkfModel(wkfModel);
+      handleSnackbarClick("success", "New process added successfully");
+      element.businessObject.calledElement = id;
+      element.businessObject.$attrs["camunda:processId"] = id;
+    } else {
+      handleSnackbarClick(
+        "error",
+        (res && res.data && (res.data.message || res.data.title)) || "Error!"
+      );
+    }
+  };
+
   const updateModel = React.useCallback(
     async (userInput) => {
       const wkfProcessRes = await getBPMNModels(
@@ -238,6 +314,7 @@ export default function CallActivityProps({
       setWkfModel({
         name: wkfProcess.name,
         id: wkfProcess.wkfModel && wkfProcess.wkfModel.id,
+        processId: wkfProcess.processId,
       });
       if (element) {
         element.businessObject.$attrs["camunda:processId"] =
@@ -327,6 +404,9 @@ export default function CallActivityProps({
                   return { calledElement: bo.calledElement };
                 },
                 set: function (e, values) {
+                  if(!values.calledElement || values.calledElement === "" ){
+                    setWkfModel(undefined)
+                  }
                   element.businessObject.calledElement = values.calledElement;
                   element.businessObject.calledElementBinding = bindingType;
                   element.businessObject.caseRef = undefined;
@@ -341,6 +421,9 @@ export default function CallActivityProps({
               canRemove={true}
             />
             <div onClick={handleClickOpen} className={classes.link}>
+              <EditIcon className={classes.linkIcon} />
+            </div>
+            <div onClick={addNewBPMRecord} className={classes.link}>
               <AddIcon className={classes.linkIcon} />
             </div>
             {wkfModel && (
@@ -651,8 +734,12 @@ export default function CallActivityProps({
               <Select
                 className={classes.select}
                 update={(value) => {
-                  if(!value) return
-                  setWkfModel({ id: value.wkfModel.id, name: value.name });
+                  if (!value) return;
+                  setWkfModel({
+                    id: value.wkfModel.id,
+                    name: `${value.name} (${value.processId})`,
+                    processId: value.processId,
+                  });
                 }}
                 name="wkfModel"
                 isLabel={true}
@@ -678,6 +765,23 @@ export default function CallActivityProps({
               </Button>
             </DialogActions>
           </Dialog>
+        )}
+        {openSnackbar.open && (
+          <Snackbar
+            open={openSnackbar.open}
+            autoHideDuration={2000}
+            onClose={handleSnackbarClose}
+          >
+            <Alert
+              elevation={6}
+              variant="filled"
+              onClose={handleSnackbarClose}
+              className="snackbarAlert"
+              severity={openSnackbar.messageType}
+            >
+              {openSnackbar.message}
+            </Alert>
+          </Snackbar>
         )}
       </div>
     )
