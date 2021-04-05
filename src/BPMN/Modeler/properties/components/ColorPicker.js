@@ -3,6 +3,8 @@ import { ColorPicker } from "material-ui-color";
 import { makeStyles } from "@material-ui/styles";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
+import "../../../css/colorpicker.css";
+
 const useStyles = makeStyles({
   root: {
     marginTop: 8,
@@ -17,22 +19,21 @@ const useStyles = makeStyles({
 });
 
 const palette = {
-  FF7043: "#FF7043",
-  "5FC34C": "#5FC34C",
-  F9C000: "#F9C000",
-  F8B200: "#F8B200",
-  "3FBDD6": "#3FBDD6",
-  "3F97F6": "#3F97F6",
-  FF9E0F: "#FF9E0F",
-  F79000: "#F79000",
-  E76092: "#E76092",
-  B567CA: "#B567CA",
-  "3EBFA5": "#3EBFA5",
-  FBA729: "#FBA729",
-  "3FC84C": "#3FC84C",
-  E4EBF8: "#E4EBF8",
-  "8ECB60": "#8ECB60",
-  "5EAEDA": "#5EAEDA",
+  "5eaeda": "#5eaeda",
+  "3fbdd6": "#3fbdd6",
+  f79000: "#f79000",
+  f8b200: "#f8b200",
+  "3f97f6": "#3f97f6",
+  e76092: "#e76092",
+  "3ebfa5": "#3ebfa5",
+  ff9e0f: "#ff9e0f",
+  fba729: "#fba729",
+  "6097fc": "#6097fc",
+  "55c041": "#55c041",
+  ff7043: "#ff7043",
+  f9c000: "#f9c000",
+  ff9800: "#ff9800",
+  a80ca8: "#a80ca8",
 };
 
 export default function ColorPickerComponent({ changeColor, entry, element }) {
@@ -49,14 +50,7 @@ export default function ColorPickerComponent({ changeColor, entry, element }) {
 
   useEffect(() => {
     const bo = getBusinessObject(element);
-    const color = [
-      "bpmn:StartEvent",
-      "bpmn:EndEvent",
-      "bpmn:IntermediateThrowEvent",
-      "bpmn:IntermediateCatchEvent",
-    ].includes(element.type)
-      ? bo && bo.di && bo.di.stroke
-      : bo && bo.di && bo.di.fill;
+    const color = bo && bo.di && bo.di.stroke;
     if (!color) return;
     setColor(color);
   }, [element]);

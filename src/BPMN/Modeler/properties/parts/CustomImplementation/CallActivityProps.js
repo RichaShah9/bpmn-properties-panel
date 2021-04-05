@@ -267,7 +267,7 @@ export default function CallActivityProps({
         </bpmn2:process>
         <bpmndi:BPMNDiagram id="BPMNDiagram_1">
           <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="${id}">
-            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1" bioc:stroke="#55c041">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1" bioc:stroke="#55c041" bioc:fill="#ccecc6">
               <dc:Bounds height="36.0" width="36.0" x="412.0" y="240.0" />
             </bpmndi:BPMNShape>
           </bpmndi:BPMNPlane>
@@ -404,8 +404,8 @@ export default function CallActivityProps({
                   return { calledElement: bo.calledElement };
                 },
                 set: function (e, values) {
-                  if(!values.calledElement || values.calledElement === "" ){
-                    setWkfModel(undefined)
+                  if (!values.calledElement || values.calledElement === "") {
+                    setWkfModel(undefined);
                   }
                   element.businessObject.calledElement = values.calledElement;
                   element.businessObject.calledElementBinding = bindingType;

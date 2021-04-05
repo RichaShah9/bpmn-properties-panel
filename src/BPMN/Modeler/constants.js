@@ -1,4 +1,28 @@
-export const TASKCOLOR = {
+export const FILL_COLORS = {
+  "bpmn:Task": "#cfe7f4",
+  "bpmn:UserTask": "#c5ebf3",
+  "bpmn:SendTask": "#fddeb3",
+  "bpmn:ReceiveTask": "#fde8b3",
+  "bpmn:ManualTask": "#c5e0fc",
+  "bpmn:BusinessRuleTask": "#f8cfde",
+  "bpmn:ServiceTask": "#c5ece4",
+  "bpmn:ScriptTask": "#ffeed4",
+  "bpmn:CallActivity": "#fee5bf",
+  "bpmn:SubProcess": "#E4EBF8",
+  "bpmn:SequenceFlow": "#8095B3",
+  "bpmn:StartEvent": "#ccecc6",
+  "bpmn:EndEvent": "#ffd4c7",
+  "bpmn:Gateway": "#fdecb3",
+  "bpmn:IntermediateThrowEvent": "#ffe0b3",
+  "bpmn:IntermediateCatchEvent": "#ffe0b3",
+  "bpmn:Participant": "#c8c8c8",
+  "bpmn:Lane": "#c8c8c8",
+  "bpmn:Group": "#c8c8c8",
+  "bpmn:Association": "#8095B3",
+  "bpmn:TextAnnotation": "#A9B1BD",
+};
+
+export const STROKE_COLORS = {
   "bpmn:Task": "#5EAEDA",
   "bpmn:UserTask": "#3FBDD6",
   "bpmn:SendTask": "#F79000",
@@ -8,8 +32,36 @@ export const TASKCOLOR = {
   "bpmn:ServiceTask": "#3EBFA5",
   "bpmn:ScriptTask": "#FF9E0F",
   "bpmn:CallActivity": "#FBA729",
-  "bpmn:SubProcess": "#E4EBF8",
+  "bpmn:SubProcess": "#6097fc",
   "bpmn:SequenceFlow": "#8095B3",
+  "bpmn:StartEvent": "#55c041",
+  "bpmn:EndEvent": "#ff7043",
+  "bpmn:Gateway": "#f9c000",
+  "bpmn:IntermediateThrowEvent": "#ff9800",
+  "bpmn:IntermediateCatchEvent": "#ff9800",
+  "bpmn:Participant": "#c8c8c8",
+  "bpmn:Lane": "#c8c8c8",
+  "bpmn:Group": "#c8c8c8",
+  "bpmn:Association": "#8095B3",
+  "bpmn:TextAnnotation": "#A9B1BD",
+};
+
+export const RELATIVE_FILL = {
+  "#5eaeda": "#cfe7f4",
+  "#3fbdd6": "#c5ebf3",
+  "#f79000": "#fddeb3",
+  "#f8b200": "#fde8b3",
+  "#3f97f6": "#c5e0fc",
+  "#e76092": "#f8cfde",
+  "#3ebfa5": "#c5ece4",
+  "#ff9e0f": "#ffeed4",
+  "#fba729": "#fee5bf",
+  "#6097fc": "#e4ebf8",
+  "#55c041": "#ccecc6",
+  "#ff7043": "#ffd4c7",
+  "#f9c000": "#fdecb3",
+  "#ff9800": "#ffe0b3",
+  "#a80ca8": "#eeceee"
 };
 
 export const USER_TASKS_TYPES = [

@@ -43,7 +43,12 @@ import {
 } from "./extra.js";
 import { getTranslations, getInfo } from "../../services/api";
 import { getBool } from "../../utils";
-import { TASKCOLOR, USER_TASKS_TYPES } from "./constants";
+import {
+  FILL_COLORS,
+  USER_TASKS_TYPES,
+  STROKE_COLORS,
+  RELATIVE_FILL,
+} from "./constants";
 
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
@@ -172,46 +177,12 @@ function setColors(element, forceUpdate = false) {
   ) {
     return;
   }
-  if (is(element, "bpmn:SequenceFlow")) {
-    element.businessObject.di.set("stroke", TASKCOLOR[element.type]);
-  } else if (is(element, "bpmn:StartEvent")) {
-    element.businessObject.di.set("stroke", "#55c041");
-  } else if (is(element, "bpmn:EndEvent")) {
-    element.businessObject.di.set("stroke", "#ff7043");
-  } else if (
-    isAny(element, [
-      "bpmn:IntermediateThrowEvent",
-      "bpmn:IntermediateCatchEvent",
-    ])
-  ) {
-    element.businessObject.di.set("stroke", "#ff9800");
-  } else if (is(element, "bpmn:SubProcess")) {
-    element.businessObject.di.set("stroke", "#92ACE2");
-    element.businessObject.di.set("fill", TASKCOLOR[element.type]);
-  } else if (is(element, ["bpmn:Gateway"])) {
-    element.businessObject.di.set("fill", "#f9c000");
-    element.businessObject.di.set("stroke", "white");
-  } else if (is(element, "bpmn:TextAnnotation")) {
-    element.businessObject.di.set("stroke", "#A9B1BD");
-  } else if (
-    isAny(element, [
-      "bpmn:UserTask",
-      "bpmn:SendTask",
-      "bpmn:ReceiveTask",
-      "bpmn:ManualTask",
-      "bpmn:BusinessRuleTask",
-      "bpmn:ServiceTask",
-      "bpmn:ScriptTask",
-    ])
-  ) {
-    element.businessObject.di.set("stroke", "#fff");
-    element.businessObject.di.set("fill", TASKCOLOR[element.type]);
-  } else if (is(element, "bpmn:CallActivity")) {
-    element.businessObject.di.set("stroke", "#54657D");
-    element.businessObject.di.set("fill", TASKCOLOR[element.type]);
-  } else if (is(element, "bpmn:Task")) {
-    element.businessObject.di.set("stroke", "#fff");
-    element.businessObject.di.set("fill", TASKCOLOR[element.type]);
+  if (is(element, ["bpmn:Gateway"])) {
+    element.businessObject.di.set("stroke", STROKE_COLORS["bpmn:Gateway"]);
+    element.businessObject.di.set("fill", FILL_COLORS["bpmn:Gateway"]);
+  } else {
+    element.businessObject.di.set("stroke", STROKE_COLORS[element.type]);
+    element.businessObject.di.set("fill", FILL_COLORS[element.type]);
   }
 }
 
@@ -417,7 +388,7 @@ function BpmnModelerComponent() {
         </bpmn2:process>
         <bpmndi:BPMNDiagram id="BPMNDiagram_1">
           <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1" bioc:stroke="#55c041">
+            <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1" bioc:stroke="#55c041" bioc:fill="#ccecc6">
               <dc:Bounds height="36.0" width="36.0" x="412.0" y="240.0" />
             </bpmndi:BPMNShape>
           </bpmndi:BPMNPlane>
@@ -768,20 +739,8 @@ function BpmnModelerComponent() {
     if (!selectedElement || !color) return;
     let modeling = bpmnModeler.get("modeling");
     let colors = {};
-    if (
-      selectedElement.type &&
-      selectedElement.type.toLowerCase().includes("event")
-    ) {
-      colors.stroke = color;
-    } else {
-      colors.fill = color;
-      colors.stroke =
-        selectedElement.type === "bpmn:CallActivity"
-          ? "#54657D"
-          : selectedElement.type === "bpmn:SubProcess"
-          ? "#92ACE2"
-          : "white";
-    }
+    colors.stroke = color;
+    colors.fill = RELATIVE_FILL[color.toLowerCase()];
     modeling.setColor(selectedElement, colors);
   };
 
