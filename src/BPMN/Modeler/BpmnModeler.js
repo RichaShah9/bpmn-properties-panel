@@ -1082,10 +1082,6 @@ function BpmnModelerComponent() {
   };
 
   const setCSSWidth = (width) => {
-    document.documentElement.style.setProperty(
-      "--bpmn-container-width",
-      `${width}px`
-    );
     setDrawerOpen(width === "0px" ? false : true);
   };
 
@@ -1290,15 +1286,6 @@ function BpmnModelerComponent() {
         </div>
       </div>
       <div>
-        <div
-          className="bpmn-property-toggle"
-          onClick={() => {
-            setWidth((width) => (width === 0 ? 380 : 0));
-            setCSSWidth(width === 0 ? 380 : 0);
-          }}
-        >
-          Properties Panel
-        </div>
         <Resizable
           style={resizeStyle}
           size={{ width, height }}
@@ -1351,6 +1338,15 @@ function BpmnModelerComponent() {
               </React.Fragment>
             </div>
           </Drawer>
+          <div
+            className="bpmn-property-toggle"
+            onClick={() => {
+              setWidth((width) => (width === 0 ? 380 : 0));
+              setCSSWidth(width === 0 ? 380 : 0);
+            }}
+          >
+            Properties Panel
+          </div>
         </Resizable>
         <div className="properties-panel-parent" id="js-properties-panel"></div>
       </div>
