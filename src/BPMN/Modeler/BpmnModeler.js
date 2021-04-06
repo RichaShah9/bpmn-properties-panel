@@ -504,7 +504,9 @@ function BpmnModelerComponent() {
           const viewElement = node.element;
           const businessObject = getBusinessObject(viewElement);
           const extensionElements = businessObject.extensionElements;
-
+          const nodeName =
+            (businessObject && businessObject.name) ||
+            (viewElement && viewElement.id);
           let extensionElementValues, camundaProperty;
           if (extensionElements && extensionElements.values) {
             camundaProperty = extensionElements.values.find(
@@ -574,7 +576,7 @@ function BpmnModelerComponent() {
                   (item) => item && (!item.itemName || !item.attributeName)
                 );
                 if (items.length < 1 || checkItems.length === items.length) {
-                  setAlertMessage(`Item is required in ${viewElement.id}`);
+                  setAlertMessage(`Item is required in ${nodeName}`);
                   alertOpen();
                   isValid = false;
                   return;
@@ -583,9 +585,7 @@ function BpmnModelerComponent() {
                   items.forEach((item) => {
                     let { itemName, attributeName, attributeValue } = item;
                     if (!itemName || !attributeName) {
-                      setAlertMessage(
-                        `Item name is required in ${viewElement.id}`
-                      );
+                      setAlertMessage(`Item name is required in ${nodeName}`);
                       alertOpen();
                       isValid = false;
                       return;
@@ -600,7 +600,7 @@ function BpmnModelerComponent() {
                       } else {
                         isValid = false;
                         setAlertMessage(
-                          `Item value is required in ${viewElement.id}`
+                          `Item value is required in ${nodeName}`
                         );
                         alertOpen();
                         return;
