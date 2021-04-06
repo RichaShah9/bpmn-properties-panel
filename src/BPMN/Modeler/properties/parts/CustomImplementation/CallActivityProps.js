@@ -284,6 +284,14 @@ export default function CallActivityProps({
       handleSnackbarClick("success", "New process added successfully");
       element.businessObject.calledElement = id;
       element.businessObject.$attrs["camunda:processId"] = id;
+      if (wkfModel.id) {
+        window.top.document
+          .getElementsByTagName("iframe")[0]
+          .contentWindow.parent.axelor.$openHtmlTab(
+            `wkf-editor/?id=${wkfModel.id}`,
+            translate("BPM editor")
+          );
+      }
     } else {
       handleSnackbarClick(
         "error",
