@@ -348,7 +348,7 @@ export default function ProcessConfiguration({
     const cloneProcessConfigList = [...(processConfigList || [])];
     cloneProcessConfigList[index] = {
       ...(cloneProcessConfigList[index] || {}),
-      [name]: (value && value[optionLabel]) || value,
+      [name]: (value && value[label]) || value,
     };
     if (name === "pathCondition") {
       cloneProcessConfigList[index] = {
@@ -383,13 +383,13 @@ export default function ProcessConfiguration({
       updateElement(model, "model", index);
 
       cloneProcessConfigList[index][`${name}Label`] = value
-        ? `${valueLabel || ""}${
-            value && value[optionLabel] ? ` (${value[optionLabel]})` : ""
+        ? `${value && value[label] ? `${value[label]}` : ""}${
+            valueLabel ? ` (${valueLabel})` : ""
           }`
         : undefined;
       updateElement(
-        `${valueLabel || ""}${
-          value && value[optionLabel] ? ` (${value[optionLabel]})` : ""
+        `${value && value[label] ? `${value[label]}` : ""}${
+          valueLabel ? ` (${valueLabel})` : ""
         }`,
         `${name}Label`,
         index
@@ -409,7 +409,7 @@ export default function ProcessConfiguration({
         updateElement(undefined, `metaModelFullName`, index);
       }
     }
-    updateElement((value && value[optionLabel]) || value, name, index);
+    updateElement((value && value[label]) || value, name, index);
     setProcessConfigList(cloneProcessConfigList);
   };
 
@@ -519,7 +519,7 @@ export default function ProcessConfiguration({
                             updateValue(
                               value,
                               "metaModel",
-                              undefined,
+                              "name",
                               key,
                               "title",
                               label
@@ -539,7 +539,7 @@ export default function ProcessConfiguration({
                             updateValue(
                               value,
                               "metaJsonModel",
-                              undefined,
+                              "name",
                               key,
                               "title",
                               label
