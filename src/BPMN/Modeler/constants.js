@@ -15,11 +15,6 @@ export const FILL_COLORS = {
   "bpmn:Gateway": "#fdecb3",
   "bpmn:IntermediateThrowEvent": "#ffe0b3",
   "bpmn:IntermediateCatchEvent": "#ffe0b3",
-  "bpmn:Participant": "#c8c8c8",
-  "bpmn:Lane": "#c8c8c8",
-  "bpmn:Group": "#c8c8c8",
-  "bpmn:Association": "#8095B3",
-  "bpmn:TextAnnotation": "#A9B1BD",
 };
 
 export const STROKE_COLORS = {
@@ -61,7 +56,7 @@ export const RELATIVE_FILL = {
   "#ff7043": "#ffd4c7",
   "#f9c000": "#fdecb3",
   "#ff9800": "#ffe0b3",
-  "#a80ca8": "#eeceee"
+  "#a80ca8": "#eeceee",
 };
 
 export const USER_TASKS_TYPES = [
