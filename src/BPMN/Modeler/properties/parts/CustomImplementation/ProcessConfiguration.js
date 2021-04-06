@@ -560,6 +560,7 @@ export default function ProcessConfiguration({
                             rootClass={classes.textFieldRoot}
                             labelClass={classes.textFieldLabel}
                             clearClassName={classes.clearClassName}
+                            disabled={getBool(processConfig.isStartModel)}
                             entry={{
                               id: `processPath_${key}`,
                               name: "processPath",

@@ -77,7 +77,8 @@ export default function TextField({
   type = "text",
   isLabel = true,
   readOnly = false,
-  clearClassName
+  clearClassName,
+  disabled = false,
 }) {
   const classes = useStyles();
   const {
@@ -165,6 +166,7 @@ export default function TextField({
           name={modelProperty}
           value={value || ""}
           onChange={(e) => setValue(e.target.value)}
+          disabled={disabled}
           className={classnames(
             classes.input,
             isError && classes.error,
@@ -174,7 +176,10 @@ export default function TextField({
         />
         {errorMessage && <Description desciption={errorMessage} type="error" />}
         {canRemove && value && (
-          <button onClick={handleClear} className={classnames(classes.clearButton, clearClassName)}>
+          <button
+            onClick={handleClear}
+            className={classnames(classes.clearButton, clearClassName)}
+          >
             <Close className={classes.clear} />
           </button>
         )}
