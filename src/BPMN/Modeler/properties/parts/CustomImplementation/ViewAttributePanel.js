@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import classnames from "classnames";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Table,
@@ -139,14 +138,9 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ViewAttributePanel({
-  handleAdd,
-  element,
-  openSnackbar,
-}) {
+export default function ViewAttributePanel({ handleAdd, element }) {
   const classes = useStyles();
   const [row, setRow] = useState(null);
-  const [isAdd, setAdd] = useState(openSnackbar ? true : false);
 
   const addModelView = () => {
     setRow({
@@ -175,6 +169,7 @@ export default function ViewAttributePanel({
       [`${name}Label`]: valueLabel,
     };
     setRow({ ...cloneRow });
+    handlePropertyAdd();
   };
 
   const addItems = (index) => {
@@ -223,6 +218,7 @@ export default function ViewAttributePanel({
       items,
     };
     setRow({ ...cloneRow });
+    handlePropertyAdd();
   };
 
   const removeItem = (valueIndex, itemIndex) => {
@@ -235,6 +231,7 @@ export default function ViewAttributePanel({
       items,
     };
     setRow({ ...cloneRow });
+    handlePropertyAdd();
   };
 
   const removeCard = (index) => {
@@ -242,6 +239,7 @@ export default function ViewAttributePanel({
     let values = cloneRow.values;
     values.splice(index, 1);
     setRow({ ...cloneRow });
+    handlePropertyAdd();
   };
 
   function getProcessConfig() {
@@ -327,46 +325,34 @@ export default function ViewAttributePanel({
         camundaProperty.values = [...elements];
       }
     }
-    let isValid = true;
     if (row.values && row.values.length > 0) {
       row.values &&
         row.values.forEach((value, index) => {
           const { model, items = [] } = value;
           if (!model) {
-            isValid = false;
             updateErrorValue(index, "model");
-            return;
           }
           if (items.length > 0) {
             items.forEach((item, itemIndex) => {
               let { itemName, attributeName, attributeValue } = item;
               if (!itemName) {
-                isValid = false;
                 updateItemErrorValues(index, itemIndex, "itemName");
-                return;
               }
               if (!attributeName) {
-                isValid = false;
                 updateItemErrorValues(index, itemIndex, "attributeName");
-                return;
               }
               if (!attributeValue) {
                 if (
                   !["readonly", "hidden", "required"].includes(attributeName)
                 ) {
-                  isValid = false;
                   updateItemErrorValues(index, itemIndex, "attributeValue");
-                  return;
                 }
               }
             });
           }
         });
     }
-    if (isValid) {
-      setAdd(true);
-      handleAdd(row);
-    }
+    handleAdd(row);
   };
 
   function getKeyData(data, key) {
@@ -453,12 +439,6 @@ export default function ViewAttributePanel({
       });
     setRow(createData(values));
   }, [element]);
-
-  useEffect(() => {
-    if (openSnackbar) {
-      setAdd(true);
-    }
-  }, [openSnackbar]);
 
   return (
     <div>
@@ -579,7 +559,7 @@ export default function ViewAttributePanel({
                                 <Button
                                   className={classes.button}
                                   onClick={() => addItems(index)}
-                                  disabled={!val.model || isAdd}
+                                  disabled={!val.model}
                                   startIcon={<Add />}
                                 >
                                   New
@@ -863,21 +843,9 @@ export default function ViewAttributePanel({
         </div>
       )}
       <div className={classes.icons}>
-        <IconButton
-          className={classes.iconButton}
-          disabled={isAdd}
-          onClick={addModelView}
-        >
+        <IconButton className={classes.iconButton} onClick={addModelView}>
           <Add fontSize="small" />
         </IconButton>
-        <Button
-          className={classnames(classes.button, classes.addButton)}
-          variant="outlined"
-          onClick={handlePropertyAdd}
-          color="primary"
-        >
-          Ok
-        </Button>
       </div>
     </div>
   );

@@ -228,8 +228,8 @@ export default function SelectComponent({
               : option["name"]
               ? "name"
               : "name";
-          } else if(name === "wkfModel"){
-            optionName = `${option["name"]} ${option["processId"]}`
+          } else if (name === "wkfModel") {
+            optionName = `${option["name"]} ${option["processId"]}`;
           } else {
             optionName = option[optionLabel]
               ? optionLabel
@@ -250,7 +250,14 @@ export default function SelectComponent({
                   self.findIndex((t) => t[optionLabel] === val[optionLabel])
               );
           }
-          update(values, value && value[optionLabel]);
+          update(
+            values,
+            name === "itemName"
+              ? value["label"] || value["title"]
+              : optionLabelSecondary === "title"
+              ? value && value[optionLabelSecondary]
+              : value && value[optionLabel]
+          );
         }}
         name={name}
         onInputChange={(e, val) => setsearchText(val)}
@@ -305,8 +312,8 @@ export default function SelectComponent({
                 : option;
           } else if (name === "dmnModel") {
             optionName = `${option["name"]} (${option["decisionId"]})`;
-          } else if(name === "wkfModel"){
-            optionName = `${option["name"]} (${option["processId"]})`
+          } else if (name === "wkfModel") {
+            optionName = `${option["name"]} (${option["processId"]})`;
           } else {
             optionName =
               option[optionLabel] && option[optionLabelSecondary]

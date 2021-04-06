@@ -193,6 +193,7 @@ function BpmnModelerComponent() {
   const [openDelopyDialog, setDelopyDialog] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [isTimerTask, setIsTimerTask] = useState(true);
+  const [alertMessage, setAlertMessage] = useState("Item is required.");
   const [ids, setIds] = useState({
     oldIds: null,
     currentIds: null,
@@ -455,6 +456,19 @@ function BpmnModelerComponent() {
     };
   };
 
+  function getKeyData(data, key) {
+    return (
+      data &&
+      data.reduce((arrs, item) => {
+        if (item.name === key) {
+          arrs.push([]);
+        }
+        arrs[arrs.length - 1] && arrs[arrs.length - 1].push(item);
+        return arrs;
+      }, [])
+    );
+  }
+
   const onSave = () => {
     if (!isTimerTask) {
       const elementRegistry = bpmnModeler.get("elementRegistry");
@@ -475,6 +489,130 @@ function BpmnModelerComponent() {
         return;
       }
     }
+    let elementRegistry = bpmnModeler.get("elementRegistry");
+    let nodes = elementRegistry && elementRegistry._elements;
+    let isValid = true;
+    nodes &&
+      Object.values(nodes).forEach((node) => {
+        if (
+          [
+            "bpmn:EndEvent",
+            "bpmn:IntermediateCatchEvent",
+            ...USER_TASKS_TYPES,
+          ].includes(node.element.type)
+        ) {
+          const viewElement = node.element;
+          const businessObject = getBusinessObject(viewElement);
+          const extensionElements = businessObject.extensionElements;
+
+          let extensionElementValues, camundaProperty;
+          if (extensionElements && extensionElements.values) {
+            camundaProperty = extensionElements.values.find(
+              (e) => e.$type === "camunda:Properties"
+            );
+            extensionElementValues = camundaProperty && camundaProperty.values;
+          }
+          if (extensionElementValues && extensionElementValues.length < 1)
+            return;
+          let models = getKeyData(extensionElementValues, "model");
+          let values = [];
+          models &&
+            models.forEach((modelArr) => {
+              let value = { items: [] };
+              let items = getKeyData(modelArr, "item");
+              modelArr.forEach((ele) => {
+                if (ele.name === "model") {
+                  value.model = { model: ele.value, fullName: ele.value };
+                }
+                if (ele.name === "modelName") {
+                  value.model = { ...value.model, name: ele.value };
+                }
+                if (ele.name === "modelType") {
+                  value.model = { ...value.model, type: ele.value };
+                }
+                if (ele.name === "modelLabel") {
+                  value.modelLabel = ele.value;
+                  value.model = { ...value.model, title: ele.value };
+                }
+                if (ele.name === "view") {
+                  value.view = { name: ele.value };
+                }
+                if (ele.name === "viewLabel") {
+                  value.viewLabel = ele.value;
+                  value.view = { ...value.view, title: ele.value };
+                }
+                if (ele.name === "roles") {
+                  if (!ele.value) return;
+                  const roles = ele.value.split(",");
+                  let valueRoles = [];
+                  roles.forEach((role) => {
+                    valueRoles.push({ name: role });
+                  });
+                  value.roles = valueRoles;
+                }
+              });
+
+              items &&
+                items.forEach((item) => {
+                  value.items.push({
+                    itemName: {
+                      name: item[0] && item[0].value,
+                      label: item[2] && item[2].value,
+                    },
+                    itemNameLabel: item[2] && item[2].value,
+                    attributeName: item[1] && item[1].name,
+                    attributeValue: item[1] && item[1].value,
+                  });
+                });
+              values.push(value);
+            });
+          if (values && values.length > 0) {
+            values &&
+              values.forEach((value) => {
+                const { items = [] } = value;
+                const checkItems = items.filter(
+                  (item) => item && (!item.itemName || !item.attributeName)
+                );
+                if (items.length < 1 || checkItems.length === items.length) {
+                  setAlertMessage(`Item is required in ${viewElement.id}`);
+                  alertOpen();
+                  isValid = false;
+                  return;
+                }
+                if (items.length > 0) {
+                  items.forEach((item) => {
+                    let { itemName, attributeName, attributeValue } = item;
+                    if (!itemName || !attributeName) {
+                      setAlertMessage(
+                        `Item name is required in ${viewElement.id}`
+                      );
+                      alertOpen();
+                      isValid = false;
+                      return;
+                    }
+                    if (!attributeValue) {
+                      if (
+                        ["readonly", "hidden", "required"].includes(
+                          attributeName
+                        )
+                      ) {
+                        attributeValue = false;
+                      } else {
+                        isValid = false;
+                        setAlertMessage(
+                          `Item value is required in ${viewElement.id}`
+                        );
+                        alertOpen();
+                        return;
+                      }
+                    }
+                  });
+                }
+              });
+          }
+        }
+      });
+    if (!isValid) return;
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
@@ -896,7 +1034,6 @@ function BpmnModelerComponent() {
   const handleAdd = (row) => {
     if (!row) return;
     const { values = [] } = row;
-    let isValid = true;
     if (values && values.length > 0) {
       values &&
         values.forEach((value) => {
@@ -908,14 +1045,6 @@ function BpmnModelerComponent() {
             roles = [],
             items = [],
           } = value;
-          const checkItems = items.filter(
-            (item) => item && (!item.itemName || !item.attributeName)
-          );
-          if (items.length < 1 || checkItems.length === items.length) {
-            alertOpen();
-            isValid = false;
-            return;
-          }
           if (model) {
             addProperty(
               "model",
@@ -943,33 +1072,12 @@ function BpmnModelerComponent() {
                 attributeName,
                 attributeValue,
               } = item;
-              if (!itemName || !attributeName) {
-                isValid = false;
-                alertOpen();
-                return;
-              }
-              if (!attributeValue) {
-                if (
-                  ["readonly", "hidden", "required"].includes(attributeName)
-                ) {
-                  attributeValue = false;
-                } else {
-                  isValid = false;
-                  alertOpen();
-                  return;
-                }
-              }
               addProperty("item", itemName.name);
               addProperty(attributeName, attributeValue);
               addProperty("itemLabel", itemNameLabel);
             });
           }
         });
-      if (isValid) {
-        onSave();
-      }
-    } else {
-      onSave();
     }
   };
 
@@ -1267,7 +1375,7 @@ function BpmnModelerComponent() {
         <AlertDialog
           openAlert={openAlert}
           alertClose={alertClose}
-          message="Item is required."
+          message={alertMessage}
           title="Error"
         />
       )}
