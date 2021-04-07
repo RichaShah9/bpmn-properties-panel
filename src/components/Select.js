@@ -252,7 +252,7 @@ export default function SelectComponent({
           }
           update(
             values,
-            name === "itemName"
+            name === "itemName" && value
               ? value["label"] || value["title"]
               : optionLabelSecondary === "title"
               ? value && value[optionLabelSecondary]
@@ -306,9 +306,11 @@ export default function SelectComponent({
           if (name === "itemName" || name === "userFieldPath") {
             optionName =
               option["label"] || option["title"]
-                ? `${option["label"] || option["title"]} (${option["name"]})`
+                ? `${option["label"] || option["title"]}${
+                    option["name"] ? ` (${option["name"]})` : ""
+                  }`
                 : typeof option === "object"
-                ? `(${option["name"]})`
+                ? `${option["name"] ? `(${option["name"]})` : ""}`
                 : option;
           } else if (name === "dmnModel") {
             optionName = `${option["name"]} (${option["decisionId"]})`;

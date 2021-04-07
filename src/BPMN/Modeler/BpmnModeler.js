@@ -1072,7 +1072,7 @@ function BpmnModelerComponent() {
                 attributeName,
                 attributeValue,
               } = item;
-              addProperty("item", itemName.name);
+              addProperty("item", itemName && itemName.name);
               addProperty(attributeName, attributeValue);
               addProperty("itemLabel", itemNameLabel);
             });

@@ -183,6 +183,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
       ],
     };
     setRow({ ...cloneRow });
+    handlePropertyAdd();
   };
 
   const updateItemErrorValues = (index, itemIndex, name) => {
