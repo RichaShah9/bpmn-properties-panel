@@ -494,6 +494,18 @@ function BpmnModelerComponent() {
     let isValid = true;
     nodes &&
       Object.values(nodes).forEach((node) => {
+        const viewElement = node.element;
+        const businessObject = getBusinessObject(viewElement);
+        const extensionElements = businessObject.extensionElements;
+        const nodeName =
+          (businessObject && businessObject.name) ||
+          (viewElement && viewElement.id);
+        if (!viewElement.id) {
+          setAlertMessage(`Id is required in ${nodeName}`);
+          alertOpen();
+          isValid = false;
+          return;
+        }
         if (
           [
             "bpmn:EndEvent",
@@ -501,12 +513,6 @@ function BpmnModelerComponent() {
             ...USER_TASKS_TYPES,
           ].includes(node.element.type)
         ) {
-          const viewElement = node.element;
-          const businessObject = getBusinessObject(viewElement);
-          const extensionElements = businessObject.extensionElements;
-          const nodeName =
-            (businessObject && businessObject.name) ||
-            (viewElement && viewElement.id);
           let extensionElementValues, camundaProperty;
           if (extensionElements && extensionElements.values) {
             camundaProperty = extensionElements.values.find(
