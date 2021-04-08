@@ -334,9 +334,12 @@ function BpmnModelerComponent() {
           const { element } = value;
           if (!element) return;
           if (modeling && element.businessObject && element.businessObject.di) {
+            let type = is(element, ["bpmn:Gateway"])
+              ? "bpmn:Gateway"
+              : element.type;
             modeling.setColor(element, {
-              stroke: element.businessObject.di.stroke,
-              fill: element.businessObject.di.fill,
+              stroke: element.businessObject.di.stroke || STROKE_COLORS[type],
+              fill: element.businessObject.di.fill || FILL_COLORS[type],
             });
           }
           if (["Shape", "Root"].includes(element.constructor.name)) {
