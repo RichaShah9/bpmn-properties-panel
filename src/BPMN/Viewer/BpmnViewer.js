@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import BpmnModeler from "bpmn-js/lib/Modeler";
-import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 
 import Service from "../../services/Service";
 import Tooltip from "../../components/Tooltip";
@@ -13,6 +13,49 @@ import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import "../css/bpmn.css";
 
 let bpmnViewer = null;
+
+export const FILL_COLORS = {
+  "bpmn:Task": "#cfe7f4",
+  "bpmn:UserTask": "#c5ebf3",
+  "bpmn:SendTask": "#fddeb3",
+  "bpmn:ReceiveTask": "#fde8b3",
+  "bpmn:ManualTask": "#c5e0fc",
+  "bpmn:BusinessRuleTask": "#f8cfde",
+  "bpmn:ServiceTask": "#c5ece4",
+  "bpmn:ScriptTask": "#ffeed4",
+  "bpmn:CallActivity": "#fee5bf",
+  "bpmn:SubProcess": "#E4EBF8",
+  "bpmn:SequenceFlow": "#8095B3",
+  "bpmn:StartEvent": "#ccecc6",
+  "bpmn:EndEvent": "#ffd4c7",
+  "bpmn:Gateway": "#fdecb3",
+  "bpmn:IntermediateThrowEvent": "#ffe0b3",
+  "bpmn:IntermediateCatchEvent": "#ffe0b3",
+};
+
+export const STROKE_COLORS = {
+  "bpmn:Task": "#5EAEDA",
+  "bpmn:UserTask": "#3FBDD6",
+  "bpmn:SendTask": "#F79000",
+  "bpmn:ReceiveTask": "#F8B200",
+  "bpmn:ManualTask": "#3F97F6",
+  "bpmn:BusinessRuleTask": "#E76092",
+  "bpmn:ServiceTask": "#3EBFA5",
+  "bpmn:ScriptTask": "#FF9E0F",
+  "bpmn:CallActivity": "#FBA729",
+  "bpmn:SubProcess": "#6097fc",
+  "bpmn:SequenceFlow": "#8095B3",
+  "bpmn:StartEvent": "#55c041",
+  "bpmn:EndEvent": "#ff7043",
+  "bpmn:Gateway": "#f9c000",
+  "bpmn:IntermediateThrowEvent": "#ff9800",
+  "bpmn:IntermediateCatchEvent": "#ff9800",
+  "bpmn:Participant": "#c8c8c8",
+  "bpmn:Lane": "#c8c8c8",
+  "bpmn:Group": "#c8c8c8",
+  "bpmn:Association": "#8095B3",
+  "bpmn:TextAnnotation": "#A9B1BD",
+};
 
 const updateTranslations = async (nodes) => {
   nodes &&
@@ -138,14 +181,32 @@ const openDiagramImage = (taskIds, diagramXml, activityCounts) => {
     let nodes = elementRegistry && elementRegistry._elements;
     if (!nodes) return;
     updateTranslations(nodes);
+    Object.entries(nodes).forEach(([key, value]) => {
+      if (!value) return;
+      const { element } = value;
+      if (!element) return;
+      let modeling = bpmnViewer.get("modeling");
+      if (modeling && element.businessObject && element.businessObject.di) {
+        let type = is(element, ["bpmn:Gateway"])
+          ? "bpmn:Gateway"
+          : element.type;
+        modeling.setColor(element, {
+          stroke: element.businessObject.di.stroke || STROKE_COLORS[type],
+          fill: element.businessObject.di.fill || FILL_COLORS[type],
+        });
+      }
+    });
     let filteredElements = Object.keys(nodes).filter(
       (element) => taskIds && taskIds.includes(element)
     );
     filteredElements.forEach((element) => {
-      let modeling = bpmnViewer.get("modeling");
-      modeling.setColor(nodes[element].element, {
-        stroke: "#006400",
-      });
+      const outgoingGfx = elementRegistry.getGraphics(element);
+      const visual = outgoingGfx && outgoingGfx.querySelector(".djs-visual");
+      const rec = visual && visual.childNodes && visual.childNodes[0];
+      if (rec && rec.style) {
+        rec.style.strokeWidth = "5px";
+        rec.style.stroke = "#006400";
+      }
     });
 
     const activities = (activityCounts && activityCounts.split(",")) || [];
