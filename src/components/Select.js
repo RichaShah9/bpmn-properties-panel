@@ -310,7 +310,7 @@ export default function SelectComponent({
                     option["name"] ? ` (${option["name"]})` : ""
                   }`
                 : typeof option === "object"
-                ? `${option["name"] ? `(${option["name"]})` : ""}`
+                ? option["name"] ? `(${option["name"]})` : undefined
                 : option;
           } else if (name === "dmnModel") {
             optionName = `${option["name"]} (${option["decisionId"]})`;

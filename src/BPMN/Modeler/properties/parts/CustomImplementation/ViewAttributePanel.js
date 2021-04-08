@@ -633,7 +633,11 @@ export default function ViewAttributePanel({ handleAdd, element }) {
                                                   )
                                                 }
                                                 validate={(values) => {
-                                                  if (!values.itemName) {
+                                                  if (
+                                                    !values.itemName ||
+                                                    (!values.itemName.name &&
+                                                      !values.itemName.label)
+                                                  ) {
                                                     return {
                                                       itemName:
                                                         "Must provide a value",
