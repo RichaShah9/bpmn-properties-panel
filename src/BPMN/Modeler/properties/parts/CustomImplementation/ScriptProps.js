@@ -491,7 +491,7 @@ export default function ScriptProps({ element, index, label }) {
               }
             },
             validate: function (e, values) {
-              if (!values.scriptResultVariable) {
+              if (!values.scriptResultVariable && isQuery) {
                 return { scriptResultVariable: "Must provide a value" };
               }
             },
