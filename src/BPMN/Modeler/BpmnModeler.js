@@ -1080,10 +1080,12 @@ function BpmnModelerComponent() {
                 itemNameLabel,
                 attributeName,
                 attributeValue,
+                permanent
               } = item;
               addProperty("item", itemName && itemName.name);
               addProperty(attributeName, attributeValue);
               addProperty("itemLabel", itemNameLabel);
+              addProperty("permanent", permanent || false);
             });
           }
         });

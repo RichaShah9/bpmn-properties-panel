@@ -18,14 +18,14 @@ import { Add, Close, ReportProblem } from "@material-ui/icons";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../../../components/Select";
-import { TextField } from "../../components";
+import { TextField, Checkbox } from "../../components";
 import {
   getModels,
   getViews,
   getItems,
   getRoles,
 } from "../../../../../services/api";
-import { translate } from "../../../../../utils";
+import { translate, getBool } from "../../../../../utils";
 
 const Ids = require("ids").default;
 
@@ -135,6 +135,10 @@ const useStyles = makeStyles({
   icons: {
     display: "flex",
     flexDirection: "column",
+  },
+  checkbox: {
+    marginTop: 0,
+    justifyContent: "center",
   },
 });
 
@@ -320,6 +324,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
             "domain",
             "itemLabel",
             "active",
+            "permanent"
           ].includes(val.name)
       );
       if (camundaProperty) {
@@ -434,6 +439,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
               itemNameLabel: item[2] && item[2].value,
               attributeName: item[1] && item[1].name,
               attributeValue: item[1] && item[1].value,
+              permanent: item[3] && item[3].value,
             });
           });
         values.push(value);
@@ -593,6 +599,12 @@ export default function ViewAttributePanel({ handleAdd, element }) {
                                           align="center"
                                         >
                                           Value
+                                        </TableCell>
+                                        <TableCell
+                                          className={classes.tableHead}
+                                          align="center"
+                                        >
+                                          Permanent
                                         </TableCell>
                                         <TableCell
                                           className={classes.tableHead}
@@ -811,6 +823,35 @@ export default function ViewAttributePanel({ handleAdd, element }) {
                                                     }}
                                                   />
                                                 )}
+                                            </TableCell>
+                                            <TableCell
+                                              align="center"
+                                              className={classes.tableCell}
+                                            >
+                                              <Checkbox
+                                                className={classes.checkbox}
+                                                entry={{
+                                                  id: `permanent-model-${key}`,
+                                                  modelProperty: "permanent",
+                                                  get: function () {
+                                                    return {
+                                                      permanent: getBool(
+                                                        item.permanent
+                                                      ),
+                                                    };
+                                                  },
+                                                  set: function (e, value) {
+                                                    handleItems(
+                                                      !value.permanent,
+                                                      "permanent",
+                                                      undefined,
+                                                      index,
+                                                      key
+                                                    );
+                                                  },
+                                                }}
+                                                element={element}
+                                              />
                                             </TableCell>
                                             <TableCell
                                               align="center"
