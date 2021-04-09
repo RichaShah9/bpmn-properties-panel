@@ -6,7 +6,9 @@ import ImplementationTypeHelper from "bpmn-js-properties-panel/lib/helper/Implem
 import find from "lodash/find";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
+import { Edit } from "@material-ui/icons";
 
+import MapperBuilder from "../../../mapper-builder/App";
 import { translate } from "../../../../../utils";
 import {
   ExtensionElementTable,
@@ -29,6 +31,23 @@ const useStyles = makeStyles({
   divider: {
     marginTop: 15,
     borderTop: "1px dotted #ccc",
+  },
+  editIcon: {
+    color: "#58B423",
+    marginLeft: 5,
+  },
+  edit: {
+    cursor: "pointer",
+    marginTop: 18.6,
+    display: "flex",
+  },
+  mapperBuilder: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  textbox: {
+    width: "100%",
   },
 });
 
@@ -107,9 +126,63 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
   const [timerDefinitionType, setTimerDefinitionType] = useState("");
   const [taskOptions, setTaskOptions] = useState(null);
   const [executionOptions, setExecutionOptions] = useState(null);
+  const [open, setOpen] = React.useState(false);
 
   const classes = useStyles();
   const isSequenceFlow = ImplementationTypeHelper.isSequenceFlow(element);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const onSave = (expr) => {
+    const listener = getListener();
+    if (!expr) {
+      listener.script.value = undefined;
+      listener.script.resource = undefined;
+      listener.script.scriptFormat = undefined;
+      listener.script.scriptValue = undefined;
+      handleClose();
+      return;
+    }
+    if (!listener.script) {
+      listener.script =
+        listener.script ||
+        elementHelper.createElement(
+          "camunda:Script",
+          {
+            scriptFormat: "axelor",
+            value: expr.resultField,
+            scriptValue: expr.resultMetaField,
+          },
+          getBO(),
+          bpmnFactory
+        );
+    } else {
+      listener.script.value = expr.resultField;
+      listener.script.resource = undefined;
+      listener.script.scriptFormat = "axelor";
+      listener.script.scriptValue = expr.resultMetaField;
+    }
+    handleClose();
+  };
+
+  const getExpression = () => {
+    const listener = getListener();
+    if (!listener && !(listener && listener.script))
+      return {
+        resultField: undefined,
+        resultMetaField: undefined,
+      };
+    return {
+      resultField: listener.script && listener.script.value,
+      resultMetaField: listener.script && listener.script.scriptValue,
+    };
+  };
 
   const getExecutionOptions = () => {
     const executionListenerEventTypeOptions = ImplementationTypeHelper.isSequenceFlow(
@@ -471,46 +544,64 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                 }}
               />
             )}
-            <Textbox
-              element={element}
-              rows={3}
-              entry={{
-                id: "script",
-                label: translate("Script"),
-                modelProperty: "script",
-                get: function () {
-                  const listener = getListener();
-                  if (listener && listener.script) {
-                    return { script: listener.script.value };
-                  }
-                },
-                set: function (e, values) {
-                  const listener = getListener();
-                  if (!listener.script) {
-                    listener.script =
-                      listener.script ||
-                      elementHelper.createElement(
-                        "camunda:Script",
-                        {
-                          scriptFormat: "axelor",
-                          value: values.script,
-                        },
-                        getBO(),
-                        bpmnFactory
-                      );
-                  } else {
-                    listener.script.value = values.script;
-                    listener.script.resource = undefined;
-                    listener.script.scriptFormat = "axelor";
-                  }
-                },
-                validate: function (e, values) {
-                  if (!values.script) {
-                    return { script: "Must provide a value" };
-                  }
-                },
-              }}
-            />
+            <div className={classes.mapperBuilder}>
+              <Textbox
+                element={element}
+                rows={3}
+                className={classes.textbox}
+                entry={{
+                  id: "script",
+                  label: translate("Script"),
+                  modelProperty: "script",
+                  get: function () {
+                    const listener = getListener();
+                    if (listener && listener.script) {
+                      return { script: listener.script.value };
+                    }
+                  },
+                  set: function (e, values) {
+                    const listener = getListener();
+                    if (!listener.script) {
+                      listener.script =
+                        listener.script ||
+                        elementHelper.createElement(
+                          "camunda:Script",
+                          {
+                            scriptFormat: "axelor",
+                            value: values.script,
+                          },
+                          getBO(),
+                          bpmnFactory
+                        );
+                    } else {
+                      listener.script.value = values.script;
+                      listener.script.resource = undefined;
+                      listener.script.scriptFormat = "axelor";
+                    }
+                  },
+                  validate: function (e, values) {
+                    if (!values.script) {
+                      return { script: "Must provide a value" };
+                    }
+                  },
+                }}
+              />
+              {selectedExecutionEntity === 0 ||
+                (selectedExecutionEntity && (
+                  <div className={classes.edit}>
+                    <Edit
+                      className={classes.editIcon}
+                      onClick={handleClickOpen}
+                    />
+                    <MapperBuilder
+                      open={open}
+                      handleClose={handleClose}
+                      onSave={onSave}
+                      params={() => getExpression()}
+                    />
+                  </div>
+                ))}
+            </div>
             {eventType === "timeout" && (
               <React.Fragment>
                 <SelectBox

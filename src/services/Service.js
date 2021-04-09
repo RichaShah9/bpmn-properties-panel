@@ -109,6 +109,16 @@ export class Service {
     const url = "/ws/meta/view/fields";
     return this.post(url, data);
   }
+
+  fetchFields(entity) {
+    const url = `/ws/meta/fields/${entity}`;
+    return this.get(url);
+  }
+
+  fetchRecord(entity, id, data = {}) {
+    const url = `ws/rest/${entity}/${id}/fetch`;
+    return this.post(url, data);
+  }
 }
 
 export default new Service();

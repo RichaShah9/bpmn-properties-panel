@@ -14,6 +14,7 @@ import { Edit } from "@material-ui/icons";
 
 import Select from "../../../../../components/Select";
 import ExpressionBuilder from "../../../expression-builder";
+import MapperBuilder from "../../../mapper-builder/App";
 import {
   getCustomModels,
   getMetaModels,
@@ -84,6 +85,7 @@ export default function ScriptProps({ element, index, label }) {
   const [isDefaultFormVisible, setDefaultFormVisible] = useState(false);
   const [isReadOnly, setReadOnly] = useState(false);
   const [openAlert, setAlert] = useState(false);
+  const [openMapper, setMapper] = useState(false);
   const classes = useStyles();
 
   const openAlertDialog = () => {
@@ -91,11 +93,37 @@ export default function ScriptProps({ element, index, label }) {
   };
 
   const handleClickOpen = () => {
+    setMapper(false);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleMapperOpen = () => {
+    setOpen(false);
+    setMapper(true);
+  };
+
+  const handleCloseMapper = () => {
+    setMapper(false);
+  };
+
+  const onSave = (expr) => {
+    const { resultField, resultMetaField } = expr || {};
+    element.businessObject.script = resultField;
+    element.businessObject.scriptFormat = "axelor";
+    setProperty("scriptValue", resultMetaField);
+    handleCloseMapper();
+  };
+
+  const getExpression = () => {
+    return {
+      resultField:
+        element && element.businessObject && element.businessObject.script,
+      resultMetaField: getProperty("scriptValue"),
+    };
   };
 
   function getProcessConfig(type) {
@@ -400,9 +428,14 @@ export default function ScriptProps({ element, index, label }) {
               },
             }}
           />
-          {isQuery && (
-            <div className={classes.new}>
-              <Edit className={classes.newIcon} onClick={handleClickOpen} />
+          <div className={classes.new}>
+            <Edit
+              className={classes.newIcon}
+              onClick={() => {
+                isQuery ? handleClickOpen() : handleMapperOpen();
+              }}
+            />
+            {isQuery ? (
               <ExpressionBuilder
                 open={open}
                 handleClose={() => handleClose()}
@@ -443,35 +476,42 @@ export default function ScriptProps({ element, index, label }) {
                 element={element}
                 title="Add Query"
               />
-              <Dialog
-                open={openAlert}
-                onClose={() => setAlert(false)}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-                classes={{
-                  paper: classes.dialog,
-                }}
-              >
-                <DialogTitle id="alert-dialog-title">
-                  <label className={classes.title}>Error</label>
-                </DialogTitle>
-                <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
-                    Add all values
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button
-                    onClick={() => setAlert(false)}
-                    color="primary"
-                    autoFocus
-                  >
-                    Ok
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </div>
-          )}
+            ) : (
+              <MapperBuilder
+                open={openMapper}
+                handleClose={handleCloseMapper}
+                onSave={onSave}
+                params={() => getExpression()}
+              />
+            )}
+            <Dialog
+              open={openAlert}
+              onClose={() => setAlert(false)}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+              classes={{
+                paper: classes.dialog,
+              }}
+            >
+              <DialogTitle id="alert-dialog-title">
+                <label className={classes.title}>Error</label>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  Add all values
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => setAlert(false)}
+                  color="primary"
+                  autoFocus
+                >
+                  Ok
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
         </div>
         <TextField
           element={element}

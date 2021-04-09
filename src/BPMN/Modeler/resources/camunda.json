@@ -645,6 +645,11 @@
           "type": "String"
         },
         {
+          "name": "scriptValue",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
           "name": "value",
           "isBody": true,
           "type": "String"
