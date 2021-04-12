@@ -123,7 +123,7 @@ export default function AutoComplete(props) {
           option && option[optionLabelKey]
         })`
       : (option && option.type) === "metaModel"
-      ? `${option && option.title} (${
+      ? `${option && option["title"] ? option["title"] : ""} (${
           option && option[optionLabelKey] ? option[optionLabelKey] : ""
         })` || ""
       : option
