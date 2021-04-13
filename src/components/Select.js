@@ -113,9 +113,9 @@ export default function SelectComponent({
         return;
       }
       return fetchMethod(criteria).then((res) => {
+        setLoading(false);
         if (res) {
           setOptions(res || []);
-          setLoading(false);
         }
       });
     },
