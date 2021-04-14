@@ -240,14 +240,17 @@ export default function UserTaskProps({ element, index, label }) {
               },
               set: function (e, values) {
                 let oldVal = getProperty("camunda:completedIf");
-                let completedIfValue = getProperty("camunda:completedIfValue")
+                let completedIfValue = getProperty("camunda:completedIfValue");
                 let currentVal = values["completedIf"];
                 (currentVal || "").replace(/[\u200B-\u200D\uFEFF]/g, "");
-                if(!completedIfValue && (getLowerCase(oldVal) !== getLowerCase(currentVal))){
+                if (
+                  !completedIfValue &&
+                  getLowerCase(oldVal) !== getLowerCase(currentVal)
+                ) {
                   setProperty("camunda:completedIf", completedIf);
                   setProperty("camunda:completedIfValue", undefined);
                   setProperty("camunda:completedIfCombinator", undefined);
-                }else{
+                } else {
                   if (getLowerCase(oldVal) !== getLowerCase(currentVal)) {
                     setCompletedIf(currentVal);
                     setAlertMessage(
