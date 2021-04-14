@@ -7,9 +7,17 @@ import find from "lodash/find";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { Edit } from "@material-ui/icons";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  Button,
+} from "@material-ui/core";
 
 import MapperBuilder from "../../../mapper-builder/App";
-import { translate } from "../../../../../utils";
+import { getLowerCase, translate } from "../../../../../utils";
 import {
   ExtensionElementTable,
   SelectBox,
@@ -17,7 +25,7 @@ import {
   Textbox,
 } from "../../components";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   groupLabel: {
     fontWeight: "bolder",
     display: "inline-block",
@@ -49,7 +57,19 @@ const useStyles = makeStyles({
   textbox: {
     width: "100%",
   },
-});
+  save: {
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    textTransform: "none",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
+  },
+}));
 
 const CAMUNDA_EXECUTION_LISTENER_ELEMENT = "camunda:ExecutionListener";
 const CAMUNDA_TASK_LISTENER_ELEMENT = "camunda:TaskListener";
@@ -126,7 +146,9 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
   const [timerDefinitionType, setTimerDefinitionType] = useState("");
   const [taskOptions, setTaskOptions] = useState(null);
   const [executionOptions, setExecutionOptions] = useState(null);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [openAlert, setAlert] = useState(false);
+  const [script, setScript] = useState(null);
 
   const classes = useStyles();
   const isSequenceFlow = ImplementationTypeHelper.isSequenceFlow(element);
@@ -561,22 +583,31 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                   },
                   set: function (e, values) {
                     const listener = getListener();
-                    if (!listener.script) {
-                      listener.script =
-                        listener.script ||
-                        elementHelper.createElement(
-                          "camunda:Script",
-                          {
-                            scriptFormat: "axelor",
-                            value: values.script,
-                          },
-                          getBO(),
-                          bpmnFactory
-                        );
+                    if (
+                      listener.script.scriptValue &&
+                      getLowerCase(values.script) !==
+                        getLowerCase(listener.script.value)
+                    ) {
+                      setScript(values.script);
+                      setAlert(true);
                     } else {
-                      listener.script.value = values.script;
-                      listener.script.resource = undefined;
-                      listener.script.scriptFormat = "axelor";
+                      if (!listener.script) {
+                        listener.script =
+                          listener.script ||
+                          elementHelper.createElement(
+                            "camunda:Script",
+                            {
+                              scriptFormat: "axelor",
+                              value: values.script,
+                            },
+                            getBO(),
+                            bpmnFactory
+                          );
+                      } else {
+                        listener.script.value = values.script;
+                        listener.script.resource = undefined;
+                        listener.script.scriptFormat = "axelor";
+                      }
                     }
                   },
                   validate: function (e, values) {
@@ -586,21 +617,88 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                   },
                 }}
               />
-              {selectedExecutionEntity === 0 ||
-                (selectedExecutionEntity && (
-                  <div className={classes.edit}>
-                    <Edit
-                      className={classes.editIcon}
-                      onClick={handleClickOpen}
-                    />
+              {(selectedExecutionEntity === 0 || selectedExecutionEntity) && (
+                <div className={classes.edit}>
+                  <Edit
+                    className={classes.editIcon}
+                    onClick={handleClickOpen}
+                  />
+                  {open && (
                     <MapperBuilder
                       open={open}
                       handleClose={handleClose}
                       onSave={onSave}
                       params={() => getExpression()}
                     />
-                  </div>
-                ))}
+                  )}
+                  {openAlert && (
+                    <Dialog
+                      open={openAlert}
+                      onClose={() => setAlert(false)}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                      classes={{
+                        paper: classes.dialog,
+                      }}
+                    >
+                      <DialogTitle id="alert-dialog-title">
+                        <label className={classes.title}>
+                          {translate("Warning")}
+                        </label>
+                      </DialogTitle>
+                      <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                          {translate(
+                            "Script can't be managed using builder once changed manually."
+                          )}
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button
+                          onClick={() => {
+                            setAlert(false);
+                            if (!script && script !== "") return;
+                            const listener = getListener();
+                            if (!listener.script) {
+                              listener.script =
+                                listener.script ||
+                                elementHelper.createElement(
+                                  "camunda:Script",
+                                  {
+                                    scriptFormat: "axelor",
+                                    value: script,
+                                  },
+                                  getBO(),
+                                  bpmnFactory
+                                );
+                            } else {
+                              listener.script.value = script;
+                              listener.script.resource = undefined;
+                              listener.script.scriptFormat = "axelor";
+                            }
+                            setScript(null);
+                            listener.script.scriptValue = undefined;
+                          }}
+                          color="primary"
+                          className={classes.save}
+                          autoFocus
+                        >
+                          Ok
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setAlert(false);
+                          }}
+                          color="primary"
+                          className={classes.save}
+                        >
+                          Cancel
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                  )}
+                </div>
+              )}
             </div>
             {eventType === "timeout" && (
               <React.Fragment>
