@@ -85,6 +85,7 @@ export default function UserTaskProps({ element, index, label }) {
 
   const openAlertDialog = () => {
     setAlertTitle("Error");
+    setAlertMessage("Add all values");
     setAlert(true);
   };
 
@@ -97,7 +98,6 @@ export default function UserTaskProps({ element, index, label }) {
   );
 
   const handleClickOpen = () => {
-    setAlertMessage("Add all values");
     setOpen(true);
   };
 
@@ -266,34 +266,38 @@ export default function UserTaskProps({ element, index, label }) {
           />
           <div className={classes.new}>
             <Edit className={classes.newIcon} onClick={handleClickOpen} />
-            <ExpressionBuilder
-              open={open}
-              handleClose={() => handleClose()}
-              openAlertDialog={openAlertDialog}
-              getExpression={() => {
-                const value = getProperty("camunda:completedIfValue");
-                const combinator = getProperty("camunda:completedIfCombinator");
-                let values;
-                if (value !== undefined) {
-                  try {
-                    values = JSON.parse(value);
-                  } catch (errror) {}
-                }
-                return { values: values, combinator };
-              }}
-              setProperty={(val) => {
-                const { expression, value, combinator } = val;
-                setProperty("camunda:completedIf", expression);
-                if (value) {
-                  setProperty("camunda:completedIfValue", value);
-                }
-                if (combinator) {
-                  setProperty("camunda:completedIfCombinator", combinator);
-                }
-              }}
-              element={element}
-              title="Add Expression"
-            />
+            {open && (
+              <ExpressionBuilder
+                open={open}
+                handleClose={() => handleClose()}
+                openAlertDialog={openAlertDialog}
+                getExpression={() => {
+                  const value = getProperty("camunda:completedIfValue");
+                  const combinator = getProperty(
+                    "camunda:completedIfCombinator"
+                  );
+                  let values;
+                  if (value !== undefined) {
+                    try {
+                      values = JSON.parse(value);
+                    } catch (errror) {}
+                  }
+                  return { values: values, combinator };
+                }}
+                setProperty={(val) => {
+                  const { expression, value, combinator } = val;
+                  setProperty("camunda:completedIf", expression);
+                  if (value) {
+                    setProperty("camunda:completedIfValue", value);
+                  }
+                  if (combinator) {
+                    setProperty("camunda:completedIfCombinator", combinator);
+                  }
+                }}
+                element={element}
+                title="Add Expression"
+              />
+            )}
           </div>
           <Dialog
             open={openAlert}

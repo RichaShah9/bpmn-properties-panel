@@ -851,43 +851,45 @@ export default function ProcessConfiguration({
           </Button>
         </DialogActions>
       </Dialog>
-      <ExpressionBuilder
-        open={openExpressionBuilder}
-        handleClose={() => setExpressionBuilder(false)}
-        openAlertDialog={openExpressionAlertDialog}
-        getExpression={() => {
-          const value =
+      {openExpressionBuilder && (
+        <ExpressionBuilder
+          open={openExpressionBuilder}
+          handleClose={() => setExpressionBuilder(false)}
+          openAlertDialog={openExpressionAlertDialog}
+          getExpression={() => {
+            const value =
+              selectedProcessConfig &&
+              selectedProcessConfig.processConfig &&
+              selectedProcessConfig.processConfig.pathConditionValue;
+            let values;
+            try {
+              values = value !== undefined ? JSON.parse(value) : undefined;
+            } catch (errror) {}
+            return { values };
+          }}
+          setProperty={(val) => {
+            const { expression, value } = val;
+            updateValue(
+              expression,
+              "pathCondition",
+              undefined,
+              selectedProcessConfig && selectedProcessConfig.key,
+              undefined,
+              value
+            );
+          }}
+          processConfigs={[
             selectedProcessConfig &&
-            selectedProcessConfig.processConfig &&
-            selectedProcessConfig.processConfig.pathConditionValue;
-          let values;
-          try {
-            values = value !== undefined ? JSON.parse(value) : undefined;
-          } catch (errror) {}
-          return { values };
-        }}
-        setProperty={(val) => {
-          const { expression, value } = val;
-          updateValue(
-            expression,
-            "pathCondition",
-            undefined,
-            selectedProcessConfig && selectedProcessConfig.key,
-            undefined,
-            value
-          );
-        }}
-        processConfigs={[
-          selectedProcessConfig &&
-            selectedProcessConfig.processConfig &&
-            selectedProcessConfig.processConfig.metaModel,
-          selectedProcessConfig &&
-            selectedProcessConfig.processConfig &&
-            selectedProcessConfig.processConfig.metaJsonModel,
-        ]}
-        element={element}
-        title="Add Expression"
-      />
+              selectedProcessConfig.processConfig &&
+              selectedProcessConfig.processConfig.metaModel,
+            selectedProcessConfig &&
+              selectedProcessConfig.processConfig &&
+              selectedProcessConfig.processConfig.metaJsonModel,
+          ]}
+          element={element}
+          title="Add Expression"
+        />
+      )}
       <Dialog
         open={openExpressionAlert}
         onClose={() => setExpressionAlert(false)}

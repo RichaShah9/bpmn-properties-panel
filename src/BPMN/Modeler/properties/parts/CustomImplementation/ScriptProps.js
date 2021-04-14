@@ -469,58 +469,60 @@ export default function ScriptProps({ element, index, label }) {
                 isQuery ? handleClickOpen() : handleMapperOpen();
               }}
             />
-            {isQuery ? (
-              <ExpressionBuilder
-                open={open}
-                handleClose={() => handleClose()}
-                openAlertDialog={openAlertDialog}
-                type="bpmQuery"
-                getExpression={() => {
-                  const value = getProperty("scriptValue");
-                  const combinator = getBool(
-                    getProperty("scriptOperatorType") || false
-                  );
-                  let values;
-                  if (value !== undefined) {
-                    try {
-                      values = JSON.parse(value);
-                      if (!values.length) {
-                        values = null;
+            {isQuery
+              ? open && (
+                  <ExpressionBuilder
+                    open={open}
+                    handleClose={() => handleClose()}
+                    openAlertDialog={openAlertDialog}
+                    type="bpmQuery"
+                    getExpression={() => {
+                      const value = getProperty("scriptValue");
+                      const combinator = getBool(
+                        getProperty("scriptOperatorType") || false
+                      );
+                      let values;
+                      if (value !== undefined) {
+                        try {
+                          values = JSON.parse(value);
+                          if (!values.length) {
+                            values = null;
+                          }
+                        } catch (errror) {}
                       }
-                    } catch (errror) {}
-                  }
-                  return { values: values, combinator };
-                }}
-                setProperty={(val) => {
-                  const { expression, value, combinator } = val;
-                  element.businessObject.script = expression;
-                  element.businessObject.scriptFormat = "axelor";
-                  if (
-                    expression === "" ||
-                    expression === null ||
-                    expression === undefined
-                  ) {
-                    setProperty("scriptValue", undefined);
-                    setProperty("scriptOperatorType", undefined);
-                    return;
-                  }
-                  if (value) {
-                    (value || "").replace(/[\u200B-\u200D\uFEFF]/g, "");
-                    setProperty("scriptValue", value);
-                  }
-                  setProperty("scriptOperatorType", combinator);
-                }}
-                element={element}
-                title="Add Query"
-              />
-            ) : (
-              <MapperBuilder
-                open={openMapper}
-                handleClose={handleCloseMapper}
-                onSave={onSave}
-                params={() => getExpression()}
-              />
-            )}
+                      return { values: values, combinator };
+                    }}
+                    setProperty={(val) => {
+                      const { expression, value, combinator } = val;
+                      element.businessObject.script = expression;
+                      element.businessObject.scriptFormat = "axelor";
+                      if (
+                        expression === "" ||
+                        expression === null ||
+                        expression === undefined
+                      ) {
+                        setProperty("scriptValue", undefined);
+                        setProperty("scriptOperatorType", undefined);
+                        return;
+                      }
+                      if (value) {
+                        (value || "").replace(/[\u200B-\u200D\uFEFF]/g, "");
+                        setProperty("scriptValue", value);
+                      }
+                      setProperty("scriptOperatorType", combinator);
+                    }}
+                    element={element}
+                    title="Add Query"
+                  />
+                )
+              : openMapper && (
+                  <MapperBuilder
+                    open={openMapper}
+                    handleClose={handleCloseMapper}
+                    onSave={onSave}
+                    params={() => getExpression()}
+                  />
+                )}
             <Dialog
               open={openAlert}
               onClose={() => setAlert(false)}

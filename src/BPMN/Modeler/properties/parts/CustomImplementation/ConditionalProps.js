@@ -305,34 +305,36 @@ export default function ConditionalProps({
           />
           <div className={classes.new}>
             <Edit className={classes.newIcon} onClick={handleClickOpen} />
-            <ExpressionBuilder
-              open={open}
-              handleClose={() => handleClose()}
-              openAlertDialog={openAlertDialog}
-              getExpression={() => {
-                const value = getProperty("camunda:conditionValue");
-                const combinator = getProperty("camunda:conditionCombinator");
-                let values;
-                if (value !== undefined) {
-                  try {
-                    values = JSON.parse(value);
-                  } catch (errror) {}
-                }
-                return { values: values, combinator };
-              }}
-              setProperty={(val) => {
-                const { expression: valExpression, value, combinator } = val;
-                if (value) {
-                  setProperty("camunda:conditionValue", value);
-                }
-                if (combinator) {
-                  setProperty("camunda:conditionCombinator", combinator);
-                }
-                setValue(valExpression);
-              }}
-              element={element}
-              title="Add Expression"
-            />
+            {open && (
+              <ExpressionBuilder
+                open={open}
+                handleClose={() => handleClose()}
+                openAlertDialog={openAlertDialog}
+                getExpression={() => {
+                  const value = getProperty("camunda:conditionValue");
+                  const combinator = getProperty("camunda:conditionCombinator");
+                  let values;
+                  if (value !== undefined) {
+                    try {
+                      values = JSON.parse(value);
+                    } catch (errror) {}
+                  }
+                  return { values: values, combinator };
+                }}
+                setProperty={(val) => {
+                  const { expression: valExpression, value, combinator } = val;
+                  if (value) {
+                    setProperty("camunda:conditionValue", value);
+                  }
+                  if (combinator) {
+                    setProperty("camunda:conditionCombinator", combinator);
+                  }
+                  setValue(valExpression);
+                }}
+                element={element}
+                title="Add Expression"
+              />
+            )}
           </div>
           <Dialog
             open={openAlert}
