@@ -30,7 +30,7 @@ import {
   getMetaFields,
 } from "../../../../../services/api";
 import ExpressionBuilder from "../../../expression-builder";
-import { translate, getBool } from "../../../../../utils";
+import { translate, getBool, getLowerCase } from "../../../../../utils";
 
 const useStyles = makeStyles((theme) => ({
   groupLabel: {
@@ -174,6 +174,8 @@ export default function ProcessConfiguration({
   const [openExpressionAlert, setExpressionAlert] = useState(false);
   const [openExpressionBuilder, setExpressionBuilder] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [errorTitle, setErrorTitle] = useState(null);
+  const [pathCondition, setPathCondition] = useState(null);
   const [field, setField] = useState(null);
 
   const openExpressionAlertDialog = () => {
@@ -629,28 +631,45 @@ export default function ProcessConfiguration({
                               },
                               set: function (e, values) {
                                 if (
+                                  processConfig.pathConditionValue &&
                                   values.pathCondition !==
-                                  processConfig.pathCondition
+                                    processConfig.pathCondition
                                 ) {
-                                  updateValue(
-                                    values.pathCondition === ""
-                                      ? undefined
-                                      : values.pathCondition,
-                                    "pathCondition",
-                                    undefined,
-                                    key
+                                  setPathCondition({
+                                    value: values.pathCondition,
+                                    key,
+                                    processConfig,
+                                  });
+                                  setErrorMessage(
+                                    "Path condition can't be managed using builder once changed manually."
                                   );
-                                }
-                                if (
-                                  values.pathCondition === "" ||
-                                  !values.pathCondition
-                                ) {
-                                  updateValue(
-                                    undefined,
-                                    "pathConditionValue",
-                                    undefined,
-                                    key
-                                  );
+                                  setErrorTitle("Warning");
+                                  setExpressionAlert(true);
+                                } else {
+                                  if (
+                                    values.pathCondition !==
+                                    processConfig.pathCondition
+                                  ) {
+                                    updateValue(
+                                      values.pathCondition === ""
+                                        ? undefined
+                                        : values.pathCondition,
+                                      "pathCondition",
+                                      undefined,
+                                      key
+                                    );
+                                  }
+                                  if (
+                                    values.pathCondition === "" ||
+                                    !values.pathCondition
+                                  ) {
+                                    updateValue(
+                                      undefined,
+                                      "pathConditionValue",
+                                      undefined,
+                                      key
+                                    );
+                                  }
                                 }
                               },
                             }}
@@ -878,19 +897,65 @@ export default function ProcessConfiguration({
           paper: classes.dialog,
         }}
       >
-        <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {translate(errorTitle)}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            {errorMessage}
+            {translate(errorMessage)}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setExpressionAlert(false)}
+            className={classes.save}
+            onClick={() => {
+              setExpressionAlert(false);
+              setErrorMessage(null);
+              setErrorTitle(null);
+              if (
+                !pathCondition &&
+                !pathCondition.value &&
+                getLowerCase(pathCondition.value) !== ""
+              ) {
+                return;
+              }
+              const pathValue = getLowerCase(pathCondition.value);
+              if (
+                pathValue !==
+                getLowerCase(
+                  pathCondition &&
+                    pathCondition.processConfig &&
+                    pathCondition.processConfig.pathCondition
+                )
+              ) {
+                updateValue(
+                  pathValue === "" ? undefined : pathValue,
+                  "pathCondition",
+                  undefined,
+                  pathCondition.key
+                );
+              }
+              if (pathValue === "" || !pathValue) {
+                updateValue(
+                  undefined,
+                  "pathConditionValue",
+                  undefined,
+                  pathCondition.key
+                );
+              }
+              setPathCondition(null);
+            }}
             color="primary"
             autoFocus
           >
             Ok
+          </Button>
+          <Button
+            onClick={() => setExpressionAlert(false)}
+            color="primary"
+            className={classes.save}
+          >
+            Cancel
           </Button>
         </DialogActions>
       </Dialog>

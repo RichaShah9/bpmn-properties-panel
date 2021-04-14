@@ -22,9 +22,9 @@ import {
   getViews,
 } from "../../../../../services/api";
 import { TextField, Textbox, Checkbox } from "../../components";
-import { translate, getBool } from "../../../../../utils";
+import { translate, getBool, getLowerCase } from "../../../../../utils";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   groupLabel: {
     fontWeight: "bolder",
     display: "inline-block",
@@ -70,7 +70,18 @@ const useStyles = makeStyles({
     fontSize: 18,
     fontWeight: "bold",
   },
-});
+  save: {
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
+  },
+}));
 
 export default function ScriptProps({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
@@ -86,13 +97,18 @@ export default function ScriptProps({ element, index, label }) {
   const [isReadOnly, setReadOnly] = useState(false);
   const [openAlert, setAlert] = useState(false);
   const [openMapper, setMapper] = useState(false);
+  const [alertTitle, setAlertTitle] = useState(null);
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [script, setScript] = useState(null);
   const classes = useStyles();
 
   const openAlertDialog = () => {
+    setAlertTitle("Error");
     setAlert(true);
   };
 
   const handleClickOpen = () => {
+    setAlertMessage("Add all values");
     setMapper(false);
     setOpen(true);
   };
@@ -413,12 +429,30 @@ export default function ScriptProps({ element, index, label }) {
                 };
               },
               set: function (e, values) {
-                if (element.businessObject) {
-                  element.businessObject.script = values.script;
-                  element.businessObject.scriptFormat = "axelor";
-                  element.businessObject.resource = undefined;
-                  setProperty("scriptOperatorType", undefined);
-                  setProperty("scriptValue", undefined);
+                let bo = getBusinessObject(element);
+                if (
+                  !getProperty("scriptValue") &&
+                  getLowerCase(values.script) !== getLowerCase(bo.get("script"))
+                ) {
+                  if (element.businessObject) {
+                    element.businessObject.script = script;
+                    element.businessObject.scriptFormat = "axelor";
+                    element.businessObject.resource = undefined;
+                    setProperty("scriptOperatorType", undefined);
+                    setProperty("scriptValue", undefined);
+                  }
+                } else {
+                  if (
+                    getLowerCase(values.script) !==
+                    getLowerCase(bo.get("script"))
+                  ) {
+                    setScript(values && values.script);
+                    setAlertMessage(
+                      "Script can't be managed using builder once changed manually."
+                    );
+                    setAlertTitle("Warning");
+                    setAlert(true);
+                  }
                 }
               },
               validate: function (e, values) {
@@ -450,6 +484,9 @@ export default function ScriptProps({ element, index, label }) {
                   if (value !== undefined) {
                     try {
                       values = JSON.parse(value);
+                      if (!values.length) {
+                        values = null;
+                      }
                     } catch (errror) {}
                   }
                   return { values: values, combinator };
@@ -494,20 +531,43 @@ export default function ScriptProps({ element, index, label }) {
               }}
             >
               <DialogTitle id="alert-dialog-title">
-                <label className={classes.title}>Error</label>
+                <label className={classes.title}>{translate(alertTitle)}</label>
               </DialogTitle>
               <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                  Add all values
+                  {translate(alertMessage)}
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
                 <Button
-                  onClick={() => setAlert(false)}
+                  onClick={() => {
+                    setAlert(false);
+                    setAlertMessage(null);
+                    setAlertTitle(null);
+                    if (!script && script !== "") return;
+                    if (element.businessObject) {
+                      element.businessObject.script = script;
+                      element.businessObject.scriptFormat = "axelor";
+                      element.businessObject.resource = undefined;
+                      setProperty("scriptOperatorType", undefined);
+                      setProperty("scriptValue", undefined);
+                    }
+                    setScript(null);
+                  }}
                   color="primary"
+                  className={classes.save}
                   autoFocus
                 >
                   Ok
+                </Button>
+                <Button
+                  onClick={() => {
+                    setAlert(false);
+                  }}
+                  color="primary"
+                  className={classes.save}
+                >
+                  Cancel
                 </Button>
               </DialogActions>
             </Dialog>

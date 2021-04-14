@@ -15,10 +15,10 @@ import {
 } from "@material-ui/core";
 
 import { Textbox } from "../../components";
-import { translate } from "../../../../../utils";
+import { translate, getLowerCase } from "../../../../../utils";
 import ExpressionBuilder from "../../../expression-builder";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   groupLabel: {
     fontWeight: "bolder",
     display: "inline-block",
@@ -50,7 +50,18 @@ const useStyles = makeStyles({
     alignItems: "center",
     justifyContent: "space-between",
   },
-});
+  save: {
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
+  },
+}));
 
 let CONDITIONAL_SOURCES = [
   "bpmn:Activity",
@@ -75,13 +86,18 @@ export default function ConditionalProps({
   const [isVisible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [openAlert, setAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState(null);
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [script, setScript] = useState(null);
   const classes = useStyles();
 
   const openAlertDialog = () => {
+    setAlertTitle("Error");
     setAlert(true);
   };
 
   const handleClickOpen = () => {
+    setAlertMessage("Add all values");
     setOpen(true);
   };
   const handleClose = () => {
@@ -260,7 +276,30 @@ export default function ConditionalProps({
                 }
               },
               set: function (e, values) {
-                setValue(values && values.script);
+                let bo = getBusinessObject(element);
+                if (
+                  getLowerCase(values.script) !==
+                    getLowerCase(
+                      bo.conditionExpression && bo.conditionExpression.body
+                    ) &&
+                  !getProperty("camunda:conditionValue")
+                ) {
+                  setValue(script);
+                } else {
+                  if (
+                    getLowerCase(values.script) !==
+                    getLowerCase(
+                      bo.conditionExpression && bo.conditionExpression.body
+                    )
+                  ) {
+                    setScript(values && values.script);
+                    setAlertMessage(
+                      "Script can't be managed using builder once changed manually."
+                    );
+                    setAlertTitle("Warning");
+                    setAlert(true);
+                  }
+                }
               },
             }}
           />
@@ -304,15 +343,38 @@ export default function ConditionalProps({
               paper: classes.dialog,
             }}
           >
-            <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+            <DialogTitle id="alert-dialog-title">
+              {translate(alertTitle)}
+            </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                Add all values
+                {translate(alertMessage)}
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setAlert(false)} color="primary" autoFocus>
+              <Button
+                onClick={() => {
+                  setAlert(false);
+                  setAlertMessage(null);
+                  setAlertTitle(null);
+                  if (!script && script !== "") return;
+                  setValue(script);
+                  setScript(null);
+                }}
+                color="primary"
+                autoFocus
+                className={classes.save}
+              >
                 Ok
+              </Button>
+              <Button
+                onClick={() => {
+                  setAlert(false);
+                }}
+                color="primary"
+                className={classes.save}
+              >
+                Cancel
               </Button>
             </DialogActions>
           </Dialog>

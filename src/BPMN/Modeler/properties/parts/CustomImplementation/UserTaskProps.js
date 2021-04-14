@@ -15,9 +15,9 @@ import TextField from "../../components/TextField";
 import ExpressionBuilder from "../../../expression-builder";
 import Select from "../../../../../components/Select";
 import { getButtons } from "../../../../../services/api";
-import { translate } from "../../../../../utils";
+import { translate, getLowerCase } from "../../../../../utils";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   groupLabel: {
     fontWeight: "bolder",
     display: "inline-block",
@@ -60,16 +60,31 @@ const useStyles = makeStyles({
   select: {
     margin: 0,
   },
-});
+  save: {
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
+  },
+}));
 
 export default function UserTaskProps({ element, index, label }) {
   const [isVisible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [openAlert, setAlert] = useState(false);
   const [buttons, setButtons] = useState(null);
+  const [alertTitle, setAlertTitle] = useState(null);
+  const [alertMessage, setAlertMessage] = useState(null);
+  const [completedIf, setCompletedIf] = useState(null);
   const classes = useStyles();
 
   const openAlertDialog = () => {
+    setAlertTitle("Error");
     setAlert(true);
   };
 
@@ -82,6 +97,7 @@ export default function UserTaskProps({ element, index, label }) {
   );
 
   const handleClickOpen = () => {
+    setAlertMessage("Add all values");
     setOpen(true);
   };
 
@@ -224,15 +240,22 @@ export default function UserTaskProps({ element, index, label }) {
               },
               set: function (e, values) {
                 let oldVal = getProperty("camunda:completedIf");
+                let completedIfValue = getProperty("camunda:completedIfValue")
                 let currentVal = values["completedIf"];
                 (currentVal || "").replace(/[\u200B-\u200D\uFEFF]/g, "");
-                setProperty("camunda:completedIf", currentVal);
-                if (
-                  (oldVal && oldVal.trim().toLowerCase()) !==
-                  (currentVal && currentVal.trim().toLowerCase())
-                ) {
+                if(!completedIfValue && (getLowerCase(oldVal) !== getLowerCase(currentVal))){
+                  setProperty("camunda:completedIf", completedIf);
                   setProperty("camunda:completedIfValue", undefined);
                   setProperty("camunda:completedIfCombinator", undefined);
+                }else{
+                  if (getLowerCase(oldVal) !== getLowerCase(currentVal)) {
+                    setCompletedIf(currentVal);
+                    setAlertMessage(
+                      "Completed If can't be managed using builder once changed manually."
+                    );
+                    setAlertTitle("Warning");
+                    setAlert(true);
+                  }
                 }
               },
             }}
@@ -278,15 +301,38 @@ export default function UserTaskProps({ element, index, label }) {
               paper: classes.dialog,
             }}
           >
-            <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+            <DialogTitle id="alert-dialog-title">
+              {translate(alertTitle)}
+            </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                Add all values
+                {translate(alertMessage)}
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setAlert(false)} color="primary" autoFocus>
+              <Button
+                onClick={() => {
+                  setAlert(false);
+                  setAlertMessage(null);
+                  setAlertTitle(null);
+                  if (!completedIf && completedIf !== "") return;
+                  setProperty("camunda:completedIf", completedIf);
+                  setProperty("camunda:completedIfValue", undefined);
+                  setProperty("camunda:completedIfCombinator", undefined);
+                  setCompletedIf(null);
+                }}
+                color="primary"
+                autoFocus
+                className={classes.save}
+              >
                 Ok
+              </Button>
+              <Button
+                className={classes.save}
+                onClick={() => setAlert(false)}
+                color="primary"
+              >
+                Cancel
               </Button>
             </DialogActions>
           </Dialog>

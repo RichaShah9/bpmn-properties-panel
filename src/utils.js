@@ -51,6 +51,11 @@ function getItemsByType(view, type) {
   return collectItems(view);
 }
 
+function getLowerCase(str) {
+  if (!str) return;
+  return str.trim().toLowerCase();
+}
+
 function getFormName(str) {
   if (!str) return;
   const formString = str.match(/[A-Z][a-z]+/g);
@@ -70,4 +75,5 @@ export {
   sortBy,
   getItemsByType,
   getFormName,
+  getLowerCase,
 };
