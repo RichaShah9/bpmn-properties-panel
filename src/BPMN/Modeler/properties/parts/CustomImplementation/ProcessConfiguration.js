@@ -622,7 +622,8 @@ export default function ProcessConfiguration({
                               modelProperty: "pathCondition",
                               get: function () {
                                 return {
-                                  pathCondition: processConfig.pathCondition,
+                                  pathCondition:
+                                    processConfig.pathCondition || "",
                                 };
                               },
                               set: function (e, values) {
@@ -651,17 +652,6 @@ export default function ProcessConfiguration({
                                         ? undefined
                                         : values.pathCondition,
                                       "pathCondition",
-                                      undefined,
-                                      key
-                                    );
-                                  }
-                                  if (
-                                    values.pathCondition === "" ||
-                                    !values.pathCondition
-                                  ) {
-                                    updateValue(
-                                      undefined,
-                                      "pathConditionValue",
                                       undefined,
                                       key
                                     );
@@ -929,14 +919,6 @@ export default function ProcessConfiguration({
                   updateValue(
                     pathValue === "" ? undefined : pathValue,
                     "pathCondition",
-                    undefined,
-                    pathCondition.key
-                  );
-                }
-                if (pathValue === "" || !pathValue) {
-                  updateValue(
-                    undefined,
-                    "pathConditionValue",
                     undefined,
                     pathCondition.key
                   );
