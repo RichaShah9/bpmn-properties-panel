@@ -74,6 +74,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     backgroundColor: "#0275d8",
     borderColor: "#0267bf",
+    textTransform: "none",
     color: "white",
     "&:hover": {
       backgroundColor: "#025aa5",
@@ -101,11 +102,6 @@ export default function ScriptProps({ element, index, label }) {
   const [alertMessage, setAlertMessage] = useState(null);
   const [script, setScript] = useState(null);
   const classes = useStyles();
-
-  const openAlertDialog = () => {
-    setAlertTitle("Error");
-    setAlert(true);
-  };
 
   const handleClickOpen = () => {
     setAlertMessage("Add all values");
@@ -474,7 +470,6 @@ export default function ScriptProps({ element, index, label }) {
                   <ExpressionBuilder
                     open={open}
                     handleClose={() => handleClose()}
-                    openAlertDialog={openAlertDialog}
                     type="bpmQuery"
                     getExpression={() => {
                       const value = getProperty("scriptValue");
@@ -523,56 +518,60 @@ export default function ScriptProps({ element, index, label }) {
                     params={() => getExpression()}
                   />
                 )}
-            <Dialog
-              open={openAlert}
-              onClose={() => setAlert(false)}
-              aria-labelledby="alert-dialog-title"
-              aria-describedby="alert-dialog-description"
-              classes={{
-                paper: classes.dialog,
-              }}
-            >
-              <DialogTitle id="alert-dialog-title">
-                <label className={classes.title}>{translate(alertTitle)}</label>
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                  {translate(alertMessage)}
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button
-                  onClick={() => {
-                    setAlert(false);
-                    setAlertMessage(null);
-                    setAlertTitle(null);
-                    if (!script && script !== "") return;
-                    if (element.businessObject) {
-                      element.businessObject.script = script;
-                      element.businessObject.scriptFormat = "axelor";
-                      element.businessObject.resource = undefined;
-                      setProperty("scriptOperatorType", undefined);
-                      setProperty("scriptValue", undefined);
-                    }
-                    setScript(null);
-                  }}
-                  color="primary"
-                  className={classes.save}
-                  autoFocus
-                >
-                  Ok
-                </Button>
-                <Button
-                  onClick={() => {
-                    setAlert(false);
-                  }}
-                  color="primary"
-                  className={classes.save}
-                >
-                  Cancel
-                </Button>
-              </DialogActions>
-            </Dialog>
+            {openAlert && (
+              <Dialog
+                open={openAlert}
+                onClose={() => setAlert(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                classes={{
+                  paper: classes.dialog,
+                }}
+              >
+                <DialogTitle id="alert-dialog-title">
+                  <label className={classes.title}>
+                    {translate(alertTitle)}
+                  </label>
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    {translate(alertMessage)}
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    onClick={() => {
+                      setAlert(false);
+                      setAlertMessage(null);
+                      setAlertTitle(null);
+                      if (!script && script !== "") return;
+                      if (element.businessObject) {
+                        element.businessObject.script = script;
+                        element.businessObject.scriptFormat = "axelor";
+                        element.businessObject.resource = undefined;
+                        setProperty("scriptOperatorType", undefined);
+                        setProperty("scriptValue", undefined);
+                      }
+                      setScript(null);
+                    }}
+                    color="primary"
+                    className={classes.save}
+                    autoFocus
+                  >
+                    Ok
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setAlert(false);
+                    }}
+                    color="primary"
+                    className={classes.save}
+                  >
+                    Cancel
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            )}
           </div>
         </div>
         <TextField

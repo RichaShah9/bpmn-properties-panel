@@ -104,6 +104,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     backgroundColor: "#0275d8",
     borderColor: "#0267bf",
+    textTransform: "none",
     color: "white",
     "&:hover": {
       backgroundColor: "#025aa5",
@@ -177,11 +178,6 @@ export default function ProcessConfiguration({
   const [errorTitle, setErrorTitle] = useState(null);
   const [pathCondition, setPathCondition] = useState(null);
   const [field, setField] = useState(null);
-
-  const openExpressionAlertDialog = () => {
-    setErrorMessage("Add all values");
-    setExpressionAlert(true);
-  };
 
   const getProcessConfigList = React.useCallback(
     (field = "processConfigurationParameters") => {
@@ -855,7 +851,6 @@ export default function ProcessConfiguration({
         <ExpressionBuilder
           open={openExpressionBuilder}
           handleClose={() => setExpressionBuilder(false)}
-          openAlertDialog={openExpressionAlertDialog}
           getExpression={() => {
             const value =
               selectedProcessConfig &&
@@ -890,148 +885,152 @@ export default function ProcessConfiguration({
           title="Add Expression"
         />
       )}
-      <Dialog
-        open={openExpressionAlert}
-        onClose={() => setExpressionAlert(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        classes={{
-          paper: classes.dialog,
-        }}
-      >
-        <DialogTitle id="alert-dialog-title">
-          {translate(errorTitle)}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {translate(errorMessage)}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            className={classes.save}
-            onClick={() => {
-              setExpressionAlert(false);
-              setErrorMessage(null);
-              setErrorTitle(null);
-              if (
-                !pathCondition &&
-                !pathCondition.value &&
-                getLowerCase(pathCondition.value) !== ""
-              ) {
-                return;
-              }
-              const pathValue = getLowerCase(pathCondition.value);
-              if (
-                pathValue !==
-                getLowerCase(
-                  pathCondition &&
-                    pathCondition.processConfig &&
-                    pathCondition.processConfig.pathCondition
+      {openExpressionAlert && (
+        <Dialog
+          open={openExpressionAlert}
+          onClose={() => setExpressionAlert(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          classes={{
+            paper: classes.dialog,
+          }}
+        >
+          <DialogTitle id="alert-dialog-title">
+            {translate(errorTitle)}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {translate(errorMessage)}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              className={classes.save}
+              onClick={() => {
+                setExpressionAlert(false);
+                setErrorMessage(null);
+                setErrorTitle(null);
+                if (
+                  !pathCondition &&
+                  !pathCondition.value &&
+                  getLowerCase(pathCondition.value) !== ""
+                ) {
+                  return;
+                }
+                const pathValue = getLowerCase(pathCondition.value);
+                if (
+                  pathValue !==
+                  getLowerCase(
+                    pathCondition &&
+                      pathCondition.processConfig &&
+                      pathCondition.processConfig.pathCondition
+                  )
+                ) {
+                  updateValue(
+                    pathValue === "" ? undefined : pathValue,
+                    "pathCondition",
+                    undefined,
+                    pathCondition.key
+                  );
+                }
+                if (pathValue === "" || !pathValue) {
+                  updateValue(
+                    undefined,
+                    "pathConditionValue",
+                    undefined,
+                    pathCondition.key
+                  );
+                }
+                setPathCondition(null);
+              }}
+              color="primary"
+              autoFocus
+            >
+              Ok
+            </Button>
+            <Button
+              onClick={() => setExpressionAlert(false)}
+              color="primary"
+              className={classes.save}
+            >
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {openUserPathDialog && (
+        <Dialog
+          open={openUserPathDialog}
+          onClose={() => {
+            setOpenUserPathDialog(false);
+            setSelectedProcessConfig(null);
+          }}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          classes={{
+            paper: classes.dialog,
+          }}
+        >
+          <DialogTitle id="alert-dialog-title">User default Path</DialogTitle>
+          <DialogContent className={classes.dialogContent}>
+            <FieldEditor
+              getMetaFields={() =>
+                getMetaFields(
+                  getData(
+                    selectedProcessConfig && selectedProcessConfig.processConfig
+                  )
                 )
-              ) {
-                updateValue(
-                  pathValue === "" ? undefined : pathValue,
-                  "pathCondition",
-                  undefined,
-                  pathCondition.key
-                );
               }
-              if (pathValue === "" || !pathValue) {
-                updateValue(
-                  undefined,
-                  "pathConditionValue",
-                  undefined,
-                  pathCondition.key
-                );
-              }
-              setPathCondition(null);
-            }}
-            color="primary"
-            autoFocus
-          >
-            Ok
-          </Button>
-          <Button
-            onClick={() => setExpressionAlert(false)}
-            color="primary"
-            className={classes.save}
-          >
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={openUserPathDialog}
-        onClose={() => {
-          setOpenUserPathDialog(false);
-          setSelectedProcessConfig(null);
-        }}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        classes={{
-          paper: classes.dialog,
-        }}
-      >
-        <DialogTitle id="alert-dialog-title">User default Path</DialogTitle>
-        <DialogContent className={classes.dialogContent}>
-          <FieldEditor
-            getMetaFields={() =>
-              getMetaFields(
-                getData(
-                  selectedProcessConfig && selectedProcessConfig.processConfig
-                )
-              )
-            }
-            onChange={(val, field) => {
-              setField(field);
-              setSelectedProcessConfig({
-                processConfig: {
-                  ...((selectedProcessConfig &&
-                    selectedProcessConfig.processConfig) ||
-                    {}),
-                  userDefaultPath: val,
-                },
-                key: selectedProcessConfig && selectedProcessConfig.key,
-              });
-            }}
-            value={{
-              fieldName:
-                selectedProcessConfig &&
-                selectedProcessConfig.processConfig &&
-                selectedProcessConfig.processConfig.userDefaultPath,
-            }}
-            isParent={true}
-            isUserPath={true}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              if (field && field.target !== "com.axelor.auth.db.User") {
-                setExpressionAlert(true);
-                setErrorMessage("Last subfield should be related to user");
-                return;
-              }
-              setOpenUserPathDialog(false);
-              if (selectedProcessConfig) {
-                updateValue(
+              onChange={(val, field) => {
+                setField(field);
+                setSelectedProcessConfig({
+                  processConfig: {
+                    ...((selectedProcessConfig &&
+                      selectedProcessConfig.processConfig) ||
+                      {}),
+                    userDefaultPath: val,
+                  },
+                  key: selectedProcessConfig && selectedProcessConfig.key,
+                });
+              }}
+              value={{
+                fieldName:
+                  selectedProcessConfig &&
                   selectedProcessConfig.processConfig &&
-                    selectedProcessConfig.processConfig.userDefaultPath,
-                  "userDefaultPath",
-                  undefined,
-                  selectedProcessConfig.key
-                );
-              }
-            }}
-            color="primary"
-            autoFocus
-            className={classes.save}
-          >
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
+                  selectedProcessConfig.processConfig.userDefaultPath,
+              }}
+              isParent={true}
+              isUserPath={true}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                if (field && field.target !== "com.axelor.auth.db.User") {
+                  setExpressionAlert(true);
+                  setErrorMessage("Last subfield should be related to user");
+                  return;
+                }
+                setOpenUserPathDialog(false);
+                if (selectedProcessConfig) {
+                  updateValue(
+                    selectedProcessConfig.processConfig &&
+                      selectedProcessConfig.processConfig.userDefaultPath,
+                    "userDefaultPath",
+                    undefined,
+                    selectedProcessConfig.key
+                  );
+                }
+              }}
+              color="primary"
+              autoFocus
+              className={classes.save}
+            >
+              OK
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
 }

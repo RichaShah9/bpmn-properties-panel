@@ -7,6 +7,10 @@ import {
   DialogTitle,
   Checkbox,
   FormControlLabel,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  Button as MaterialButton,
 } from "@material-ui/core";
 import {
   TimelineContent,
@@ -53,6 +57,9 @@ const useStyles = makeStyles((theme) => ({
   },
   dialogPaper: {
     maxWidth: "100%",
+  },
+  dialog: {
+    minWidth: 300,
   },
   root: {
     display: "flex",
@@ -117,11 +124,11 @@ function ExpressionBuilder({
   getExpression,
   type: parentType = "expressionBuilder",
   title = "Add Expression",
-  openAlertDialog,
   processConfigs,
 }) {
   const expression = isBPMQuery(parentType) ? "BPM" : "GROOVY";
   const [combinator, setCombinator] = useState("and");
+  const [openAlert, setAlert] = useState(false);
   const [expressionComponents, setExpressionComponents] = useState([
     { Component: ExpressionComponent },
   ]);
@@ -554,7 +561,7 @@ function ExpressionBuilder({
           !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)
         ) {
           isValid = false;
-          openAlertDialog();
+          setAlert(true);
           return null;
         }
         isValid = true;
@@ -743,7 +750,7 @@ function ExpressionBuilder({
         !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator)
       ) {
         isValid = false;
-        openAlertDialog();
+        setAlert(true);
         return null;
       }
       isValid = true;
@@ -1268,6 +1275,36 @@ function ExpressionBuilder({
           onClick={() => generateExpression(combinator, parentType)}
         />
       </div>
+      {openAlert && (
+        <Dialog
+          open={openAlert}
+          onClose={() => setAlert(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          classes={{
+            paper: classes.dialog,
+          }}
+        >
+          <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Add all values
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <MaterialButton
+              onClick={() => {
+                setAlert(false);
+              }}
+              color="primary"
+              autoFocus
+              className={classes.save}
+            >
+              Ok
+            </MaterialButton>
+          </DialogActions>
+        </Dialog>
+      )}
     </Dialog>
   );
 }

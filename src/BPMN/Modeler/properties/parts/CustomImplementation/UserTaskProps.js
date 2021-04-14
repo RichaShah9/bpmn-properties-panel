@@ -64,6 +64,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     backgroundColor: "#0275d8",
     borderColor: "#0267bf",
+    textTransform: "none",
     color: "white",
     "&:hover": {
       backgroundColor: "#025aa5",
@@ -82,12 +83,6 @@ export default function UserTaskProps({ element, index, label }) {
   const [alertMessage, setAlertMessage] = useState(null);
   const [completedIf, setCompletedIf] = useState(null);
   const classes = useStyles();
-
-  const openAlertDialog = () => {
-    setAlertTitle("Error");
-    setAlertMessage("Add all values");
-    setAlert(true);
-  };
 
   const getProperty = React.useCallback(
     (name) => {
@@ -184,8 +179,15 @@ export default function UserTaskProps({ element, index, label }) {
     const bo = getBusinessObject(element);
     if (!bo) return;
     if (bo.$attrs) {
+      if (!value) {
+        delete bo.$attrs[name];
+        return;
+      }
       bo.$attrs[name] = value;
     } else {
+      if (!value) {
+        return;
+      }
       bo.$attrs = { [name]: value };
     }
   };
@@ -270,7 +272,6 @@ export default function UserTaskProps({ element, index, label }) {
               <ExpressionBuilder
                 open={open}
                 handleClose={() => handleClose()}
-                openAlertDialog={openAlertDialog}
                 getExpression={() => {
                   const value = getProperty("camunda:completedIfValue");
                   const combinator = getProperty(
@@ -299,50 +300,52 @@ export default function UserTaskProps({ element, index, label }) {
               />
             )}
           </div>
-          <Dialog
-            open={openAlert}
-            onClose={() => setAlert(false)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-            classes={{
-              paper: classes.dialog,
-            }}
-          >
-            <DialogTitle id="alert-dialog-title">
-              {translate(alertTitle)}
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-description">
-                {translate(alertMessage)}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setAlert(false);
-                  setAlertMessage(null);
-                  setAlertTitle(null);
-                  if (!completedIf && completedIf !== "") return;
-                  setProperty("camunda:completedIf", completedIf);
-                  setProperty("camunda:completedIfValue", undefined);
-                  setProperty("camunda:completedIfCombinator", undefined);
-                  setCompletedIf(null);
-                }}
-                color="primary"
-                autoFocus
-                className={classes.save}
-              >
-                Ok
-              </Button>
-              <Button
-                className={classes.save}
-                onClick={() => setAlert(false)}
-                color="primary"
-              >
-                Cancel
-              </Button>
-            </DialogActions>
-          </Dialog>
+          {openAlert && (
+            <Dialog
+              open={openAlert}
+              onClose={() => setAlert(false)}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+              classes={{
+                paper: classes.dialog,
+              }}
+            >
+              <DialogTitle id="alert-dialog-title">
+                {translate(alertTitle)}
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  {translate(alertMessage)}
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => {
+                    setAlert(false);
+                    setAlertMessage(null);
+                    setAlertTitle(null);
+                    if (!completedIf && completedIf !== "") return;
+                    setProperty("camunda:completedIf", completedIf);
+                    setProperty("camunda:completedIfValue", undefined);
+                    setProperty("camunda:completedIfCombinator", undefined);
+                    setCompletedIf(null);
+                  }}
+                  color="primary"
+                  autoFocus
+                  className={classes.save}
+                >
+                  Ok
+                </Button>
+                <Button
+                  className={classes.save}
+                  onClick={() => setAlert(false)}
+                  color="primary"
+                >
+                  Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
+          )}
         </div>
         <div className={classes.allButtons}>
           <label className={classes.label}>{translate("Buttons")}</label>

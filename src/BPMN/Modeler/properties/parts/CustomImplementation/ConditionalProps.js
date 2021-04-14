@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#0275d8",
     borderColor: "#0267bf",
     color: "white",
+    textTransform: "none",
     "&:hover": {
       backgroundColor: "#025aa5",
       borderColor: "#014682",
@@ -90,11 +91,6 @@ export default function ConditionalProps({
   const [alertMessage, setAlertMessage] = useState(null);
   const [script, setScript] = useState(null);
   const classes = useStyles();
-
-  const openAlertDialog = () => {
-    setAlertTitle("Error");
-    setAlert(true);
-  };
 
   const handleClickOpen = () => {
     setAlertMessage("Add all values");
@@ -309,7 +305,6 @@ export default function ConditionalProps({
               <ExpressionBuilder
                 open={open}
                 handleClose={() => handleClose()}
-                openAlertDialog={openAlertDialog}
                 getExpression={() => {
                   const value = getProperty("camunda:conditionValue");
                   const combinator = getProperty("camunda:conditionCombinator");
@@ -336,50 +331,54 @@ export default function ConditionalProps({
               />
             )}
           </div>
-          <Dialog
-            open={openAlert}
-            onClose={() => setAlert(false)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-            classes={{
-              paper: classes.dialog,
-            }}
-          >
-            <DialogTitle id="alert-dialog-title">
-              {translate(alertTitle)}
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-description">
-                {translate(alertMessage)}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setAlert(false);
-                  setAlertMessage(null);
-                  setAlertTitle(null);
-                  if (!script && script !== "") return;
-                  setValue(script);
-                  setScript(null);
-                }}
-                color="primary"
-                autoFocus
-                className={classes.save}
-              >
-                Ok
-              </Button>
-              <Button
-                onClick={() => {
-                  setAlert(false);
-                }}
-                color="primary"
-                className={classes.save}
-              >
-                Cancel
-              </Button>
-            </DialogActions>
-          </Dialog>
+          {openAlert && (
+            <Dialog
+              open={openAlert}
+              onClose={() => setAlert(false)}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+              classes={{
+                paper: classes.dialog,
+              }}
+            >
+              <DialogTitle id="alert-dialog-title">
+                {translate(alertTitle)}
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  {translate(alertMessage)}
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => {
+                    setAlert(false);
+                    setAlertMessage(null);
+                    setAlertTitle(null);
+                    if (!script && script !== "") return;
+                    setValue(script);
+                    setScript(null);
+                    setProperty("camunda:conditionValue", undefined);
+                    setProperty("camunda:conditionCombinator", undefined);
+                  }}
+                  color="primary"
+                  autoFocus
+                  className={classes.save}
+                >
+                  Ok
+                </Button>
+                <Button
+                  onClick={() => {
+                    setAlert(false);
+                  }}
+                  color="primary"
+                  className={classes.save}
+                >
+                  Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
+          )}{" "}
         </div>
       </div>
     )
