@@ -15,6 +15,7 @@ export const FILL_COLORS = {
   "bpmn:Gateway": "#fdecb3",
   "bpmn:IntermediateThrowEvent": "#ffe0b3",
   "bpmn:IntermediateCatchEvent": "#ffe0b3",
+  "bpmn:BoundaryEvent": "#ffe0b3",
 };
 
 export const STROKE_COLORS = {
@@ -39,6 +40,7 @@ export const STROKE_COLORS = {
   "bpmn:Group": "#c8c8c8",
   "bpmn:Association": "#8095B3",
   "bpmn:TextAnnotation": "#A9B1BD",
+  "bpmn:BoundaryEvent": "#ff9800",
 };
 
 export const RELATIVE_FILL = {
