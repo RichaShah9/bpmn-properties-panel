@@ -7,10 +7,11 @@ import {
   DialogActions,
   DialogContentText,
   Button,
+  Tooltip,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
-import { Edit } from "@material-ui/icons";
+import { Edit, NotInterested } from "@material-ui/icons";
 
 import Select from "../../../../../components/Select";
 import ExpressionBuilder from "../../../expression-builder";
@@ -22,7 +23,7 @@ import {
   getViews,
 } from "../../../../../services/api";
 import { TextField, Textbox, Checkbox } from "../../components";
-import { translate, getBool, getLowerCase } from "../../../../../utils";
+import { translate, getBool } from "../../../../../utils";
 
 const useStyles = makeStyles((theme) => ({
   groupLabel: {
@@ -100,7 +101,7 @@ export default function ScriptProps({ element, index, label }) {
   const [openMapper, setMapper] = useState(false);
   const [alertTitle, setAlertTitle] = useState(null);
   const [alertMessage, setAlertMessage] = useState(null);
-  const [script, setScript] = useState(null);
+
   const classes = useStyles();
 
   const handleClickOpen = () => {
@@ -356,8 +357,9 @@ export default function ScriptProps({ element, index, label }) {
 
   useEffect(() => {
     const query = getProperty("query") || false;
+    const scriptValue = getProperty("scriptValue");
     setQuery(getBool(query));
-    setReadOnly(getBool(query));
+    setReadOnly(getBool(query) || scriptValue ? true : false);
   }, [getProperty]);
 
   useEffect(() => {
@@ -401,7 +403,11 @@ export default function ScriptProps({ element, index, label }) {
               }
               setProperty("query", query);
               setQuery(query);
-              setReadOnly(query);
+              if (!query && getProperty("scriptValue")) {
+                setReadOnly(true);
+              } else {
+                setReadOnly(query);
+              }
             },
           }}
         />
@@ -410,7 +416,7 @@ export default function ScriptProps({ element, index, label }) {
             element={element}
             className={classes.textbox}
             rows={3}
-            readOnly={isQuery && isReadOnly ? true : false}
+            readOnly={isReadOnly ? true : false}
             entry={{
               id: "script",
               label: translate("Script"),
@@ -425,30 +431,12 @@ export default function ScriptProps({ element, index, label }) {
                 };
               },
               set: function (e, values) {
-                let bo = getBusinessObject(element);
-                if (
-                  !getProperty("scriptValue") &&
-                  getLowerCase(values.script) !== getLowerCase(bo.get("script"))
-                ) {
-                  if (element.businessObject) {
-                    element.businessObject.script = script;
-                    element.businessObject.scriptFormat = "axelor";
-                    element.businessObject.resource = undefined;
-                    setProperty("scriptOperatorType", undefined);
-                    setProperty("scriptValue", undefined);
-                  }
-                } else {
-                  if (
-                    getLowerCase(values.script) !==
-                    getLowerCase(bo.get("script"))
-                  ) {
-                    setScript(values && values.script);
-                    setAlertMessage(
-                      "Script can't be managed using builder once changed manually."
-                    );
-                    setAlertTitle("Warning");
-                    setAlert(true);
-                  }
+                if (element.businessObject) {
+                  element.businessObject.script = values.script;
+                  element.businessObject.scriptFormat = "axelor";
+                  element.businessObject.resource = undefined;
+                  setProperty("scriptOperatorType", undefined);
+                  setProperty("scriptValue", undefined);
                 }
               },
               validate: function (e, values) {
@@ -459,6 +447,20 @@ export default function ScriptProps({ element, index, label }) {
             }}
           />
           <div className={classes.new}>
+            <Tooltip title="Enable" aria-label="enable">
+              <NotInterested
+                className={classes.newIcon}
+                onClick={() => {
+                  if (isReadOnly) {
+                    setAlertMessage(
+                      "Script can't be managed using builder once changed manually."
+                    );
+                    setAlertTitle("Warning");
+                    setAlert(true);
+                  }
+                }}
+              />
+            </Tooltip>
             <Edit
               className={classes.newIcon}
               onClick={() => {
@@ -503,6 +505,7 @@ export default function ScriptProps({ element, index, label }) {
                       if (value) {
                         (value || "").replace(/[\u200B-\u200D\uFEFF]/g, "");
                         setProperty("scriptValue", value);
+                        setReadOnly(true);
                       }
                       setProperty("scriptOperatorType", combinator);
                     }}
@@ -514,7 +517,10 @@ export default function ScriptProps({ element, index, label }) {
                   <MapperBuilder
                     open={openMapper}
                     handleClose={handleCloseMapper}
-                    onSave={onSave}
+                    onSave={(expr) => {
+                      onSave(expr);
+                      setReadOnly(true);
+                    }}
                     params={() => getExpression()}
                   />
                 )}
@@ -544,15 +550,11 @@ export default function ScriptProps({ element, index, label }) {
                       setAlert(false);
                       setAlertMessage(null);
                       setAlertTitle(null);
-                      if (!script && script !== "") return;
+                      setReadOnly(false);
                       if (element.businessObject) {
-                        element.businessObject.script = script;
-                        element.businessObject.scriptFormat = "axelor";
-                        element.businessObject.resource = undefined;
                         setProperty("scriptOperatorType", undefined);
                         setProperty("scriptValue", undefined);
                       }
-                      setScript(null);
                     }}
                     color="primary"
                     className={classes.save}

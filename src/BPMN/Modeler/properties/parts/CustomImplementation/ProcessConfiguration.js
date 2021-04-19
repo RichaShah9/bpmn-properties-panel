@@ -18,8 +18,15 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
+  Tooltip,
 } from "@material-ui/core";
-import { Add, Edit, Close, ReportProblem } from "@material-ui/icons";
+import {
+  Add,
+  Edit,
+  Close,
+  ReportProblem,
+  NotInterested,
+} from "@material-ui/icons";
 
 import Select from "../../../../../components/Select";
 import { TextField, Checkbox, FieldEditor } from "../../components";
@@ -30,7 +37,7 @@ import {
   getMetaFields,
 } from "../../../../../services/api";
 import ExpressionBuilder from "../../../expression-builder";
-import { translate, getBool, getLowerCase } from "../../../../../utils";
+import { translate, getBool } from "../../../../../utils";
 
 const useStyles = makeStyles((theme) => ({
   groupLabel: {
@@ -616,6 +623,11 @@ export default function ProcessConfiguration({
                             rootClass={classes.textFieldRoot}
                             labelClass={classes.textFieldLabel}
                             clearClassName={classes.clearClassName}
+                            readOnly={
+                              processConfig && processConfig.pathConditionValue
+                                ? true
+                                : false
+                            }
                             entry={{
                               id: `pathCondition_${key}`,
                               name: "pathCondition",
@@ -628,12 +640,30 @@ export default function ProcessConfiguration({
                               },
                               set: function (e, values) {
                                 if (
-                                  processConfig.pathConditionValue &&
                                   values.pathCondition !==
-                                    processConfig.pathCondition
+                                  processConfig.pathCondition
+                                ) {
+                                  updateValue(
+                                    values.pathCondition === ""
+                                      ? undefined
+                                      : values.pathCondition,
+                                    "pathCondition",
+                                    undefined,
+                                    key
+                                  );
+                                }
+                              },
+                            }}
+                          />
+                          <Tooltip title="Enable" aria-label="enable">
+                            <NotInterested
+                              className={classes.newIcon}
+                              onClick={() => {
+                                if (
+                                  processConfig &&
+                                  processConfig.pathConditionValue
                                 ) {
                                   setPathCondition({
-                                    value: values.pathCondition,
                                     key,
                                     processConfig,
                                   });
@@ -642,24 +672,10 @@ export default function ProcessConfiguration({
                                   );
                                   setErrorTitle("Warning");
                                   setExpressionAlert(true);
-                                } else {
-                                  if (
-                                    values.pathCondition !==
-                                    processConfig.pathCondition
-                                  ) {
-                                    updateValue(
-                                      values.pathCondition === ""
-                                        ? undefined
-                                        : values.pathCondition,
-                                      "pathCondition",
-                                      undefined,
-                                      key
-                                    );
-                                  }
                                 }
-                              },
-                            }}
-                          />
+                              }}
+                            />
+                          </Tooltip>
                           <Edit
                             className={classes.newIcon}
                             onClick={() => {
@@ -900,29 +916,16 @@ export default function ProcessConfiguration({
                 setExpressionAlert(false);
                 setErrorMessage(null);
                 setErrorTitle(null);
-                if (
-                  !pathCondition &&
-                  !pathCondition.value &&
-                  getLowerCase(pathCondition.value) !== ""
-                ) {
-                  return;
-                }
-                const pathValue = getLowerCase(pathCondition.value);
-                if (
-                  pathValue !==
-                  getLowerCase(
-                    pathCondition &&
-                      pathCondition.processConfig &&
-                      pathCondition.processConfig.pathCondition
-                  )
-                ) {
-                  updateValue(
-                    pathValue === "" ? undefined : pathValue,
-                    "pathCondition",
-                    undefined,
-                    pathCondition.key
-                  );
-                }
+                const pathValue =
+                  pathCondition &&
+                  pathCondition.processConfig &&
+                  pathCondition.processConfig.pathCondition;
+                updateValue(
+                  pathValue === "" ? undefined : pathValue,
+                  "pathCondition",
+                  undefined,
+                  pathCondition.key
+                );
                 setPathCondition(null);
               }}
               color="primary"

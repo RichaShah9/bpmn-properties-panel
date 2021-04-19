@@ -60,10 +60,12 @@ const useStyles = makeStyles({
   readOnly: {
     borderColor: "#ccc !important",
     background: "#E3E3E3",
+    color: "#7E7E7E",
     "&:focus": {
       boxShadow: "none !important",
       outline: "none",
       borderColor: "#ccc !important",
+      color: "#7E7E7E",
     },
   },
 });
@@ -175,7 +177,7 @@ export default function TextField({
           onBlur={(e) => updateProperty(e.target.value)}
         />
         {errorMessage && <Description desciption={errorMessage} type="error" />}
-        {canRemove && value && (
+        {canRemove && value && !readOnly && (
           <button
             onClick={handleClear}
             className={classnames(classes.clearButton, clearClassName)}

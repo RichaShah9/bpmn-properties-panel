@@ -4,7 +4,7 @@ import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
-import { Edit } from "@material-ui/icons";
+import { Edit, NotInterested } from "@material-ui/icons";
 import {
   Dialog,
   DialogTitle,
@@ -12,10 +12,11 @@ import {
   DialogActions,
   DialogContentText,
   Button,
+  Tooltip,
 } from "@material-ui/core";
 
 import { Textbox } from "../../components";
-import { translate, getLowerCase } from "../../../../../utils";
+import { translate } from "../../../../../utils";
 import ExpressionBuilder from "../../../expression-builder";
 
 const useStyles = makeStyles((theme) => ({
@@ -89,7 +90,7 @@ export default function ConditionalProps({
   const [openAlert, setAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState(null);
   const [alertMessage, setAlertMessage] = useState(null);
-  const [script, setScript] = useState(null);
+  const [readOnly, setReadOnly] = useState(false);
   const classes = useStyles();
 
   const handleClickOpen = () => {
@@ -100,10 +101,13 @@ export default function ConditionalProps({
     setOpen(false);
   };
 
-  const getProperty = (name) => {
-    const bo = getBusinessObject(element);
-    return (bo.$attrs && bo.$attrs[name]) || "";
-  };
+  const getProperty = React.useCallback(
+    (name) => {
+      const bo = getBusinessObject(element);
+      return (bo.$attrs && bo.$attrs[name]) || "";
+    },
+    [element]
+  );
 
   const setProperty = (name, value) => {
     const bo = getBusinessObject(element);
@@ -236,6 +240,11 @@ export default function ConditionalProps({
   };
 
   useEffect(() => {
+    const conditionValue = getProperty("camunda:conditionValue");
+    setReadOnly(conditionValue ? true : false);
+  }, [getProperty]);
+
+  useEffect(() => {
     if (
       is(element, "bpmn:SequenceFlow") &&
       isConditionalSource(element.source)
@@ -256,6 +265,7 @@ export default function ConditionalProps({
             element={element}
             rows={3}
             className={classes.textbox}
+            readOnly={readOnly}
             entry={{
               id: "script",
               label: translate("Script"),
@@ -272,34 +282,25 @@ export default function ConditionalProps({
                 }
               },
               set: function (e, values) {
-                let bo = getBusinessObject(element);
-                if (
-                  getLowerCase(values.script) !==
-                    getLowerCase(
-                      bo.conditionExpression && bo.conditionExpression.body
-                    ) &&
-                  !getProperty("camunda:conditionValue")
-                ) {
-                  setValue(script);
-                } else {
-                  if (
-                    getLowerCase(values.script) !==
-                    getLowerCase(
-                      bo.conditionExpression && bo.conditionExpression.body
-                    )
-                  ) {
-                    setScript(values && values.script);
+                setValue(values && values.script);
+              },
+            }}
+          />
+          <div className={classes.new}>
+            <Tooltip title="Enable" aria-label="enable">
+              <NotInterested
+                className={classes.newIcon}
+                onClick={() => {
+                  if (readOnly) {
                     setAlertMessage(
                       "Script can't be managed using builder once changed manually."
                     );
                     setAlertTitle("Warning");
                     setAlert(true);
                   }
-                }
-              },
-            }}
-          />
-          <div className={classes.new}>
+                }}
+              />
+            </Tooltip>
             <Edit className={classes.newIcon} onClick={handleClickOpen} />
             {open && (
               <ExpressionBuilder
@@ -355,9 +356,7 @@ export default function ConditionalProps({
                     setAlert(false);
                     setAlertMessage(null);
                     setAlertTitle(null);
-                    if (!script && script !== "") return;
-                    setValue(script);
-                    setScript(null);
+                    setReadOnly(false);
                     setProperty("camunda:conditionValue", undefined);
                     setProperty("camunda:conditionCombinator", undefined);
                   }}

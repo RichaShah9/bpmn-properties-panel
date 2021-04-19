@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
-import { Edit } from "@material-ui/icons";
+import { Edit, NotInterested } from "@material-ui/icons";
 import {
   Dialog,
   DialogTitle,
@@ -9,6 +9,7 @@ import {
   DialogActions,
   DialogContentText,
   Button,
+  Tooltip,
 } from "@material-ui/core";
 
 import TextField from "../../components/TextField";
@@ -43,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
   },
   new: {
     cursor: "pointer",
+    display: "flex",
   },
   dialog: {
     minWidth: 300,
@@ -81,7 +83,7 @@ export default function UserTaskProps({ element, index, label }) {
   const [buttons, setButtons] = useState(null);
   const [alertTitle, setAlertTitle] = useState(null);
   const [alertMessage, setAlertMessage] = useState(null);
-  const [completedIf, setCompletedIf] = useState(null);
+  const [readOnly, setReadOnly] = useState(false);
   const classes = useStyles();
 
   const getProperty = React.useCallback(
@@ -201,6 +203,10 @@ export default function UserTaskProps({ element, index, label }) {
   useEffect(() => {
     const buttonsProperty = getProperty("camunda:buttons");
     const buttonLabelsProperty = getProperty("camunda:buttonLabels");
+    const completedIfValue = getProperty("camunda:completedIfValue");
+    if (completedIfValue) {
+      setReadOnly(true);
+    }
     const buttons = [];
     if (buttonsProperty) {
       const names = buttonsProperty && buttonsProperty.split(",");
@@ -226,6 +232,7 @@ export default function UserTaskProps({ element, index, label }) {
         <div className={classes.expressionBuilder}>
           <TextField
             element={element}
+            readOnly={readOnly}
             entry={{
               id: "completedIf",
               label: translate("Completed If"),
@@ -242,31 +249,32 @@ export default function UserTaskProps({ element, index, label }) {
               },
               set: function (e, values) {
                 let oldVal = getProperty("camunda:completedIf");
-                let completedIfValue = getProperty("camunda:completedIfValue");
                 let currentVal = values["completedIf"];
                 (currentVal || "").replace(/[\u200B-\u200D\uFEFF]/g, "");
-                if (
-                  !completedIfValue &&
-                  getLowerCase(oldVal) !== getLowerCase(currentVal)
-                ) {
-                  setProperty("camunda:completedIf", completedIf);
+                setProperty("camunda:completedIf", currentVal);
+                if (getLowerCase(oldVal) !== getLowerCase(currentVal)) {
                   setProperty("camunda:completedIfValue", undefined);
                   setProperty("camunda:completedIfCombinator", undefined);
-                } else {
-                  if (getLowerCase(oldVal) !== getLowerCase(currentVal)) {
-                    setCompletedIf(currentVal);
-                    setAlertMessage(
-                      "Completed If can't be managed using builder once changed manually."
-                    );
-                    setAlertTitle("Warning");
-                    setAlert(true);
-                  }
                 }
               },
             }}
             canRemove={true}
           />
           <div className={classes.new}>
+            <Tooltip title="Enable" aria-label="enable">
+              <NotInterested
+                className={classes.newIcon}
+                onClick={() => {
+                  if (readOnly) {
+                    setAlertMessage(
+                      "Completed If can't be managed using builder once changed manually."
+                    );
+                    setAlertTitle("Warning");
+                    setAlert(true);
+                  }
+                }}
+              />
+            </Tooltip>
             <Edit className={classes.newIcon} onClick={handleClickOpen} />
             {open && (
               <ExpressionBuilder
@@ -290,6 +298,7 @@ export default function UserTaskProps({ element, index, label }) {
                   setProperty("camunda:completedIf", expression);
                   if (value) {
                     setProperty("camunda:completedIfValue", value);
+                    setReadOnly(true);
                   }
                   if (combinator) {
                     setProperty("camunda:completedIfCombinator", combinator);
@@ -324,11 +333,9 @@ export default function UserTaskProps({ element, index, label }) {
                     setAlert(false);
                     setAlertMessage(null);
                     setAlertTitle(null);
-                    if (!completedIf && completedIf !== "") return;
-                    setProperty("camunda:completedIf", completedIf);
+                    setReadOnly(false);
                     setProperty("camunda:completedIfValue", undefined);
                     setProperty("camunda:completedIfCombinator", undefined);
-                    setCompletedIf(null);
                   }}
                   color="primary"
                   autoFocus
@@ -338,7 +345,9 @@ export default function UserTaskProps({ element, index, label }) {
                 </Button>
                 <Button
                   className={classes.save}
-                  onClick={() => setAlert(false)}
+                  onClick={() => {
+                    setAlert(false);
+                  }}
                   color="primary"
                 >
                   Cancel

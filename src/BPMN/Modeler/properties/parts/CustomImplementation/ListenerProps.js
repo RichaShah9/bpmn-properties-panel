@@ -6,7 +6,7 @@ import ImplementationTypeHelper from "bpmn-js-properties-panel/lib/helper/Implem
 import find from "lodash/find";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
-import { Edit } from "@material-ui/icons";
+import { Edit, NotInterested } from "@material-ui/icons";
 import {
   Dialog,
   DialogTitle,
@@ -14,10 +14,11 @@ import {
   DialogActions,
   DialogContentText,
   Button,
+  Tooltip,
 } from "@material-ui/core";
 
 import MapperBuilder from "../../../mapper-builder/App";
-import { getLowerCase, translate } from "../../../../../utils";
+import { translate } from "../../../../../utils";
 import {
   ExtensionElementTable,
   SelectBox,
@@ -148,7 +149,6 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
   const [executionOptions, setExecutionOptions] = useState(null);
   const [open, setOpen] = useState(false);
   const [openAlert, setAlert] = useState(false);
-  const [script, setScript] = useState(null);
 
   const classes = useStyles();
   const isSequenceFlow = ImplementationTypeHelper.isSequenceFlow(element);
@@ -204,6 +204,15 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
       resultField: listener.script && listener.script.value,
       resultMetaField: listener.script && listener.script.scriptValue,
     };
+  };
+
+  const getReadOnly = () => {
+    const listener = getListener();
+    if (listener && listener.script && listener.script.scriptValue) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   const getExecutionOptions = () => {
@@ -571,6 +580,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                 element={element}
                 rows={3}
                 className={classes.textbox}
+                readOnly={() => getReadOnly()}
                 entry={{
                   id: "script",
                   label: translate("Script"),
@@ -583,31 +593,22 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                   },
                   set: function (e, values) {
                     const listener = getListener();
-                    if (
-                      listener.script.scriptValue &&
-                      getLowerCase(values.script) !==
-                        getLowerCase(listener.script.value)
-                    ) {
-                      setScript(values.script);
-                      setAlert(true);
+                    if (!listener.script) {
+                      listener.script =
+                        listener.script ||
+                        elementHelper.createElement(
+                          "camunda:Script",
+                          {
+                            scriptFormat: "axelor",
+                            value: values.script,
+                          },
+                          getBO(),
+                          bpmnFactory
+                        );
                     } else {
-                      if (!listener.script) {
-                        listener.script =
-                          listener.script ||
-                          elementHelper.createElement(
-                            "camunda:Script",
-                            {
-                              scriptFormat: "axelor",
-                              value: values.script,
-                            },
-                            getBO(),
-                            bpmnFactory
-                          );
-                      } else {
-                        listener.script.value = values.script;
-                        listener.script.resource = undefined;
-                        listener.script.scriptFormat = "axelor";
-                      }
+                      listener.script.value = values.script;
+                      listener.script.resource = undefined;
+                      listener.script.scriptFormat = "axelor";
                     }
                   },
                   validate: function (e, values) {
@@ -619,6 +620,22 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
               />
               {(selectedExecutionEntity === 0 || selectedExecutionEntity) && (
                 <div className={classes.edit}>
+                  <Tooltip title="Enable" aria-label="enable">
+                    <NotInterested
+                      className={classes.editIcon}
+                      onClick={() => {
+                        const listener = getListener();
+
+                        if (
+                          listener &&
+                          listener.script &&
+                          listener.script.scriptValue
+                        ) {
+                          setAlert(true);
+                        }
+                      }}
+                    />
+                  </Tooltip>
                   <Edit
                     className={classes.editIcon}
                     onClick={handleClickOpen}
@@ -627,7 +644,9 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                     <MapperBuilder
                       open={open}
                       handleClose={handleClose}
-                      onSave={onSave}
+                      onSave={(expr) => {
+                        onSave(expr);
+                      }}
                       params={() => getExpression()}
                     />
                   )}
@@ -657,26 +676,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                         <Button
                           onClick={() => {
                             setAlert(false);
-                            if (!script && script !== "") return;
                             const listener = getListener();
-                            if (!listener.script) {
-                              listener.script =
-                                listener.script ||
-                                elementHelper.createElement(
-                                  "camunda:Script",
-                                  {
-                                    scriptFormat: "axelor",
-                                    value: script,
-                                  },
-                                  getBO(),
-                                  bpmnFactory
-                                );
-                            } else {
-                              listener.script.value = script;
-                              listener.script.resource = undefined;
-                              listener.script.scriptFormat = "axelor";
-                            }
-                            setScript(null);
                             listener.script.scriptValue = undefined;
                           }}
                           color="primary"

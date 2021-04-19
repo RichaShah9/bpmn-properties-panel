@@ -219,7 +219,7 @@ export default function Textbox({
         onChange={(e) => {
           setValue(e.target.value);
         }}
-        readOnly={readOnly}
+        readOnly={typeof readOnly === "function" ? readOnly() : readOnly}
       />
       {errorMessage && <Description desciption={errorMessage} type="error" />}
       {description && <Description desciption={description} />}
