@@ -54,8 +54,6 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import "bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css";
 import "../css/bpmn.css";
-import "../css/comments/comments.css";
-import "../css/comments/simulation.css";
 import "../css/colors.css";
 
 const resizeStyle = {

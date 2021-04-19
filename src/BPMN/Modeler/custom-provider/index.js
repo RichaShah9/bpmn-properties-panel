@@ -1,8 +1,6 @@
 import CustomPropertiesProvider from "./providers/CustomPropertiesProvider";
-import Comments from "./embedded-comments/comments";
 
 export default {
-  __init__: ["propertiesProvider", "comments"],
+  __init__: ["propertiesProvider"],
   propertiesProvider: ["type", CustomPropertiesProvider],
-  comments: ["type", Comments],
 };
