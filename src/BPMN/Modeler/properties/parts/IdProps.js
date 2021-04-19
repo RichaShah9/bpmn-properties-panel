@@ -14,9 +14,9 @@ export default function IdProps(group, element, translate, options) {
       return getBusinessObject(element).id;
     },
     setProperty: function (element, properties) {
-      element.id = properties["id"];
+      element = element.labelTarget || element;
       if (element.businessObject) {
-        element.businessObject["id"] = properties["id"];
+        element.businessObject.id = properties["id"];
       }
     },
     validate: function (element, values) {
