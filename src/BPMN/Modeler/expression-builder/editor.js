@@ -427,7 +427,6 @@ function Rule(props) {
     field,
     operator,
     fieldValue,
-    allField = [],
     fieldValue2 = "",
     isRelationalValue,
     relatedValueModal,
@@ -466,38 +465,8 @@ function Rule(props) {
     }
   };
 
-  const [elseNameValue, setElseNameValue] = useState({
-    allField: allField,
-    field: relatedElseValueFieldName,
-    fieldName:
-      getValue(fieldValue2) ||
-      (relatedElseValueFieldName && relatedElseValueFieldName.name),
-    fieldType: relatedElseValueFieldName && relatedElseValueFieldName.type,
-    fieldValue: null,
-    fieldValue2: null,
-    operator: null,
-    isRelationalValue: isField === "none" ? null : isField,
-    relatedValueFieldName: relatedValueFieldName,
-    relatedValueModal: relatedValueModal,
-    relatedElseValueFieldName: relatedElseValueFieldName,
-    relatedElseValueModal: relatedElseValueModal,
-    isShow: isShowElseMetaModelField,
-  });
-  const [nameValue, setNameValue] = useState({
-    allField: allField,
-    field: relatedValueFieldName,
-    fieldName:
-      getValue(fieldValue) ||
-      (relatedValueFieldName && relatedValueFieldName.fieldName),
-    fieldType: relatedValueFieldName && relatedValueFieldName.type,
-    fieldValue: null,
-    fieldValue2: null,
-    operator: null,
-    isRelationalValue: isField === "none" ? null : isField,
-    relatedValueFieldName: relatedValueFieldName,
-    relatedValueModal: relatedValueModal,
-    isShow: isShowMetaModelField,
-  });
+  const [elseNameValue, setElseNameValue] = useState(null);
+  const [nameValue, setNameValue] = useState(null);
 
   const addOperatorByType = (keys, value) => {
     keys.map((key) => (operators_by_type[key] = value));
@@ -537,6 +506,67 @@ function Rule(props) {
   const handleChange = (name, value) => {
     onChange({ name, value }, editor);
   };
+
+  useEffect(() => {
+    setField(isRelationalValue ? isRelationalValue : "none");
+    setMetaModal(relatedValueModal || null);
+    setIsShowMetaModelField(showMetaModelField || false);
+    setElseMetaModal(relatedElseValueModal || null);
+    setIsShowElseMetaModelField(showElseMetaModelField || false);
+  }, [
+    isRelationalValue,
+    relatedValueModal,
+    showMetaModelField,
+    relatedElseValueModal,
+    showElseMetaModelField,
+  ]);
+
+  useEffect(() => {
+    const {
+      fieldValue,
+      allField = [],
+      fieldValue2 = "",
+      isRelationalValue,
+      relatedValueModal,
+      relatedValueFieldName,
+      relatedElseValueModal,
+      relatedElseValueFieldName,
+      isShowMetaModelField: showMetaModelField,
+      isShowElseMetaModelField: showElseMetaModelField,
+    } = value;
+    setElseNameValue({
+      allField: allField,
+      field: relatedElseValueFieldName,
+      fieldName:
+        getValue(fieldValue2) ||
+        (relatedElseValueFieldName && relatedElseValueFieldName.name),
+      fieldType: relatedElseValueFieldName && relatedElseValueFieldName.type,
+      fieldValue: null,
+      fieldValue2: null,
+      operator: null,
+      isRelationalValue: isRelationalValue ? isRelationalValue : "none",
+      relatedValueFieldName: relatedValueFieldName,
+      relatedValueModal: relatedValueModal,
+      relatedElseValueFieldName: relatedElseValueFieldName,
+      relatedElseValueModal: relatedElseValueModal,
+      isShow: showElseMetaModelField,
+    });
+    setNameValue({
+      allField: allField,
+      field: relatedValueFieldName,
+      fieldName:
+        getValue(fieldValue) ||
+        (relatedValueFieldName && relatedValueFieldName.fieldName),
+      fieldType: relatedValueFieldName && relatedValueFieldName.type,
+      fieldValue: null,
+      fieldValue2: null,
+      operator: null,
+      isRelationalValue: isRelationalValue ? isRelationalValue : "none",
+      relatedValueFieldName: relatedValueFieldName,
+      relatedValueModal: relatedValueModal,
+      isShow: showMetaModelField,
+    });
+  }, [value]);
 
   return (
     <div className={classes.rules}>
@@ -741,7 +771,8 @@ function Rule(props) {
                       ? isBPM
                         ? `self.${fieldNameValue}`
                         : `${lowerCaseFirstLetter(
-                            metaModal && metaModal.name
+                            (metaModal && metaModal.name) ||
+                              (parentMetaModal && parentMetaModal.name)
                           )}${
                             isContextValue
                               ? "?."
@@ -755,7 +786,10 @@ function Rule(props) {
                                 }toLocalDateTime()`
                               : ""
                           }`
-                      : `${lowerCaseFirstLetter(metaModal && metaModal.name)}${
+                      : `${lowerCaseFirstLetter(
+                          (metaModal && metaModal.name) ||
+                            (parentMetaModal && parentMetaModal.name)
+                        )}${
                           isContextValue
                             ? "?."
                             : join_operator[isBPM ? "BPM" : expression]
@@ -896,7 +930,10 @@ function Rule(props) {
                           ? isBPM
                             ? `self.${fieldNameValue}`
                             : `${lowerCaseFirstLetter(
-                                metaModal && metaModal.name
+                                metaModal &&
+                                  metaModal.name &&
+                                  parentMetaModal &&
+                                  parentMetaModal.name
                               )}${
                                 isContextValue
                                   ? "?."
