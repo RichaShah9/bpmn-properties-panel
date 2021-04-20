@@ -139,9 +139,20 @@ export default function ScriptProps({ element, index, label }) {
     };
   };
 
+  function getBO(element) {
+    if (
+      element &&
+      element.$parent &&
+      element.$parent.$type !== "bpmn:Process"
+    ) {
+      return getBO(element.$parent);
+    } else {
+      return element.$parent;
+    }
+  }
+
   function getProcessConfig(type) {
-    let bo =
-      element && element.businessObject && element.businessObject.$parent;
+    let bo = getBO(element && element.businessObject);
     if (element.type === "bpmn:Process") {
       bo = element.businessObject;
     }

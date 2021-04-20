@@ -46,7 +46,8 @@ export function getProcessConfig(element, processConfigs) {
     };
   }
   if (!element) return null;
-  let bo = element && element.businessObject && element.businessObject.$parent;
+  let bo = getBO(element && element.businessObject);
+  bo = bo && bo.$parent;
   if (element && element.type === "bpmn:Process") {
     bo = element.businessObject;
   } else if (bo.$type === "bpmn:SubProcess") {

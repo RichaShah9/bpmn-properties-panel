@@ -128,6 +128,18 @@ export default function UserTaskProps({ element, index, label }) {
     }
   };
 
+  function getBO(element) {
+    if (
+      element &&
+      element.$parent &&
+      element.$parent.$type !== "bpmn:Process"
+    ) {
+      return getBO(element.$parent);
+    } else {
+      return element.$parent;
+    }
+  }
+
   function getProcessConfig() {
     const model = getProperty("camunda:metaModel");
     const modelFullName = getProperty("camunda:metaModelModelName");
@@ -137,8 +149,7 @@ export default function UserTaskProps({ element, index, label }) {
     } else if (jsonModel) {
       return [{ model: jsonModel, type: "metaJsonModel" }];
     } else {
-      let bo =
-        element && element.businessObject && element.businessObject.$parent;
+      let bo = getBO(element && element.businessObject);
       if (element.type === "bpmn:Process") {
         bo = element.businessObject;
       }

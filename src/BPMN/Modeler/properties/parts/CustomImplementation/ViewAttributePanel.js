@@ -247,9 +247,20 @@ export default function ViewAttributePanel({ handleAdd, element }) {
     handlePropertyAdd();
   };
 
+  function getBO(element) {
+    if (
+      element &&
+      element.$parent &&
+      element.$parent.$type !== "bpmn:Process"
+    ) {
+      return getBO(element.$parent);
+    } else {
+      return element.$parent;
+    }
+  }
+
   function getProcessConfig() {
-    let bo =
-      element && element.businessObject && element.businessObject.$parent;
+    let bo = getBO(element && element.businessObject);
     const extensionElements = bo && bo.extensionElements;
     const noOptions = {
       criteria: [
@@ -324,7 +335,7 @@ export default function ViewAttributePanel({ handleAdd, element }) {
             "domain",
             "itemLabel",
             "active",
-            "permanent"
+            "permanent",
           ].includes(val.name)
       );
       if (camundaProperty) {

@@ -340,9 +340,20 @@ export default function MenuActionPanel({ element, bpmnFactory }) {
     }
   };
 
+  function getBO(element) {
+    if (
+      element &&
+      element.$parent &&
+      element.$parent.$type !== "bpmn:Process"
+    ) {
+      return getBO(element.$parent);
+    } else {
+      return element.$parent;
+    }
+  }
+
   function getProcessConfig() {
-    let bo =
-      element && element.businessObject && element.businessObject.$parent;
+    let bo = getBO(element && element.businessObject);
     if (element.type === "bpmn:Process") {
       bo = element.businessObject;
     }
