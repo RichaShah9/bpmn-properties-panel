@@ -59,7 +59,11 @@ export const getElements = (bpmnModeler) => {
       let elements = [];
       process.flowElements &&
         process.flowElements.forEach((element) => {
-          if (["event", "task", "gateway"].includes(getType(element))) {
+          if (
+            ["event", "task", "gateway", "bpmn:callactivity"].includes(
+              getType(element)
+            )
+          ) {
             elements.push({
               id: element.id,
               name: element.name || element.id,
