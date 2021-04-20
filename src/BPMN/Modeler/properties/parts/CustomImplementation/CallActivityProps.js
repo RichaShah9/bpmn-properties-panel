@@ -214,8 +214,7 @@ export default function CallActivityProps({
   const onConfirm = () => {
     if (wkfModel) {
       if (element && element.businessObject) {
-        element.businessObject.calledElement = wkfModel.name;
-        element.businessObject.$attrs["camunda:processId"] = wkfModel.processId;
+        element.businessObject.calledElement = wkfModel.processId;
       }
     }
     handleClose();
@@ -280,10 +279,9 @@ export default function CallActivityProps({
     });
     const wkfModel = res && res.data && res.data[0];
     if (wkfModel) {
-      setWkfModel(wkfModel);
+      setWkfModel(null);
       handleSnackbarClick("success", "New process added successfully");
       element.businessObject.calledElement = id;
-      element.businessObject.$attrs["camunda:processId"] = id;
       if (wkfModel.id) {
         window.top.document
           .getElementsByTagName("iframe")[0]
@@ -325,8 +323,7 @@ export default function CallActivityProps({
         processId: wkfProcess.processId,
       });
       if (element) {
-        element.businessObject.$attrs["camunda:processId"] =
-          wkfProcess.processId;
+        element.businessObject.calledElement = wkfProcess.processId;
       }
     },
     [element]
@@ -352,9 +349,7 @@ export default function CallActivityProps({
 
   useEffect(() => {
     const bo = getBusinessObject(element);
-    if (bo && bo.$attrs && bo.$attrs["camunda:processId"]) {
-      updateModel(bo.$attrs["camunda:processId"] || bo.calledElement);
-    }
+    updateModel(bo.calledElement);
   }, [element, updateModel]);
 
   return (
