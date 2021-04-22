@@ -59,6 +59,15 @@ function MultiSelector(props) {
       if (isContext && list.length - 1 === 0) {
         return record;
       }
+      if (
+        record.model === "com.axelor.meta.db.MetaJsonRecord" &&
+        record.targetModel
+      ) {
+        return { fullName: record.targetModel };
+      }
+      if (!record.target) {
+        return { fullName: record.model };
+      }
       return { fullName: record.target };
     } else {
       if (sourceModel) {
@@ -117,14 +126,24 @@ function MultiSelector(props) {
     <div>
       <Selection
         isMulti={true}
-        fetchAPI={() =>
-          isContext && !hasValue() ? getModels() : fetchFields(getModel())
-        }
+        fetchAPI={async () => {
+          const data =
+            isContext && !hasValue()
+              ? await getModels()
+              : await fetchFields(getModel());
+          if (sourceModel && (!value || value.length < 1)) {
+            const object = Object.assign({}, sourceModel, {
+              title: `SOURCE`,
+            });
+            data.splice(0, 0, { ...object });
+          }
+          return data;
+        }}
         value={value}
         onChange={handleChange}
         renderTags={(tags, getTagProps) => {
           return tags.map((tag, i) => (
-            <>
+            <React.Fragment key={i}>
               <Chip
                 key={i}
                 label={checkValue(tag)}
@@ -134,7 +153,7 @@ function MultiSelector(props) {
               {i < tags.length - 1 && (
                 <RightIcon className={classes.rightIcon} />
               )}
-            </>
+            </React.Fragment>
           ));
         }}
         {...rest}
