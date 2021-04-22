@@ -133,6 +133,13 @@ function ExpressionBuilder({
     { Component: ExpressionComponent },
   ]);
   const [singleResult, setSingleResult] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    alertMessage: "Add all values",
+    alertTitle: "Error",
+  });
+  const [isClose, setClose] = useState(false);
+  const [initialValues, setInitialValues] = useState(null);
+
   const classes = useStyles();
   function onAddExpressionEditor() {
     setExpressionComponents(
@@ -521,6 +528,23 @@ function ExpressionBuilder({
     }
   }
 
+  const onCancel = () => {
+    if (
+      JSON.stringify(generateExpressionValues()) ===
+      JSON.stringify(initialValues)
+    ) {
+      handleClose();
+      return;
+    }
+    setClose(true);
+    setAlert(true);
+    setAlertConfig({
+      alertMessage:
+        "Current changes will be lost. Do you really want to proceed?",
+      alertTitle: "Question",
+    });
+  };
+
   function getCondition(rules, modalName) {
     const isBPM = isBPMQuery(parentType);
     const prefix = isBPM ? "self" : modalName;
@@ -562,6 +586,10 @@ function ExpressionBuilder({
         ) {
           isValid = false;
           setAlert(true);
+          setAlertConfig({
+            alertMessage: "Add all values",
+            alertTitle: "Error",
+          });
           return null;
         }
         isValid = true;
@@ -751,6 +779,10 @@ function ExpressionBuilder({
       ) {
         isValid = false;
         setAlert(true);
+        setAlertConfig({
+          alertMessage: "Add all values",
+          alertTitle: "Error",
+        });
         return null;
       }
       isValid = true;
@@ -1009,6 +1041,21 @@ function ExpressionBuilder({
     );
   }, []);
 
+  function generateExpressionValues() {
+    const expressionValues = [];
+    expressionComponents &&
+      expressionComponents.forEach(({ value }) => {
+        const { rules, metaModals } = value;
+        const modalName = metaModals && metaModals.name;
+        expressionValues.push({
+          metaModalName: modalName,
+          metaModalType: metaModals.type,
+          rules,
+        });
+      });
+    return expressionValues;
+  }
+
   function generateExpression(combinator, type) {
     const expressionValues = [];
     let model;
@@ -1093,6 +1140,7 @@ function ExpressionBuilder({
     async function fetchValue() {
       const { values, combinator } = getExpression() || {};
       const expressionComponents = [];
+      setInitialValues(values);
       if (!values || values.length === 0) {
         setExpressionComponents([
           {
@@ -1269,11 +1317,14 @@ function ExpressionBuilder({
             </div>
           </div>
         </Paper>
-        <Button
-          title="OK"
-          className={classes.save}
-          onClick={() => generateExpression(combinator, parentType)}
-        />
+        <div>
+          <Button
+            title="OK"
+            className={classes.save}
+            onClick={() => generateExpression(combinator, parentType)}
+          />
+          <Button title="Cancel" className={classes.save} onClick={onCancel} />
+        </div>
       </div>
       {openAlert && (
         <Dialog
@@ -1285,22 +1336,38 @@ function ExpressionBuilder({
             paper: classes.dialog,
           }}
         >
-          <DialogTitle id="alert-dialog-title">Error</DialogTitle>
+          <DialogTitle id="alert-dialog-title">
+            {alertConfig.alertTitle}
+          </DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              Add all values
+              {alertConfig.alertMessage}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <MaterialButton
               onClick={() => {
                 setAlert(false);
+                if (isClose) {
+                  handleClose();
+                }
               }}
               color="primary"
               autoFocus
               className={classes.save}
             >
               Ok
+            </MaterialButton>
+            <MaterialButton
+              onClick={() => {
+                setAlert(false);
+              }}
+              color="primary"
+              autoFocus
+              style={{ textTransform: "none" }}
+              className={classes.save}
+            >
+              Cancel
             </MaterialButton>
           </DialogActions>
         </Dialog>
