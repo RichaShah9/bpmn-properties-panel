@@ -130,6 +130,7 @@ export async function fetchFields(item, excludeUIFields = false) {
         "title",
         "name",
       ],
+      sortBy: ["title"],
     });
     const { data = [] } = res || {};
     fields = [...data];
@@ -143,7 +144,7 @@ export async function fetchFields(item, excludeUIFields = false) {
       fields.push(...Object.values(jsonField));
     });
   }
-  const newFields = sortBy(fields, "name");
+  const newFields = sortBy(fields, "title");
   return newFields.filter((field) => !excludedUITypes.includes(field.type));
 }
 
@@ -177,7 +178,7 @@ export async function fetchCustomFields(item) {
         "title",
         "name",
       ],
-      sortBy: ["name"],
+      sortBy: ["title"],
     });
     const { data = [] } = res || {};
     return [...data];
