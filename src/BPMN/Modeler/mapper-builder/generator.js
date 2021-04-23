@@ -13,10 +13,11 @@ const getModelFieldValue = (fields) => {
   if (fields) {
     fields.forEach((field) => {
       if (field.name) {
+        const fieldName = lowerCaseFirstLetter(field.name);
         if (modelFieldText) {
-          modelFieldText = `${modelFieldText}?.${field.name}`;
+          modelFieldText = `${modelFieldText}?.${fieldName}`;
         } else {
-          modelFieldText = `${field.name}`;
+          modelFieldText = `${fieldName}`;
         }
       }
     });
