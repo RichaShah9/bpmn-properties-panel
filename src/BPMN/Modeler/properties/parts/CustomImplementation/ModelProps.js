@@ -391,7 +391,7 @@ export default function ModelProps({
             <div className={classes.groupLabel}>{label}</div>
           </React.Fragment>
         )}
-        {!["bpmn:Process", "bpmn:Participant"].includes(
+        {!["bpmn:Process", "bpmn:Participant", "bpmn:SendTask"].includes(
           element && element.type
         ) && (
           <React.Fragment>
