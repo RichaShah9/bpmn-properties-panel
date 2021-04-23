@@ -190,7 +190,7 @@ export default function CallActivityProps({
   bpmnFactory,
 }) {
   const [isVisible, setVisible] = useState(false);
-  const [callActivityType, setCallActivityType] = useState("");
+  const [callActivityType, setCallActivityType] = useState("bpmn");
   const [delegateMappingType, setDelegateMappingType] = useState("");
   const [bindingType, setBindingType] = useState("latest");
   const [isBusinessKey, setBusinessKey] = useState(false);
@@ -250,6 +250,21 @@ export default function CallActivityProps({
     });
   };
 
+  const checkId = async (id) => {
+    const model = await Service.search("com.axelor.apps.bpm.db.WkfModel", {
+      data: {
+        _domain: `self.code = '${id}'`,
+      },
+      limit: 1,
+    });
+    if (model.total > 0) {
+      let newId = nextId();
+      checkId(newId);
+    } else {
+      return id;
+    }
+  };
+
   const addNewBPMRecord = async () => {
     const xml = `<?xml version="1.0" encoding="UTF-8" ?>
       <bpmn2:definitions 
@@ -272,16 +287,19 @@ export default function CallActivityProps({
           </bpmndi:BPMNPlane>
         </bpmndi:BPMNDiagram>
       </bpmn2:definitions>`;
+
+    const uniqueCode = await checkId(id);
     let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
-      name: id,
-      code: id,
+      name: uniqueCode,
+      code: uniqueCode,
       diagramXml: xml,
+      generatedFromCallActivity: true,
     });
     const wkfModel = res && res.data && res.data[0];
     if (wkfModel) {
-      setWkfModel(null);
+      element.businessObject.calledElement = uniqueCode;
+      setWkfModel(wkfModel);
       handleSnackbarClick("success", "New process added successfully");
-      element.businessObject.calledElement = id;
       if (wkfModel.id) {
         window.top.document
           .getElementsByTagName("iframe")[0]
@@ -316,14 +334,29 @@ export default function CallActivityProps({
         "or"
       );
       const wkfProcess = wkfProcessRes && wkfProcessRes[0];
-      if (!wkfProcess) return;
-      setWkfModel({
-        name: wkfProcess.name,
-        id: wkfProcess.wkfModel && wkfProcess.wkfModel.id,
-        processId: wkfProcess.processId,
-      });
-      if (element) {
-        element.businessObject.calledElement = wkfProcess.processId;
+      if (!wkfProcess) {
+        const model = await Service.search("com.axelor.apps.bpm.db.WkfModel", {
+          data: {
+            _domain: `self.code = '${userInput}' AND self.generatedFromCallActivity is true`,
+          },
+          limit: 1,
+        });
+        const data = model && model.data && model.data[0];
+        if (data) {
+          setWkfModel(data);
+          if (element) {
+            element.businessObject.calledElement = data.code;
+          }
+        }
+      } else {
+        setWkfModel({
+          name: wkfProcess.name,
+          id: wkfProcess.wkfModel && wkfProcess.wkfModel.id,
+          processId: wkfProcess.processId,
+        });
+        if (element) {
+          element.businessObject.calledElement = wkfProcess.processId;
+        }
       }
     },
     [element]
@@ -332,7 +365,7 @@ export default function CallActivityProps({
   useEffect(() => {
     if (is(element, "camunda:CallActivity")) {
       let bo = getBusinessObject(element);
-      const callActivityType = getCallableType(bo);
+      const callActivityType = getCallableType(bo) || "bpmn";
       const delegateMappingType = getDelegateVariableMapping(bo);
       const calledElementBinding =
         bo[
