@@ -352,10 +352,10 @@ export default function CallActivityProps({
         setWkfModel({
           name: wkfProcess.name,
           id: wkfProcess.wkfModel && wkfProcess.wkfModel.id,
-          processId: wkfProcess.processId,
+          processId: wkfProcess.name,
         });
         if (element) {
-          element.businessObject.calledElement = wkfProcess.processId;
+          element.businessObject.calledElement = wkfProcess.name;
         }
       }
     },
@@ -773,8 +773,8 @@ export default function CallActivityProps({
                   if (!value) return;
                   setWkfModel({
                     id: value.wkfModel.id,
-                    name: `${value.name} (${value.processId})`,
-                    processId: value.processId,
+                    name: `${value.wkfModel.name} (${value.name})`,
+                    processId: value.name,
                   });
                 }}
                 name="wkfModel"

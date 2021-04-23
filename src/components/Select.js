@@ -229,7 +229,9 @@ export default function SelectComponent({
               ? "name"
               : "name";
           } else if (name === "wkfModel") {
-            optionName = `${option["name"]} ${option["processId"]}`;
+            optionName = `${
+              option["wkfModel"] && option["wkfModel"]["name"]
+            } (${option["name"]})`;
           } else {
             optionName = option[optionLabel]
               ? optionLabel
@@ -310,12 +312,16 @@ export default function SelectComponent({
                     option["name"] ? ` (${option["name"]})` : ""
                   }`
                 : typeof option === "object"
-                ? option["name"] ? `(${option["name"]})` : undefined
+                ? option["name"]
+                  ? `(${option["name"]})`
+                  : undefined
                 : option;
           } else if (name === "dmnModel") {
             optionName = `${option["name"]} (${option["decisionId"]})`;
           } else if (name === "wkfModel") {
-            optionName = `${option["name"]} (${option["processId"]})`;
+            optionName = `${
+              option["wkfModel"] && option["wkfModel"]["name"]
+            } (${option["name"]})`;
           } else {
             optionName =
               option[optionLabel] && option[optionLabelSecondary]
