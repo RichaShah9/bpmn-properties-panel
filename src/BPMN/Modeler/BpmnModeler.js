@@ -1081,7 +1081,9 @@ function BpmnModelerComponent() {
                 permanent,
               } = item;
               addProperty("item", itemName && itemName.name);
-              addProperty(attributeName, attributeValue);
+              if (attributeName && attributeName !== "") {
+                addProperty(attributeName, attributeValue);
+              }
               addProperty("itemLabel", itemNameLabel);
               addProperty("permanent", permanent || false);
             });

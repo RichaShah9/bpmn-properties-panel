@@ -216,7 +216,13 @@ export default function ViewAttributePanel({ handleAdd, element }) {
       [`${name}Label`]: valueLabel,
     };
     if (name === "attributeName") {
-      items[itemIndex].attributeValue = null;
+      if (["readonly", "hidden", "required", "active"].includes(value)) {
+        if (!items[itemIndex].attributeValue) {
+          items[itemIndex].attributeValue = "false";
+        }
+      } else {
+        items[itemIndex].attributeValue = null;
+      }
     }
     values[index] = {
       ...(values[index] || {}),
