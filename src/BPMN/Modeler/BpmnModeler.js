@@ -1078,7 +1078,7 @@ function BpmnModelerComponent() {
                 itemNameLabel,
                 attributeName,
                 attributeValue,
-                permanent
+                permanent,
               } = item;
               addProperty("item", itemName && itemName.name);
               addProperty(attributeName, attributeValue);
@@ -1199,6 +1199,48 @@ function BpmnModelerComponent() {
     },
     [checkMenuActionTab]
   );
+
+  const alertUser = (event) => {
+    event.preventDefault();
+    event.returnValue = "Are you sure you want to close the tab?";
+  };
+
+  useEffect(() => {
+    window.top && window.top.addEventListener("beforeunload", alertUser);
+    return () => {
+      window.top && window.top.removeEventListener("beforeunload", alertUser);
+    };
+  });
+
+  useEffect(() => {
+    const scope =
+      window.top &&
+      window.top.angular &&
+      window.top.angular
+        .element(
+          window.top.document.querySelectorAll(
+            '[ng-repeat="tab in navTabs"][class="ng-scope active"]'
+          )[0]
+        )
+        .scope();
+    if (!scope) return;
+    scope.tab.$viewScope.confirmDirty = function (callback, cancelCallback) {
+      window.top.axelor.dialogs.confirm(
+        window._t(
+          "Current changes will be lost. Do you really want to proceed?"
+        ),
+        function (confirmed) {
+          if (!confirmed) {
+            if (cancelCallback) {
+              cancelCallback();
+            }
+            return;
+          }
+          scope.$applyAsync(callback);
+        }
+      );
+    };
+  }, []);
 
   useEffect(() => {
     let modeler = {
