@@ -734,9 +734,18 @@ function Builder({ params, onSave, handleClose, open }) {
             </>
           </div>
         </Paper>
-        <Button className={classes.save} onClick={handleSave}>
-          OK
-        </Button>
+        <div>
+          <Button className={classes.save} onClick={handleSave}>
+            OK
+          </Button>
+          <Button
+            className={classes.save}
+            onClick={handleClose}
+            style={{ textTransform: "none" }}
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
     </Dialog>
   );
