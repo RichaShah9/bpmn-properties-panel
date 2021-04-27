@@ -1,7 +1,18 @@
 import propertiesTabs from "./properties/properties";
 import { download, getBool, translate } from "../../utils";
 import { tabProperty } from "./properties/tabProperty";
+import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import Service from "../../services/Service";
+
+export const getProcessBusinessObject = (element, propertyName) => {
+  if (!is(element, "bpmn:Participant")) {
+    return {};
+  }
+  let bo = getBusinessObject(element).get("processRef"),
+    properties = {};
+  properties[propertyName] = bo && bo.get(propertyName);
+  return properties;
+};
 
 export const fetchId = () => {
   const regexBPMN = /[?&]id=([^&#]*)/g; // ?id=1
@@ -184,4 +195,5 @@ export default {
   isTabVisible,
   hidePanelElements,
   addOldNodes,
+  getProcessBusinessObject,
 };

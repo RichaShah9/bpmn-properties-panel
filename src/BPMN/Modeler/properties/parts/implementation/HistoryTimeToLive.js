@@ -13,7 +13,7 @@ export default function HistoryTimeToLive(
     widget: "textField",
     get: function (element, node) {
       let bo = getBusinessObject(element);
-      let historyTimeToLive = bo.get("camunda:historyTimeToLive");
+      let historyTimeToLive = bo && bo.get("camunda:historyTimeToLive");
 
       return {
         historyTimeToLive: historyTimeToLive ? historyTimeToLive : "",

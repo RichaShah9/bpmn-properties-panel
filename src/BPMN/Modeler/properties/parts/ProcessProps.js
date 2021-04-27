@@ -1,7 +1,8 @@
-import participantHelper from "bpmn-js-properties-panel/lib/helper/ParticipantHelper";
 import nameEntryFactory from "./implementation/Name";
 import utils from "bpmn-js-properties-panel/lib/Utils";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+
+import { getProcessBusinessObject } from "../../extra";
 
 export default function ProcessProps(group, element, translate, options) {
   let businessObject = getBusinessObject(element);
@@ -26,10 +27,7 @@ export default function ProcessProps(group, element, translate, options) {
 
       // in participants we have to change the default behavior of set and get
       idEntry.get = function (element) {
-        let properties = participantHelper.getProcessBusinessObject(
-          element,
-          "id"
-        );
+        let properties = getProcessBusinessObject(element, "id");
         return { processId: properties.id };
       };
 
@@ -63,7 +61,7 @@ export default function ProcessProps(group, element, translate, options) {
 
       // in participants we have to change the default behavior of set and get
       processNameEntry.get = function (element) {
-        return participantHelper.getProcessBusinessObject(element, "name");
+        return getProcessBusinessObject(element, "name");
       };
 
       processNameEntry.set = function (element, values) {

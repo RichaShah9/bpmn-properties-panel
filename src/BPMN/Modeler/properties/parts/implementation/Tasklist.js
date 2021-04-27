@@ -8,7 +8,7 @@ export default function Tasklist(element, bpmnFactory, options, translate) {
     widget: "checkbox",
     get: function (element, node) {
       let bo = getBusinessObject(element);
-      let isStartableInTasklist = bo.get("camunda:isStartableInTasklist");
+      let isStartableInTasklist = bo && bo.get("camunda:isStartableInTasklist");
 
       return {
         isStartableInTasklist: isStartableInTasklist

@@ -237,10 +237,10 @@ export default function ScriptProps({ element, index, label }) {
     (name) => {
       let propertyName = `camunda:${name}`;
       let bo = getBusinessObject(element);
-      if ((element && element.type) === "bpmn:Participant") {
-        bo = getBusinessObject(bo.processRef);
+      if (is(element, "bpmn:Participant")) {
+        bo = getBusinessObject(element).get("processRef");
       }
-      return (bo.$attrs && bo.$attrs[propertyName]) || "";
+      return (bo && bo.$attrs && bo.$attrs[propertyName]) || "";
     },
     [element]
   );

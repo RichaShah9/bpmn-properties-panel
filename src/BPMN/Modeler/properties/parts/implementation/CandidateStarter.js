@@ -16,7 +16,7 @@ export default function CandidateStarter(
     widget: "textField",
     get: function (element, node) {
       let bo = getBusinessObject(element);
-      let candidateStarterGroups = bo.get("camunda:candidateStarterGroups");
+      let candidateStarterGroups = bo && bo.get("camunda:candidateStarterGroups");
 
       return {
         candidateStarterGroups: candidateStarterGroups
@@ -48,7 +48,7 @@ export default function CandidateStarter(
     widget: "textField",
     get: function (element, node) {
       let bo = getBusinessObject(element);
-      let candidateStarterUsers = bo.get("camunda:candidateStarterUsers");
+      let candidateStarterUsers = bo && bo.get("camunda:candidateStarterUsers");
 
       return {
         candidateStarterUsers: candidateStarterUsers

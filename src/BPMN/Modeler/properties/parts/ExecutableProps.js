@@ -1,5 +1,5 @@
-import participantHelper from "bpmn-js-properties-panel/lib/helper/ParticipantHelper";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
+import { getProcessBusinessObject } from "../../extra";
 
 export default function ExecutableProps(group, element, translate) {
   let bo = getBusinessObject(element);
@@ -27,7 +27,7 @@ export default function ExecutableProps(group, element, translate) {
     };
 
     executableEntry.set = function (element, values) {
-      if(element && element.businessObject){
+      if (element && element.businessObject) {
         element.businessObject.isExecutable = !values["isExecutable"];
       }
     };
@@ -35,10 +35,7 @@ export default function ExecutableProps(group, element, translate) {
     // in participants we have to change the default behavior of set and get
     if (is(element, "bpmn:Participant")) {
       executableEntry.get = function (element) {
-        return participantHelper.getProcessBusinessObject(
-          element,
-          "isExecutable"
-        );
+        return getProcessBusinessObject(element, "isExecutable");
       };
 
       executableEntry.set = function (element, values) {
