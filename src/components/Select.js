@@ -75,7 +75,6 @@ export default function SelectComponent({
   index,
   value,
   update,
-  criteriaIds,
   type,
   options: propOptions,
   label,
@@ -124,9 +123,9 @@ export default function SelectComponent({
 
   const optionDebounceHandler = React.useCallback(() => {
     if (searchText) {
-      fetchOptions(searchText, criteriaIds);
+      fetchOptions(searchText);
     }
-  }, [fetchOptions, searchText, criteriaIds]);
+  }, [fetchOptions, searchText]);
 
   useDebounceEffect(optionDebounceHandler, 500);
 
@@ -166,10 +165,10 @@ export default function SelectComponent({
       if (propOptions && propOptions.length > 0) {
         setOptions([...propOptions]);
       } else {
-        fetchOptions(null, criteriaIds);
+        fetchOptions(null);
       }
     }
-  }, [fetchOptions, open, criteriaIds, propOptions]);
+  }, [fetchOptions, open, propOptions]);
 
   useEffect(() => {
     if (propOptions) {
@@ -314,7 +313,7 @@ export default function SelectComponent({
                 : typeof option === "object"
                 ? option["name"]
                   ? `(${option["name"]})`
-                  : undefined
+                  : ""
                 : option;
           } else if (name === "dmnModel") {
             optionName = `${option["name"]} (${option["decisionId"]})`;
