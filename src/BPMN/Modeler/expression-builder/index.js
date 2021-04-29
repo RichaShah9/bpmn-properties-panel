@@ -530,8 +530,9 @@ function ExpressionBuilder({
 
   const onCancel = () => {
     if (
+      !initialValues ||
       JSON.stringify(generateExpressionValues()) ===
-      JSON.stringify(initialValues)
+        JSON.stringify(initialValues)
     ) {
       handleClose();
       return;
@@ -1049,7 +1050,7 @@ function ExpressionBuilder({
         const modalName = metaModals && metaModals.name;
         expressionValues.push({
           metaModalName: modalName,
-          metaModalType: metaModals.type,
+          metaModalType: metaModals && metaModals.type,
           rules,
         });
       });
