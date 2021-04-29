@@ -34,6 +34,8 @@ const palette = {
   f9c000: "#f9c000",
   ff9800: "#ff9800",
   a80ca8: "#a80ca8",
+  e53935: "#e53935",
+  "000000": "#000000",
 };
 
 export default function ColorPickerComponent({ changeColor, entry, element }) {

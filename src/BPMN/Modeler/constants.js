@@ -59,6 +59,8 @@ export const RELATIVE_FILL = {
   "#f9c000": "#fdecb3",
   "#ff9800": "#ffe0b3",
   "#a80ca8": "#eeceee",
+  "#e53935": "#ffcfd4",
+  "#000000": "#ffffff",
 };
 
 export const USER_TASKS_TYPES = [
