@@ -2,12 +2,10 @@ import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { isEventSubProcess, isExpanded } from "bpmn-js/lib/util/DiUtil";
 import { isDifferentType } from "bpmn-js/lib/features/popup-menu/util/TypeUtil";
 import { forEach, filter } from "min-dash";
-import * as replaceOptions from "./replace/ReplaceOptions";
+import * as replaceOptions from "../features/replace/ReplaceOptions";
 
-/**
- * This module is an element agnostic replace menu provider for the popup menu.
- */
 export default function ReplaceMenuProvider(
+  bpmnFactory,
   popupMenu,
   modeling,
   moddle,
@@ -15,6 +13,7 @@ export default function ReplaceMenuProvider(
   rules,
   translate
 ) {
+  this._bpmnFactory = bpmnFactory;
   this._popupMenu = popupMenu;
   this._modeling = modeling;
   this._moddle = moddle;
@@ -26,6 +25,7 @@ export default function ReplaceMenuProvider(
 }
 
 ReplaceMenuProvider.$inject = [
+  "bpmnFactory",
   "popupMenu",
   "modeling",
   "moddle",
@@ -62,10 +62,18 @@ ReplaceMenuProvider.prototype.getEntries = function (element) {
 
   var differentType = isDifferentType(element);
 
-  // start events outside event sub processes
+  if (is(businessObject, "bpmn:DataObjectReference")) {
+    return this._createEntries(element, replaceOptions.DATA_OBJECT_REFERENCE);
+  }
+
+  if (is(businessObject, "bpmn:DataStoreReference")) {
+    return this._createEntries(element, replaceOptions.DATA_STORE_REFERENCE);
+  }
+
+  // start events outside sub processes
   if (
     is(businessObject, "bpmn:StartEvent") &&
-    !isEventSubProcess(businessObject.$parent)
+    !is(businessObject.$parent, "bpmn:SubProcess")
   ) {
     entries = filter(replaceOptions.START_EVENT, differentType);
 
@@ -107,6 +115,17 @@ ReplaceMenuProvider.prototype.getEntries = function (element) {
     return this._createEntries(element, entries);
   }
 
+  // start events inside sub processes
+  if (
+    is(businessObject, "bpmn:StartEvent") &&
+    !isEventSubProcess(businessObject.$parent) &&
+    is(businessObject.$parent, "bpmn:SubProcess")
+  ) {
+    entries = filter(replaceOptions.START_EVENT_SUB_PROCESS, differentType);
+
+    return this._createEntries(element, entries);
+  }
+
   // end events
   if (is(businessObject, "bpmn:EndEvent")) {
     entries = filter(replaceOptions.END_EVENT, function (entry) {
@@ -132,7 +151,7 @@ ReplaceMenuProvider.prototype.getEntries = function (element) {
       var target = entry.target;
 
       if (
-        target.eventDefinition === "bpmn:CancelEventDefinition" &&
+        target.eventDefinitionType === "bpmn:CancelEventDefinition" &&
         !is(businessObject.attachedToRef, "bpmn:Transaction")
       ) {
         return false;
@@ -250,6 +269,18 @@ ReplaceMenuProvider.prototype.getHeaderEntries = function (element) {
     headerEntries = headerEntries.concat(this._getLoopEntries(element));
   }
 
+  if (is(element, "bpmn:DataObjectReference")) {
+    headerEntries = headerEntries.concat(
+      this._getDataObjectIsCollection(element)
+    );
+  }
+
+  if (is(element, "bpmn:Participant")) {
+    headerEntries = headerEntries.concat(
+      this._getParticipantMultiplicity(element)
+    );
+  }
+
   if (
     is(element, "bpmn:SubProcess") &&
     !is(element, "bpmn:Transaction") &&
@@ -292,7 +323,6 @@ ReplaceMenuProvider.prototype._createEntries = function (
  *
  * @param  {djs.model.Base} element
  * @param  {Object} replaceOptions
-
  * @return {Array<Object>} a list of menu items
  */
 ReplaceMenuProvider.prototype._createSequenceFlowEntries = function (
@@ -402,10 +432,15 @@ ReplaceMenuProvider.prototype._createMenuEntry = function (
     return replaceElement(element, definition.target);
   };
 
+  var label = definition.label;
+  if (label && typeof label === "function") {
+    label = label(element);
+  }
+
   action = action || replaceAction;
 
   var menuEntry = {
-    label: translate(definition.label),
+    label: translate(label),
     className: definition.className,
     id: definition.actionName,
     action: action,
@@ -495,6 +530,79 @@ ReplaceMenuProvider.prototype._getLoopEntries = function (element) {
 };
 
 /**
+ * Get a list of menu items containing a button for the collection marker
+ *
+ * @param  {djs.model.Base} element
+ *
+ * @return {Array<Object>} a list of menu items
+ */
+ReplaceMenuProvider.prototype._getDataObjectIsCollection = function (element) {
+  var self = this;
+  var translate = this._translate;
+
+  function toggleIsCollection(event, entry) {
+    self._modeling.updateModdleProperties(element, dataObject, {
+      isCollection: !entry.active,
+    });
+  }
+
+  var dataObject = element.businessObject.dataObjectRef,
+    isCollection = dataObject.isCollection;
+
+  var dataObjectEntries = [
+    {
+      id: "toggle-is-collection",
+      className: "bpmn-icon-parallel-mi-marker",
+      title: translate("Collection"),
+      active: isCollection,
+      action: toggleIsCollection,
+    },
+  ];
+  return dataObjectEntries;
+};
+
+/**
+ * Get a list of menu items containing a button for the participant multiplicity marker
+ *
+ * @param  {djs.model.Base} element
+ *
+ * @return {Array<Object>} a list of menu items
+ */
+ReplaceMenuProvider.prototype._getParticipantMultiplicity = function (element) {
+  var self = this;
+  var bpmnFactory = this._bpmnFactory;
+  var translate = this._translate;
+
+  function toggleParticipantMultiplicity(event, entry) {
+    var isActive = entry.active;
+    var participantMultiplicity;
+
+    if (!isActive) {
+      participantMultiplicity = bpmnFactory.create(
+        "bpmn:ParticipantMultiplicity"
+      );
+    }
+
+    self._modeling.updateProperties(element, {
+      participantMultiplicity: participantMultiplicity,
+    });
+  }
+
+  var participantMultiplicity = element.businessObject.participantMultiplicity;
+
+  var participantEntries = [
+    {
+      id: "toggle-participant-multiplicity",
+      className: "bpmn-icon-parallel-mi-marker",
+      title: translate("Participant Multiplicity"),
+      active: !!participantMultiplicity,
+      action: toggleParticipantMultiplicity,
+    },
+  ];
+  return participantEntries;
+};
+
+/**
  * Get the menu items containing a button for the ad hoc marker
  *
  * @param  {djs.model.Base} element
@@ -536,5 +644,6 @@ ReplaceMenuProvider.prototype._getAdHocEntry = function (element) {
       }
     },
   };
+
   return adHocEntry;
 };

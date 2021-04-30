@@ -775,3 +775,53 @@ export var PARTICIPANT = [
     }
   },
 ];
+
+
+export var DATA_OBJECT_REFERENCE = [
+  {
+    label: 'Data Store Reference',
+    actionName: 'replace-with-data-store-reference',
+    className: 'bpmn-icon-data-store',
+    target: {
+      type: 'bpmn:DataStoreReference'
+    }
+  }
+];
+
+export var DATA_STORE_REFERENCE = [
+  {
+    label: 'Data Object Reference',
+    actionName: 'replace-with-data-object-reference',
+    className: 'bpmn-icon-data-object',
+    target: {
+      type: 'bpmn:DataObjectReference'
+    }
+  }
+];
+
+export var START_EVENT_SUB_PROCESS = [
+  {
+    label: 'Start Event',
+    actionName: 'replace-with-none-start',
+    className: 'bpmn-icon-start-event-none',
+    target: {
+      type: 'bpmn:StartEvent'
+    }
+  },
+  {
+    label: 'Intermediate Throw Event',
+    actionName: 'replace-with-none-intermediate-throwing',
+    className: 'bpmn-icon-intermediate-event-none',
+    target: {
+      type: 'bpmn:IntermediateThrowEvent'
+    }
+  },
+  {
+    label: 'End Event',
+    actionName: 'replace-with-none-end',
+    className: 'bpmn-icon-end-event-none',
+    target: {
+      type: 'bpmn:EndEvent'
+    }
+  }
+];
