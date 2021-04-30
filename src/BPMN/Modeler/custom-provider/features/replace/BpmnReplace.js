@@ -204,8 +204,12 @@ export default function BpmnReplace(
         newBusinessObject
       ).height;
     }
-
-    if (!rules.allowed("shape.resize", { shape: newBusinessObject })) {
+    if (
+      ["bpmn:DataStoreReference", "bpmn:DataObjectReference"].includes(
+        newBusinessObject && newBusinessObject.$type
+      ) &&
+      !rules.allowed("shape.resize", { shape: newBusinessObject })
+    ) {
       newElement.height = elementFactory._getDefaultSize(
         newBusinessObject
       ).height;
