@@ -17,6 +17,7 @@ export const FILL_COLORS = {
   "bpmn:IntermediateCatchEvent": "#ffe0b3",
   "bpmn:BoundaryEvent": "#ffe0b3",
   "bpmn:DataOutputAssociation": "#8095B3",
+  "bpmn:Transaction": "#E4EBF8",
 };
 
 export const DATA_STORE_TYPES = [
@@ -36,6 +37,7 @@ export const STROKE_COLORS = {
   "bpmn:ScriptTask": "#FF9E0F",
   "bpmn:CallActivity": "#FBA729",
   "bpmn:SubProcess": "#6097fc",
+  "bpmn:Transaction": "#6097fc",
   "bpmn:SequenceFlow": "#8095B3",
   "bpmn:StartEvent": "#55c041",
   "bpmn:EndEvent": "#ff7043",
