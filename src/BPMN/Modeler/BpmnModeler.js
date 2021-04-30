@@ -38,7 +38,6 @@ import {
   getTabs,
   isGroupVisible,
   isHiddenProperty,
-  hidePanelElements,
   addOldNodes,
 } from "./extra.js";
 import { getTranslations, getInfo } from "../../services/api";
@@ -885,7 +884,16 @@ function BpmnModelerComponent() {
     let modeling = bpmnModeler.get("modeling");
     let colors = {};
     colors.stroke = color;
-    colors.fill = RELATIVE_FILL[color.toLowerCase()];
+
+    colors.fill = [
+      "bpmn:Process",
+      "bpmn:Participant",
+      "bpmn:Group",
+      "bpmn:DataObjectReference",
+      "bpmn:DataStoreReference",
+    ].includes(selectedElement && selectedElement.type)
+      ? "white"
+      : RELATIVE_FILL[color.toLowerCase()];
     modeling.setColor(selectedElement, colors);
   };
 
@@ -1269,7 +1277,6 @@ function BpmnModelerComponent() {
     setId(id);
     setIsTimerTask(timerTask);
     fetchDiagram(id);
-    hidePanelElements();
   }, [fetchDiagram]);
 
   useEffect(() => {

@@ -13,7 +13,7 @@ import {
   getViews,
 } from "../../../../../services/api";
 import { translate, getBool } from "../../../../../utils";
-import { USER_TASKS_TYPES } from "../../../constants";
+import { USER_TASKS_TYPES, DATA_STORE_TYPES } from "../../../constants";
 
 const CONDITIONAL_SOURCES = [
   "bpmn:EventBasedGateway",
@@ -391,9 +391,12 @@ export default function ModelProps({
             <div className={classes.groupLabel}>{label}</div>
           </React.Fragment>
         )}
-        {!["bpmn:Process", "bpmn:Participant", "bpmn:SendTask"].includes(
-          element && element.type
-        ) && (
+        {![
+          "bpmn:Process",
+          "bpmn:Participant",
+          "bpmn:SendTask",
+          ...DATA_STORE_TYPES,
+        ].includes(element && element.type) && (
           <React.Fragment>
             <label className={classes.label}>{translate("Model")}</label>
             {!metaJsonModel && (
@@ -460,51 +463,54 @@ export default function ModelProps({
           </React.Fragment>
         )}
         <div className={classes.container}>
-          <Checkbox
-            element={element}
-            entry={{
-              id: "displayStatus",
-              label: translate("Display status"),
-              modelProperty: "displayStatus",
-              get: function () {
-                return {
-                  displayStatus: displayStatus,
-                };
-              },
-              set: function (e, value) {
-                const displayStatus = !value.displayStatus;
-                setDisplayStatus(displayStatus);
-                setProperty("displayStatus", displayStatus);
-                if (displayStatus === false) {
-                  setModels([]);
-                  addModels([]);
-                }
-              },
-            }}
-          />
-          {displayStatus && (
-            <React.Fragment>
-              <div className={classes.allModels}>
-                <label className={classes.label}>
-                  {translate("Display on models")}
-                </label>
-                <Select
-                  className={classes.select}
-                  update={(value) => {
-                    setModels(value);
-                    addModels(value);
-                  }}
-                  fetchMethod={() => getAllModels(getProcessConfig())}
-                  name="models"
-                  value={models || []}
-                  multiple={true}
-                  isLabel={false}
-                  optionLabel="name"
-                  optionLabelSecondary="title"
-                />
-              </div>
-            </React.Fragment>
+          {!DATA_STORE_TYPES.includes(element && element.type) && (
+            <Checkbox
+              element={element}
+              entry={{
+                id: "displayStatus",
+                label: translate("Display status"),
+                modelProperty: "displayStatus",
+                get: function () {
+                  return {
+                    displayStatus: displayStatus,
+                  };
+                },
+                set: function (e, value) {
+                  const displayStatus = !value.displayStatus;
+                  setDisplayStatus(displayStatus);
+                  setProperty("displayStatus", displayStatus);
+                  if (displayStatus === false) {
+                    setModels([]);
+                    addModels([]);
+                  }
+                },
+              }}
+            />
           )}
+          {displayStatus &&
+            !DATA_STORE_TYPES.includes(element && element.type) && (
+              <React.Fragment>
+                <div className={classes.allModels}>
+                  <label className={classes.label}>
+                    {translate("Display on models")}
+                  </label>
+                  <Select
+                    className={classes.select}
+                    update={(value) => {
+                      setModels(value);
+                      addModels(value);
+                    }}
+                    fetchMethod={() => getAllModels(getProcessConfig())}
+                    name="models"
+                    value={models || []}
+                    multiple={true}
+                    isLabel={false}
+                    optionLabel="name"
+                    optionLabelSecondary="title"
+                  />
+                </div>
+              </React.Fragment>
+            )}
         </div>
         {HELP_SOURCES.includes(element && element.type) && (
           <Textbox

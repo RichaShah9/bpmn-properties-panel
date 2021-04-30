@@ -4,6 +4,7 @@ const types = [
   "bpmn:SequenceFlow",
   "bpmn:MessageFlow",
   "bpmn:TextAnnotation",
+  "bpmn:DataOutputAssociation",
 ];
 
 export default function ColorProps(group, element, translate) {

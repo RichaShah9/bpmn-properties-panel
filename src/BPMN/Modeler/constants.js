@@ -16,7 +16,14 @@ export const FILL_COLORS = {
   "bpmn:IntermediateThrowEvent": "#ffe0b3",
   "bpmn:IntermediateCatchEvent": "#ffe0b3",
   "bpmn:BoundaryEvent": "#ffe0b3",
+  "bpmn:DataOutputAssociation": "#8095B3",
 };
+
+export const DATA_STORE_TYPES = [
+  "bpmn:DataOutputAssociation",
+  "bpmn:DataObjectReference",
+  "bpmn:DataStoreReference",
+];
 
 export const STROKE_COLORS = {
   "bpmn:Task": "#5EAEDA",
@@ -41,6 +48,9 @@ export const STROKE_COLORS = {
   "bpmn:Association": "#8095B3",
   "bpmn:TextAnnotation": "#A9B1BD",
   "bpmn:BoundaryEvent": "#ff9800",
+  "bpmn:DataObjectReference": "#A9B1BD",
+  "bpmn:DataStoreReference": "#A9B1BD",
+  "bpmn:DataOutputAssociation": "#8095B3",
 };
 
 export const RELATIVE_FILL = {

@@ -315,4 +315,19 @@ export const tabProperty = [
     subType: "bpmn:CompensateEventDefinition",
     tabs: commonTabsWithoutMenuAction,
   },
+  {
+    type: "bpmn:DataObjectReference",
+    subType: null || undefined,
+    tabs: defaultTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:DataStoreReference",
+    subType: null || undefined,
+    tabs: defaultTabsWithoutMenuAction,
+  },
+  {
+    type: "bpmn:DataOutputAssociation",
+    subType: null || undefined,
+    tabs: defaultTabsWithoutMenuAction,
+  },
 ];
