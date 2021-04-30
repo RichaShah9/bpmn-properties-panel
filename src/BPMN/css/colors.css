@@ -10,6 +10,26 @@
   color: #ff9800 !important;
 }
 
+.djs-palette .bpmn-icon-data-store {
+  color: rgb(128, 149, 179) !important;
+}
+
+.djs-palette .bpmn-icon-data-object {
+  color: rgb(128, 149, 179) !important;
+}
+
+.djs-palette .bpmn-icon-participant {
+  color: rgb(128, 149, 179) !important;
+}
+
+.djs-palette .bpmn-icon-group {
+  color: rgb(128, 149, 179) !important;
+}
+
+.djs-palette .bpmn-icon-subprocess-expanded {
+  color: #6097fc !important;
+}
+
 .djs-palette .bpmn-icon-end-event-none {
   color: #ff7043 !important;
 }
