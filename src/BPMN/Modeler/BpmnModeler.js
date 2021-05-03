@@ -885,13 +885,9 @@ function BpmnModelerComponent() {
     let colors = {};
     colors.stroke = color;
 
-    colors.fill = [
-      "bpmn:Process",
-      "bpmn:Participant",
-      "bpmn:Group",
-      "bpmn:DataObjectReference",
-      "bpmn:DataStoreReference",
-    ].includes(selectedElement && selectedElement.type)
+    colors.fill = ["bpmn:Process", "bpmn:Participant", "bpmn:Group"].includes(
+      selectedElement && selectedElement.type
+    )
       ? "white"
       : RELATIVE_FILL[color.toLowerCase()];
     modeling.setColor(selectedElement, colors);

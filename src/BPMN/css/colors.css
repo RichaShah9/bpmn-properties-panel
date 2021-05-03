@@ -1,5 +1,5 @@
 .djs-palette .bpmn-icon-task {
-  color: #3f97f6 !important;
+  color: #5eaeda !important;
 }
 
 .djs-palette .bpmn-icon-start-event-none {
@@ -11,11 +11,11 @@
 }
 
 .djs-palette .bpmn-icon-data-store {
-  color: rgb(128, 149, 179) !important;
+  color: #e53935 !important;
 }
 
 .djs-palette .bpmn-icon-data-object {
-  color: rgb(128, 149, 179) !important;
+  color: #a80ca8 !important;
 }
 
 .djs-palette .bpmn-icon-participant {
