@@ -68,6 +68,7 @@ export default function Textbox({
     getProperty,
     setProperty,
     validate,
+    id,
   } = entry || {};
   const [value, setValue] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -121,8 +122,15 @@ export default function Textbox({
     let isSubscribed = true;
     async function getAllTranslations() {
       if (!element || !["name", "text"].includes(modelProperty)) return;
-      const bo = element.businessObject;
+      let bo = element.businessObject;
       const elementType = element && element.type;
+      if (
+        elementType === "bpmn:Participant" &&
+        modelProperty === "name" &&
+        id === "process-name"
+      ) {
+        bo = bo && bo.processRef;
+      }
       let propertyName =
         elementType === "bpmn:TextAnnotation"
           ? "text"
@@ -170,7 +178,7 @@ export default function Textbox({
     }
     getAllTranslations();
     return () => (isSubscribed = false);
-  }, [element, modelProperty, bpmnModeler]);
+  }, [element, modelProperty, id, bpmnModeler]);
 
   useEffect(() => {
     let isSubscribed = true;
