@@ -39,7 +39,9 @@ export const uploadXml = () => {
 export const getType = (element) => {
   if (!element) return;
   const type = (element.type || element.$type).toLowerCase();
-  return type.includes("event")
+  return type.includes("boundary")
+    ? type
+    : type.includes("event")
     ? "event"
     : type.includes("task")
     ? "task"
@@ -65,9 +67,13 @@ export const getFlowElements = (process, ele = []) => {
     process.flowElements &&
     process.flowElements.forEach((element) => {
       if (
-        ["event", "task", "gateway", "bpmn:callactivity"].includes(
-          getType(element)
-        )
+        [
+          "event",
+          "task",
+          "gateway",
+          "bpmn:callactivity",
+          "bpmn:boundaryevent",
+        ].includes(getType(element))
       ) {
         elements.push({
           id: element.id,
