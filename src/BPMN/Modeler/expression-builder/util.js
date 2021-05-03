@@ -26,7 +26,10 @@ export function lowerCaseFirstLetter(str) {
 }
 
 export function getBO(bo) {
-  if (bo && bo.$type === "bpmn:SubProcess") {
+  if (
+    bo &&
+    (bo.$type === "bpmn:SubProcess" || bo.$type === "bpmn:Transaction")
+  ) {
     return getBO(bo.$parent);
   }
   return bo;
@@ -50,7 +53,10 @@ export function getProcessConfig(element, processConfigs) {
   bo = bo && bo.$parent;
   if (element && element.type === "bpmn:Process") {
     bo = element.businessObject;
-  } else if (bo.$type === "bpmn:SubProcess") {
+  } else if (
+    bo.$type === "bpmn:SubProcess" ||
+    bo.$type === "bpmn:Transaction"
+  ) {
     bo = getBO(bo.$parent);
   } else if (
     (element && element.businessObject && element.businessObject.$type) ===

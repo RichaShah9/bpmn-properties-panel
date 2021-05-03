@@ -59,6 +59,31 @@ export const addOldNodes = async (wkf, setWkf, bpmnModeler) => {
   }
 };
 
+export const getFlowElements = (process, ele = []) => {
+  let elements = [...ele];
+  process &&
+    process.flowElements &&
+    process.flowElements.forEach((element) => {
+      if (
+        ["event", "task", "gateway", "bpmn:callactivity"].includes(
+          getType(element)
+        )
+      ) {
+        elements.push({
+          id: element.id,
+          name: element.name || element.id,
+          type: getType(element),
+        });
+      } else if (
+        ["bpmn:subprocess", "bpmn:transaction"].includes(getType(element))
+      ) {
+        const nestedElements = getFlowElements(element, []);
+        elements = [...elements, ...(nestedElements || [])];
+      }
+    });
+  return elements;
+};
+
 export const getElements = (bpmnModeler) => {
   const rootElements =
     bpmnModeler._definitions && bpmnModeler._definitions.rootElements;
@@ -67,21 +92,7 @@ export const getElements = (bpmnModeler) => {
   const allProcess = {};
   processes &&
     processes.forEach((process) => {
-      let elements = [];
-      process.flowElements &&
-        process.flowElements.forEach((element) => {
-          if (
-            ["event", "task", "gateway", "bpmn:callactivity"].includes(
-              getType(element)
-            )
-          ) {
-            elements.push({
-              id: element.id,
-              name: element.name || element.id,
-              type: getType(element),
-            });
-          }
-        });
+      let elements = getFlowElements(process);
       allProcess[process.id] = {
         elements: elements,
       };
