@@ -20,15 +20,22 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import Select from "../../../components/Select";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   dialogPaper: {
     padding: 5,
     minWidth: 450,
     overflow: "auto",
   },
   button: {
-    textTransform: "none",
-    margin: "10px 0px",
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
   },
   select: {
     minWidth: 250,
@@ -49,7 +56,7 @@ const useStyles = makeStyles({
     marginBottom: 10,
     fontSize: 12,
   },
-});
+}));
 
 export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
   const { oldElements, currentElements } = ids || {};
@@ -207,6 +214,9 @@ export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
           variant="outlined"
           color="primary"
           className={classes.button}
+          style={{
+            textTransform: "none",
+          }}
         >
           Cancel
         </Button>
