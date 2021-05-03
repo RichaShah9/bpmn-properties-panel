@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefinitionHelper";
 import { makeStyles } from "@material-ui/core/styles";
-import { is } from "bpmn-js/lib/util/ModelUtil";
+import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 
 import Message from "./MessageEventDefinition";
@@ -180,9 +180,7 @@ export default function EventProps({
 
     // Special Case: Receive Task
     if (is(element, "bpmn:ReceiveTask")) {
-      let messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(
-        element
-      );
+      let messageEventDefinition = getBusinessObject(element);
       renderType = {
         eventDefinition: messageEventDefinition,
         type: "message",
