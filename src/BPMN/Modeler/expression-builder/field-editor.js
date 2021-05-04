@@ -35,6 +35,7 @@ export default function FieldEditor({
   isBPM,
   isField,
   setInitialField = () => {},
+  isAllowButtons = false,
 }) {
   const { fieldName = "", allField = [], isShow: propIsShow } = value || {};
   const [fields, setFields] = useState([]);
@@ -209,6 +210,16 @@ export default function FieldEditor({
 
   useEffect(() => {
     let isSubscribed = true;
+    if (isSubscribed) {
+      setShow(propIsShow || isName ? true : false);
+    }
+    return () => {
+      isSubscribed = false;
+    };
+  }, [propIsShow, isName]);
+
+  useEffect(() => {
+    let isSubscribed = true;
     (async () => {
       const data = await getMetaFields();
       if (isSubscribed) {
@@ -275,7 +286,8 @@ export default function FieldEditor({
                   isBPMQuery(type),
                   relationJsonModel,
                   isM2OField,
-                  isBPM
+                  isBPM,
+                  isAllowButtons
                 );
               }}
               editor={editor}
@@ -296,6 +308,7 @@ export default function FieldEditor({
               isBPM={isBPM}
               setInitialField={setInitialField}
               isField={isField}
+              isAllowButtons={isAllowButtons}
             />
           )}
           {!isShow && !isOneToOne && (

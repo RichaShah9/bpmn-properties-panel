@@ -125,6 +125,7 @@ function ExpressionBuilder({
   type: parentType = "expressionBuilder",
   title = "Add Expression",
   processConfigs,
+  isAllowButtons = false,
 }) {
   const expression = isBPMQuery(parentType) ? "BPM" : "GROOVY";
   const [combinator, setCombinator] = useState("and");
@@ -290,11 +291,17 @@ function ExpressionBuilder({
         prefix
       );
     } else {
-      const isNumber = ["long", "integer", "decimal", "boolean"].includes(type);
+      const isNumber = [
+        "long",
+        "integer",
+        "decimal",
+        "boolean",
+        "button",
+      ].includes(type);
       const isDateTime = ["date", "time", "datetime"].includes(type);
 
       if (isNumber) {
-        if (!fieldValue) {
+        if (!fieldValue && fieldValue !== false) {
           fieldValue = 0;
         }
         if (["between", "notBetween"].includes(operator) && !fieldValue2) {
@@ -562,14 +569,18 @@ function ExpressionBuilder({
         const { targetName, selectionList } = field || {};
         const type = field && field.type && field.type.toLowerCase();
         const typeName = field && field.typeName;
-        const isNumber = ["long", "integer", "decimal", "boolean"].includes(
-          type
-        );
+        const isNumber = [
+          "long",
+          "integer",
+          "decimal",
+          "boolean",
+          "button",
+        ].includes(type);
         const isDateTime = ["date", "time", "datetime"].includes(type);
         let { fieldValue, fieldValue2, isRelationalValue } = rule;
         let fieldName = propFieldName;
         if (isNumber) {
-          if (!fieldValue) {
+          if (!fieldValue && fieldValue !== false) {
             fieldValue = 0;
           }
           if (["between", "notBetween"].includes(operator) && !fieldValue2) {
@@ -1243,6 +1254,7 @@ function ExpressionBuilder({
                                   element={element}
                                   type={parentType}
                                   processConfigs={processConfigs}
+                                  isAllowButtons={isAllowButtons}
                                 />
                               </div>
                             );
@@ -1297,6 +1309,7 @@ function ExpressionBuilder({
                                     element={element}
                                     type={parentType}
                                     processConfigs={processConfigs}
+                                    isAllowButtons={isAllowButtons}
                                   />
                                   {!isBPMQuery(parentType) && (
                                     <Button

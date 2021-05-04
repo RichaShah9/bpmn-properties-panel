@@ -97,6 +97,7 @@ const operators_by_type = {
     "isNotNull",
   ],
   boolean: ["isTrue", "isFalse"],
+  button: ["="],
 };
 
 const map_operator_groovy = {

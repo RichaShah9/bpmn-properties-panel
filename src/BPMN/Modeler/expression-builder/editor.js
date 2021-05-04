@@ -421,6 +421,7 @@ function Rule(props) {
     parentType,
     parentMetaModal,
     element,
+    isAllowButtons = false,
   } = props;
   const {
     fieldType = "",
@@ -579,6 +580,7 @@ function Rule(props) {
         expression={expression}
         type={parentType}
         isParent={true}
+        isAllowButtons={isAllowButtons}
         setInitialField={() => {
           setField("none");
         }}
@@ -609,6 +611,7 @@ function Rule(props) {
           className={classes.operators}
         />
         {operator &&
+          field.type !== "button" &&
           !["isNull", "isNotNull", "isTrue", "isFalse"].includes(operator) && (
             <RadioGroup
               aria-label="radioType"
@@ -1007,7 +1010,21 @@ function Rule(props) {
           )}
         </React.Fragment>
       ) : (
-        operator && (
+        operator &&
+        (field.type === "button" ? (
+          <Select
+            name="fieldValue"
+            onChange={(value) =>
+              onChange({ name: "fieldValue", value: value }, editor)
+            }
+            value={fieldValue}
+            options={[
+              { name: true, title: "true" },
+              { name: false, title: "false" },
+            ]}
+            className={classes.operators}
+          />
+        ) : (
           <RenderWidget
             type={type}
             parentType={parentType}
@@ -1023,7 +1040,7 @@ function Rule(props) {
             editor={editor}
             field={field}
           />
-        )
+        ))
       )}
       <Button Icon={DeleteIcon} onClick={onRemoveRule} />
     </div>
@@ -1045,6 +1062,7 @@ export default function Editor({
   type,
   parentMetaModal,
   element,
+  isAllowButtons = false,
 }) {
   const classes = useStyles();
   const [isBPM, setBPM] = useState(false);
@@ -1111,6 +1129,7 @@ export default function Editor({
                     isBPM={isBPM}
                     parentMetaModal={parentMetaModal}
                     element={element}
+                    isAllowButtons={isAllowButtons}
                   />
                 </React.Fragment>
               ))}
@@ -1134,6 +1153,7 @@ export default function Editor({
                     type={type}
                     element={element}
                     expression={expression}
+                    isAllowButtons={isAllowButtons}
                   />
                 </React.Fragment>
               ))}

@@ -2,6 +2,7 @@ import AxelorService from "./axelor.rest";
 import services from "../../../../services/Service";
 import { sortBy } from "../../../../utils";
 import { allowed_types, query_custom_types } from "../data";
+import { getButtons } from "../../../../services/api";
 
 const metaModalService = new AxelorService({
   model: "com.axelor.meta.db.MetaModel",
@@ -21,7 +22,12 @@ export async function getMetaModals({ search = "" }) {
     .then(({ data = [] }) => data);
 }
 
-const getResultedFields = (res, isQuery, isM2OField, isContextValue = false) => {
+const getResultedFields = (
+  res,
+  isQuery,
+  isM2OField,
+  isContextValue = false
+) => {
   const responseData = res && res.data;
   const allFields = responseData && responseData.fields;
   const jsonFields = Object.values(
@@ -126,7 +132,8 @@ export async function getSubMetaField(
   isQuery = false,
   relationJsonModel,
   isM2OField = false,
-  isContextValue
+  isContextValue,
+  isAllowedButtons = false
 ) {
   if (model === "com.axelor.meta.db.MetaJsonRecord" && relationJsonModel) {
     const res = await services.get(
@@ -140,6 +147,16 @@ export async function getSubMetaField(
         (isQuery ? !a.json : true) &&
         ((a.type || "").toLowerCase() === "many-to-many" ? a.targetName : true)
     );
+    if (isAllowedButtons) {
+      const buttons = await getButtons([
+        {
+          model: relationJsonModel,
+          type: "metaJsonModel",
+          modelFullName: model,
+        },
+      ]);
+      result = [...(result || []), ...(buttons || [])];
+    }
     if (!isM2MFields && result && result.length > 0) {
       return result.filter(
         (f) =>
@@ -167,6 +184,16 @@ export async function getSubMetaField(
         (isQuery ? !a.json : true) &&
         (a.type === "many-to-many" ? a.targetName : true)
     );
+    if (isAllowedButtons) {
+      const buttons = await getButtons([
+        {
+          model: metaModel && metaModel.name,
+          type: "metaModel",
+          modelFullName: metaModel && metaModel.fullName,
+        },
+      ]);
+      resultFields = [...(resultFields || []), ...(buttons || [])];
+    }
     if (!isM2MFields && resultFields && resultFields.length > 0) {
       return resultFields.filter(
         (f) =>

@@ -6,7 +6,7 @@ import { Paper } from "@material-ui/core";
 import Editor from "./editor";
 import { Selection } from "./component";
 import { getMetaFields } from "./services/api";
-import { getModels } from "../../../services/api";
+import { getButtons, getModels } from "../../../services/api";
 import { isBPMQuery, getProcessConfig } from "./util";
 import { allowed_types } from "./data";
 
@@ -74,6 +74,7 @@ function ExpressionBuilder(props) {
     element,
     type,
     processConfigs,
+    isAllowButtons,
   } = props;
   const { metaModals: model, rules: r } = value;
   const [expression] = useState("GROOVY");
@@ -160,11 +161,23 @@ function ExpressionBuilder(props) {
 
   async function fetchField() {
     const isQuery = isBPMQuery(type);
-    const allFields = (await getMetaFields(metaModals, isQuery)) || [];
+    let allFields = (await getMetaFields(metaModals, isQuery)) || [];
+    if (metaModals && isAllowButtons) {
+      const buttons = await getButtons([
+        {
+          model: metaModals.name,
+          type: metaModals.type,
+          modelFullName: `${metaModals.packageName}.${metaModals.name}`,
+        },
+      ]);
+      allFields = [...(allFields || []), ...(buttons || [])];
+    }
     return allFields.filter((a) => {
       return (
-        allowed_types.includes((a.type || "").toLowerCase()) &&
-        (isQuery ? !a.json : true)
+        (isAllowButtons
+          ? [...allowed_types, "button"]
+          : allowed_types
+        ).includes((a.type || "").toLowerCase()) && (isQuery ? !a.json : true)
       );
     });
   }
@@ -222,6 +235,7 @@ function ExpressionBuilder(props) {
                   parentMetaModal={metaModals}
                   element={element}
                   processConfigs={processConfigs}
+                  isAllowButtons={isAllowButtons}
                 />
                 <br />
               </React.Fragment>

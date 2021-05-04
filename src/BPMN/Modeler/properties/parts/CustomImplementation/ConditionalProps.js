@@ -377,7 +377,7 @@ export default function ConditionalProps({
                 </Button>
               </DialogActions>
             </Dialog>
-          )}{" "}
+          )}
         </div>
       </div>
     )

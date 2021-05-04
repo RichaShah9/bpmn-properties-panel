@@ -1005,6 +1005,16 @@
           "name": "variableEvent",
           "isAttr": true,
           "type": "String"
+        },
+        {
+          "name": "scriptValue",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "combinator",
+          "isAttr": true,
+          "type": "String"
         }
       ]
     },
