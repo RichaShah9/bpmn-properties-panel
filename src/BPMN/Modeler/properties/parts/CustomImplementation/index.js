@@ -15,6 +15,7 @@ import MenuActionPanel from "./MenuActionPanel";
 import ProcessConfiguration from "./ProcessConfiguration";
 import TranslationProps from "./TranslationProps";
 import BusinessRuleProps from "./BusinessRuleProps";
+import Comments from "./Comments";
 
 export {
   CallActivityProps,
@@ -34,4 +35,5 @@ export {
   ProcessConfiguration,
   TranslationProps,
   BusinessRuleProps,
+  Comments
 };

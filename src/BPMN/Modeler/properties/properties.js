@@ -49,6 +49,7 @@ import {
   ProcessConfiguration,
   TranslationProps,
   BusinessRuleProps,
+  Comments
 } from "./parts/CustomImplementation";
 
 // helpers
@@ -367,6 +368,22 @@ function createConfigurationGroups(
   return [configurationGroup];
 }
 
+function createCommentGroups(
+  element,
+  bpmnFactory,
+  elementRegistry,
+  translate
+) {
+  let commentsGroup = {
+    id: "comments",
+    label: translate("Comments"),
+    entries: [],
+    component: Comments,
+    className: "comments"
+  };
+  return [commentsGroup];
+}
+
 export default function getTabs(
   element,
   canvas,
@@ -445,6 +462,17 @@ export default function getTabs(
     ),
   };
 
+  let commentsTab = {
+    id: "comments",
+    label: translate("Comments"),
+    groups: createCommentGroups(
+      element,
+      bpmnFactory,
+      elementRegistry,
+      translate
+    ),
+  };
+
   let tabs = [
     generalTab,
     viewAttributesTab,
@@ -452,6 +480,7 @@ export default function getTabs(
     menuActionTab,
     configurationTab,
     listenersTab,
+    commentsTab
   ];
   return tabs;
 }

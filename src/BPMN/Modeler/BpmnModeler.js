@@ -28,6 +28,7 @@ import {
   SelectBox,
   Checkbox,
   ColorPicker,
+  TabScrollButtonComponent,
 } from "./properties/components";
 import {
   fetchId,
@@ -39,6 +40,7 @@ import {
   isGroupVisible,
   isHiddenProperty,
   addOldNodes,
+  getCommentsLength,
 } from "./extra.js";
 import { getTranslations, getInfo } from "../../services/api";
 import { getBool } from "../../utils";
@@ -157,6 +159,9 @@ const useStyles = makeStyles((theme) => ({
   businessRuleTask: {
     marginTop: 0,
   },
+  comments: {
+    height: "calc(100% - 66px)",
+  },
 }));
 
 let bpmnModeler = null;
@@ -202,6 +207,7 @@ function BpmnModelerComponent() {
   });
   const [selectedElement, setSelectedElement] = useState(null);
   const [isMenuActionDisable, setMenuAction] = useState(false);
+  const [comments, setComments] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [tabs, setTabs] = useState([]);
   const [width, setWidth] = useState(drawerWidth);
@@ -319,6 +325,8 @@ function BpmnModelerComponent() {
         canvas.zoom("fit-viewport");
         let element = canvas.getRootElement();
         setSelectedElement(element);
+        const commentsLength = getCommentsLength(element);
+        setComments(commentsLength);
         checkMenuActionTab(element);
         let tabs = getTabs(bpmnModeler, element);
         setTabs(tabs);
@@ -853,6 +861,14 @@ function BpmnModelerComponent() {
     });
   };
 
+  const updateCommentsCount = (isIncrement = false) => {
+    if (isIncrement) {
+      setComments((comments) => comments + 1);
+    } else {
+      setComments((comments) => comments - 1);
+    }
+  };
+
   const handleOk = async (wkfMigrationMap, isMigrateOld) => {
     setDelopyDialog(false);
     let res = await callOutoutMapping();
@@ -1166,6 +1182,7 @@ function BpmnModelerComponent() {
             onSave={onSave}
             openSnackbar={openSnackbar.open}
             handleMenuActionTab={handleMenuActionTab}
+            updateCommentsCount={updateCommentsCount}
           />
         ) : (
           group.entries.length > 0 && (
@@ -1200,6 +1217,8 @@ function BpmnModelerComponent() {
       setTabValue(0);
       setTabs(tabs);
       setSelectedElement(element);
+      const commentsLength = getCommentsLength(element);
+      setComments(commentsLength);
       checkMenuActionTab(element);
       setDrawerOpen(true);
     },
@@ -1368,13 +1387,23 @@ function BpmnModelerComponent() {
               <Typography className={classes.nodeTitle}>
                 {selectedElement && selectedElement.id}
               </Typography>
-              <Tabs value={tabValue} onChange={handleChange}>
+              <Tabs
+                value={tabValue}
+                onChange={handleChange}
+                variant="scrollable"
+                scrollButtons="auto"
+                ScrollButtonComponent={TabScrollButtonComponent}
+              >
                 {tabs.map((tab, tabIndex) => (
                   <Tab
                     disabled={
                       tab.id === "menu-action-tab" && isMenuActionDisable
                     }
-                    label={tab.label}
+                    label={
+                      tab.id === "comments" && comments
+                        ? `${tab.label} (${comments})`
+                        : tab.label
+                    }
                     key={tabIndex}
                     data-tab={tab.id}
                   />

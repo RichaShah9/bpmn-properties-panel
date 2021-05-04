@@ -1,14 +1,20 @@
-const commonTabs = ["general", "menu-action-tab", "listeners"];
-const defaultTabs = ["general", "menu-action-tab"];
+const commonTabs = ["general", "menu-action-tab", "listeners", "comments"];
+const defaultTabs = ["general", "menu-action-tab", "comments"];
 // const variableTabs = ["general", "variables", "menu-action-tab", "listeners"];
-const commonTabsWithoutMenuAction = ["general", "listeners"];
-const defaultTabsWithoutMenuAction = ["general"];
-const variableTabsWithoutMenuAction = ["general", "variables", "listeners"];
+const commonTabsWithoutMenuAction = ["general", "listeners", "comments"];
+const defaultTabsWithoutMenuAction = ["general", "comments"];
+const variableTabsWithoutMenuAction = [
+  "general",
+  "variables",
+  "listeners",
+  "comments",
+];
 const withViewAttributes = [
   "general",
   "listeners",
   "view-attributes",
   "menu-action-tab",
+  "comments"
 ];
 const variableTabsWithViewAttributes = [
   "general",
@@ -16,13 +22,14 @@ const variableTabsWithViewAttributes = [
   "view-attributes",
   "menu-action-tab",
   "listeners",
+  "comments"
 ];
 
 export const tabProperty = [
   {
     type: "bpmn:Process",
     subType: null || undefined,
-    tabs: ["general", "configuration", "listeners"],
+    tabs: ["general", "configuration", "listeners", "comments"],
   },
   {
     type: "bpmn:StartEvent",
@@ -168,7 +175,7 @@ export const tabProperty = [
   {
     type: "bpmn:Participant",
     subType: null || undefined,
-    tabs: ["general", "configuration", "listeners"],
+    tabs: ["general", "configuration", "listeners", "comments"],
   },
   {
     type: "bpmn:Group",
