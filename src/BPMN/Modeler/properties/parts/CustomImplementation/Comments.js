@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     borderTop: "1px dotted #ccc",
   },
   comments: {
-    height: "calc(100% - 100px)",
+    height: "calc(100% - 85px)",
     overflow: "auto",
   },
   textField: {
