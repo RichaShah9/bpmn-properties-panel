@@ -1,31 +1,31 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import classNames from 'classnames';
-import { Typography, Grid } from '@material-ui/core';
-import { RelationalFieldList } from '../constant';
-import FieldPopover from './FieldPopover';
-import AddIcon from '@material-ui/icons/AddCircleOutline';
+import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import classNames from "classnames";
+import { Typography, Grid } from "@material-ui/core";
+import { RelationalFieldList } from "../constant";
+import FieldPopover from "./FieldPopover";
+import AddIcon from "@material-ui/icons/AddCircleOutline";
 
 const useStyles = makeStyles({
   container: {
-    display: 'flex',
+    display: "flex",
   },
   input: {
-    width: '100%',
-    display: 'flex',
-    position: 'relative',
-    '& > div:before': {
+    width: "100%",
+    display: "flex",
+    position: "relative",
+    "& > div:before": {
       border: 0,
     },
   },
   parentField: {
     marginRight: 5,
-    color: '#3f51b5',
+    color: "#3f51b5",
   },
   clickableView: {
-    cursor: 'pointer',
-    '& input': {
-      cursor: 'pointer',
+    cursor: "pointer",
+    "& input": {
+      cursor: "pointer",
     },
     // '&:hover': {
     //   '& $addFieldView': {
@@ -37,7 +37,7 @@ const useStyles = makeStyles({
     fontSize: 12,
   },
   fieldNameColumn: {
-    width: 'unset',
+    width: "unset",
   },
   // addFieldView: {
   //   visibility: 'hidden',
@@ -45,21 +45,21 @@ const useStyles = makeStyles({
   addFieldButton: {
     padding: 0,
     marginLeft: 5,
-  }
+  },
 });
 
 const isRelationalField = (row) => {
-  const type = row.type.replace(/-/g, '_').toLowerCase();
+  const type = row.type.replace(/-/g, "_").toLowerCase();
   return RelationalFieldList.indexOf(type) !== -1;
 };
 
 const getFields = (item) => {
-  if(isRelationalField(item)) {
-    const {value} = item;
+  if (isRelationalField(item)) {
+    const { value } = item;
     return value?.fields || null;
   }
   return null;
-}
+};
 
 function ModelFieldComponent(props) {
   const classes = useStyles();
@@ -68,7 +68,7 @@ function ModelFieldComponent(props) {
   const fields = getFields(item);
 
   React.useEffect(() => {
-    if (item && isRelationalField(item) && item['subFieldName']) {
+    if (item && isRelationalField(item) && item["subFieldName"]) {
       setShowSubField(true);
     }
   }, [item]);
@@ -77,25 +77,25 @@ function ModelFieldComponent(props) {
     return null;
   }
   return (
-      <div
-        className={classNames(classes.input)}
-      >
-        <Grid container direction="column" className={classes.fieldNameColumn}>
-          <Typography title={item['name']}>
-            {item['title'] || item['autoTitle'] || item['name']}
-          </Typography>
-        </Grid>
-        <div>
-          {fields && showSubField && <FieldPopover
+    <div className={classNames(classes.input)}>
+      <Grid container direction="column" className={classes.fieldNameColumn}>
+        <Typography title={item["name"]}>
+          {item["title"] || item["autoTitle"] || item["name"]}
+        </Typography>
+      </Grid>
+      <div>
+        {fields && showSubField && (
+          <FieldPopover
             data={fields}
             iconButton={true}
             onSubmit={(data) => handleAdd(data)}
             icon={<AddIcon />}
             buttonTitle="Add Fields"
             iconButtonClassName={classes.addFieldButton}
-          />}
-        </div>
+          />
+        )}
       </div>
+    </div>
   );
 }
 
