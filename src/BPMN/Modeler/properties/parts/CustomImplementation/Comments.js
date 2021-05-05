@@ -2,15 +2,23 @@ import React, { useState, useEffect } from "react";
 import moment from "moment";
 import { IconButton, TextField, Avatar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ArrowForward, Clear } from "@material-ui/icons";
+import {
+  ArrowForward,
+  Clear,
+  QuestionAnswerOutlined,
+} from "@material-ui/icons";
 
 import { getInfo } from "../../../../../services/api";
 import { COLORS } from "../../../constants";
 import { getComments, addComment, removeComment } from "../../../extra";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     height: "100%",
     overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
   },
   groupLabel: {
     fontWeight: "bolder",
@@ -37,7 +45,6 @@ const useStyles = makeStyles((theme) => ({
     borderTop: "1px dotted #ccc",
   },
   comments: {
-    height: "calc(100% - 85px)",
     overflow: "auto",
   },
   textField: {
@@ -56,6 +63,11 @@ const useStyles = makeStyles((theme) => ({
   small: {
     width: theme.spacing(4),
     height: theme.spacing(4),
+  },
+  sublabel: {
+    fontSize: 14,
+    margin: "10px 0px",
+    fontStyle: "italic",
   },
 }));
 
@@ -82,12 +94,7 @@ const getAvatarColor = (id) => {
   }
 };
 
-export default function Comments({
-  element,
-  index,
-  label,
-  updateCommentsCount,
-}) {
+export default function Comments({ element, updateCommentsCount }) {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(null);
   const [user, setUser] = useState(null);
@@ -151,10 +158,19 @@ export default function Comments({
 
   return (
     <div className={classes.root}>
-      <React.Fragment>
-        {index > 0 && <div className={classes.divider} />}
-        <div className={classes.groupLabel}>{label}</div>
-      </React.Fragment>
+      {comments && Object.keys(comments).length === 0 && (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ marginRight: 20 }}>
+            <QuestionAnswerOutlined style={{ fontSize: 25, color: "#666" }} />
+          </div>
+          <div>
+            <div className={classes.groupLabel}>Add comments</div>
+            <div className={classes.sublabel}>
+              You can add comments about diagrams or specific BPMN elements.
+            </div>
+          </div>
+        </div>
+      )}
       <div className={classes.root}>
         <div className={classes.comments}>
           {comments &&
@@ -203,7 +219,13 @@ export default function Comments({
                                 {c && c[2] && c[2].replace(".", ":")}
                               </div>
                             </div>
-                            <div>{c && c[3]}</div>
+                            <div
+                              style={{
+                                whiteSpace: "pre-wrap",
+                              }}
+                            >
+                              {c && c[3]}
+                            </div>
                           </div>
                         </div>
                         <div>
@@ -228,6 +250,8 @@ export default function Comments({
             onChange={(e) => setComment(e.target.value)}
             value={comment}
             size="small"
+            multiline
+            rows={4}
           />
           <IconButton
             size="small"
