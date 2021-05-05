@@ -1101,11 +1101,11 @@ function BpmnModelerComponent() {
                 permanent,
               } = item;
               addProperty("item", itemName && itemName.name);
+              addProperty("itemLabel", itemNameLabel);
+              addProperty("permanent", permanent || false);
               if (attributeName && attributeName !== "") {
                 addProperty(attributeName, attributeValue);
               }
-              addProperty("itemLabel", itemNameLabel);
-              addProperty("permanent", permanent || false);
             });
           }
         });

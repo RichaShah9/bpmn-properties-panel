@@ -451,12 +451,12 @@ export default function ViewAttributePanel({ handleAdd, element }) {
             value.items.push({
               itemName: {
                 name: item[0] && item[0].value,
-                label: item[2] && item[2].value,
+                label: item[1] && item[1].value,
               },
-              itemNameLabel: item[2] && item[2].value,
-              attributeName: item[1] && item[1].name,
-              attributeValue: item[1] && item[1].value,
-              permanent: item[3] && item[3].value,
+              itemNameLabel: item[1] && item[1].value,
+              attributeName: item[3] && item[3].name,
+              attributeValue: item[3] && item[3].value,
+              permanent: item[2] && item[2].value,
             });
           });
         values.push(value);
