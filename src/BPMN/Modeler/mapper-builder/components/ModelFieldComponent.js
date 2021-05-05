@@ -82,7 +82,7 @@ function ModelFieldComponent(props) {
       >
         <Grid container direction="column" className={classes.fieldNameColumn}>
           <Typography title={item['name']}>
-            {item['title']}
+            {item['title'] || item['autoTitle'] || item['name']}
           </Typography>
         </Grid>
         <div>

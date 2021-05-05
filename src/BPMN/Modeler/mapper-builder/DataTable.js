@@ -208,6 +208,7 @@ function RenderRelationalWidget(props) {
     }
     return data;
   };
+  const _value = value._selectId ? { ...value, id: value._selectId } : value;
   return (
     <Selection
       name="fieldValue"
@@ -220,7 +221,7 @@ function RenderRelationalWidget(props) {
       onChange={(value) => {
         onChange({ name: "fieldValue", value: value, nameField }, editor);
       }}
-      value={value || []}
+      value={_value || []}
       classes={{ root: classes.MuiAutocompleteRoot }}
     />
   );
@@ -385,7 +386,13 @@ const RenderWidget = React.memo(function RenderWidgetMemo({
         editor,
         internalProps: {
           ...(options
-            ? { options, classes, ...props, value: value.fieldValue }
+            ? {
+                options,
+                classes,
+                ...props,
+                value: value.fieldValue,
+                className: classes.input,
+              }
             : {
                 classes,
                 ...props,
@@ -439,7 +446,11 @@ function DataTable(props) {
           (!from || from === VALUE_FROM.NONE) &&
           typeof _value === "object"
         ) {
-          _value = value[targetName];
+          if (targetName === "_selectId") {
+            _value = value["id"];
+          } else {
+            _value = value[targetName];
+          }
         }
         // if (row.from === 'self' && typeof _value === 'object') {
         //   _value = value['name'];
