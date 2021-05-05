@@ -27,7 +27,7 @@ function pascalToKebabCase(string) {
 }
 
 function getBool(val) {
-  if (!val) return false;
+  if (!val || !["false", "true", true, false].includes(val)) return false;
   return !!JSON.parse(String(val).toLowerCase());
 }
 
