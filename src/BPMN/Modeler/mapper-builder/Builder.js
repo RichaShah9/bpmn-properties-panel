@@ -312,7 +312,7 @@ function Builder({ params, onSave, handleClose, open }) {
   const [modelFieldMap, setModelFieldMap] = React.useState({});
   const [metaFields, setMetaFields] = React.useState([]);
   const [errors, setErrors] = React.useState({});
-  const [fromBpm, setFromBpm] = React.useState(false);
+  const [createVariable, setCreateVariable] = React.useState(false);
 
   const setBuilderFields = React.useCallback(
     (fields) => {
@@ -546,7 +546,7 @@ function Builder({ params, onSave, handleClose, open }) {
       targetModel: model && model.name,
       sourceModel: sourceModel && sourceModel.name,
       newRecord,
-      fromBpm,
+      createVariable,
       isJson: (model && model.modelType) === ModelType.CUSTOM,
     };
     const jsonQuery = JSON.stringify({ ...json });
@@ -560,7 +560,15 @@ function Builder({ params, onSave, handleClose, open }) {
       resultField: scriptString,
     };
     onSave(record);
-  }, [builderFields, params, model, sourceModel, newRecord, onSave, fromBpm]);
+  }, [
+    builderFields,
+    params,
+    model,
+    sourceModel,
+    newRecord,
+    onSave,
+    createVariable,
+  ]);
 
   const handleModelSelect = React.useCallback(
     async (e) => {
@@ -620,7 +628,7 @@ function Builder({ params, onSave, handleClose, open }) {
         const sourceModelResult = await fetchModelByName(jsonData.sourceModel);
         setModel(modelResult);
         setSourceModel(sourceModelResult);
-        setFromBpm(jsonData.fromBpm);
+        setCreateVariable(jsonData.createVariable);
         setNewRecord(jsonData.newRecord);
         getMetaFields(modelResult);
         setLoading(false);
@@ -689,8 +697,8 @@ function Builder({ params, onSave, handleClose, open }) {
                     <Grid item className={classes.newRecordInputView}>
                       <Switch
                         className={classes.newRecordSwitch}
-                        checked={fromBpm}
-                        onChange={(e) => setFromBpm(e.target.checked)}
+                        checked={createVariable}
+                        onChange={(e) => setCreateVariable(e.target.checked)}
                         color="primary"
                       />
                       <Typography className={classes.newRecordSwitchText}>
