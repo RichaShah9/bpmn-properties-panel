@@ -448,15 +448,31 @@ export default function ViewAttributePanel({ handleAdd, element }) {
 
         items &&
           items.forEach((item) => {
+            const name = item.find((f) => f.name === "item");
+            const label = item.find((f) => f.name === "itemLabel");
+            const attribute = item.find((f) =>
+              [
+                "readonly",
+                "readonlyIf",
+                "hidden",
+                "hideIf",
+                "required",
+                "requiredIf",
+                "title",
+                "domain",
+                "active",
+              ].includes(f.name)
+            );
+            const permanent = item.find((f) => f.name === "permanent");
             value.items.push({
               itemName: {
-                name: item[0] && item[0].value,
-                label: item[1] && item[1].value,
+                name: name && name.value,
+                label: label && label.value,
               },
-              itemNameLabel: item[1] && item[1].value,
-              attributeName: item[3] && item[3].name,
-              attributeValue: item[3] && item[3].value,
-              permanent: item[2] && item[2].value,
+              itemNameLabel: label && label.value,
+              attributeName: attribute && attribute.name,
+              attributeValue: attribute && attribute.value,
+              permanent: permanent && permanent.value,
             });
           });
         values.push(value);
