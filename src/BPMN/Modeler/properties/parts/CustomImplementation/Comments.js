@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from "react";
 import moment from "moment";
-import { IconButton, TextField, Avatar } from "@material-ui/core";
+import { nanoid } from "nanoid";
+import { IconButton, TextField, Avatar, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   ArrowForward,
-  Clear,
   QuestionAnswerOutlined,
+  Edit,
+  Clear,
 } from "@material-ui/icons";
 
 import { getInfo } from "../../../../../services/api";
 import { COLORS } from "../../../constants";
-import { getComments, addComment, removeComment } from "../../../extra";
+import {
+  getComments,
+  addComment,
+  removeComment,
+  updateComment,
+} from "../../../extra";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
   },
   textField: {
+    marginTop: 10,
     width: "100%",
   },
   reply: {
@@ -68,6 +76,18 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 14,
     margin: "10px 0px",
     fontStyle: "italic",
+  },
+  buttons: {
+    margin: theme.spacing(1),
+    backgroundColor: "#0275d8",
+    borderColor: "#0267bf",
+    color: "white",
+    textTransform: "none",
+    "&:hover": {
+      backgroundColor: "#025aa5",
+      borderColor: "#014682",
+      color: "white",
+    },
   },
 }));
 
@@ -96,6 +116,7 @@ const getAvatarColor = (id) => {
 
 export default function Comments({ element, updateCommentsCount }) {
   const [comment, setComment] = useState("");
+  const [editComment, setEditComment] = useState(null);
   const [comments, setComments] = useState(null);
   const [user, setUser] = useState(null);
   const classes = useStyles();
@@ -106,7 +127,7 @@ export default function Comments({ element, updateCommentsCount }) {
       if (!groups[date]) {
         groups[date] = [];
       }
-      groups[date].push(game);
+      groups[date].push([...game, false]);
       return groups;
     }, {});
     return groups;
@@ -118,7 +139,8 @@ export default function Comments({ element, updateCommentsCount }) {
       user,
       moment().format("DD/MM/YYYY"),
       moment().format("HH.mm"),
-      comment
+      comment,
+      nanoid()
     );
     let comments = getComments(element);
     setComments(getCommentGroups(comments));
@@ -126,11 +148,22 @@ export default function Comments({ element, updateCommentsCount }) {
     updateCommentsCount(true);
   };
 
-  const removeNewComment = (element, comment) => {
-    removeComment(element, comment);
-    let comments = getComments(element);
-    setComments(getCommentGroups(comments));
-    updateCommentsCount(false);
+  const updateEdit = (key, id, value, valueIndex) => {
+    const cloneElements = { ...comments };
+    let index = cloneElements[key].findIndex((f) => f.includes(id));
+    if (index > -1) {
+      cloneElements[key][index][valueIndex] = value;
+      setComments(cloneElements);
+    }
+  };
+
+  const removeNewComment = (key, id) => {
+    const cloneElements = { ...comments };
+    let index = cloneElements[key].findIndex((f) => f.includes(id));
+    if (index > -1) {
+      cloneElements[key].splice(index, 1);
+      setComments(cloneElements);
+    }
   };
 
   const renderKey = (key) => {
@@ -219,19 +252,64 @@ export default function Comments({ element, updateCommentsCount }) {
                                 {c && c[2] && c[2].replace(".", ":")}
                               </div>
                             </div>
-                            <div
-                              style={{
-                                whiteSpace: "pre-wrap",
-                              }}
-                            >
-                              {c && c[3]}
-                            </div>
+                            {c && c[5] ? (
+                              <React.Fragment>
+                                <TextField
+                                  variant="outlined"
+                                  className={classes.textField}
+                                  onChange={(e) =>
+                                    setEditComment(e.target.value)
+                                  }
+                                  defaultValue={c && c[3]}
+                                  size="small"
+                                  placeholder="comment"
+                                  multiline
+                                  rows={1}
+                                />
+                                <Button
+                                  className={classes.buttons}
+                                  onClick={() => {
+                                    updateEdit(key, c && c[4], false, 5);
+                                    updateEdit(key, c && c[4], editComment, 3);
+                                    updateComment(element, c, editComment);
+                                  }}
+                                >
+                                  Update Comment
+                                </Button>
+                                <Button
+                                  className={classes.buttons}
+                                  onClick={() => {
+                                    updateEdit(key, c && c[4], false, 5);
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                              </React.Fragment>
+                            ) : (
+                              <div
+                                style={{
+                                  whiteSpace: "pre-wrap",
+                                }}
+                              >
+                                {c && c[3]}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div>
+                        <div style={{ display: "flex", alignItems: "center" }}>
                           <IconButton
                             size="small"
-                            onClick={() => removeNewComment(element, c)}
+                            onClick={() => updateEdit(key, c && c[4], true, 5)}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              removeNewComment(key, c && c[4]);
+                              removeComment(element, c);
+                              updateCommentsCount(false);
+                            }}
                           >
                             <Clear fontSize="small" />
                           </IconButton>
