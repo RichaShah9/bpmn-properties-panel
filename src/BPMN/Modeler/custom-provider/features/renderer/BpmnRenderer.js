@@ -1,7 +1,5 @@
 import inherits from "inherits";
 
-import { isObject, assign, forEach } from "min-dash";
-
 import BaseRenderer from "diagram-js/lib/draw/BaseRenderer";
 import { isEventSubProcess, isExpanded } from "bpmn-js/lib/util/DiUtil";
 
@@ -39,6 +37,8 @@ import {
   translate,
 } from "diagram-js/lib/util/SvgTransformUtil";
 
+import { isObject, assign, forEach } from "min-dash";
+
 import Ids from "ids";
 
 var RENDERER_IDS = new Ids();
@@ -48,8 +48,6 @@ var INNER_OUTER_DIST = 3;
 
 var DEFAULT_FILL_OPACITY = 0.95,
   HIGH_FILL_OPACITY = 0.35;
-
-var ELEMENT_LABEL_DISTANCE = 10;
 
 export default function BpmnRenderer(
   config,
@@ -1597,25 +1595,7 @@ export default function BpmnRenderer(
           messageAttrs.stroke = "white";
         }
 
-        var message = drawPath(parentGfx, markerPathData, messageAttrs);
-
-        var labelText = semantic.messageRef.name;
-        var label = renderLabel(parentGfx, labelText, {
-          align: "center-top",
-          fitBox: true,
-          style: {
-            fill: getStrokeColor(element, defaultStrokeColor),
-          },
-        });
-
-        var messageBounds = message.getBBox(),
-          labelBounds = label.getBBox();
-
-        var translateX = midPoint.x - labelBounds.width / 2,
-          translateY =
-            midPoint.y + messageBounds.height / 2 + ELEMENT_LABEL_DISTANCE;
-
-        transform(label, translateX, translateY, 0);
+        drawPath(parentGfx, markerPathData, messageAttrs);
       }
 
       return path;
@@ -1987,7 +1967,7 @@ export default function BpmnRenderer(
   }
 
   function renderDataItemCollection(parentGfx, element) {
-    var yPosition = (element.height - 20) / element.height;
+    var yPosition = (element.height - 18) / element.height;
 
     var pathData = pathMap.getScaledPath("DATA_OBJECT_COLLECTION_PATH", {
       xScaleFactor: 1,
@@ -1995,7 +1975,7 @@ export default function BpmnRenderer(
       containerWidth: element.width,
       containerHeight: element.height,
       position: {
-        mx: 0.4, //Manual Updated
+        mx: 0.33,
         my: yPosition,
       },
     });
