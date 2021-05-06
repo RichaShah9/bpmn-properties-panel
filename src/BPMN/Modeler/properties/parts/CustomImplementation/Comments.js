@@ -52,7 +52,8 @@ const useStyles = makeStyles((theme) => ({
     borderTop: "1px dotted #ccc",
   },
   comments: {
-    overflow: "auto",
+    overflowY: "auto",
+    overflowX: "hidden",
   },
   textField: {
     marginTop: 10,
@@ -234,7 +235,7 @@ export default function Comments({ element, updateCommentsCount }) {
                             {c && c[0] && c[0].charAt(0)}
                           </Avatar>
                         </div>
-                        <div style={{ width: "100%" }}>
+                        <div style={{ width: "calc(100% - 85px)" }}>
                           <div>
                             <div
                               style={{ display: "flex", alignItems: "center" }}
@@ -289,6 +290,7 @@ export default function Comments({ element, updateCommentsCount }) {
                               <div
                                 style={{
                                   whiteSpace: "pre-wrap",
+                                  overflowWrap: "break-word",
                                 }}
                               >
                                 {c && c[3]}
