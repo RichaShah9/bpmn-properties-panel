@@ -372,9 +372,7 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
           </React.Fragment>
         )}
         {((element && element.type === "bpmn:ServiceTask" && !isBaml) ||
-          (element &&
-            element.type !== "bpmn:ServiceTask" &&
-            element.type !== "bpmn:SendTask")) && (
+          (element && element.type !== "bpmn:ServiceTask")) && (
           <React.Fragment>
             <SelectBox
               element={element}
