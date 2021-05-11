@@ -213,6 +213,7 @@ function BpmnModelerComponent() {
   const [width, setWidth] = useState(drawerWidth);
   const [height, setHeight] = useState("100%");
   const classes = useStyles();
+  const diagramXmlRef = React.useRef(null);
 
   const handleMenuActionTab = (val) => {
     setMenuAction(val);
@@ -372,6 +373,11 @@ function BpmnModelerComponent() {
             element.businessObject.$attrs["camunda:key"] ||
             bo.get([modelProperty]);
           updateTranslations(element, bpmnModeler, nameKey);
+        });
+        bpmnModeler.saveXML({ format: true }, (err, newXml) => {
+          if (!err) {
+            diagramXmlRef.current = newXml;
+          }
         });
       });
     },
@@ -1260,27 +1266,32 @@ function BpmnModelerComponent() {
       window.top.angular &&
       window.top.angular
         .element(
-          window.top.document.querySelectorAll(
-            '[ng-repeat="tab in navTabs"][class="ng-scope active"]'
-          )[0]
+          window.top.document.querySelector(
+            '[ng-repeat="tab in navTabs"][class="ng-scope active"] [ng-click="closeTab(tab)"]'
+          )
         )
         .scope();
     if (!scope) return;
     scope.tab.$viewScope.confirmDirty = function (callback, cancelCallback) {
-      window.top.axelor.dialogs.confirm(
-        window._t(
-          "Current changes will be lost. Do you really want to proceed?"
-        ),
-        function (confirmed) {
-          if (!confirmed) {
-            if (cancelCallback) {
-              cancelCallback();
+      bpmnModeler.saveXML({ format: true }, async function (err, xml) {
+        const diagramXml = diagramXmlRef.current;
+        const isDirty = `${diagramXml}` !== `${xml}`;
+        if (!isDirty) {
+          return callback && callback();
+        } else {
+          window.top.axelor.dialogs.confirm(
+            window.top._t(
+              "Current changes will be lost. Do you really want to proceed?"
+            ),
+            function (confirmed) {
+              if (!confirmed) {
+                return cancelCallback && cancelCallback();
+              }
+              return callback && callback();
             }
-            return;
-          }
-          scope.$applyAsync(callback);
+          );
         }
-      );
+      });
     };
   }, []);
 
