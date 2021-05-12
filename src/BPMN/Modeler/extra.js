@@ -83,6 +83,13 @@ export const getFlowElements = (process, ele = []) => {
       } else if (
         ["bpmn:subprocess", "bpmn:transaction"].includes(getType(element))
       ) {
+        if (getType(element) === "bpmn:subprocess") {
+          elements.push({
+            id: element.id,
+            name: element.name || element.id,
+            type: getType(element),
+          });
+        }
         const nestedElements = getFlowElements(element, []);
         elements = [...elements, ...(nestedElements || [])];
       }
