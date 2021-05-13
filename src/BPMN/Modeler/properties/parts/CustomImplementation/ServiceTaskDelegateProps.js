@@ -290,6 +290,13 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
       if (eventTypes.includes(element && element.type)) {
         return;
       }
+      if (is(element, "bpmn:SendTask")) {
+        const bo = getBusinessObject(element);
+        if (bo) {
+          element.businessObject.class =
+            "com.axelor.apps.bpm.listener.SendTaskExecution";
+        }
+      }
       setVisible(true);
     }
   }, [element]);
@@ -297,10 +304,14 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
   return (
     isVisible && (
       <div>
-        <React.Fragment>
-          {index > 0 && <div className={classes.divider} />}
-        </React.Fragment>
-        <div className={classes.groupLabel}>{label}</div>
+        {element && element.type !== "bpmn:SendTask" && (
+          <React.Fragment>
+            <React.Fragment>
+              {index > 0 && <div className={classes.divider} />}
+            </React.Fragment>
+            <div className={classes.groupLabel}>{label}</div>
+          </React.Fragment>
+        )}
         {element && element.type === "bpmn:ServiceTask" && (
           <Checkbox
             element={element}
@@ -372,7 +383,9 @@ export default function ServiceTaskDelegateProps({ element, index, label }) {
           </React.Fragment>
         )}
         {((element && element.type === "bpmn:ServiceTask" && !isBaml) ||
-          (element && element.type !== "bpmn:ServiceTask")) && (
+          (element &&
+            element.type !== "bpmn:ServiceTask" &&
+            element.type !== "bpmn:SendTask")) && (
           <React.Fragment>
             <SelectBox
               element={element}

@@ -187,6 +187,14 @@ export default function EventProps({
       };
     }
 
+    if (is(element, "bpmn:SendTask")) {
+      let messageEventDefinition = getBusinessObject(element);
+      renderType = {
+        eventDefinition: messageEventDefinition,
+        type: "message",
+      };
+    }
+
     errorEvents.forEach((event) => {
       if (is(element, event)) {
         let errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(
