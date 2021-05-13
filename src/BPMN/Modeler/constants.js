@@ -32,7 +32,7 @@ export const FILL_COLORS = {
   "bpmn:Transaction": "#E4EBF8",
   "bpmn:DataObjectReference": "#eeceee",
   "bpmn:DataStoreReference": "#ffcfd4",
-  "bpmn:AdHocSubProcess": "#E4EBF8"
+  "bpmn:AdHocSubProcess": "#E4EBF8",
 };
 
 export const DATA_STORE_TYPES = [
@@ -96,6 +96,13 @@ export const USER_TASKS_TYPES = [
   "bpmn:ReceiveTask",
   "bpmn:CallActivity",
   "bpmn:SubProcess",
+];
+
+export const SUBPROCESS_TYPES = [
+  "bpmn:subprocess",
+  "bpmn:transaction",
+  "multiinstancesequential",
+  "multiinstanceparallel",
 ];
 
 export const COLORS = [

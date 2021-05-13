@@ -68,7 +68,7 @@ export default function DeployDialog({ open, onClose, ids, onOk, wkf }) {
     const cloneWkfMigrationMap = { ...wkfMigrationMap };
     cloneWkfMigrationMap[processId] = {
       ...cloneWkfMigrationMap[processId],
-      [oldEle.id]: newEle.id,
+      [oldEle && oldEle.id]: newEle && newEle.id,
     };
     setWkfMigrationMap(cloneWkfMigrationMap);
   };

@@ -3,6 +3,7 @@ import { download, getBool, translate } from "../../utils";
 import { tabProperty } from "./properties/tabProperty";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 import Service from "../../services/Service";
+import { SUBPROCESS_TYPES } from "./constants";
 
 export const getProcessBusinessObject = (element, propertyName) => {
   if (!is(element, "bpmn:Participant")) {
@@ -39,6 +40,14 @@ export const uploadXml = () => {
 export const getType = (element) => {
   if (!element) return;
   const type = (element.type || element.$type).toLowerCase();
+  let isProcessLoop = false,
+    isProcessSequential = false;
+  if (type === "bpmn:subprocess") {
+    const { isLoop, isSequential } =
+      ensureMultiInstanceSupported(element) || {};
+    isProcessLoop = isLoop;
+    isProcessLoop = isSequential;
+  }
   return type.includes("boundary")
     ? type
     : type.includes("event")
@@ -47,6 +56,12 @@ export const getType = (element) => {
     ? "task"
     : type.includes("gateway")
     ? "gateway"
+    : type.includes("bpmn:subprocess")
+    ? isProcessLoop
+      ? isProcessSequential
+        ? "multiinstancesequential"
+        : "multiinstanceparallel"
+      : type
     : type;
 };
 
@@ -60,6 +75,21 @@ export const addOldNodes = async (wkf, setWkf, bpmnModeler) => {
     setWkf({ ...res.data[0] });
   }
 };
+
+function getLoopCharacteristics(element) {
+  let bo = getBusinessObject(element);
+  return bo.loopCharacteristics;
+}
+
+function ensureMultiInstanceSupported(element) {
+  let loopCharacteristics = getLoopCharacteristics(element);
+  return {
+    isLoop:
+      loopCharacteristics &&
+      loopCharacteristics.$type === "bpmn:MultiInstanceLoopCharacteristics",
+    isSequential: loopCharacteristics && loopCharacteristics.isSequential,
+  };
+}
 
 export const getFlowElements = (process, ele = []) => {
   let elements = [...ele];
@@ -80,14 +110,19 @@ export const getFlowElements = (process, ele = []) => {
           name: element.name || element.id,
           type: getType(element),
         });
-      } else if (
-        ["bpmn:subprocess", "bpmn:transaction"].includes(getType(element))
-      ) {
-        if (getType(element) === "bpmn:subprocess") {
+      } else if (SUBPROCESS_TYPES.includes(getType(element))) {
+        if (SUBPROCESS_TYPES.includes(getType(element))) {
+          const { isLoop, isSequential } = ensureMultiInstanceSupported(
+            element
+          );
           elements.push({
             id: element.id,
             name: element.name || element.id,
-            type: getType(element),
+            type: isLoop
+              ? isSequential
+                ? "multiinstancesequential"
+                : "multiinstanceparallel"
+              : getType(element),
           });
         }
         const nestedElements = getFlowElements(element, []);
