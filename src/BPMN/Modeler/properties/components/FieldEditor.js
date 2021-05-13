@@ -35,6 +35,7 @@ export default function FieldEditor({
   const { fieldName = "" } = value || {};
   const [fields, setFields] = useState([]);
   const [isShow, setShow] = useState(true);
+  const [isButton, setButton] = useState(true);
   const classes = useStyles();
   const values = fieldName && fieldName.split(".");
   const [startValue] = values || [];
@@ -74,12 +75,9 @@ export default function FieldEditor({
           data &&
             data.filter((d) =>
               isCollection
-                ? [
-                    "many_to_one",
-                    "one_to_many",
-                    "many_to_many",
-                    "many-to-one",
-                  ].includes(d.type.toLowerCase())
+                ? ["many_to_one", "one_to_many", "many_to_many"].includes(
+                    d.type.toLowerCase()
+                  )
                 : ["many_to_one", "many-to-one"].includes(d.type.toLowerCase())
             )
         );
@@ -119,6 +117,7 @@ export default function FieldEditor({
     ) {
       if (["MANY_TO_MANY", "ONE_TO_MANY"].includes(transformValue.type)) {
         setShow(false);
+        setButton(false);
       } else {
         setShow(true);
       }
@@ -136,6 +135,7 @@ export default function FieldEditor({
       setShow(true);
     }
   }, [isUserPath, startModel, fields, isCollection, fieldName]);
+
   return (
     <React.Fragment>
       <Selection
@@ -179,7 +179,11 @@ export default function FieldEditor({
           {isShow && (
             <FieldEditor
               getMetaFields={() => {
-                return getSubMetaField(relationModel, relationJsonModel);
+                return getSubMetaField(
+                  relationModel,
+                  relationJsonModel,
+                  isCollection
+                );
               }}
               initValue={`${initValue}${startValue}${"."}`}
               value={{
@@ -193,7 +197,7 @@ export default function FieldEditor({
               isCollection={isCollection}
             />
           )}
-          {!isShow && (
+          {!isShow && isButton && (
             <IconButton
               size="small"
               onClick={() => setShow((isShow) => !isShow)}

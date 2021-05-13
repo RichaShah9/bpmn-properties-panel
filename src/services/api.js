@@ -188,7 +188,11 @@ export async function getMetaModal(data) {
   return res && res.data && res.data[0];
 }
 
-export async function getSubMetaField(model, relationJsonModel) {
+export async function getSubMetaField(
+  model,
+  relationJsonModel,
+  isCollection = false
+) {
   if (model === "com.axelor.meta.db.MetaJsonRecord" && relationJsonModel) {
     const res = await Service.get(
       `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${relationJsonModel}`
@@ -197,7 +201,11 @@ export async function getSubMetaField(model, relationJsonModel) {
     return (
       result &&
       result.filter((r) =>
-        ["many_to_one", "many-to-one"].includes(r.type.toLowerCase())
+        isCollection
+          ? ["many_to_one", "one_to_many", "many_to_many"].includes(
+              r.type.toLowerCase()
+            )
+          : ["many_to_one", "many-to-one"].includes(r.type.toLowerCase())
       )
     );
   } else {
@@ -215,7 +223,11 @@ export async function getSubMetaField(model, relationJsonModel) {
     return (
       resultFields &&
       resultFields.filter((r) =>
-        ["many_to_one", "many-to-one"].includes(r.type.toLowerCase())
+        isCollection
+          ? ["many_to_one", "one_to_many", "many_to_many"].includes(
+              r.type.toLowerCase()
+            )
+          : ["many_to_one", "many-to-one"].includes(r.type.toLowerCase())
       )
     );
   }

@@ -58,6 +58,9 @@ const useStyles = makeStyles((theme) => ({
       color: "white",
     },
   },
+  dialog: {
+    maxWidth: "100%",
+  },
   dialogContent: {
     display: "flex",
     alignItems: "flex-end",
@@ -261,7 +264,9 @@ export default function MultiInstanceLoopCharacteristics({
         collection.lastIndexOf(")")
       );
       const values = collectionVal && collectionVal.split(".");
-      setCollectionVal(values[1]);
+      setCollectionVal(
+        [...(values || [])].splice(1, values && values.length - 1).join(".")
+      );
       const { modelList } = getValue(element) || {};
       if (values && modelList) {
         const model = modelList.find(
