@@ -87,6 +87,8 @@ export default function EventProps({
             element={element}
             bpmnFactory={bpmnFactory}
             messageEventDefinition={renderType.eventDefinition}
+            bpmnModdle={bpmnModdle}
+            bpmnModeler={bpmnModeler}
           />
         );
       case "signal":

@@ -36,6 +36,7 @@ export default function SignalEventProps({
   useEffect(() => {
     let reference = signalEventDefinition.get("signalRef");
     setSelectedSignal(reference && reference.id);
+    setEle(reference);
   }, [signalEventDefinition]);
 
   useEffect(() => {
