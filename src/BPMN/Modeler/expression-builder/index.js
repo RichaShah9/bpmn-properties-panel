@@ -559,12 +559,12 @@ function ExpressionBuilder({
     });
   };
 
-  function getCondition(rules, modalName, modelId) {
+  function getCondition(rules, modalName) {
     const isBPM = isBPMQuery(parentType);
     const prefix = isBPM
       ? "self"
       : generateWithId
-      ? `$ctx.find('${upperCaseFirstLetter(modalName)}', ${modelId})`
+      ? `$ctx.find('${upperCaseFirstLetter(modalName)}', ${modalName}Id)`
       : modalName;
     const map_operators = map_operator[isBPM ? "BPM" : expression];
     return (
@@ -1017,13 +1017,11 @@ function ExpressionBuilder({
     }
   }
 
-  function getCriteria(rule, modalName, isChildren, modelId) {
+  function getCriteria(rule, modalName, isChildren) {
     const { rules, combinator, children } = rule[0];
-    const condition = getCondition(rules, modalName, modelId).filter(
-      (f) => f !== ""
-    );
+    const condition = getCondition(rules, modalName).filter((f) => f !== "");
     if (children.length > 0) {
-      const conditions = getCriteria(children, modalName, true, modelId);
+      const conditions = getCriteria(children, modalName, true);
       condition.push(conditions);
     }
     const map_type = isBPMQuery(parentType)
@@ -1089,7 +1087,6 @@ function ExpressionBuilder({
       expressionComponents.map(({ value }, index) => {
         const { rules, metaModals } = value;
         const modalName = metaModals && metaModals.name;
-        const id = metaModals && metaModals.id;
         model = modalName;
         let str = "";
         const listOfTree = getListOfTree(rules);
@@ -1099,12 +1096,7 @@ function ExpressionBuilder({
               lowerCaseFirstLetter(modalName),
               undefined
             )
-          : getCriteria(
-              listOfTree,
-              lowerCaseFirstLetter(modalName),
-              undefined,
-              id
-            );
+          : getCriteria(listOfTree, lowerCaseFirstLetter(modalName), undefined);
         vals.push(
           ...(criteria &&
             ((criteria.values || []).filter((f) => Array.isArray(f)) || []))
