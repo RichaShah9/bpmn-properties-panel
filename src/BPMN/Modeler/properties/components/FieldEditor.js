@@ -30,6 +30,7 @@ export default function FieldEditor({
   isParent = false,
   isUserPath = false,
   startModel,
+  isCollection = false,
 }) {
   const { fieldName = "" } = value || {};
   const [fields, setFields] = useState([]);
@@ -72,7 +73,14 @@ export default function FieldEditor({
         setFields(
           data &&
             data.filter((d) =>
-              ["many_to_one", "many-to-one"].includes(d.type.toLowerCase())
+              isCollection
+                ? [
+                    "many_to_one",
+                    "one_to_many",
+                    "many_to_many",
+                    "many-to-one",
+                  ].includes(d.type.toLowerCase())
+                : ["many_to_one", "many-to-one"].includes(d.type.toLowerCase())
             )
         );
       }
@@ -80,7 +88,7 @@ export default function FieldEditor({
     return () => {
       isSubscribed = false;
     };
-  }, [getMetaFields]);
+  }, [getMetaFields, isCollection]);
 
   useEffect(() => {
     const values = fieldName && fieldName.split(".");
@@ -103,6 +111,18 @@ export default function FieldEditor({
         setShow(true);
       }
     } else if (
+      isCollection &&
+      transformValue &&
+      lastValue &&
+      transformValue.name === lastValue &&
+      values.length === 1
+    ) {
+      if (["MANY_TO_MANY", "ONE_TO_MANY"].includes(transformValue.type)) {
+        setShow(false);
+      } else {
+        setShow(true);
+      }
+    } else if (
       startModel &&
       transformValue &&
       lastValue &&
@@ -115,8 +135,7 @@ export default function FieldEditor({
     } else {
       setShow(true);
     }
-  }, [isUserPath, startModel, fields, fieldName]);
-
+  }, [isUserPath, startModel, fields, isCollection, fieldName]);
   return (
     <React.Fragment>
       <Selection
@@ -160,7 +179,7 @@ export default function FieldEditor({
           {isShow && (
             <FieldEditor
               getMetaFields={() => {
-                return getSubMetaField(relationModel, true, relationJsonModel);
+                return getSubMetaField(relationModel, relationJsonModel);
               }}
               initValue={`${initValue}${startValue}${"."}`}
               value={{
@@ -171,6 +190,7 @@ export default function FieldEditor({
               isParent={relationModel ? true : false}
               isUserPath={isUserPath}
               startModel={startModel}
+              isCollection={isCollection}
             />
           )}
           {!isShow && (

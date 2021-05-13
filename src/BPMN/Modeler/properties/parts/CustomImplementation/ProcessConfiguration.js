@@ -924,7 +924,7 @@ export default function ProcessConfiguration({
                   pathValue === "" ? undefined : pathValue,
                   "pathCondition",
                   undefined,
-                  pathCondition.key
+                  pathCondition && pathCondition.key
                 );
                 setPathCondition(null);
               }}
