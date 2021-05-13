@@ -39,7 +39,12 @@ import {
   positive_operators,
 } from "./data";
 import { getModels } from "../../../services/api";
-import { isBPMQuery, lowerCaseFirstLetter, getJsonExpression } from "./util";
+import {
+  isBPMQuery,
+  lowerCaseFirstLetter,
+  upperCaseFirstLetter,
+  getJsonExpression,
+} from "./util";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -134,6 +139,7 @@ function ExpressionBuilder({
     { Component: ExpressionComponent },
   ]);
   const [singleResult, setSingleResult] = useState(false);
+  const [generateWithId, setGenerateWithId] = useState(false);
   const [alertConfig, setAlertConfig] = useState({
     alertMessage: "Add all values",
     alertTitle: "Error",
@@ -553,9 +559,13 @@ function ExpressionBuilder({
     });
   };
 
-  function getCondition(rules, modalName) {
+  function getCondition(rules, modalName, modelId) {
     const isBPM = isBPMQuery(parentType);
-    const prefix = isBPM ? "self" : modalName;
+    const prefix = isBPM
+      ? "self"
+      : generateWithId
+      ? `$ctx.find('${upperCaseFirstLetter(modalName)}', ${modelId})`
+      : modalName;
     const map_operators = map_operator[isBPM ? "BPM" : expression];
     return (
       rules &&
@@ -1007,11 +1017,13 @@ function ExpressionBuilder({
     }
   }
 
-  function getCriteria(rule, modalName, isChildren) {
+  function getCriteria(rule, modalName, isChildren, modelId) {
     const { rules, combinator, children } = rule[0];
-    const condition = getCondition(rules, modalName).filter((f) => f !== "");
+    const condition = getCondition(rules, modalName, modelId).filter(
+      (f) => f !== ""
+    );
     if (children.length > 0) {
-      const conditions = getCriteria(children, modalName, true);
+      const conditions = getCriteria(children, modalName, true, modelId);
       condition.push(conditions);
     }
     const map_type = isBPMQuery(parentType)
@@ -1077,6 +1089,7 @@ function ExpressionBuilder({
       expressionComponents.map(({ value }, index) => {
         const { rules, metaModals } = value;
         const modalName = metaModals && metaModals.name;
+        const id = metaModals && metaModals.id;
         model = modalName;
         let str = "";
         const listOfTree = getListOfTree(rules);
@@ -1086,7 +1099,12 @@ function ExpressionBuilder({
               lowerCaseFirstLetter(modalName),
               undefined
             )
-          : getCriteria(listOfTree, lowerCaseFirstLetter(modalName), undefined);
+          : getCriteria(
+              listOfTree,
+              lowerCaseFirstLetter(modalName),
+              undefined,
+              id
+            );
         vals.push(
           ...(criteria &&
             ((criteria.values || []).filter((f) => Array.isArray(f)) || []))
@@ -1100,6 +1118,7 @@ function ExpressionBuilder({
           metaModalName: modalName,
           metaModalType: metaModals.type,
           rules,
+          generateWithId,
         });
         return `${str}`;
       });
@@ -1164,7 +1183,7 @@ function ExpressionBuilder({
       }
       for (let i = 0; i < values.length; i++) {
         const element = values[i];
-        const { metaModalName, metaModalType } = element;
+        const { metaModalName, metaModalType, generateWithId } = element;
         if (!metaModalName) return;
         const criteria = {
           criteria: [
@@ -1186,6 +1205,7 @@ function ExpressionBuilder({
           Component: ExpressionComponent,
           value,
         });
+        setGenerateWithId(generateWithId);
       }
       if (isSubscribed) {
         setExpressionComponents(expressionComponents);
@@ -1214,7 +1234,31 @@ function ExpressionBuilder({
         <Paper variant="outlined" className={classes.paper}>
           <div style={{ height: "100%", width: "100%" }}>
             <div className={classes.expression}>
-              <Timeline align="alternate" className={classes.timeline}>
+              {!isBPMQuery(parentType) && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={generateWithId}
+                      onChange={(e) => setGenerateWithId(e.target.checked)}
+                      name="generateWithId"
+                      className={classes.checkbox}
+                    />
+                  }
+                  style={{ color: "#0275d8" }}
+                  label="Generate with id"
+                />
+              )}
+              <Timeline
+                align="alternate"
+                className={classes.timeline}
+                style={{
+                  border:
+                    expression === "BPM"
+                      ? "none"
+                      : "1px solid rgba(0, 0, 0, 0.12)",
+                  padding: expression === "BPM" ? 0 : "24px 16px",
+                }}
+              >
                 {isBPMQuery(parentType) ? (
                   <TimelineItem
                     className={classes.timelineItem}
