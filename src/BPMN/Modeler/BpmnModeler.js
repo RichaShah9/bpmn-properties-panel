@@ -651,6 +651,7 @@ function BpmnModelerComponent() {
       });
     if (!isValid) return;
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
+      diagramXmlRef.current = xml;
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...wkf,
         diagramXml: xml,
@@ -804,6 +805,7 @@ function BpmnModelerComponent() {
 
   const deploy = async (wkfMigrationMap, isMigrateOld, newWkf = wkf) => {
     bpmnModeler.saveXML({ format: true }, async function (err, xml) {
+      diagramXmlRef.current = xml;
       let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
         ...newWkf,
         diagramXml: xml,
@@ -897,6 +899,7 @@ function BpmnModelerComponent() {
     let res = await callOutoutMapping();
     if (res.status === 0) {
       bpmnModeler.saveXML({ format: true }, async function (err, xml) {
+        diagramXmlRef.current = xml;
         let res = await Service.add("com.axelor.apps.bpm.db.WkfModel", {
           ...wkf,
           diagramXml: xml,
