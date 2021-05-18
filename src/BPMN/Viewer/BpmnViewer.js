@@ -1,11 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import BpmnModeler from "bpmn-js/lib/Modeler";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
+import { Snackbar } from "@material-ui/core";
+import Alert from "@material-ui/lab/Alert";
 
 import Service from "../../services/Service";
 import Tooltip from "../../components/Tooltip";
 import readOnlyModule from "./custom/readonly";
-import { download, getBool } from "../../utils";
+import { download, getBool, translate } from "../../utils";
 import { getInfo, getTranslations } from "../../services/api";
 
 import "bpmn-js/dist/assets/diagram-js.css";
@@ -251,6 +253,15 @@ const resetZoom = () => {
 };
 
 function BpmnViewerComponent({ isInstance }) {
+  const [node, setNode] = useState(null);
+  const [id, setId] = useState(null);
+  const [openSnackbar, setSnackbar] = useState({
+    open: false,
+    messageType: null,
+    message: null,
+  });
+  const [activityIds, setActivityIds] = useState(null);
+
   const saveSVG = () => {
     bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
       download(svg, "diagram.svg");
@@ -288,17 +299,81 @@ function BpmnViewerComponent({ isInstance }) {
     },
   ];
 
+  const handleSnackbarClick = (messageType, message) => {
+    setSnackbar({
+      open: true,
+      messageType,
+      message,
+    });
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar({
+      open: false,
+      messageType: null,
+      message: null,
+    });
+  };
+
+  const restartBefore = async () => {
+    if (!isInstance || !node || !activityIds || !activityIds.includes(node.id))
+      return;
+    let actionRes = await Service.action({
+      model: "com.axelor.apps.bpm.db.WkfModel",
+      action: "action-wkf-instance-method-restart-instance",
+      data: {
+        context: {
+          _model: "com.axelor.apps.bpm.db.WkfModel",
+          processInstanceId: id,
+          activityId: node && node.id,
+        },
+      },
+    });
+    if (actionRes && actionRes.status === 0) {
+      handleSnackbarClick("success", "Restarted successfully");
+    } else {
+      handleSnackbarClick(
+        "error",
+        (actionRes &&
+          actionRes.data &&
+          (actionRes.data.message || actionRes.data.title)) ||
+          "Error!"
+      );
+    }
+    setNode(null);
+  };
+
   useEffect(() => {
     bpmnViewer = new BpmnModeler({
       container: "#canvas-task",
       additionalModules: [readOnlyModule],
     });
     let { id, taskIds, activityCounts } = fetchId(isInstance) || {};
+    setId(id);
     if (isInstance) {
+      const activities = (activityCounts && activityCounts.split(",")) || [];
+      const ids = [];
+      activities &&
+        activities.forEach((activity) => {
+          let taskActivity = activity.split(":");
+          ids.push(taskActivity[0]);
+        });
+      setActivityIds(ids);
       fetchInstanceDiagram(id, taskIds, activityCounts);
     } else {
       fetchDiagram(id, taskIds, activityCounts);
     }
+  }, [isInstance]);
+
+  useEffect(() => {
+    if (!bpmnViewer || !isInstance) return;
+    bpmnViewer.on("element.click", (event) => {
+      const { element } = event || {};
+      setNode(element);
+    });
   }, [isInstance]);
 
   return (
@@ -316,8 +391,33 @@ function BpmnViewerComponent({ isInstance }) {
             />
           </div>
         ))}
+        <Tooltip
+          title="Restart before"
+          children={
+            <button onClick={restartBefore} className="restart-button">
+              {translate("Restart before")}
+            </button>
+          }
+        />
       </div>
       <div id="canvas-task"></div>
+      {openSnackbar.open && (
+        <Snackbar
+          open={openSnackbar.open}
+          autoHideDuration={2000}
+          onClose={handleSnackbarClose}
+        >
+          <Alert
+            elevation={6}
+            variant="filled"
+            onClose={handleSnackbarClose}
+            className="snackbarAlert"
+            severity={openSnackbar.messageType}
+          >
+            {openSnackbar.message}
+          </Alert>
+        </Snackbar>
+      )}
     </React.Fragment>
   );
 }

@@ -67,6 +67,16 @@ body,
   display: inline-block;
 }
 
+.restart-button{
+  padding: 5px;
+  background: #fafafa;
+  border: solid 1px #ccc;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
 #js-properties-panel {
   background: #f8f8f8;
   width: calc(100% - 1px);
