@@ -2,6 +2,41 @@ import services from "../../../../services/Service";
 import { sortBy } from "../utils";
 import { ModelType, excludedUITypes } from "../constant";
 
+async function fetchSelectionByName(name) {
+  const { data } = await services.post(
+    "ws/rest/com.axelor.meta.db.MetaSelect/search",
+    {
+      data: {
+        _domain: "self.name = :name",
+        _domainContext: { name },
+      },
+      fields: ["name", "items"],
+      offset: 0,
+      limit: 1,
+      sortBy: null,
+    }
+  );
+  const record = data && data[0];
+  if (record) {
+    const { items } = record;
+    const { data } = await services.post(
+      "ws/rest/com.axelor.meta.db.MetaSelectItem/search",
+      {
+        data: {
+          _domain: "self.id in (:list)",
+          _domainContext: { list: items.map((x) => x.id) },
+        },
+        fields: ["title", "value", "color", "data", "order"],
+        offset: 0,
+        limit: -1,
+        sortBy: ["order"],
+      }
+    );
+    return data;
+  }
+  return [];
+}
+
 export async function getModels(data = {}, metaModalType) {
   const models =
     ((!metaModalType || metaModalType === "metaModel") &&
@@ -129,11 +164,19 @@ export async function fetchFields(item, excludeUIFields = false) {
         "jsonModel",
         "title",
         "name",
+        "selection",
       ],
       sortBy: ["title"],
     });
     const { data = [] } = res || {};
-    fields = [...data];
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      if (item.selection) {
+        const selectionList = await fetchSelectionByName(item.selection);
+        item.selectionList = selectionList;
+      }
+      fields.push(item);
+    }
   } else {
     const res = await services.fetchFields(entity);
     if (res && res.status === -1) return [];
