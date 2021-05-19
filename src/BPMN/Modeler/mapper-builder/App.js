@@ -4,7 +4,7 @@ import "./App.css";
 import Builder from "./Builder";
 import BuilderProvider from "./store/context";
 
-function AppContent({ params, onSave, handleClose, open }) {
+function AppContent({ params, onSave, handleClose, open, bpmnModeler }) {
   const [values, setValues] = React.useState(null);
 
   useEffect(() => {
@@ -19,12 +19,19 @@ function AppContent({ params, onSave, handleClose, open }) {
         params={values}
         handleClose={handleClose}
         open={open}
+        bpmnModeler={bpmnModeler}
       />
     </div>
   );
 }
 
-export default function App({ handleClose, open, onSave, params }) {
+export default function App({
+  handleClose,
+  open,
+  onSave,
+  params,
+  bpmnModeler,
+}) {
   return (
     <BuilderProvider>
       <AppContent
@@ -32,6 +39,7 @@ export default function App({ handleClose, open, onSave, params }) {
         handleClose={handleClose}
         open={open}
         params={params}
+        bpmnModeler={bpmnModeler}
       />
     </BuilderProvider>
   );

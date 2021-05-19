@@ -32,6 +32,13 @@ export function generateJson(data, currentJson, defaultFrom) {
     const from = value ? value.from || defaultFrom : defaultFrom;
     let newValue = value?.selected;
     const modelFieldValue = getModelFieldValue(modelSubField);
+    if (from === VALUE_FROM.PROCESS) {
+      if (modelFieldValue) {
+        newValue = { value: modelFieldValue };
+      } else {
+        newValue = null;
+      }
+    }
     if (from === VALUE_FROM.CONTEXT) {
       if (modelFieldValue) {
         newValue = { value: modelFieldValue };
@@ -101,6 +108,7 @@ export function generateJson(data, currentJson, defaultFrom) {
         modelSubField: element.modelSubField || undefined,
         sourceField: element.sourceField || undefined,
         selfField: element.selfField || undefined,
+        processId: element.processId && element.processId.name,
       };
       jsonData.push(JSON.parse(JSON.stringify(record)));
     }

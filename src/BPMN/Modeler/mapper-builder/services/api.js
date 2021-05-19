@@ -37,10 +37,10 @@ async function fetchSelectionByName(name) {
   return [];
 }
 
-export async function getModels(data = {}, metaModalType) {
+export async function getModels(data = {}, metaModalType, criteria) {
   const models =
     ((!metaModalType || metaModalType === "metaModel") &&
-      (await getMetaModels(data))) ||
+      (await getMetaModels(data, criteria))) ||
     [];
   const metaJsonModels =
     ((!metaModalType || metaModalType === "metaJsonModel") &&
@@ -84,14 +84,14 @@ export async function fetchModelByName(modelName) {
   return record || null;
 }
 
-export async function getMetaModels(e) {
+export async function getMetaModels(e, criteriaParent = []) {
   const criteria = [];
   if (e && e.search) {
     criteria.push({ fieldName: "fullName", operator: "like", value: e.search });
   }
   const res = await services.search("com.axelor.meta.db.MetaModel", {
     data: {
-      criteria,
+      criteria: [...criteria, ...(criteriaParent || [])],
     },
     fields: ["name", "metaFields", "id", "fullName"],
   });
@@ -103,7 +103,10 @@ export async function getMetaModels(e) {
       value: e.search,
     });
   }
-  const customModelData = await getCustomModels(customModelCriteria);
+  const customModelData = await getCustomModels([
+    ...customModelCriteria,
+    ...criteriaParent,
+  ]);
   if (res && res.status === -1) return [];
   const { data = [] } = res || {};
   return [...data, ...customModelData];

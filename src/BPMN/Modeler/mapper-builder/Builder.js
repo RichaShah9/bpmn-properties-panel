@@ -301,7 +301,7 @@ const clearChildrenParentValue = ({
   });
 };
 
-function Builder({ params, onSave, handleClose, open }) {
+function Builder({ params, onSave, handleClose, open, bpmnModeler }) {
   const classes = useStyles();
   const { state, update } = useStore();
   const { builderFields } = state;
@@ -502,6 +502,7 @@ function Builder({ params, onSave, handleClose, open }) {
           modelSubField: getModelSubField(jsonField.modelSubField),
           selfField: jsonField.selfField,
           sourceField: jsonField.sourceField,
+          processId: jsonField.processId ? { name: jsonField.processId } : null,
           ...contextValue,
         });
       });
@@ -732,6 +733,7 @@ function Builder({ params, onSave, handleClose, open }) {
                   handleAdd={handleAdd}
                   sourceModel={sourceModel}
                   targetModel={model}
+                  bpmnModeler={bpmnModeler}
                 />
               </Grid>
               {loading && (

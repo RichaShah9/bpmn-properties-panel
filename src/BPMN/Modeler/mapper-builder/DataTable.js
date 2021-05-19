@@ -7,7 +7,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 
-import { Close } from "@material-ui/icons";
+import { Close, ArrowForward } from "@material-ui/icons";
 
 import moment from "moment";
 import { get } from "lodash";
@@ -18,7 +18,7 @@ import NumberField from "./components/NumberInput";
 import DateTimePicker from "./components/DateTimePicker";
 import Select from "./components/Select";
 import InputField from "./components/TextInput";
-
+import { getElements } from "../extra";
 import {
   fetchFields,
   getData,
@@ -78,6 +78,10 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: 0,
     textAlign: "center",
   },
+  rightIcon: {
+    width: "0.8em",
+    height: "0.8em",
+  },
 }));
 
 const getType = (row) => {
@@ -91,6 +95,7 @@ const getOptions = (isRoot, parentRow, defaultFrom) => {
     { title: "Context", id: VALUE_FROM.CONTEXT },
     { title: "Expression", id: VALUE_FROM.NONE },
     { title: "Source", id: VALUE_FROM.SOURCE },
+    { title: "Process", id: VALUE_FROM.PROCESS },
   ];
   const from = get(parentRow, "value.from", defaultFrom);
   if (
@@ -100,6 +105,10 @@ const getOptions = (isRoot, parentRow, defaultFrom) => {
     options.push({ title: "Parent", id: VALUE_FROM.PARENT });
   }
   return options;
+};
+
+const getValue = (row, key) => {
+  return row[key];
 };
 
 const getSelfValue = (row) => {
@@ -419,7 +428,40 @@ function DataTable(props) {
     handleAdd,
     sourceModel,
     targetModel,
+    bpmnModeler,
   } = props;
+
+  const getProcessElement = React.useCallback(
+    (processId) => {
+      if (!processId) return;
+      const elementRegistry = bpmnModeler.get("elementRegistry");
+      let rootElement = elementRegistry.get(processId.name);
+      if (!rootElement) {
+        const elements = bpmnModeler.get("canvas").getRootElement();
+        const { participants } = elements.businessObject;
+        if (participants && participants.length > 0) {
+          let participant = participants.find(
+            (p) => p.processRef.id === processId.name
+          );
+          rootElement = participant && participant.processRef;
+          return rootElement;
+        }
+      }
+      return rootElement && rootElement.businessObject;
+    },
+    [bpmnModeler]
+  );
+
+  const getProcesses = React.useCallback(() => {
+    const elements = getElements(bpmnModeler);
+    const processes = [];
+    Object.keys(elements).forEach((e) => {
+      processes.push({
+        name: e,
+      });
+    });
+    return processes;
+  }, [bpmnModeler]);
 
   const getDefaultFrom = React.useCallback(() => {
     return sourceModel ? VALUE_FROM.SOURCE : VALUE_FROM.NONE;
@@ -584,6 +626,52 @@ function DataTable(props) {
                     )
                   }
                 />
+              ) : from === VALUE_FROM.PROCESS ? (
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <Selection
+                    optionValueKey="name"
+                    optionLabelKey="title"
+                    concatValue={true}
+                    options={getProcesses()}
+                    value={getValue(row, "processId")}
+                    isProcessContext={true}
+                    onChange={(e) => {
+                      handleChange(
+                        { target: { value: null } },
+                        "modelSubField",
+                        index,
+                        row
+                      );
+                      handleChange(
+                        { target: { value: e } },
+                        "processId",
+                        index,
+                        row
+                      );
+                    }}
+                  />
+                  {getValue(row, "processId") && (
+                    <React.Fragment>
+                      <ArrowForward className={classes.rightIcon} />
+                      <MultiSelector
+                        optionValueKey="name"
+                        optionLabelKey="title"
+                        concatValue={true}
+                        isProcessContext={true}
+                        value={row.modelSubField}
+                        element={getProcessElement(getValue(row, "processId"))}
+                        onChange={(e) =>
+                          handleChange(
+                            { target: { value: e } },
+                            "modelSubField",
+                            index,
+                            row
+                          )
+                        }
+                      />
+                    </React.Fragment>
+                  )}
+                </div>
               ) : (
                 <RenderWidget
                   row={row}
@@ -705,6 +793,8 @@ function DataTable(props) {
       sourceModel,
       getDefaultFrom,
       targetModel,
+      getProcesses,
+      getProcessElement,
     ]
   );
   return (

@@ -13,6 +13,7 @@ export const VALUE_FROM = {
   NONE: 'none',
   SOURCE: 'source',
   PARENT: 'parent',
+  PROCESS: 'process'
 };
 
 export const ModelType = {

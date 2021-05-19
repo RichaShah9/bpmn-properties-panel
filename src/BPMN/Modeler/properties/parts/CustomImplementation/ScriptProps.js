@@ -85,7 +85,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ScriptProps({ element, index, label }) {
+export default function ScriptProps({ element, index, label, bpmnModeler }) {
   const [isVisible, setVisible] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [isQuery, setQuery] = useState(false);
@@ -528,6 +528,7 @@ export default function ScriptProps({ element, index, label }) {
                   <MapperBuilder
                     open={openMapper}
                     handleClose={handleCloseMapper}
+                    bpmnModeler={bpmnModeler}
                     onSave={(expr) => {
                       onSave(expr);
                       setReadOnly(true);

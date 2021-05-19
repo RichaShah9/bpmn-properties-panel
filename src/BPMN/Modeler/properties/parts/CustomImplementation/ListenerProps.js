@@ -139,7 +139,13 @@ function createFormalExpression(parent, body, bpmnFactory) {
   );
 }
 
-export default function ListenerProps({ element, index, label, bpmnFactory }) {
+export default function ListenerProps({
+  element,
+  index,
+  label,
+  bpmnFactory,
+  bpmnModeler,
+}) {
   const [isVisible, setVisible] = useState(false);
   const [selectedExecutionEntity, setSelectedExecutionEntity] = useState(null);
   const [selectedTaskEntity, setSelectedTaskEntity] = useState(null);
@@ -644,6 +650,7 @@ export default function ListenerProps({ element, index, label, bpmnFactory }) {
                     <MapperBuilder
                       open={open}
                       handleClose={handleClose}
+                      bpmnModeler={bpmnModeler}
                       onSave={(expr) => {
                         onSave(expr);
                       }}

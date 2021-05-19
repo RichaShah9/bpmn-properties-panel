@@ -25,6 +25,43 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function getProcessConfig(element) {
+  const extensionElements = element && element.extensionElements;
+  const noOptions = [
+    {
+      fieldName: "name",
+      operator: "IN",
+      value: [],
+    },
+  ];
+  if (!extensionElements || !extensionElements.values) return noOptions;
+  const processConfigurations = extensionElements.values.find(
+    (e) => e.$type === "camunda:ProcessConfiguration"
+  );
+  const metaModels = [],
+    metaJsonModels = [];
+  if (
+    !processConfigurations &&
+    !processConfigurations.processConfigurationParameters
+  )
+    return noOptions;
+  processConfigurations.processConfigurationParameters.forEach((config) => {
+    if (config.metaModel) {
+      metaModels.push(config.metaModel);
+    } else if (config.metaJsonModel) {
+      metaJsonModels.push(config.metaJsonModel);
+    }
+  });
+  let value = [...metaModels, ...metaJsonModels];
+  return [
+    {
+      fieldName: "name",
+      operator: "IN",
+      value: value,
+    },
+  ];
+}
+
 const getKey = (key) => (key === "_selectId" ? "id" : key);
 
 const getIndex = (value, newValue) => {
@@ -48,6 +85,8 @@ function MultiSelector(props) {
     parentRow,
     targetModel,
     isContext = false,
+    isProcessContext = false,
+    element,
     ...rest
   } = props;
   const classes = useStyles();
@@ -56,7 +95,7 @@ function MultiSelector(props) {
     if (Array.isArray(value) && value.length) {
       const list = value.filter((e) => e.name);
       const record = list[list.length - 1];
-      if (isContext && list.length - 1 === 0) {
+      if ((isContext || isProcessContext) && list.length - 1 === 0) {
         return record;
       }
       if (
@@ -128,7 +167,13 @@ function MultiSelector(props) {
         isMulti={true}
         fetchAPI={async () => {
           const data =
-            isContext && !hasValue()
+            isProcessContext && !hasValue()
+              ? await getModels(
+                  getProcessConfig(element),
+                  undefined,
+                  getProcessConfig(element)
+                )
+              : isContext && !hasValue()
               ? await getModels()
               : await fetchFields(getModel());
           if (sourceModel && (!value || value.length < 1)) {
