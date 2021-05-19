@@ -533,33 +533,21 @@ export async function getButtons(models = []) {
           const btns = getItemsByType(formView, "button");
           buttons = [...buttons, ...(btns || [])];
         }
+      } else {
+        if (type === "metaJsonModel") {
+          modelNames.push(model);
+        }
       }
     }
     if (modelNames && modelNames.length > 0) {
-      const customFieldsRes = await Service.search(
-        "com.axelor.meta.db.MetaJsonField",
-        {
-          data: {
-            criteria: [
-              {
-                fieldName: "type",
-                operator: "=",
-                value: "button",
-              },
-              {
-                fieldName: "model",
-                operator: "IN",
-                value: modelNames,
-              },
-            ],
-            operator: "and",
-            _domain: "self.jsonModel is null",
-          },
-          fields: ["name", "title", "type"],
-        }
-      );
-      const customFields = customFieldsRes && customFieldsRes.data;
-      buttons = [...buttons, ...(customFields || [])];
+      for (let i = 0; i < modelNames.length; i++) {
+        const res = await Service.get(
+          `ws/meta/fields/com.axelor.meta.db.MetaJsonRecord?jsonModel=${modelNames[i]}`
+        );
+        const fields = getResultedFields(res);
+        const buttonFields = fields.filter((f) => f.type === "button");
+        buttons = [...buttons, ...(buttonFields || [])];
+      }
     }
     return buttons;
   }
