@@ -261,6 +261,7 @@ function BpmnViewerComponent({ isInstance }) {
     message: null,
   });
   const [activityIds, setActivityIds] = useState(null);
+  const [taskIds, setTaskIds] = useState(null);
 
   const saveSVG = () => {
     bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
@@ -346,6 +347,39 @@ function BpmnViewerComponent({ isInstance }) {
     setNode(null);
   };
 
+  const cancelNode = async () => {
+    if (
+      !isInstance ||
+      !node ||
+      (!(activityIds && activityIds).includes(node.id) &&
+        !(taskIds && taskIds.includes(node.id)))
+    )
+      return;
+    let actionRes = await Service.action({
+      model: "com.axelor.apps.bpm.db.WkfModel",
+      action: "action-wkf-instance-method-cancel-node",
+      data: {
+        context: {
+          _model: "com.axelor.apps.bpm.db.WkfModel",
+          processInstanceId: id,
+          activityId: node && node.id,
+        },
+      },
+    });
+    if (actionRes && actionRes.status === 0) {
+      handleSnackbarClick("success", "Cancelled successfully");
+    } else {
+      handleSnackbarClick(
+        "error",
+        (actionRes &&
+          actionRes.data &&
+          (actionRes.data.message || actionRes.data.title)) ||
+          "Error!"
+      );
+    }
+    setNode(null);
+  };
+
   useEffect(() => {
     bpmnViewer = new BpmnModeler({
       container: "#canvas-task",
@@ -362,6 +396,7 @@ function BpmnViewerComponent({ isInstance }) {
           ids.push(taskActivity[0]);
         });
       setActivityIds(ids);
+      setTaskIds(taskIds);
       fetchInstanceDiagram(id, taskIds, activityCounts);
     } else {
       fetchDiagram(id, taskIds, activityCounts);
@@ -392,13 +427,25 @@ function BpmnViewerComponent({ isInstance }) {
           </div>
         ))}
         <Tooltip
-          title="Restart before"
+          title="Restart"
           children={
             <button onClick={restartBefore} className="restart-button">
-              {translate("Restart before")}
+              {translate("Restart")}
             </button>
           }
         />
+        {node &&
+          ((activityIds && activityIds.includes(node.id)) ||
+            (taskIds && taskIds.includes(node.id))) && (
+            <Tooltip
+              title="Cancel Node"
+              children={
+                <button onClick={cancelNode} className="restart-button">
+                  {translate("Cancel Node")}
+                </button>
+              }
+            />
+          )}
       </div>
       <div id="canvas-task"></div>
       {openSnackbar.open && (
