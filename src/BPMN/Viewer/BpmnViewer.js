@@ -387,6 +387,7 @@ function BpmnViewerComponent({ isInstance }) {
     });
     let { id, taskIds, activityCounts } = fetchId(isInstance) || {};
     setId(id);
+    setTaskIds(taskIds);
     if (isInstance) {
       const activities = (activityCounts && activityCounts.split(",")) || [];
       const ids = [];
@@ -396,7 +397,6 @@ function BpmnViewerComponent({ isInstance }) {
           ids.push(taskActivity[0]);
         });
       setActivityIds(ids);
-      setTaskIds(taskIds);
       fetchInstanceDiagram(id, taskIds, activityCounts);
     } else {
       fetchDiagram(id, taskIds, activityCounts);
@@ -404,12 +404,27 @@ function BpmnViewerComponent({ isInstance }) {
   }, [isInstance]);
 
   useEffect(() => {
-    if (!bpmnViewer || !isInstance) return;
-    bpmnViewer.on("element.click", (event) => {
+    if (!bpmnViewer) return;
+    if (isInstance) {
+      bpmnViewer.on("element.click", (event) => {
+        const { element } = event || {};
+        setNode(element);
+      });
+    }
+    bpmnViewer.on("shape.changed", (event) => {
       const { element } = event || {};
-      setNode(element);
+      let elementRegistry = bpmnViewer.get("elementRegistry");
+      if (element && taskIds && taskIds.includes(element.id)) {
+        const outgoingGfx = elementRegistry.getGraphics(element.id);
+        const visual = outgoingGfx && outgoingGfx.querySelector(".djs-visual");
+        const rec = visual && visual.childNodes && visual.childNodes[0];
+        if (rec && rec.style) {
+          rec.style.strokeWidth = "5px";
+          rec.style.stroke = "#006400";
+        }
+      }
     });
-  }, [isInstance]);
+  }, [isInstance, taskIds]);
 
   return (
     <React.Fragment>
@@ -426,26 +441,30 @@ function BpmnViewerComponent({ isInstance }) {
             />
           </div>
         ))}
-        <Tooltip
-          title="Restart"
-          children={
-            <button onClick={restartBefore} className="restart-button">
-              {translate("Restart")}
-            </button>
-          }
-        />
-        {node &&
-          ((activityIds && activityIds.includes(node.id)) ||
-            (taskIds && taskIds.includes(node.id))) && (
+        {isInstance && (
+          <React.Fragment>
             <Tooltip
-              title="Cancel Node"
+              title="Restart"
               children={
-                <button onClick={cancelNode} className="restart-button">
-                  {translate("Cancel Node")}
+                <button onClick={restartBefore} className="restart-button">
+                  {translate("Restart")}
                 </button>
               }
             />
-          )}
+            {node &&
+              ((activityIds && activityIds.includes(node.id)) ||
+                (taskIds && taskIds.includes(node.id))) && (
+                <Tooltip
+                  title="Cancel Node"
+                  children={
+                    <button onClick={cancelNode} className="restart-button">
+                      {translate("Cancel Node")}
+                    </button>
+                  }
+                />
+              )}
+          </React.Fragment>
+        )}
       </div>
       <div id="canvas-task"></div>
       {openSnackbar.open && (
