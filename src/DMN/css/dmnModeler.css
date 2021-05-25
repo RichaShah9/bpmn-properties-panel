@@ -87,3 +87,15 @@ body,
 .snackbarAlert > .MuiAlert-message {
   font-size: 14px;
 }
+
+.dpp-properties-entry{
+  text-align: left;
+}
+
+.dpp-properties-tab-bar{
+  text-align: left;
+}
+
+.dpp-properties-group{
+  text-align: left;
+}
