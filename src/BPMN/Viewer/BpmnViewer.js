@@ -262,6 +262,7 @@ function BpmnViewerComponent({ isInstance }) {
   });
   const [activityIds, setActivityIds] = useState(null);
   const [taskIds, setTaskIds] = useState(null);
+  const [activityCounts, setActivityCounts] = useState(null);
 
   const saveSVG = () => {
     bpmnViewer.saveSVG({ format: true }, async function (err, svg) {
@@ -335,6 +336,7 @@ function BpmnViewerComponent({ isInstance }) {
     });
     if (actionRes && actionRes.status === 0) {
       handleSnackbarClick("success", "Restarted successfully");
+      fetchInstanceDiagram(id, taskIds, activityCounts);
     } else {
       handleSnackbarClick(
         "error",
@@ -348,13 +350,7 @@ function BpmnViewerComponent({ isInstance }) {
   };
 
   const cancelNode = async () => {
-    if (
-      !isInstance ||
-      !node ||
-      (!(activityIds && activityIds).includes(node.id) &&
-        !(taskIds && taskIds.includes(node.id)))
-    )
-      return;
+    if (!isInstance || !node || !(taskIds && taskIds.includes(node.id))) return;
     let actionRes = await Service.action({
       model: "com.axelor.apps.bpm.db.WkfModel",
       action: "action-wkf-instance-method-cancel-node",
@@ -368,6 +364,7 @@ function BpmnViewerComponent({ isInstance }) {
     });
     if (actionRes && actionRes.status === 0) {
       handleSnackbarClick("success", "Cancelled successfully");
+      fetchInstanceDiagram(id, taskIds, activityCounts);
     } else {
       handleSnackbarClick(
         "error",
@@ -388,6 +385,7 @@ function BpmnViewerComponent({ isInstance }) {
     let { id, taskIds, activityCounts } = fetchId(isInstance) || {};
     setId(id);
     setTaskIds(taskIds);
+    setActivityCounts(activityCounts);
     if (isInstance) {
       const activities = (activityCounts && activityCounts.split(",")) || [];
       const ids = [];
@@ -451,18 +449,16 @@ function BpmnViewerComponent({ isInstance }) {
                 </button>
               }
             />
-            {node &&
-              ((activityIds && activityIds.includes(node.id)) ||
-                (taskIds && taskIds.includes(node.id))) && (
-                <Tooltip
-                  title="Cancel Node"
-                  children={
-                    <button onClick={cancelNode} className="restart-button">
-                      {translate("Cancel Node")}
-                    </button>
-                  }
-                />
-              )}
+            {node && taskIds && taskIds.includes(node.id) && (
+              <Tooltip
+                title="Cancel Node"
+                children={
+                  <button onClick={cancelNode} className="restart-button">
+                    {translate("Cancel Node")}
+                  </button>
+                }
+              />
+            )}
           </React.Fragment>
         )}
       </div>
