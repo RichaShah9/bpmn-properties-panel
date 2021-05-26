@@ -6,7 +6,9 @@ import drdAdapterModule from "dmn-js-properties-panel/lib/adapter/drd";
 import propertiesProviderModule from "dmn-js-properties-panel/lib/provider/camunda";
 import camundaModdleDescriptor from "camunda-dmn-moddle/resources/camunda";
 import Alert from "@material-ui/lab/Alert";
-import { Snackbar } from "@material-ui/core";
+import { Snackbar, Drawer } from "@material-ui/core";
+import { Resizable } from "re-resizable";
+import { makeStyles } from "@material-ui/core/styles";
 
 import Service from "../services/Service";
 import Tooltip from "../components/Tooltip";
@@ -23,6 +25,30 @@ import "dmn-js/dist/assets/diagram-js.css";
 import "./css/dmnModeler.css";
 
 let dmnModeler = null;
+const drawerWidth = 380;
+
+const resizeStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderLeft: "solid 1px #ddd",
+  background: "#f0f0f0",
+};
+
+const useStyles = makeStyles(() => ({
+  drawerPaper: {
+    background: "#F8F8F8",
+    width: "100%",
+    position: "absolute",
+    borderLeft: "1px solid #ccc",
+    overflow: "auto",
+    height: "100%",
+  },
+  drawerContainer: {
+    padding: 10,
+    height: "100%",
+  },
+}));
 
 const defaultDMNDiagram = `<?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/1.0" id="Definitions_1oj7khq" name="DRD" namespace="http://camunda.org/schema/1.0/dmn">
@@ -100,6 +126,10 @@ function DMNModeler() {
     messageType: null,
     message: null,
   });
+  const [width, setWidth] = useState(drawerWidth);
+  const [height, setHeight] = useState("100%");
+  const [drawerOpen, setDrawerOpen] = useState(true);
+  const classes = useStyles();
 
   const handleSnackbarClick = (messageType, message) => {
     setSnackbar({
@@ -225,7 +255,7 @@ function DMNModeler() {
   ];
 
   const setCSSWidth = (width) => {
-    document.documentElement.style.setProperty("--container-width", width);
+    setDrawerOpen(width === "0px" ? false : true);
   };
 
   useEffect(() => {
@@ -249,39 +279,6 @@ function DMNModeler() {
     let id = fetchId();
     fetchDiagram(id, setWkfModel);
   }, []);
-
-  useEffect(() => {
-    const BORDER_SIZE = 4;
-    const panel = document.getElementById("resize-handler");
-    if (!panel) return;
-    let m_pos;
-    function resize(e) {
-      const dx = m_pos - e.x;
-      m_pos = e.x;
-      panel.style.width =
-        parseInt(getComputedStyle(panel, "").width) + dx + "px";
-      setCSSWidth(panel.style.width);
-    }
-
-    panel.addEventListener(
-      "mousedown",
-      function (e) {
-        if (e.offsetX < BORDER_SIZE) {
-          m_pos = e.x;
-          document.addEventListener("mousemove", resize, false);
-        }
-      },
-      false
-    );
-
-    document.addEventListener(
-      "mouseup",
-      function () {
-        document.removeEventListener("mousemove", resize, false);
-      },
-      false
-    );
-  });
 
   return (
     <div className="App">
@@ -312,20 +309,42 @@ function DMNModeler() {
           </div>
         </div>
         <div>
-          <div
-            className="property-toggle"
-            onClick={() => {
-              let element = document.getElementById("resize-handler");
-              element.style.width =
-                parseInt(element.style.width, 10) > 4 ? 0 : "260px";
-              setCSSWidth(element.style.width);
+          <Resizable
+            style={resizeStyle}
+            size={{ width, height }}
+            onResizeStop={(e, direction, ref, d) => {
+              setWidth((width) => width + d.width);
+              setHeight(height + d.height);
+              setCSSWidth(width + d.width);
             }}
+            maxWidth={window.innerWidth - 150}
           >
-            Properties Panel
-          </div>
-          <div id="resize-handler" style={{ width: 260 }}>
-            <div id="properties"></div>
-          </div>
+            <Drawer
+              variant="persistent"
+              anchor="right"
+              open={drawerOpen}
+              style={{
+                width: drawerWidth,
+              }}
+              classes={{
+                paper: classes.drawerPaper,
+              }}
+              id="drawer"
+            >
+              <div className={classes.drawerContainer}>
+                <div id="properties"></div>
+              </div>
+            </Drawer>
+            <div
+              className="bpmn-property-toggle"
+              onClick={() => {
+                setWidth((width) => (width === 0 ? 380 : 0));
+                setCSSWidth(width === 0 ? 380 : 0);
+              }}
+            >
+              Properties Panel
+            </div>
+          </Resizable>
         </div>
       </div>
       {openSnackbar.open && (
