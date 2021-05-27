@@ -153,63 +153,69 @@ export default function FieldEditor({
           ),
         }}
       />
-      {hasManyValues && relationModel && (
-        <React.Fragment>
-          {isShow && (
-            <IconButton
-              size="small"
-              onClick={() => {
-                setShow((isShow) => !isShow);
-                if (fields && fields.length > 0 && startValue) {
-                  const previousField = fields.find(
-                    (f) => f.name === startValue
+      {hasManyValues &&
+        relationModel &&
+        (isUserPath
+          ? transformValue &&
+            transformValue.target !== "com.axelor.meta.db.MetaJsonRecord" &&
+            !transformValue.jsonField
+          : true) && (
+          <React.Fragment>
+            {isShow && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setShow((isShow) => !isShow);
+                  if (fields && fields.length > 0 && startValue) {
+                    const previousField = fields.find(
+                      (f) => f.name === startValue
+                    );
+                    handleChange({
+                      ...(previousField || {}),
+                    });
+                  }
+                }}
+                className={classes.iconButton}
+              >
+                <Tooltip title={translate("Remove sub field")}>
+                  <Close className={classes.icon} fontSize="small" />
+                </Tooltip>
+              </IconButton>
+            )}
+            {isShow && (
+              <FieldEditor
+                getMetaFields={() => {
+                  return getSubMetaField(
+                    relationModel,
+                    relationJsonModel,
+                    isCollection
                   );
-                  handleChange({
-                    ...(previousField || {}),
-                  });
-                }
-              }}
-              className={classes.iconButton}
-            >
-              <Tooltip title={translate("Remove sub field")}>
-                <Close className={classes.icon} fontSize="small" />
-              </Tooltip>
-            </IconButton>
-          )}
-          {isShow && (
-            <FieldEditor
-              getMetaFields={() => {
-                return getSubMetaField(
-                  relationModel,
-                  relationJsonModel,
-                  isCollection
-                );
-              }}
-              initValue={`${initValue}${startValue}${"."}`}
-              value={{
-                fieldName: values.slice(1).join("."),
-              }}
-              onChange={onChange}
-              classNames={classNames}
-              isParent={relationModel ? true : false}
-              isUserPath={isUserPath}
-              startModel={startModel}
-              isCollection={isCollection}
-            />
-          )}
-          {!isShow && isButton && (
-            <IconButton
-              size="small"
-              onClick={() => setShow((isShow) => !isShow)}
-              className={classes.iconButton}
-            >
-              <Tooltip title={translate("Add sub field")}>
-                <ArrowForward className={classes.icon} fontSize="small" />
-              </Tooltip>
-            </IconButton>
-          )}
-        </React.Fragment>
-      )}
+                }}
+                initValue={`${initValue}${startValue}${"."}`}
+                value={{
+                  fieldName: values.slice(1).join("."),
+                }}
+                onChange={onChange}
+                classNames={classNames}
+                isParent={relationModel ? true : false}
+                isUserPath={isUserPath}
+                startModel={startModel}
+                isCollection={isCollection}
+              />
+            )}
+            {!isShow && isButton && (
+              <IconButton
+                size="small"
+                onClick={() => setShow((isShow) => !isShow)}
+                className={classes.iconButton}
+              >
+                <Tooltip title={translate("Add sub field")}>
+                  <ArrowForward className={classes.icon} fontSize="small" />
+                </Tooltip>
+              </IconButton>
+            )}
+          </React.Fragment>
+        )}
     </React.Fragment>
   );
 }
