@@ -77,35 +77,6 @@ const fetchId = () => {
   }
 };
 
-const fetchDiagram = async (id, setWkf) => {
-  if (id) {
-    let res = await Service.fetchId("com.axelor.apps.bpm.db.WkfDmnModel", id);
-    const wkf = (res && res.data && res.data[0]) || {};
-    let { diagramXml } = wkf;
-    setWkf(wkf);
-    newBpmnDiagram(diagramXml);
-  } else {
-    newBpmnDiagram();
-  }
-};
-
-const newBpmnDiagram = (rec) => {
-  const diagram = rec || defaultDMNDiagram;
-  openDiagram(diagram);
-};
-
-const openDiagram = async (dmnXML) => {
-  const dmn13XML = await migrateDiagram(dmnXML);
-  dmnModeler.importXML(dmn13XML, function (err) {
-    if (err) {
-      return console.error("could not import DMN 1.1 diagram", err);
-    }
-    let activeEditor = dmnModeler.getActiveViewer();
-    let canvas = activeEditor.get("canvas");
-    canvas.zoom("fit-viewport");
-  });
-};
-
 const uploadXml = () => {
   document.getElementById("inputFile").click();
 };
@@ -147,6 +118,45 @@ function DMNModeler() {
       open: false,
       messageType: null,
       message: null,
+    });
+  };
+
+  const newBpmnDiagram = React.useCallback((rec) => {
+    const diagram = rec || defaultDMNDiagram;
+    openDiagram(diagram);
+  }, []);
+
+  const fetchDiagram = React.useCallback(
+    async (id, setWkf) => {
+      if (id) {
+        let res = await Service.fetchId(
+          "com.axelor.apps.bpm.db.WkfDmnModel",
+          id
+        );
+        const wkf = (res && res.data && res.data[0]) || {};
+        let { diagramXml } = wkf;
+        setWkf(wkf);
+        newBpmnDiagram(diagramXml);
+      } else {
+        newBpmnDiagram();
+      }
+    },
+    [newBpmnDiagram]
+  );
+
+  const openDiagram = async (dmnXML) => {
+    const dmn13XML = await migrateDiagram(dmnXML);
+    dmnModeler.importXML(dmn13XML, function (err) {
+      if (err) {
+        return console.error("could not import DMN 1.1 diagram", err);
+      }
+      let activeEditor = dmnModeler.getActiveViewer();
+      let canvas = activeEditor.get("canvas");
+      canvas.zoom("fit-viewport");
+      let eventBus = activeEditor.get("eventBus");
+      eventBus.on("drillDown.click", (event) => {
+        setWidth(0);
+      });
     });
   };
 
@@ -278,7 +288,7 @@ function DMNModeler() {
 
     let id = fetchId();
     fetchDiagram(id, setWkfModel);
-  }, []);
+  }, [fetchDiagram]);
 
   return (
     <div className="App">
