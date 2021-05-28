@@ -8,6 +8,8 @@ import versionTag from "../properties/parts/VersionTagProps";
 // history time to live
 import historyTimeToLive from "../properties/parts/HistoryTimeToLiveProps";
 
+import ModelProps from "../properties/parts/ModelProps";
+
 import { is } from "dmn-js-shared/lib/util/ModelUtil";
 
 // helpers ////////////////////////////////////////
@@ -32,6 +34,13 @@ function createGeneralTabGroups(element, translate, dmnModeler) {
   nameProps(generalGroup, element, translate, dmnModeler);
   versionTag(generalGroup, element, translate);
 
+  let modelProps = {
+    id: "modelProps",
+    label: translate("Details"),
+    entries: [],
+    component: ModelProps,
+  };
+
   let historyTimeToLiveGroup = {
     id: "historyConfiguration",
     label: translate("History Configuration"),
@@ -42,6 +51,7 @@ function createGeneralTabGroups(element, translate, dmnModeler) {
   const groups = [];
   groups.push(generalGroup);
   groups.push(historyTimeToLiveGroup);
+  groups.push(modelProps);
 
   return groups;
 }
