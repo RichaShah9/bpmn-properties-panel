@@ -5,13 +5,24 @@ import propertiesPanelModule from "dmn-js-properties-panel";
 import drdAdapterModule from "dmn-js-properties-panel/lib/adapter/drd";
 import propertiesProviderModule from "dmn-js-properties-panel/lib/provider/camunda";
 import camundaModdleDescriptor from "camunda-dmn-moddle/resources/camunda";
+import classnames from "classnames";
 import Alert from "@material-ui/lab/Alert";
-import { Snackbar, Drawer } from "@material-ui/core";
+import { Snackbar, Drawer, Typography } from "@material-ui/core";
 import { Resizable } from "re-resizable";
 import { makeStyles } from "@material-ui/core/styles";
 
+import { translate } from "../utils";
+import propertiesTabs from "./properties/properties";
+import propertiesCustomProviderModule from "./custom-provider";
 import Service from "../services/Service";
 import Tooltip from "../components/Tooltip";
+import { Tab, Tabs } from "../components/Tabs";
+import {
+  Textbox,
+  TextField,
+  SelectBox,
+  Checkbox,
+} from "../BPMN/Modeler/properties/components";
 
 import { download } from "../utils";
 import "dmn-js-properties-panel/dist/assets/dmn-js-properties-panel.css";
@@ -47,6 +58,28 @@ const useStyles = makeStyles(() => ({
   drawerContainer: {
     padding: 10,
     height: "100%",
+    textAlign: "left",
+  },
+  groupLabel: {
+    fontWeight: "bolder",
+    display: "inline-block",
+    verticalAlign: "middle",
+    color: "#666",
+    fontSize: "120%",
+    margin: "10px 0px",
+    transition: "margin 0.218s linear",
+    fontStyle: "italic",
+  },
+  groupContainer: {
+    marginTop: 10,
+  },
+  divider: {
+    marginTop: 15,
+    borderTop: "1px dotted #ccc",
+  },
+  nodeTitle: {
+    fontSize: "120%",
+    fontWeight: "bolder",
   },
 }));
 
@@ -77,6 +110,26 @@ const fetchId = () => {
   }
 };
 
+function renderTabs(tabs = [], element) {
+  const objectTabs = ["general"];
+  let filteredTabs = [];
+  tabs &&
+    tabs.forEach((tab) => {
+      if (!tab) return;
+      if (objectTabs && objectTabs.includes(tab.id)) {
+        filteredTabs.push(tab);
+      }
+    });
+  return filteredTabs;
+}
+
+function getTabs(dmnModeler, element) {
+  let activeEditor = dmnModeler && dmnModeler.getActiveViewer();
+  if (!activeEditor) return;
+  let tabs = propertiesTabs(element, translate, dmnModeler);
+  let filteredTabs = renderTabs(tabs, element);
+  return filteredTabs;
+}
 const uploadXml = () => {
   document.getElementById("inputFile").click();
 };
@@ -100,7 +153,33 @@ function DMNModeler() {
   const [width, setWidth] = useState(drawerWidth);
   const [height, setHeight] = useState("100%");
   const [drawerOpen, setDrawerOpen] = useState(true);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
+  const [tabs, setTabs] = useState(null);
+
   const classes = useStyles();
+
+  const renderComponent = (entry) => {
+    if (!entry && entry.widget) return;
+    switch (entry.widget) {
+      case "textField":
+        return (
+          <TextField entry={entry} element={selectedElement} canRemove={true} />
+        );
+      case "textBox":
+        return <Textbox entry={entry} element={selectedElement} />;
+      case "selectBox":
+        return <SelectBox entry={entry} element={selectedElement} />;
+      case "checkbox":
+        return <Checkbox entry={entry} element={selectedElement} />;
+      default:
+        return <Textbox entry={entry} element={selectedElement} />;
+    }
+  };
+
+  function Entry({ entry }) {
+    return <div key={entry.id}>{renderComponent(entry)}</div>;
+  }
 
   const handleSnackbarClick = (messageType, message) => {
     setSnackbar({
@@ -121,10 +200,69 @@ function DMNModeler() {
     });
   };
 
-  const newBpmnDiagram = React.useCallback((rec) => {
-    const diagram = rec || defaultDMNDiagram;
-    openDiagram(diagram);
+  const updateTabs = React.useCallback((event) => {
+    let { element } = event;
+    if (element && element.type === "label") {
+      let activeEditor = dmnModeler && dmnModeler.getActiveViewer();
+      const elementRegistry = activeEditor.get("elementRegistry");
+      const newElement = elementRegistry.get(
+        element.businessObject && element.businessObject.id
+      );
+      element = newElement;
+    }
+    let tabs = getTabs(dmnModeler, element);
+    setTabValue(0);
+    setTabs(tabs);
+    setSelectedElement(element);
+    setDrawerOpen(true);
   }, []);
+
+  const openDiagram = React.useCallback(
+    async (dmnXML) => {
+      const dmn13XML = await migrateDiagram(dmnXML);
+      dmnModeler.importXML(dmn13XML, function (err) {
+        if (err) {
+          return console.error("could not import DMN 1.1 diagram", err);
+        }
+        let activeEditor = dmnModeler.getActiveViewer();
+        let canvas = activeEditor.get("canvas");
+        canvas.zoom("fit-viewport");
+        let element = canvas.getRootElement();
+        let eventBus = activeEditor.get("eventBus");
+        eventBus.on("drillDown.click", (event) => {
+          setWidth(0);
+        });
+        updateTabs({
+          element,
+        });
+        eventBus.on("element.click", (event) => {
+          const { element } = event;
+          setSelectedElement(element);
+          updateTabs(event);
+        });
+        eventBus.on("commandStack.shape.replace.postExecuted", (event) => {
+          updateTabs({
+            element: event && event.context && event.context.newShape,
+          });
+        });
+        eventBus.on("shape.removed", () => {
+          let element = canvas.getRootElement();
+          updateTabs({
+            element,
+          });
+        });
+      });
+    },
+    [updateTabs]
+  );
+
+  const newBpmnDiagram = React.useCallback(
+    (rec) => {
+      const diagram = rec || defaultDMNDiagram;
+      openDiagram(diagram);
+    },
+    [openDiagram]
+  );
 
   const fetchDiagram = React.useCallback(
     async (id, setWkf) => {
@@ -143,22 +281,6 @@ function DMNModeler() {
     },
     [newBpmnDiagram]
   );
-
-  const openDiagram = async (dmnXML) => {
-    const dmn13XML = await migrateDiagram(dmnXML);
-    dmnModeler.importXML(dmn13XML, function (err) {
-      if (err) {
-        return console.error("could not import DMN 1.1 diagram", err);
-      }
-      let activeEditor = dmnModeler.getActiveViewer();
-      let canvas = activeEditor.get("canvas");
-      canvas.zoom("fit-viewport");
-      let eventBus = activeEditor.get("eventBus");
-      eventBus.on("drillDown.click", (event) => {
-        setWidth(0);
-      });
-    });
-  };
 
   const uploadFile = (e) => {
     let files = e.target.files;
@@ -268,6 +390,43 @@ function DMNModeler() {
     setDrawerOpen(width === "0px" ? false : true);
   };
 
+  const handleChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  const TabPanel = ({ group, index }) => {
+    return (
+      <div
+        key={group.id}
+        data-group={group.id}
+        className={classnames(classes.groupContainer, classes[group.className])}
+      >
+        {group.component ? (
+          <group.component
+            element={selectedElement}
+            index={index}
+            label={group.label}
+            onSave={onSave}
+          />
+        ) : (
+          group.entries.length > 0 && (
+            <React.Fragment>
+              <React.Fragment>
+                {index > 0 && <div className={classes.divider} />}
+              </React.Fragment>
+              <div className={classes.groupLabel}>{group.label}</div>
+              <div>
+                {group.entries.map((entry, i) => (
+                  <Entry entry={entry} key={i} />
+                ))}
+              </div>
+            </React.Fragment>
+          )
+        )}
+      </div>
+    );
+  };
+
   useEffect(() => {
     dmnModeler = new DmnModeler({
       drd: {
@@ -278,7 +437,9 @@ function DMNModeler() {
           propertiesPanelModule,
           propertiesProviderModule,
           drdAdapterModule,
+          propertiesCustomProviderModule,
         ],
+        keyboard: { bindTo: document },
       },
       container: "#canvas",
       moddleExtensions: {
@@ -342,7 +503,21 @@ function DMNModeler() {
               id="drawer"
             >
               <div className={classes.drawerContainer}>
-                <div id="properties"></div>
+                <Typography className={classes.nodeTitle}>
+                  {selectedElement && selectedElement.id}
+                </Typography>
+                <Tabs value={tabValue} onChange={handleChange}>
+                  <Tab label="General" data-tab="General" />
+                </Tabs>
+                <React.Fragment>
+                  {tabs &&
+                    tabs[tabValue] &&
+                    tabs[tabValue].groups &&
+                    tabs[tabValue].groups.map((group, index) => (
+                      <TabPanel key={index} group={group} index={index} />
+                    ))}
+                </React.Fragment>
+                <div id="properties" style={{ display: "none" }}></div>
               </div>
             </Drawer>
             <div
