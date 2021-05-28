@@ -6,7 +6,10 @@ import find from "lodash/find";
 import filter from "lodash/filter";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 
-import { Checkbox, SelectBox } from "../../components";
+import {
+  Checkbox,
+  SelectBox,
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 
 function getContainedActivities(element) {
@@ -124,7 +127,7 @@ export default function CompensateProps({
 
           set: function (e, values) {
             let activityRef = values.activityRef || undefined;
-            let elementRegistry = bpmnModeler.get("elementRegistry")
+            let elementRegistry = bpmnModeler.get("elementRegistry");
             activityRef =
               activityRef &&
               getBusinessObject(

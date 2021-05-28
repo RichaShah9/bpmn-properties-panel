@@ -14,7 +14,12 @@ import {
 } from "@material-ui/core";
 
 import Select from "../../../../../components/Select";
-import { TextField, Checkbox, Table, FieldEditor } from "../../components";
+import {
+  TextField,
+  Checkbox,
+  Table,
+  FieldEditor,
+} from "../../../../../components/properties/components";
 import {
   getParentMenus,
   getSubMenus,

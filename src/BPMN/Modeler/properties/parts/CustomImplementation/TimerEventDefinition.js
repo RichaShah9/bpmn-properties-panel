@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 
-import { TextField, SelectBox } from "../../components";
+import {
+  TextField,
+  SelectBox,
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 

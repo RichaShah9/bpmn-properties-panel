@@ -12,7 +12,7 @@ import {
   ExtensionElementTable,
   TextField,
   Checkbox,
-} from "../../components";
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 
 const useStyles = makeStyles({

@@ -3,7 +3,10 @@ import extensionElementsHelper from "bpmn-js-properties-panel/lib/helper/Extensi
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
-import { Checkbox, SelectBox } from "../../components";
+import {
+  Checkbox,
+  SelectBox,
+} from "../../../../../components/properties/components";
 import { translate, getBool } from "../../../../../utils";
 
 const useStyles = makeStyles({

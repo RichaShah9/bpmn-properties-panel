@@ -29,7 +29,7 @@ import {
   Checkbox,
   ColorPicker,
   TabScrollButtonComponent,
-} from "./properties/components";
+} from "../../components/properties/components";
 import {
   fetchId,
   uploadXml,

@@ -24,7 +24,7 @@ import {
   SelectBox,
   TextField,
   Textbox,
-} from "../../components";
+} from "../../../../../components/properties/components";
 
 const useStyles = makeStyles((theme) => ({
   groupLabel: {

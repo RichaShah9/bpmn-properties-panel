@@ -29,7 +29,11 @@ import {
 } from "@material-ui/icons";
 
 import Select from "../../../../../components/Select";
-import { TextField, Checkbox, FieldEditor } from "../../components";
+import {
+  TextField,
+  Checkbox,
+  FieldEditor,
+} from "../../../../../components/properties/components";
 import {
   getMetaModels,
   getCustomModels,

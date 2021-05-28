@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "@material-ui/core";
 
-import TextField from "../../components/TextField";
+import TextField from "../../../../../components/properties/components/TextField";
 import ExpressionBuilder from "../../../expression-builder";
 import Select from "../../../../../components/Select";
 import { getButtons } from "../../../../../services/api";

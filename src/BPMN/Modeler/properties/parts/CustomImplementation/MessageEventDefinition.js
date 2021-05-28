@@ -3,7 +3,10 @@ import elementHelper from "bpmn-js-properties-panel/lib/helper/ElementHelper";
 import utils from "bpmn-js-properties-panel/lib/Utils";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 
-import { TextField, CustomSelectBox } from "../../components";
+import {
+  TextField,
+  CustomSelectBox,
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 
 const setProperty = (name, value, element) => {
@@ -56,7 +59,7 @@ export default function MessageProps({
   useEffect(() => {
     let reference = messageEventDefinition.get("messageRef");
     setSelectedMessage(reference && reference.id);
-    setEle(reference)
+    setEle(reference);
   }, [messageEventDefinition]);
 
   useEffect(() => {
@@ -126,7 +129,7 @@ export default function MessageProps({
                   ele.$parent.rootElements.push(ele);
                 }
               }
-              getOptions()
+              getOptions();
               setSelectedMessage(ele && ele.id);
             },
             get: function () {

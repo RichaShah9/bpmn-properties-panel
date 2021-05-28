@@ -3,7 +3,7 @@ import eventDefinitionHelper from "bpmn-js-properties-panel/lib/helper/EventDefi
 import { makeStyles } from "@material-ui/core/styles";
 import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
-import TextField from "../../components/TextField";
+import TextField from "../../../../../components/properties/components/TextField";
 import { translate } from "../../../../../utils";
 
 const useStyles = makeStyles({

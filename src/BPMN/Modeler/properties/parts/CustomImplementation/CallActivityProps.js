@@ -18,7 +18,11 @@ import { is, getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../../../components/Select";
 import Service from "../../../../../services/Service";
-import { TextField, SelectBox, Checkbox } from "../../components";
+import {
+  TextField,
+  SelectBox,
+  Checkbox,
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 import { getBPMNModels } from "../../../../../services/api";
 

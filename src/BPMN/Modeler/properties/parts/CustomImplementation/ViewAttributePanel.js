@@ -18,7 +18,10 @@ import { Add, Close, ReportProblem } from "@material-ui/icons";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
 import Select from "../../../../../components/Select";
-import { TextField, Checkbox } from "../../components";
+import {
+  TextField,
+  Checkbox,
+} from "../../../../../components/properties/components";
 import {
   getModels,
   getViews,

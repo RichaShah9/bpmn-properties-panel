@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 
-import TextField from "../../components/TextField";
+import TextField from "../../../../../components/properties/components/TextField";
 import { translate } from "../../../../../utils";
 
 const useStyles = makeStyles({

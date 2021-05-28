@@ -5,7 +5,10 @@ import { getBusinessObject, is } from "bpmn-js/lib/util/ModelUtil";
 import { isAny } from "bpmn-js/lib/features/modeling/util/ModelingUtil";
 
 import Select from "../../../../../components/Select";
-import { Checkbox, Textbox } from "../../components";
+import {
+  Checkbox,
+  Textbox,
+} from "../../../../../components/properties/components";
 import {
   getCustomModels,
   getMetaModels,

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 
-import { TextField, CustomSelectBox } from "../../components";
+import {
+  TextField,
+  CustomSelectBox,
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 
 export default function EscalationEventProps({

@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from "@material-ui/core";
 
-import { Textbox } from "../../components";
+import { Textbox } from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 import ExpressionBuilder from "../../../expression-builder";
 

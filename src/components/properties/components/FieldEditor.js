@@ -4,9 +4,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Close, ArrowForward } from "@material-ui/icons";
 import { IconButton, Tooltip } from "@material-ui/core";
 
-import { translate } from "../../../../utils";
-import { Selection } from "../../expression-builder/component";
-import { getSubMetaField } from "../../../../services/api";
+import { translate } from "../../../utils";
+import { Selection } from "../../../BPMN/Modeler/expression-builder/component";
+import { getSubMetaField } from "../../../services/api";
 
 const useStyles = makeStyles(() => ({
   MuiAutocompleteRoot: {

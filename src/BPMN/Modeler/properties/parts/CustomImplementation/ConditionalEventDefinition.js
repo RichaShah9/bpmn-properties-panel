@@ -15,7 +15,10 @@ import { Edit, NotInterested } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 
 import ExpressionBuilder from "../../../expression-builder";
-import { TextField, Textbox } from "../../components";
+import {
+  TextField,
+  Textbox,
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 
 const conditionType = "script";

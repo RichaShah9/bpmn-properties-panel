@@ -22,7 +22,11 @@ import {
   getAllModels,
   getViews,
 } from "../../../../../services/api";
-import { TextField, Textbox, Checkbox } from "../../components";
+import {
+  TextField,
+  Textbox,
+  Checkbox,
+} from "../../../../../components/properties/components";
 import { translate, getBool } from "../../../../../utils";
 
 const useStyles = makeStyles((theme) => ({

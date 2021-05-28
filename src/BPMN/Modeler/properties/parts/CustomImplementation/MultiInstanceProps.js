@@ -17,7 +17,10 @@ import { Edit } from "@material-ui/icons";
 import { Selection } from "../../../expression-builder/component";
 import { getModels, getMetaFields } from "../../../../../services/api";
 import { translate } from "../../../../../utils";
-import { TextField, FieldEditor } from "../../components";
+import {
+  TextField,
+  FieldEditor,
+} from "../../../../../components/properties/components";
 
 const useStyles = makeStyles((theme) => ({
   groupLabel: {

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { is } from "bpmn-js/lib/util/ModelUtil";
 
-import { TextField, CustomSelectBox } from "../../components";
+import {
+  TextField,
+  CustomSelectBox,
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 
 export default function ErrorEventProps({

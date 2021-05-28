@@ -19,7 +19,11 @@ import {
   getBamlModels,
 } from "../../../../../services/api";
 import { getBool } from "../../../../../utils";
-import { SelectBox, TextField, Checkbox } from "../../components";
+import {
+  SelectBox,
+  TextField,
+  Checkbox,
+} from "../../../../../components/properties/components";
 import { translate } from "../../../../../utils";
 
 const eventTypes = [

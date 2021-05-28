@@ -4,8 +4,8 @@ import TextareaAutosize from "@material-ui/core/TextareaAutosize";
 import { makeStyles } from "@material-ui/styles";
 
 import Description from "./Description";
-import { getTranslations } from "../../../../services/api";
-import { getBool } from "../../../../utils";
+import { getTranslations } from "../../../services/api";
+import { getBool } from "../../../utils";
 
 const useStyles = makeStyles({
   root: {

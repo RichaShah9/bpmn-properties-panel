@@ -3,7 +3,7 @@ import { ColorPicker } from "material-ui-color";
 import { makeStyles } from "@material-ui/styles";
 import { getBusinessObject } from "bpmn-js/lib/util/ModelUtil";
 
-import "../../../css/colorpicker.css";
+import "../css/colorpicker.css";
 
 const useStyles = makeStyles({
   root: {

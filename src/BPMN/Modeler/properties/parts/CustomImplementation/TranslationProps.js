@@ -19,7 +19,10 @@ import {
   removeAllTranslations,
   getInfo,
 } from "../../../../../services/api";
-import { TextField, Checkbox } from "../../components";
+import {
+  TextField,
+  Checkbox,
+} from "../../../../../components/properties/components";
 import { translate, getBool } from "../../../../../utils";
 
 const useStyles = makeStyles({
