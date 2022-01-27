@@ -17,7 +17,7 @@
     "dmn-js-properties-panel": "^0.4.0",
     "inherits": "^2.0.4",
     "lodash": "^4.17.15",
-    "min-dash": "^3.5.2",
+    "min-dash": "^3.8.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
